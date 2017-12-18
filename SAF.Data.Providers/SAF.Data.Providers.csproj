@@ -1,0 +1,204 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{427F22DA-51D4-4DBA-B1EC-108C0B4F1899}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SAF.Data.Providers</RootNamespace>
+    <AssemblyName>SAF.Data.Providers</AssemblyName>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <SccProjectName>SAK</SccProjectName>
+    <SccLocalPath>SAK</SccLocalPath>
+    <SccAuxPath>SAK</SccAuxPath>
+    <SccProvider>SAK</SccProvider>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Debug\SAF.Data.Providers.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
+    <Prefer32Bit>false</Prefer32Bit>
+    <DocumentationFile>bin\Release\SAF.Data.Providers.XML</DocumentationFile>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'DebugLocal|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\DebugLocal\</OutputPath>
+    <DefineConstants>CODE_ANALYSIS;DEBUG;TRACE</DefineConstants>
+    <DocumentationFile>bin\Debug\SAF.Data.Providers.XML</DocumentationFile>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <ErrorReport>prompt</ErrorReport>
+    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup>
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyOriginatorKeyFile>SimpleApplicationFramework.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="AutoMapper, Version=5.1.1.0, Culture=neutral, PublicKeyToken=be96cd2c38ef1005, processorArchitecture=MSIL">
+      <HintPath>..\packages\AutoMapper.5.1.1\lib\net45\AutoMapper.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="JetBrains.Annotations, Version=11.1.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.11.1.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="LumenWorks.Framework.IO, Version=3.8.0.0, Culture=neutral, PublicKeyToken=5ad3ea2f85776344, processorArchitecture=MSIL">
+      <HintPath>..\packages\LumenWorks.Framework.IO.3.8.0\lib\net20\LumenWorks.Framework.IO.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Caching" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AnsiString.cs" />
+    <Compile Include="ColumnAttribute.cs" />
+    <Compile Include="Database.cs" />
+    <Compile Include="DatabaseTypes\DatabaseType.cs" />
+    <Compile Include="DatabaseTypes\FirebirdDatabaseType.cs" />
+    <Compile Include="DatabaseTypes\MySqlDatabaseType.cs" />
+    <Compile Include="DatabaseTypes\OracleDatabaseType.cs" />
+    <Compile Include="DataTableLoader.cs" />
+    <Compile Include="DirectPropertyNameMapper.cs" />
+    <Compile Include="EntityRowBase.cs" />
+    <Compile Include="FlatPocoFactory.cs" />
+    <Compile Include="IDatabaseContext.cs" />
+    <Compile Include="IDatabaseContextProvider.cs" />
+    <Compile Include="Internal\AutoSelectHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Internal\EnumMapper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Internal\PagingHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Internal\ParametersHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DatabaseTypes\PostgreSqlDatabaseType.cs" />
+    <Compile Include="DatabaseTypes\SQLiteDatabaseType.cs" />
+    <Compile Include="DatabaseTypes\SqlServerCeDatabaseType.cs" />
+    <Compile Include="DatabaseTypes\SqlServerDatabaseType.cs" />
+    <Compile Include="DataItemDefinition.cs" />
+    <Compile Include="DataItemDefinitionProvider.cs" />
+    <Compile Include="DefaultDatabaseFactory.cs" />
+    <Compile Include="IPropertyNameMapper.cs" />
+    <Compile Include="IStructuredCommand.cs" />
+    <Compile Include="IStructuredCommandFactory.cs" />
+    <Compile Include="IStructuredCommandProvider.cs" />
+    <Compile Include="IStructuredCommandProviderFactory.cs" />
+    <Compile Include="PocoDataRequest.cs" />
+    <Compile Include="Query.cs" />
+    <Compile Include="RaisedPocoFactory.cs" />
+    <Compile Include="MappedQueryConverter.cs" />
+    <Compile Include="SelectWithAttribute.cs" />
+    <Compile Include="StructuredCommandText.cs" />
+    <Compile Include="StructuredInsertCommand.cs" />
+    <Compile Include="StructuredMergeCommand.cs" />
+    <Compile Include="StructuredSqlCommand.cs" />
+    <Compile Include="StructuredSqlCommandProvider.cs" />
+    <Compile Include="StructuredSqlCommandProviderFactory.cs" />
+    <Compile Include="TableTypeAttribute.cs" />
+    <Compile Include="TransactSqlFromClause.cs" />
+    <Compile Include="EntityRepository.cs" />
+    <Compile Include="ExplicitColumnsAttribute.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="IDatabaseFactory.cs" />
+    <Compile Include="IDataSetReader.cs" />
+    <Compile Include="IgnoreAttribute.cs" />
+    <Compile Include="IMapper.cs" />
+    <Compile Include="Internal\SqlPageStatement.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="IRepositoryAdapter.cs" />
+    <Compile Include="IRepositoryAdapterFactory.cs" />
+    <Compile Include="Mappers.cs" />
+    <Compile Include="OracleProvider.cs" />
+    <Compile Include="PetaPocoRepositoryProvider.cs" />
+    <Compile Include="PrimaryKeyAttribute.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="QueryRepositoryAdapterFactory.cs" />
+    <Compile Include="QueryRepositoryAdapter.cs" />
+    <Compile Include="StandardMapper.cs" />
+    <Compile Include="TableInfo.cs" />
+    <Compile Include="TableNameAttribute.cs" />
+    <Compile Include="TransactSqlSelection.cs" />
+    <Compile Include="TransactSqlUpdate.cs" />
+    <Compile Include="ReadOnlyRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\Solution Code Analysis\CustomDictionary.xml">
+      <Link>Code Analysis\CustomDictionary.xml</Link>
+    </CodeAnalysisDictionary>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
+      <Project>{CC6AA902-7C36-4F19-8C16-81B2FC4E38B9}</Project>
+      <Name>SAF.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SAF.Data\SAF.Data.csproj">
+      <Project>{746FAE9A-6FE4-4253-BEA3-B56AE1909B76}</Project>
+      <Name>SAF.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
+      <Project>{9D9DC978-66F4-4234-98BA-B55CE579D3BA}</Project>
+      <Name>SAF.StringResources</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="SAF.Data.Providers.nuspec" />
+    <None Include="SimpleApplicationFramework.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

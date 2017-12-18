@@ -1,0 +1,15 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="SAF.Data.Persistence.Tests.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="DBaseTestDirectory" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">D:\Test\SAF\Data.Persistence\DBaseWrapper</Value>
+    </Setting>
+    <Setting Name="DBaseTestTable" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">UPDATED</Value>
+    </Setting>
+    <Setting Name="DBaseTestVersion" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">III</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
