@@ -49,8 +49,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAF.Testing.Common.Tests", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Repository.Mapping", "Startitecture.Repository.Mapping\Startitecture.Repository.Mapping.csproj", "{93206D9F-C517-46E9-AFBA-34190DDDE488}"
 EndProject
-Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Startitecture.Orm.Tests.Schema", "Startitecture.Orm.Tests.Schema\Startitecture.Orm.Tests.Schema.sqlproj", "{988778F0-8E54-4338-8131-06AD34C14741}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Forms.Model", "Startitecture.Forms.Model\Startitecture.Forms.Model.csproj", "{8C414EA1-5AB4-43BA-BB01-88CE7DE25FC6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Common.Model", "Startitecture.Common.Model\Startitecture.Common.Model.csproj", "{B2A85677-E1D8-4919-A5C6-1B8BB59C819A}"
@@ -270,33 +268,6 @@ Global
 		{93206D9F-C517-46E9-AFBA-34190DDDE488}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{93206D9F-C517-46E9-AFBA-34190DDDE488}.Release|x86.ActiveCfg = Release|Any CPU
 		{93206D9F-C517-46E9-AFBA-34190DDDE488}.Release|x86.Build.0 = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|Mixed Platforms.Deploy.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|x86.Build.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Debug|x86.Deploy.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|Any CPU.Deploy.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|Mixed Platforms.Deploy.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|x86.Build.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.DebugLocal|x86.Deploy.0 = Debug|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|Any CPU.Build.0 = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|Any CPU.Deploy.0 = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|Mixed Platforms.Deploy.0 = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|x86.ActiveCfg = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|x86.Build.0 = Release|Any CPU
-		{988778F0-8E54-4338-8131-06AD34C14741}.Release|x86.Deploy.0 = Release|Any CPU
 		{8C414EA1-5AB4-43BA-BB01-88CE7DE25FC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8C414EA1-5AB4-43BA-BB01-88CE7DE25FC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C414EA1-5AB4-43BA-BB01-88CE7DE25FC6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -363,8 +334,8 @@ Global
 		{62766A6B-8299-4580-85F4-8488EE8F774A} = {6BD71D9F-938D-4A32-8A5C-1ECCC5B5DCA8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
+		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi
