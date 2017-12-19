@@ -12,7 +12,7 @@
     // Settings.ConnectionString = "Data Source=(local);Initial Catalog=Northwind;Integrated Security=True;Application Name=EntityFramework Reverse POCO Generator";
     // Settings.ProviderName = "System.Data.SqlClient";
 
-    Settings.Namespace = "Startitecture.Platform.Entities"; // Override the default namespace here
+    Settings.Namespace = "Startitecture.Platform.Entities.Forms"; // Override the default namespace here
     Settings.DbContextName = "PlatformContext"; // Note: If generating separate files, please give the db context a different name from this tt filename.
     //Settings.DbContextInterfaceName = "IMyDbContext"; // Defaults to "I" + DbContextName or set string empty to not implement any interface.
     Settings.DbContextInterfaceBaseClasses = "System.IDisposable";    // Specify what the base classes are for your database context interface
@@ -20,11 +20,13 @@
     //Settings.DefaultConstructorArgument = "EnvironmentConnectionStrings.MyDbContext"; //defaults to "Name=" + ConnectionStringName
     Settings.ConfigurationClassName = "Configuration"; // Configuration, Mapping, Map, etc. This is appended to the Poco class name to configure the mappings.
     Settings.FilenameSearchOrder = new[] { "app.config", "web.config" }; // Add more here if required. The config files are searched for in the local project first, then the whole solution second.
-    Settings.GenerateSeparateFiles = false;
+    Settings.GenerateSeparateFiles = true;
     Settings.MakeClassesInternal = false;
-    Settings.MakeClassesPartial = true;
+    Settings.MakeClassesPartial = false; // this will still have partial classes but not constructors.
     Settings.MakeDbContextInterfacePartial = false;
     Settings.UseMappingTables = true; // If true, mapping will be used and no mapping tables will be generated. If false, all tables will be generated.
+    Settings.IncludeParentEntities = true; // if true, "parent" entities will be included in the POCO.
+    Settings.IncludeChildEntities = false; // if true, "child" entity lists will be included in the POCO.
     Settings.UsePascalCase = true;    // This will rename the generated C# tables & properties to use PascalCase. If false table & property names will be left alone.
     Settings.UseDataAnnotations = true; // If true, will add data annotations to the poco classes.
     Settings.UseDataAnnotationsSchema = true; // UseDataAnnotations must also be true. If true, will add data annotations schema to the poco classes.
@@ -46,7 +48,7 @@
     Settings.IncludeQueryTraceOn9481Flag = false; // If SqlServer 2014 appears frozen / take a long time when this file is saved, try setting this to true (you will also need elevated privileges).
     Settings.IncludeCodeGeneratedAttribute = true; // If true, will include the GeneratedCode attribute, false to remove it.
     Settings.UsePrivateSetterForComputedColumns = true; // If the columns is computed, use a private setter.
-    Settings.AdditionalNamespaces = new[] { "Startitecture.Orm.Common", "System.Diagnostics.CodeAnalysis" };  // To include extra namespaces, include them here. i.e. "Microsoft.AspNet.Identity.EntityFramework"
+    Settings.AdditionalNamespaces = new[] { "System.Diagnostics.CodeAnalysis", "Startitecture.Orm.Common" };  // To include extra namespaces, include them here. i.e. "Microsoft.AspNet.Identity.EntityFramework"
     Settings.AdditionalContextInterfaceItems = new[] // To include extra db context interface items, include them here. Also set MakeClassesPartial=true, and implement the partial DbContext class functions.
     {
         ""  //  example: "void SetAutoDetectChangesEnabled(bool flag);"
@@ -127,17 +129,17 @@
     //      UnitOfWorkNamespace = "YourProject.Context";
     //      PocoConfigurationNamespace = "YourProject.Maps";
     // You also need to set the following to the namespace where they now live:
-    Settings.PocoNamespace = "Startitecture.Platform.Entities";
-    Settings.ContextNamespace = "Startitecture.Platform.Entities";
-    Settings.UnitOfWorkNamespace = "Startitecture.Platform.Entities";
-    Settings.PocoConfigurationNamespace = "Startitecture.Platform.Entities";
+    Settings.PocoNamespace = "Startitecture.Platform.Entities.Forms";
+    Settings.ContextNamespace = "Startitecture.Platform.Entities.Forms";
+    Settings.UnitOfWorkNamespace = "Startitecture.Platform.Entities.Forms";
+    Settings.PocoConfigurationNamespace = "Startitecture.Platform.Entities.Forms";
 
 
     // Schema *****************************************************************************************************************************
     // If there are multiple schemas, then the table name is prefixed with the schema, except for dbo.
     // Ie. dbo.hello will be Hello.
     //     abc.hello will be AbcHello.
-    Settings.PrependSchemaName = true;   // Control if the schema name is prepended to the table name
+    Settings.PrependSchemaName = false;   // Control if the schema name is prepended to the table name
 
     // Table Suffix ***********************************************************************************************************************
     // Prepends the suffix to the generated classes names
@@ -162,7 +164,7 @@
     //              TableFilterInclude = new Regex("^table_name1$|^table_name2$|etc");
     //              ColumnFilterExclude = new Regex("^FK_.*$");
     Settings.SchemaFilterExclude = null;
-    Settings.SchemaFilterInclude = null;
+    Settings.SchemaFilterInclude = new Regex("^forms$");
     Settings.TableFilterExclude = null;
     Settings.TableFilterInclude = null;
     Settings.ColumnFilterExclude = null;

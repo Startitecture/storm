@@ -987,27 +987,54 @@ if(!tbl.HasPrimaryKey) { #>
     WritePocoClassAttributes(tbl);#>
 <#if(Settings.IncludeCodeGeneratedAttribute){#>    <#=CodeGeneratedAttribute#>
 <#}#>
-    <# if(Settings.MakeClassesInternal) { #>internal<# } else { #>public<# } #> <# if(Settings.MakeClassesPartial) { #>partial <# } #>class <#=tbl.NameHumanCaseWithSuffix#><#=WritePocoBaseClasses != null ? WritePocoBaseClasses(tbl) : "" #>
+    <# if(Settings.MakeClassesInternal) { #>internal<# } else { #>public<# } #> partial class <#=tbl.NameHumanCaseWithSuffix#><#=WritePocoBaseClasses != null ? WritePocoBaseClasses(tbl) : "" #>
     {
-<# WritePocoBaseClassBody(tbl); #>
+<# WritePocoBaseClassBody(tbl); 
+#>
+<#
+if (!Settings.UsePropertyInitializers){
+if(tbl.Columns.Where(c => !c.Hidden).Count() > 0 || tbl.ReverseNavigationCtor.Count() > 0 || Settings.MakeClassesPartial) // took out: c.Default != string.Empty &&
+{
+#>
+        /// <summary>
+        /// Initializes a new instance of the <see cref="<#=tbl.NameHumanCaseWithSuffix#>"/> class.
+        /// </summary>
+        public <#=tbl.NameHumanCaseWithSuffix#>()
+        {
+<#
+foreach(var col in tbl.Columns.OrderBy(x => x.Ordinal).Where(c => c.Default != string.Empty && !c.Hidden))
+{
+#>
+            this.<#=col.NameHumanCase #> = <#=col.Default #>;
+<# } #>
+<# if (Settings.IncludeChildEntities) {
+foreach(string s in tbl.ReverseNavigationCtor)
+{
+#>
+            this.<#=s #>
+<# } }
+if(Settings.MakeClassesPartial) {#>
+            this.InitializePartial();
+<#}#>        }
 <# foreach(Column col in tbl.Columns.OrderBy(x => x.Ordinal).Where(x => !x.Hidden))
 {
 #>
 <#= WritePocoColumn(col) #>
 <# } #>
 <#
-if(tbl.ReverseNavigationProperty.Count() > 0)
+if(tbl.ReverseNavigationProperty.Count() > 0 && Settings.IncludeChildEntities)
 {
 #>
 
 <#if(Settings.IncludeComments != CommentsStyle.None){#>        // Reverse navigation
-
 <# } #>
 <#
 foreach(var s in tbl.ReverseNavigationProperty.OrderBy(x => x.Definition))
 { #>
-<# if(Settings.IncludeComments != CommentsStyle.None){#>        /// <summary>
-        /// <#=s.Comments ?? "" #>
+<# if(Settings.IncludeComments != CommentsStyle.None){#>
+
+        /// <summary>
+        /// Gets or sets the <#=s.Comments ?? "" #>
         /// </summary>
 <# }
    foreach (var rnpda in Settings.AdditionalReverseNavigationsDataAnnotations) {#>
@@ -1020,7 +1047,7 @@ foreach(var s in tbl.ReverseNavigationProperty.OrderBy(x => x.Definition))
    } #>
         <#=s.Definition #>
 <# } } #>
-<# if(tbl.HasForeignKey) { #>
+<# if(tbl.HasForeignKey && Settings.IncludeParentEntities) { #>
 
 <#if(Settings.IncludeComments != CommentsStyle.None && tbl.Columns.SelectMany(x => x.EntityFk).Any()){#>        // Foreign keys
 <# } #>
@@ -1028,8 +1055,9 @@ foreach(var s in tbl.ReverseNavigationProperty.OrderBy(x => x.Definition))
 foreach(var entityFk in tbl.Columns.SelectMany(x => x.EntityFk).OrderBy(o => o.Definition))
 { #>
 
-<# if(Settings.IncludeComments != CommentsStyle.None){#>        /// <summary>
-        /// <#=entityFk.Comments #>
+<# if(Settings.IncludeComments != CommentsStyle.None){#>
+        /// <summary>
+        /// Gets or sets the <#=entityFk.Comments #>
         /// </summary>
 <# }
    foreach (var fkda in Settings.AdditionalForeignKeysDataAnnotations) {#>
@@ -1042,33 +1070,11 @@ foreach(var entityFk in tbl.Columns.SelectMany(x => x.EntityFk).OrderBy(o => o.D
    } #>
         <#=entityFk.Definition #>
 <# } } #>
-<#
-if (!Settings.UsePropertyInitializers){
-if(tbl.Columns.Where(c => c.Default != string.Empty && !c.Hidden).Count() > 0 || tbl.ReverseNavigationCtor.Count() > 0 || Settings.MakeClassesPartial)
-{
-#>
-
-        public <#=tbl.NameHumanCaseWithSuffix#>()
-        {
-<#
-foreach(var col in tbl.Columns.OrderBy(x => x.Ordinal).Where(c => c.Default != string.Empty && !c.Hidden))
-{
-#>
-            <#=col.NameHumanCase #> = <#=col.Default #>;
-<# } #>
-<#
-foreach(string s in tbl.ReverseNavigationCtor)
-{
-#>
-            <#=s #>
-<# }
-if(Settings.MakeClassesPartial) {#>
-            InitializePartial();
-<#}#>        }
 <#if(Settings.MakeClassesPartial) {#>
 
         partial void InitializePartial();
-<#} }
+<#}#>
+<# }
 }#>
     }
 

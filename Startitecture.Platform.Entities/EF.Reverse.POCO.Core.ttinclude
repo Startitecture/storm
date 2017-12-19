@@ -83,6 +83,8 @@
         public static bool MakeDbContextInterfacePartial;
         public static bool GenerateSeparateFiles;
         public static bool UseMappingTables;
+		public static bool IncludeParentEntities; // include "parent" entities
+		public static bool IncludeChildEntities; // include "child" lists
         public static bool UsePropertyInitializers;
         public static bool IsSqlCe;
         public static string FileExtension = ".cs";

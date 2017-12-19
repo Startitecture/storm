@@ -42,17 +42,176 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="PlatformDatabase.cs">
+    <Compile Include="AttachmentRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ContainerRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="CurrencyValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DataSliceInstanceRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DataSliceRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DateValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DeadlineTypeRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DiscreteValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DocumentAttachmentRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DocumentRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DocumentValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="DocumentVersionRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ExternalResourceRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FieldInstanceRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FieldPlacementRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FieldRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FieldTypeRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FieldValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FieldValueRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FloatingValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FormPhaseInstanceRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FormRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FormSubmissionRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="FormVersionRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="LayoutAreaRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PageRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PersonRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PhaseActionDeadlineRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PhaseSignatureOptionRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PhaseStateRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PhaseTypeRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PlatformDatabase-workflow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>PlatformDatabase.tt</DependentUpon>
+    </Compile>
+    <Compile Include="PlatformDatabase-forms.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="PlatformDatabase-dbo.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessPhaseRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ProcessVersionRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ReferenceValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="RejectionBehaviorRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceAttachmentRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ResourceClassificationRow.cs">
+      <DependentUpon>PlatformDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="RoutingTypeRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="SectionRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="SignatureTypeRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="TextValueItemRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="ValueTypeRow.cs">
+      <DependentUpon>PlatformDatabase-forms.tt</DependentUpon>
+    </Compile>
+    <Compile Include="WorkflowFormSubmissionRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="WorkflowInstanceRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="WorkflowPhaseInstanceRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
+    <Compile Include="WorkflowStateRow.cs">
+      <DependentUpon>PlatformDatabase-workflow.tt</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="PlatformDatabase.tt">
+    <Content Include="PlatformDatabase-workflow.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PlatformDatabase.cs</LastGenOutput>
+      <LastGenOutput>PlatformDatabase-workflow.cs</LastGenOutput>
+    </Content>
+    <Content Include="PlatformDatabase-forms.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PlatformDatabase-forms.cs</LastGenOutput>
+    </Content>
+    <Content Include="PlatformDatabase-dbo.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>PlatformDatabase-dbo.cs</LastGenOutput>
     </Content>
   </ItemGroup>
   <ItemGroup>
