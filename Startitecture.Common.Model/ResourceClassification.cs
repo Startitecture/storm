@@ -1,16 +1,54 @@
-﻿namespace Startitecture.Common.Model
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ResourceClassification.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Common.Model
 {
     using System;
     using System.Collections.Generic;
 
     using SAF.Core;
 
+    /// <summary>
+    /// The resource classification.
+    /// </summary>
     public class ResourceClassification : IEquatable<ResourceClassification>, IComparable, IComparable<ResourceClassification>
     {
         /// <summary>
-        /// Gets or sets the ResourceClassificationId.
+        /// The comparison properties.
         /// </summary>
-        public int ResourceClassificationId { get; private set; }
+        private static readonly Func<ResourceClassification, object>[] ComparisonProperties =
+            {
+                item => item.Name,
+                item => item.Description,
+                item => item.IsActive
+            };
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceClassification" /> class.
+        /// </summary>
+        public ResourceClassification()
+            : this(null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResourceClassification"/> class.
+        /// </summary>
+        /// <param name="resourceClassificationId">
+        /// The resource classification ID.
+        /// </param>
+        public ResourceClassification(int? resourceClassificationId)
+        {
+            this.ResourceClassificationId = resourceClassificationId;
+        }
+
+        /// <summary>
+        /// Gets the Resource Classification ID.
+        /// </summary>
+        public int? ResourceClassificationId { get; private set; }
 
         /// <summary>
         /// Gets or sets the Name.
@@ -23,17 +61,9 @@
         public string Description { get; set; }
 
         /// <summary>
-        /// Gets or sets the IsActive.
+        /// Gets or sets a value indicating whether the resource classification is active.
         /// </summary>
         public bool IsActive { get; set; }
-
-
-        /// <summary>
-        /// The comparison properties.
-        /// </summary>
-        private static readonly Func<ResourceClassification, object>[] ComparisonProperties =
-            {
-            };
 
         #region Equality and Comparison Methods and Operators
 
@@ -152,7 +182,7 @@
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return base.ToString();
+            return this.Name;
         }
 
         /// <summary>
@@ -174,7 +204,7 @@
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
         /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
@@ -197,6 +227,5 @@
         }
 
         #endregion
-
     }
 }

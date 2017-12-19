@@ -243,11 +243,6 @@
     <Compile Include="FormSubmissionValueRow.cs" />
     <Compile Include="Generate.cs" />
     <Compile Include="IDocumentVersionService.cs" />
-    <Compile Include="StormTestPocos\Generated\Database.cs">
-      <DependentUpon>Database.tt</DependentUpon>
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-    </Compile>
     <Compile Include="Models-Fields\Generated\Database.cs">
       <DependentUpon>Database.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -294,8 +289,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="StormTestPocos\Generated\PetaPoco.Core.ttinclude" />
-    <None Include="StormTestPocos\Generated\PetaPoco.Generator.ttinclude" />
     <None Include="Models-Fields\Generated\PetaPoco.Core.ttinclude" />
     <None Include="Models-Fields\Generated\PetaPoco.Generator.ttinclude" />
     <None Include="Models\Generated\Database.tt">
@@ -350,12 +343,6 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>FieldsMessages.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="StormTestPocos\Generated\Database.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Database.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">

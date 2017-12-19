@@ -479,4 +479,7 @@
     <value>The enumeration did not contain the expected number of elements.</value>
     <comment>Indicates that the enumeration did not contain the expected number of elements.</comment>
   </data>
+  <data name="ValueCannotBeNullOrWhiteSpace" xml:space="preserve">
+    <value>Value cannot be null or whitespace.</value>
+  </data>
 </root>

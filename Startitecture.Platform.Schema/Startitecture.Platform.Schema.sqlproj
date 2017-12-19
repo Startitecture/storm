@@ -118,4 +118,10 @@
     <Build Include="Security\forms.sql" />
     <Build Include="Security\workflow.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Startitecture.Platform.Schema.refactorlog" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Startitecture.Platform.Schema.publish.xml" />
+  </ItemGroup>
 </Project>

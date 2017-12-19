@@ -10,6 +10,7 @@ namespace Startitecture.Common.Model
     using System.Collections.Generic;
 
     using SAF.Core;
+    using SAF.StringResources;
 
     /// <summary>
     /// The document.
@@ -249,5 +250,38 @@ namespace Startitecture.Common.Model
         }
 
         #endregion
+
+        /// <summary>
+        /// Revises the current document with the specified file name.
+        /// </summary>
+        /// <param name="fileName">
+        /// The file name.
+        /// </param>
+        /// <returns>
+        /// The <see cref="DocumentVersion"/> created by the revision.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="fileName"/> is null or white space.
+        /// </exception>
+        /// <exception cref="OperationException">
+        /// The new revision could not be added to the sorted set because such a revision already exists.
+        /// </exception>
+        public DocumentVersion Revise(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(fileName));
+            }
+
+            var documentVersion = new DocumentVersion();
+            documentVersion.AddToDocument(this, fileName);
+
+            if (this.documentVersions.Add(documentVersion))
+            {
+                return documentVersion;
+            }
+
+            throw new OperationException(documentVersion, ErrorMessages.ItemCouldNotBeAddedToCollection);
+        }
     }
 }
