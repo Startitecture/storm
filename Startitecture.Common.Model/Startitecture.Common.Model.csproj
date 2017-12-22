@@ -41,8 +41,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Container.cs" />
+    <Compile Include="DataSlice.cs" />
+    <Compile Include="DataSliceInstance.cs" />
     <Compile Include="Document.cs" />
     <Compile Include="DocumentVersion.cs" />
+    <Compile Include="ExternalResource.cs" />
+    <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ResourceClassification.cs" />
   </ItemGroup>

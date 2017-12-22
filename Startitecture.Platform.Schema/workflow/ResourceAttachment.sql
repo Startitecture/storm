@@ -1,4 +1,4 @@
-﻿CREATE TABLE [dbo].[ResourceAttachment] (
+﻿CREATE TABLE [workflow].[ResourceAttachment] (
     [ResourceAttachmentId] BIGINT NOT NULL,
     [ExternalResourceId]   INT    NOT NULL,
     CONSTRAINT [PK_ResourceAttachment] PRIMARY KEY CLUSTERED ([ResourceAttachmentId] ASC),

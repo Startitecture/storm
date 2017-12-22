@@ -7,4 +7,10 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="[ResourceAttachmentId]" />
   </Operation>
+  <Operation Name="Move Schema" Key="d42d7d9b-f00c-4ae1-ad99-fd8977e354a5" ChangeDateTime="12/22/2017 11:09:46">
+    <Property Name="ElementName" Value="[dbo].[ResourceAttachment]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="NewSchema" Value="workflow" />
+    <Property Name="IsNewSchemaExternal" Value="False" />
+  </Operation>
 </Operations>
