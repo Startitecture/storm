@@ -51,7 +51,7 @@ namespace Startitecture.Common.Model
         /// The resource classification.
         /// </param>
         /// <param name="externalResourceId">
-        /// The external resource id.
+        /// The external resource ID.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="resourceClassification"/> is null.
@@ -77,7 +77,7 @@ namespace Startitecture.Common.Model
         }
 
         /// <summary>
-        /// Gets the external resource id.
+        /// Gets the external resource ID.
         /// </summary>
         public int? ExternalResourceId { get; private set; }
 

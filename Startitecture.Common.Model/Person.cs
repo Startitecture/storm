@@ -46,9 +46,10 @@ namespace Startitecture.Common.Model
         /// The security identifier.
         /// </param>
         /// <param name="personId">
-        /// The person id.
+        /// The person ID.
         /// </param>
         /// <exception cref="ArgumentException">
+        /// <paramref name="securityIdentifier"/> is null or whitespace.
         /// </exception>
         public Person(string securityIdentifier, int? personId)
         {
@@ -62,7 +63,7 @@ namespace Startitecture.Common.Model
         }
 
         /// <summary>
-        /// Gets the person id.
+        /// Gets the person ID.
         /// </summary>
         public int? PersonId { get; private set; }
 

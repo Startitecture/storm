@@ -50,7 +50,7 @@ namespace Startitecture.Common.Model
         /// The container.
         /// </param>
         /// <param name="documentId">
-        /// The document id.
+        /// The document ID.
         /// </param>
         public Document(Container container, int? documentId)
         {
@@ -59,7 +59,7 @@ namespace Startitecture.Common.Model
         }
 
         /// <summary>
-        /// Gets the DocumentId.
+        /// Gets the DocumentID.
         /// </summary>
         public int? DocumentId { get; private set; }
 
@@ -69,7 +69,7 @@ namespace Startitecture.Common.Model
         public Container Container { get; private set; }
 
         /// <summary>
-        /// Gets or sets the ResourceClassificationId.
+        /// Gets or sets the ResourceClassificationID.
         /// </summary>
         public ResourceClassification ResourceClassification { get; set; }
 

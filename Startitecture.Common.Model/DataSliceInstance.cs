@@ -46,7 +46,7 @@ namespace Startitecture.Common.Model
         /// The identifier.
         /// </param>
         /// <param name="dataSliceInstanceId">
-        /// The data slice instance id.
+        /// The data slice instance ID.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="dataSlice"/> is null.
@@ -64,7 +64,7 @@ namespace Startitecture.Common.Model
         }
 
         /// <summary>
-        /// Gets the data slice instance id.
+        /// Gets the data slice instance ID.
         /// </summary>
         public int? DataSliceInstanceId { get; private set; }
 

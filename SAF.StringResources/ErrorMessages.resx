@@ -482,4 +482,7 @@
   <data name="ValueCannotBeNullOrWhiteSpace" xml:space="preserve">
     <value>Value cannot be null or whitespace.</value>
   </data>
+  <data name="EnumerationMustBeKnownValue" xml:space="preserve">
+    <value>The enumeration must be set to a known value.</value>
+  </data>
 </root>

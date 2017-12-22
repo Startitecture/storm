@@ -367,6 +367,15 @@ namespace SAF.StringResources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The enumeration must be set to a known value..
+        /// </summary>
+        public static string EnumerationMustBeKnownValue {
+            get {
+                return ResourceManager.GetString("EnumerationMustBeKnownValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to start new event &apos;{0}&apos; because the action event failed validation..
         /// </summary>
         public static string EventFailedValidation {

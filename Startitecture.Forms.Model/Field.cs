@@ -1,83 +1,141 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DocumentVersion.cs" company="Startitecture">
+// <copyright file="Field.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Common.Model
+namespace Startitecture.Forms.Model
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
 
     using SAF.Core;
     using SAF.StringResources;
 
+    using Startitecture.Common.Model;
+
     /// <summary>
-    /// The document version.
+    /// The field.
     /// </summary>
-    public class DocumentVersion : IEquatable<DocumentVersion>, IComparable, IComparable<DocumentVersion>
+    public class Field : IEquatable<Field>, IComparable, IComparable<Field>
     {
         /// <summary>
         /// The comparison properties.
         /// </summary>
-        private static readonly Func<DocumentVersion, object>[] ComparisonProperties =
+        private static readonly Func<Field, object>[] ComparisonProperties =
             {
-                item => item.Document,
-                item => item.Revision,
-                item => item.Uri,
-                item => item.RevisionTime,
-                item => item.FileName
+                item => item.DataSlice,
+                item => item.Name,
+                item => item.FieldType,
+                item => item.ValueType,
+                item => item.Label
             };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentVersion"/> class.
+        /// Initializes a new instance of the <see cref="Field"/> class.
         /// </summary>
-        public DocumentVersion()
-        {
-            this.Uri = new Uri($"{Path.GetTempPath()}{Path.DirectorySeparatorChar}{Guid.NewGuid()}");
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentVersion"/> class.
-        /// </summary>
-        /// <param name="documentVersionId">
-        /// The document version ID.
+        /// <param name="dataSlice">
+        /// The data slice that contains the field.
         /// </param>
-        public DocumentVersion(int? documentVersionId)
+        /// <param name="fieldType">
+        /// The field type.
+        /// </param>
+        /// <param name="valueType">
+        /// The value type.
+        /// </param>
+        /// <param name="name">
+        /// The name of the field.
+        /// </param>
+        public Field(DataSlice dataSlice, FieldType fieldType, ValueType valueType, string name)
+            : this(dataSlice, fieldType, valueType, name, null)
         {
-            this.DocumentVersionId = documentVersionId;
         }
 
         /// <summary>
-        /// Gets the document version ID.
+        /// Initializes a new instance of the <see cref="Field"/> class.
         /// </summary>
-        public int? DocumentVersionId { get; private set; }
+        /// <param name="dataSlice">
+        /// The data slice that contains the field.
+        /// </param>
+        /// <param name="fieldType">
+        /// The field type.
+        /// </param>
+        /// <param name="valueType">
+        /// The value type.
+        /// </param>
+        /// <param name="name">
+        /// The name of the field.
+        /// </param>
+        /// <param name="fieldId">
+        /// The field ID.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="dataSlice"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="name"/> is null or whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="fieldType"/> or <paramref name="valueType"/> are set to an unknown value.
+        /// </exception>
+        public Field(DataSlice dataSlice, FieldType fieldType, ValueType valueType, string name, int? fieldId)
+        {
+            if (dataSlice == null)
+            {
+                throw new ArgumentNullException(nameof(dataSlice));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(name));
+            }
+
+            if (fieldType == FieldType.Unknown || Enum.IsDefined(typeof(FieldType), fieldType) == false)
+            {
+                throw new ArgumentOutOfRangeException(nameof(fieldType), fieldType, ErrorMessages.EnumerationMustBeKnownValue);
+            }
+
+            if (valueType == ValueType.Unknown || Enum.IsDefined(typeof(ValueType), valueType) == false)
+            {
+                throw new ArgumentOutOfRangeException(nameof(valueType), valueType, ErrorMessages.EnumerationMustBeKnownValue);
+            }
+
+            this.DataSlice = dataSlice;
+            this.FieldType = fieldType;
+            this.ValueType = valueType;
+            this.Name = name;
+            this.FieldId = fieldId;
+        }
 
         /// <summary>
-        /// Gets the document.
+        /// Gets the field ID.
         /// </summary>
-        public Document Document { get; private set; }
+        public int? FieldId { get; private set; }
 
         /// <summary>
-        /// Gets the file name.
+        /// Gets the data slice.
         /// </summary>
-        public string FileName { get; private set; }
+        public DataSlice DataSlice { get; private set; }
 
         /// <summary>
-        /// Gets the uri.
+        /// Gets the field type.
         /// </summary>
-        public Uri Uri { get; private set; }
+        public FieldType FieldType { get; private set; }
 
         /// <summary>
-        /// Gets the revision.
+        /// Gets the value type.
         /// </summary>
-        public int Revision { get; private set; }
+        public ValueType ValueType { get; private set; }
 
         /// <summary>
-        /// Gets the revision time.
+        /// Gets the name.
         /// </summary>
-        public DateTimeOffset RevisionTime { get; private set; }
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the label.
+        /// </summary>
+        public string Label { get; set; }
 
         #region Equality and Comparison Methods and Operators
 
@@ -93,9 +151,9 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator ==(Field valueA, Field valueB)
         {
-            return EqualityComparer<DocumentVersion>.Default.Equals(valueA, valueB);
+            return EqualityComparer<Field>.Default.Equals(valueA, valueB);
         }
 
         /// <summary>
@@ -110,7 +168,7 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator !=(Field valueA, Field valueB)
         {
             return !(valueA == valueB);
         }
@@ -127,9 +185,9 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the first value is less than the second value; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator <(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator <(Field valueA, Field valueB)
         {
-            return Comparer<DocumentVersion>.Default.Compare(valueA, valueB) < 0;
+            return Comparer<Field>.Default.Compare(valueA, valueB) < 0;
         }
 
         /// <summary>
@@ -144,9 +202,9 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the first value is greater than the second value; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator >(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator >(Field valueA, Field valueB)
         {
-            return Comparer<DocumentVersion>.Default.Compare(valueA, valueB) > 0;
+            return Comparer<Field>.Default.Compare(valueA, valueB) > 0;
         }
 
         /// <summary>
@@ -182,7 +240,7 @@ namespace Startitecture.Common.Model
         /// <param name="other">
         /// An object to compare with this object.
         /// </param>
-        public int CompareTo(DocumentVersion other)
+        public int CompareTo(Field other)
         {
             return Evaluate.Compare(this, other, ComparisonProperties);
         }
@@ -196,7 +254,7 @@ namespace Startitecture.Common.Model
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return this.Uri.ToString();
+            return this.Name;
         }
 
         /// <summary>
@@ -235,45 +293,11 @@ namespace Startitecture.Common.Model
         /// <param name="other">
         /// An object to compare with this object.
         /// </param>
-        public bool Equals(DocumentVersion other)
+        public bool Equals(Field other)
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
 
         #endregion
-
-       /// <summary>
-        /// Adds the current document version to the specified <paramref name="document"/>.
-        /// </summary>
-        /// <param name="document">
-        /// The document.
-        /// </param>
-        /// <param name="fileName">
-        /// The file name.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="document"/> is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="fileName"/> is null or whitespace.
-        /// </exception>
-        internal void AddToDocument(Document document, string fileName)
-        {
-            if (document == null)
-            {
-                throw new ArgumentNullException(nameof(document));
-            }
-
-            if (string.IsNullOrWhiteSpace(fileName))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(fileName));
-            }
-
-            this.Document = document;
-            this.Uri = new Uri($"{document.Container}{Path.AltDirectorySeparatorChar}{fileName}");
-            this.Revision = document.CurrentVersion?.Revision ?? 0 + 1;
-            this.RevisionTime = DateTimeOffset.Now;
-            this.FileName = fileName;
-        }
     }
 }

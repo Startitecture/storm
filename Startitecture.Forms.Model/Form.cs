@@ -1,10 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DataSlice.cs" company="Startitecture">
+// <copyright file="Form.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Common.Model
+namespace Startitecture.Forms.Model
 {
     using System;
     using System.Collections.Generic;
@@ -13,31 +13,51 @@ namespace Startitecture.Common.Model
     using SAF.StringResources;
 
     /// <summary>
-    /// The data slice.
+    /// The form.
     /// </summary>
-    public class DataSlice : IEquatable<DataSlice>
+    public class Form : IEquatable<Form>
     {
         /// <summary>
         /// The comparison properties.
         /// </summary>
-        private static readonly Func<DataSlice, object>[] ComparisonProperties =
+        private static readonly Func<Form, object>[] ComparisonProperties =
             {
-                item => item.Name
+                item => item.Name,
+                item => item.IsActive
             };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DataSlice"/> class.
+        /// The form versions.
+        /// </summary>
+        private readonly SortedSet<FormVersion> formVersions = new SortedSet<FormVersion>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Form"/> class.
         /// </summary>
         /// <param name="name">
-        /// The name.
-        /// </param>
-        /// <param name="dataSliceId">
-        /// The data slice ID.
+        /// The name of the form.
         /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="name"/> is null or whitespace.
         /// </exception>
-        public DataSlice(string name, int? dataSliceId)
+        public Form(string name)
+            : this(name, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Form"/> class.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the form.
+        /// </param>
+        /// <param name="formId">
+        /// The form ID.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="name"/> is null or whitespace.
+        /// </exception>
+        public Form(string name, int? formId)
         {
             if (string.IsNullOrWhiteSpace(name))
             {
@@ -45,18 +65,33 @@ namespace Startitecture.Common.Model
             }
 
             this.Name = name;
-            this.DataSliceId = dataSliceId;
+            this.FormId = formId;
         }
 
         /// <summary>
-        /// Gets the data slice ID.
+        /// Gets the form ID.
         /// </summary>
-        public int? DataSliceId { get; private set; }
+        public int? FormId { get; private set; }
 
         /// <summary>
         /// Gets the name.
         /// </summary>
         public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether is active.
+        /// </summary>
+        public bool IsActive { get; set; }
+
+        /// <summary>
+        /// The form versions.
+        /// </summary>
+        public IEnumerable<FormVersion> FormVersions => this.formVersions;
+
+        /// <summary>
+        /// The latest version.
+        /// </summary>
+        public FormVersion LatestVersion => this.formVersions.Max;
 
         #region Equality and Comparison Methods and Operators
 
@@ -72,9 +107,9 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(DataSlice valueA, DataSlice valueB)
+        public static bool operator ==(Form valueA, Form valueB)
         {
-            return EqualityComparer<DataSlice>.Default.Equals(valueA, valueB);
+            return EqualityComparer<Form>.Default.Equals(valueA, valueB);
         }
 
         /// <summary>
@@ -89,7 +124,7 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(DataSlice valueA, DataSlice valueB)
+        public static bool operator !=(Form valueA, Form valueB)
         {
             return !(valueA == valueB);
         }
@@ -142,11 +177,48 @@ namespace Startitecture.Common.Model
         /// <param name="other">
         /// An object to compare with this object.
         /// </param>
-        public bool Equals(DataSlice other)
+        public bool Equals(Form other)
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
 
         #endregion
+
+        /// <summary>
+        /// Revises the current form.
+        /// </summary>
+        /// <returns>
+        /// The newly created <see cref="FormVersion"/>.
+        /// </returns>
+        public FormVersion Revise()
+        {
+            return this.Revise(this.Name);
+        }
+
+        /// <summary>
+        /// Revises the current form.
+        /// </summary>
+        /// <param name="name">
+        /// The name of the form.
+        /// </param>
+        /// <returns>
+        /// The newly created <see cref="FormVersion"/>.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="name"/> is null or whitespace.
+        /// </exception>
+        public FormVersion Revise(string name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(name));
+            }
+
+            this.Name = name;
+            var formVersion = new FormVersion();
+            formVersion.AddToForm(this, name);
+            this.formVersions.Add(formVersion);
+            return formVersion;
+        }
     }
 }

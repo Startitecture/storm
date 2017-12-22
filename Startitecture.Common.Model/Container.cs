@@ -11,6 +11,7 @@ namespace Startitecture.Common.Model
     using System.Linq;
 
     using SAF.Core;
+    using SAF.StringResources;
 
     /// <summary>
     /// The container.
@@ -50,13 +51,13 @@ namespace Startitecture.Common.Model
         /// The container ID.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="path"/> is null or white space.
+        /// <paramref name="path"/> is null or whitespace.
         /// </exception>
         public Container(string path, int? containerId)
         {
             if (string.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(path));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(path));
             }
 
             this.Path = path;

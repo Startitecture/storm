@@ -1,73 +1,71 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DocumentVersion.cs" company="Startitecture">
+// <copyright file="FormVersion.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Common.Model
+namespace Startitecture.Forms.Model
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
 
     using SAF.Core;
     using SAF.StringResources;
 
     /// <summary>
-    /// The document version.
+    /// The form version.
     /// </summary>
-    public class DocumentVersion : IEquatable<DocumentVersion>, IComparable, IComparable<DocumentVersion>
+    public class FormVersion : IEquatable<FormVersion>, IComparable, IComparable<FormVersion>
     {
         /// <summary>
         /// The comparison properties.
         /// </summary>
-        private static readonly Func<DocumentVersion, object>[] ComparisonProperties =
+        private static readonly Func<FormVersion, object>[] ComparisonProperties =
             {
-                item => item.Document,
+                item => item.Form,
                 item => item.Revision,
-                item => item.Uri,
-                item => item.RevisionTime,
-                item => item.FileName
+                item => item.Name,
+                item => item.IsActive
             };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentVersion"/> class.
+        /// The sections.
         /// </summary>
-        public DocumentVersion()
+        private readonly SortedSet<Section> sections = new SortedSet<Section>();
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="FormVersion"/> class.
+        /// </summary>
+        public FormVersion()
         {
-            this.Uri = new Uri($"{Path.GetTempPath()}{Path.DirectorySeparatorChar}{Guid.NewGuid()}");
+            this.Name = Guid.NewGuid().ToString();
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DocumentVersion"/> class.
+        /// Initializes a new instance of the <see cref="FormVersion"/> class.
         /// </summary>
-        /// <param name="documentVersionId">
-        /// The document version ID.
+        /// <param name="formVersionId">
+        /// The form version id.
         /// </param>
-        public DocumentVersion(int? documentVersionId)
+        public FormVersion(int? formVersionId)
         {
-            this.DocumentVersionId = documentVersionId;
+            this.FormVersionId = formVersionId;
         }
 
         /// <summary>
-        /// Gets the document version ID.
+        /// Gets the form version id.
         /// </summary>
-        public int? DocumentVersionId { get; private set; }
+        public int? FormVersionId { get; private set; }
 
         /// <summary>
-        /// Gets the document.
+        /// Gets the form.
         /// </summary>
-        public Document Document { get; private set; }
+        public Form Form { get; private set; }
 
         /// <summary>
-        /// Gets the file name.
+        /// Gets the name.
         /// </summary>
-        public string FileName { get; private set; }
-
-        /// <summary>
-        /// Gets the uri.
-        /// </summary>
-        public Uri Uri { get; private set; }
+        public string Name { get; private set; }
 
         /// <summary>
         /// Gets the revision.
@@ -75,9 +73,14 @@ namespace Startitecture.Common.Model
         public int Revision { get; private set; }
 
         /// <summary>
-        /// Gets the revision time.
+        /// Gets or sets a value indicating whether is active.
         /// </summary>
-        public DateTimeOffset RevisionTime { get; private set; }
+        public bool IsActive { get; set; }
+
+        /// <summary>
+        /// The sections.
+        /// </summary>
+        public IEnumerable<Section> Sections => this.sections;
 
         #region Equality and Comparison Methods and Operators
 
@@ -93,9 +96,9 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator ==(FormVersion valueA, FormVersion valueB)
         {
-            return EqualityComparer<DocumentVersion>.Default.Equals(valueA, valueB);
+            return EqualityComparer<FormVersion>.Default.Equals(valueA, valueB);
         }
 
         /// <summary>
@@ -110,7 +113,7 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator !=(FormVersion valueA, FormVersion valueB)
         {
             return !(valueA == valueB);
         }
@@ -127,9 +130,9 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the first value is less than the second value; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator <(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator <(FormVersion valueA, FormVersion valueB)
         {
-            return Comparer<DocumentVersion>.Default.Compare(valueA, valueB) < 0;
+            return Comparer<FormVersion>.Default.Compare(valueA, valueB) < 0;
         }
 
         /// <summary>
@@ -144,9 +147,9 @@ namespace Startitecture.Common.Model
         /// <returns>
         /// <c>true</c> if the first value is greater than the second value; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator >(DocumentVersion valueA, DocumentVersion valueB)
+        public static bool operator >(FormVersion valueA, FormVersion valueB)
         {
-            return Comparer<DocumentVersion>.Default.Compare(valueA, valueB) > 0;
+            return Comparer<FormVersion>.Default.Compare(valueA, valueB) > 0;
         }
 
         /// <summary>
@@ -182,7 +185,7 @@ namespace Startitecture.Common.Model
         /// <param name="other">
         /// An object to compare with this object.
         /// </param>
-        public int CompareTo(DocumentVersion other)
+        public int CompareTo(FormVersion other)
         {
             return Evaluate.Compare(this, other, ComparisonProperties);
         }
@@ -196,7 +199,7 @@ namespace Startitecture.Common.Model
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return this.Uri.ToString();
+            return this.Name;
         }
 
         /// <summary>
@@ -235,45 +238,43 @@ namespace Startitecture.Common.Model
         /// <param name="other">
         /// An object to compare with this object.
         /// </param>
-        public bool Equals(DocumentVersion other)
+        public bool Equals(FormVersion other)
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
 
         #endregion
 
-       /// <summary>
-        /// Adds the current document version to the specified <paramref name="document"/>.
+        /// <summary>
+        /// Adds the current form version to a form.
         /// </summary>
-        /// <param name="document">
-        /// The document.
+        /// <param name="form">
+        /// The form to add the form version to.
         /// </param>
-        /// <param name="fileName">
-        /// The file name.
+        /// <param name="name">
+        /// The name of the form.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="document"/> is null.
+        /// <paramref name="form"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="fileName"/> is null or whitespace.
+        /// <paramref name="name"/> is null or whitespace.
         /// </exception>
-        internal void AddToDocument(Document document, string fileName)
+        internal void AddToForm(Form form, string name)
         {
-            if (document == null)
+            if (form == null)
             {
-                throw new ArgumentNullException(nameof(document));
+                throw new ArgumentNullException(nameof(form));
             }
 
-            if (string.IsNullOrWhiteSpace(fileName))
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(fileName));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(name));
             }
 
-            this.Document = document;
-            this.Uri = new Uri($"{document.Container}{Path.AltDirectorySeparatorChar}{fileName}");
-            this.Revision = document.CurrentVersion?.Revision ?? 0 + 1;
-            this.RevisionTime = DateTimeOffset.Now;
-            this.FileName = fileName;
+            this.Form = form;
+            this.Name = name;
+            this.Revision = form.LatestVersion?.Revision ?? 0 + 1;
         }
     }
 }
