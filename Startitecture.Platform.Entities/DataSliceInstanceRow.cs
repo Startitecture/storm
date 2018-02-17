@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities
         /// Gets or sets the DataSliceInstanceId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"DataSliceInstanceId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DataSliceInstanceId", Order = 1, TypeName = "int")]
         [Index(@"PK_DataSliceInstance", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the DataSliceId
         /// </summary>
-        [Column(@"DataSliceId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DataSliceId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Data slice ID")]
         public int DataSliceId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the Identifier
         /// </summary>
-        [Column(@"Identifier", Order = 3, TypeName = "uniqueidentifier")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Identifier", Order = 3, TypeName = "uniqueidentifier")]
         [Required]
         [Display(Name = "Identifier")]
         public System.Guid Identifier { get; set; }

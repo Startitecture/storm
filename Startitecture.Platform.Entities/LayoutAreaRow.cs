@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the LayoutAreaId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"LayoutAreaId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"LayoutAreaId", Order = 1, TypeName = "int")]
         [Index(@"PK_LayoutArea", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the SectionId
         /// </summary>
-        [Column(@"SectionId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"SectionId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Section ID")]
         public int SectionId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Identifier
         /// </summary>
-        [Column(@"Identifier", Order = 3, TypeName = "uniqueidentifier")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Identifier", Order = 3, TypeName = "uniqueidentifier")]
         [Required]
         [Display(Name = "Identifier")]
         public System.Guid Identifier { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Order
         /// </summary>
-        [Column(@"Order", Order = 4, TypeName = "smallint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Order", Order = 4, TypeName = "smallint")]
         [Required]
         [Display(Name = "Order")]
         public short Order { get; set; }
@@ -71,7 +71,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Style (length: 50)
         /// </summary>
-        [Column(@"Style", Order = 5, TypeName = "varchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Style", Order = 5, TypeName = "varchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]

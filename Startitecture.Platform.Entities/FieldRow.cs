@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the FieldId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FieldId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldId", Order = 1, TypeName = "int")]
         [Index(@"PK_Field", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the DataSliceId
         /// </summary>
-        [Column(@"DataSliceId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DataSliceId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Data slice ID")]
         public int DataSliceId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the FieldTypeId
         /// </summary>
-        [Column(@"FieldTypeId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldTypeId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Field type ID")]
         public int FieldTypeId { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the ValueTypeId
         /// </summary>
-        [Column(@"ValueTypeId", Order = 4, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ValueTypeId", Order = 4, TypeName = "int")]
         [Required]
         [Display(Name = "Value type ID")]
         public int ValueTypeId { get; set; }
@@ -71,7 +71,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Name (length: 50)
         /// </summary>
-        [Column(@"Name", Order = 5, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Name", Order = 5, TypeName = "nvarchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]
@@ -81,7 +81,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Label
         /// </summary>
-        [Column(@"Label", Order = 6, TypeName = "nvarchar(max)")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Label", Order = 6, TypeName = "nvarchar(max)")]
         [Required]
         [Display(Name = "Label")]
         public string Label { get; set; }

@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities
         /// Gets or sets the DocumentId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"DocumentId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DocumentId", Order = 1, TypeName = "int")]
         [Index(@"PK_Document", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the ContainerId
         /// </summary>
-        [Column(@"ContainerId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ContainerId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Container ID")]
         public int ContainerId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the ResourceClassificationId
         /// </summary>
-        [Column(@"ResourceClassificationId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ResourceClassificationId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Resource classification ID")]
         public int ResourceClassificationId { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the Name (length: 260)
         /// </summary>
-        [Column(@"Name", Order = 4, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Name", Order = 4, TypeName = "nvarchar")]
         [Required]
         [MaxLength(260)]
         [StringLength(260)]

@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the FieldPlacementId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FieldPlacementId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldPlacementId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_FieldPlacement", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the FieldInstanceId
         /// </summary>
-        [Column(@"FieldInstanceId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldInstanceId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Field instance ID")]
         public int FieldInstanceId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the LayoutAreaId
         /// </summary>
-        [Column(@"LayoutAreaId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"LayoutAreaId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Layout area ID")]
         public int LayoutAreaId { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Order
         /// </summary>
-        [Column(@"Order", Order = 4, TypeName = "smallint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Order", Order = 4, TypeName = "smallint")]
         [Required]
         [Display(Name = "Order")]
         public short Order { get; set; }

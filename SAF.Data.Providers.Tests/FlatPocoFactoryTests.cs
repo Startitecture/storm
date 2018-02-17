@@ -14,6 +14,8 @@ namespace SAF.Data.Providers.Tests
 
     using SAF.Testing.Common;
 
+    using Startitecture.Orm.Mapper;
+
     /// <summary>
     /// The flat poco factory tests.
     /// </summary>

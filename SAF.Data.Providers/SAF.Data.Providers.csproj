@@ -83,51 +83,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnsiString.cs" />
-    <Compile Include="Database.cs" />
-    <Compile Include="DatabaseTypes\DatabaseType.cs" />
-    <Compile Include="DatabaseTypes\FirebirdDatabaseType.cs" />
-    <Compile Include="DatabaseTypes\MySqlDatabaseType.cs" />
-    <Compile Include="DatabaseTypes\OracleDatabaseType.cs" />
-    <Compile Include="DataTableLoader.cs" />
-    <Compile Include="DependencyContainer.cs" />
-    <Compile Include="EntityRowBase.cs" />
-    <Compile Include="FlatPocoFactory.cs" />
-    <Compile Include="Internal\AutoSelectHelper.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Internal\EnumMapper.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Internal\PagingHelper.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Internal\ParametersHelper.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="DatabaseTypes\PostgreSqlDatabaseType.cs" />
-    <Compile Include="DatabaseTypes\SQLiteDatabaseType.cs" />
-    <Compile Include="DatabaseTypes\SqlServerCeDatabaseType.cs" />
-    <Compile Include="DatabaseTypes\SqlServerDatabaseType.cs" />
-    <Compile Include="DefaultDatabaseFactory.cs" />
-    <Compile Include="PocoDataRequest.cs" />
-    <Compile Include="Query.cs" />
-    <Compile Include="RaisedPocoFactory.cs" />
     <Compile Include="EntityRepository.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="IMapper.cs" />
-    <Compile Include="Internal\SqlPageStatement.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Mappers.cs" />
-    <Compile Include="OracleProvider.cs" />
-    <Compile Include="DatabaseRepositoryProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="QueryRepositoryAdapterFactory.cs" />
-    <Compile Include="QueryRepositoryAdapter.cs" />
     <Compile Include="ReadOnlyRepository.cs" />
-    <Compile Include="StandardMapper.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\Solution Code Analysis\CustomDictionary.xml">
@@ -173,6 +133,10 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="DatabaseTypes\" />
+    <Folder Include="Internal\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

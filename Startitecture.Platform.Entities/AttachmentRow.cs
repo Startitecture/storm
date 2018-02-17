@@ -19,6 +19,8 @@ namespace Startitecture.Platform.Entities.Workflow
     using Startitecture.Orm.Common;
     using System.Diagnostics.CodeAnalysis;
 
+    using Startitecture.Orm.Schema;
+
     /// <summary>
     /// The Attachment entity POCO.
     /// </summary>
@@ -37,7 +39,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the AttachmentId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"AttachmentId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"AttachmentId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_Attachment", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +49,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the WorkflowFormSubmissionId
         /// </summary>
-        [Column(@"WorkflowFormSubmissionId", Order = 2, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowFormSubmissionId", Order = 2, TypeName = "bigint")]
         [Required]
         [Display(Name = "Workflow form submission ID")]
         public long WorkflowFormSubmissionId { get; set; }
@@ -55,7 +57,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Subject (length: 100)
         /// </summary>
-        [Column(@"Subject", Order = 3, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Subject", Order = 3, TypeName = "nvarchar")]
         [Required]
         [MaxLength(100)]
         [StringLength(100)]
@@ -65,7 +67,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Order
         /// </summary>
-        [Column(@"Order", Order = 4, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Order", Order = 4, TypeName = "int")]
         [Required]
         [Display(Name = "Order")]
         public int Order { get; set; }

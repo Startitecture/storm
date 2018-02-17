@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the FieldInstanceId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FieldInstanceId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldInstanceId", Order = 1, TypeName = "int")]
         [Index(@"PK_FieldInstance", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the FieldId
         /// </summary>
-        [Column(@"FieldId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Field ID")]
         public int FieldId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the DataSliceInstanceId
         /// </summary>
-        [Column(@"DataSliceInstanceId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DataSliceInstanceId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Data slice instance ID")]
         public int DataSliceInstanceId { get; set; }

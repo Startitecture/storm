@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the PhaseSignatureOptionId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"PhaseSignatureOptionId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"PhaseSignatureOptionId", Order = 1, TypeName = "int")]
         [Index(@"PK_PhaseSignatureOption", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -48,7 +48,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the SignatureTypeId
         /// </summary>
-        [Column(@"SignatureTypeId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"SignatureTypeId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Signature type ID")]
         public int SignatureTypeId { get; set; }
@@ -56,7 +56,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the RejectionBehaviorId
         /// </summary>
-        [Column(@"RejectionBehaviorId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"RejectionBehaviorId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Rejection behavior ID")]
         public int RejectionBehaviorId { get; set; }

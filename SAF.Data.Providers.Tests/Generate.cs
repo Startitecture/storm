@@ -21,8 +21,10 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The generate.
@@ -154,7 +156,7 @@ namespace SAF.Data.Providers.Tests
         /// The type of POCO to create the request for.
         /// </typeparam>
         /// <returns>
-        /// A <see cref="PocoDataRequest"/> for the specified type.
+        /// A <see cref="Startitecture.Orm.Mapper.PocoDataRequest"/> for the specified type.
         /// </returns>
         public static PocoDataRequest CreatePocoDataRequest<T>(T item)
         {

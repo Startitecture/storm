@@ -10,21 +10,13 @@
 namespace SAF.Data.Providers
 {
     using System;
-    using System.Collections.Generic;
-    using System.Collections.Specialized;
-    using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
-    using System.Runtime.Caching;
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Schema;
-    using Startitecture.Resources;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// Contains extension methods for the common repository provider library.

@@ -17,6 +17,7 @@ namespace SAF.Mock
     using SAF.Data.Providers;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
     using Startitecture.Repository.Mapping;
 

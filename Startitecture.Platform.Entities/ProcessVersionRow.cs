@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the ProcessVersionId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"ProcessVersionId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ProcessVersionId", Order = 1, TypeName = "int")]
         [Index(@"PK_ProcessVersion", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the ProcessId
         /// </summary>
-        [Column(@"ProcessId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ProcessId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Process ID")]
         public int ProcessId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Revision
         /// </summary>
-        [Column(@"Revision", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Revision", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Revision")]
         public int Revision { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Name (length: 50)
         /// </summary>
-        [Column(@"Name", Order = 4, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Name", Order = 4, TypeName = "nvarchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]

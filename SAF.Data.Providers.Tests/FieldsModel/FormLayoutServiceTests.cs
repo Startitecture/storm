@@ -21,6 +21,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using SAF.Testing.Common;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
     using Startitecture.Repository.Mapping;
 

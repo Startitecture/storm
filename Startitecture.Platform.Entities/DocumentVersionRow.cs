@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities
         /// Gets or sets the DocumentVersionId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"DocumentVersionId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DocumentVersionId", Order = 1, TypeName = "int")]
         [Index(@"PK_DocumentVersion", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the DocumentId
         /// </summary>
-        [Column(@"DocumentId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DocumentId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Document ID")]
         public int DocumentId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the FileName (length: 260)
         /// </summary>
-        [Column(@"FileName", Order = 3, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FileName", Order = 3, TypeName = "nvarchar")]
         [Required]
         [MaxLength(260)]
         [StringLength(260)]
@@ -65,7 +65,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the Uri (length: 260)
         /// </summary>
-        [Column(@"Uri", Order = 4, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Uri", Order = 4, TypeName = "nvarchar")]
         [Index(@"UK_DocumentVersion_Uri", 1, IsUnique = true, IsClustered = false)]
         [Required]
         [MaxLength(260)]
@@ -76,7 +76,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the Revision
         /// </summary>
-        [Column(@"Revision", Order = 5, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Revision", Order = 5, TypeName = "int")]
         [Required]
         [Display(Name = "Revision")]
         public int Revision { get; set; }
@@ -84,7 +84,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the RevisionTime
         /// </summary>
-        [Column(@"RevisionTime", Order = 6, TypeName = "datetimeoffset")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"RevisionTime", Order = 6, TypeName = "datetimeoffset")]
         [Required]
         [Display(Name = "Revision time")]
         public System.DateTimeOffset RevisionTime { get; set; }

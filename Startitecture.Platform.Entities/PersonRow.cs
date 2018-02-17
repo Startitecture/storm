@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities
         /// Gets or sets the PersonId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"PersonId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"PersonId", Order = 1, TypeName = "int")]
         [Index(@"PK_Person", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the FirstName (length: 50)
         /// </summary>
-        [Column(@"FirstName", Order = 2, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FirstName", Order = 2, TypeName = "nvarchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]
@@ -57,7 +57,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the MiddleName (length: 50)
         /// </summary>
-        [Column(@"MiddleName", Order = 3, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"MiddleName", Order = 3, TypeName = "nvarchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]
@@ -67,7 +67,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the LastName (length: 50)
         /// </summary>
-        [Column(@"LastName", Order = 4, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"LastName", Order = 4, TypeName = "nvarchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]
@@ -77,7 +77,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the SecurityIdentifier (length: 254)
         /// </summary>
-        [Column(@"SecurityIdentifier", Order = 5, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"SecurityIdentifier", Order = 5, TypeName = "nvarchar")]
         [Index(@"UK_Person_SecurityIdentifier", 1, IsUnique = true, IsClustered = false)]
         [Required]
         [MaxLength(254)]

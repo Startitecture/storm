@@ -17,6 +17,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Startitecture.Platform.Entities
 {
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +38,7 @@ namespace Startitecture.Platform.Entities
         /// Gets or sets the ContainerId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"ContainerId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ContainerId", Order = 1, TypeName = "int")]
         [Index(@"PK_Container", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +48,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the Name (length: 260)
         /// </summary>
-        [Column(@"Name", Order = 2, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Name", Order = 2, TypeName = "nvarchar")]
         [Required]
         [MaxLength(260)]
         [StringLength(260)]
@@ -57,7 +58,7 @@ namespace Startitecture.Platform.Entities
         /// <summary>
         /// Gets or sets the Path (length: 260)
         /// </summary>
-        [Column(@"Path", Order = 3, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Path", Order = 3, TypeName = "nvarchar")]
         [Required]
         [MaxLength(260)]
         [StringLength(260)]

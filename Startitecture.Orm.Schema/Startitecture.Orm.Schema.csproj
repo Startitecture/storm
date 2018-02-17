@@ -47,8 +47,10 @@
     <Compile Include="ColumnAttribute.cs" />
     <Compile Include="DataItemDefinition.cs" />
     <Compile Include="DataItemDefinitionProvider.cs" />
+    <Compile Include="EntityRowBase.cs" />
     <Compile Include="ExplicitColumnsAttribute.cs" />
     <Compile Include="IgnoreAttribute.cs" />
+    <Compile Include="IndexAttribute.cs" />
     <Compile Include="PrimaryKeyAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectWithAttribute.cs" />

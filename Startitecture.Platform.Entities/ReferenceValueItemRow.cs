@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the ReferenceValueItemId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"ReferenceValueItemId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ReferenceValueItemId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_ReferenceValueItem", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -48,7 +48,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the ItemType (length: 250)
         /// </summary>
-        [Column(@"ItemType", Order = 2, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ItemType", Order = 2, TypeName = "nvarchar")]
         [Required]
         [MaxLength(250)]
         [StringLength(250)]
@@ -58,7 +58,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the ItemId
         /// </summary>
-        [Column(@"ItemId", Order = 3, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ItemId", Order = 3, TypeName = "bigint")]
         [Required]
         [Display(Name = "Item ID")]
         public long ItemId { get; set; }

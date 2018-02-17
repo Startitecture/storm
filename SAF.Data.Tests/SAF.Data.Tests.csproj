@@ -141,6 +141,10 @@
       <Project>{5643589D-8D46-4717-AE66-994173F3D671}</Project>
       <Name>Startitecture.Orm.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj">
+      <Project>{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}</Project>
+      <Name>Startitecture.Orm.Mapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
       <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
       <Name>Startitecture.Orm.Model</Name>

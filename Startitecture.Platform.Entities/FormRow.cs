@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the FormId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FormId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FormId", Order = 1, TypeName = "int")]
         [Index(@"PK_Form", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Name (length: 50)
         /// </summary>
-        [Column(@"Name", Order = 2, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Name", Order = 2, TypeName = "nvarchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]
@@ -57,7 +57,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the IsActive
         /// </summary>
-        [Column(@"IsActive", Order = 3, TypeName = "bit")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"IsActive", Order = 3, TypeName = "bit")]
         [Required]
         [Display(Name = "Is active")]
         public bool IsActive { get; set; }

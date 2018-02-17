@@ -19,6 +19,8 @@ namespace SAF.Data.Providers.Tests
     using SAF.Testing.Common;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The attachment document repository tests.

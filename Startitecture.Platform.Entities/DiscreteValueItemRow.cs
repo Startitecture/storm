@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the DiscreteValueItemId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"DiscreteValueItemId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DiscreteValueItemId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_DiscreteValueItem", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -48,7 +48,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Value
         /// </summary>
-        [Column(@"Value", Order = 2, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Value", Order = 2, TypeName = "bigint")]
         [Required]
         [Display(Name = "Value")]
         public long Value { get; set; }

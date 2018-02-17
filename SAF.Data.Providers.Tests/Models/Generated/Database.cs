@@ -18,6 +18,7 @@ namespace SAF.Data.Providers.Tests
     using System.Linq;
     using System.Web;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using SAF.Data.Providers;
 
     /// <summary>

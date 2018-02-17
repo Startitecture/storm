@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the FieldValueId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FieldValueId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldValueId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_FieldValue", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the FormSubmissionId
         /// </summary>
-        [Column(@"FormSubmissionId", Order = 2, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FormSubmissionId", Order = 2, TypeName = "bigint")]
         [Required]
         [Display(Name = "Form submission ID")]
         public long FormSubmissionId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the FieldInstanceId
         /// </summary>
-        [Column(@"FieldInstanceId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldInstanceId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Field instance ID")]
         public int FieldInstanceId { get; set; }

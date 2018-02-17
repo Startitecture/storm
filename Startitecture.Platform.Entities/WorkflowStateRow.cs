@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the WorkflowStateId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"WorkflowStateId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowStateId", Order = 1, TypeName = "int")]
         [Index(@"PK_WorkflowState", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Name (length: 50)
         /// </summary>
-        [Column(@"Name", Order = 2, TypeName = "varchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Name", Order = 2, TypeName = "varchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]

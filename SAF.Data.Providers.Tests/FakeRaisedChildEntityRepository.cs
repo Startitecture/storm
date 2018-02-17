@@ -13,6 +13,7 @@ namespace SAF.Data.Providers.Tests
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake raised child entity repository.

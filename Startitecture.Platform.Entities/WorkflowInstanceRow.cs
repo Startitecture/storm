@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the WorkflowInstanceId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"WorkflowInstanceId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowInstanceId", Order = 1, TypeName = "int")]
         [Index(@"PK_WorkflowInstance", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the ProcessVersionId
         /// </summary>
-        [Column(@"ProcessVersionId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ProcessVersionId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Process version ID")]
         public int ProcessVersionId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the WorkflowStateId
         /// </summary>
-        [Column(@"WorkflowStateId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowStateId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Workflow state ID")]
         public int WorkflowStateId { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Subject (length: 100)
         /// </summary>
-        [Column(@"Subject", Order = 4, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Subject", Order = 4, TypeName = "nvarchar")]
         [Required]
         [MaxLength(100)]
         [StringLength(100)]

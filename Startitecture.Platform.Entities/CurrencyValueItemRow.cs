@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the CurrencyValueItemId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"CurrencyValueItemId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"CurrencyValueItemId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_CurrencyValueItem", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -48,7 +48,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Value
         /// </summary>
-        [Column(@"Value", Order = 2, TypeName = "decimal")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Value", Order = 2, TypeName = "decimal")]
         [Required]
         [Display(Name = "Value")]
         public decimal Value { get; set; }

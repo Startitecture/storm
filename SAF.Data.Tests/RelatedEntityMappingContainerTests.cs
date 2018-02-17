@@ -19,6 +19,7 @@ namespace SAF.Data.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Repository.Mapping;
 
     /// <summary>

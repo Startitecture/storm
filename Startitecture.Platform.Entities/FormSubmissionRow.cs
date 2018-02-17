@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the FormSubmissionId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FormSubmissionId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FormSubmissionId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_FormSubmission", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the FormVersionId
         /// </summary>
-        [Column(@"FormVersionId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FormVersionId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Form version ID")]
         public int FormVersionId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the SubmissionTime
         /// </summary>
-        [Column(@"SubmissionTime", Order = 3, TypeName = "datetimeoffset")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"SubmissionTime", Order = 3, TypeName = "datetimeoffset")]
         [Required]
         [Display(Name = "Submission time")]
         public System.DateTimeOffset SubmissionTime { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the SubmittedByPersonId
         /// </summary>
-        [Column(@"SubmittedByPersonId", Order = 4, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"SubmittedByPersonId", Order = 4, TypeName = "int")]
         [Required]
         [Display(Name = "Submitted by person ID")]
         public int SubmittedByPersonId { get; set; }

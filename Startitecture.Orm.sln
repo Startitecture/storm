@@ -7,6 +7,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAF.Data.Tests", "SAF.Data.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D49E474-547C-45FE-B0D6-DE51287A93D5}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		Startitecture.Orm.vsmdi = Startitecture.Orm.vsmdi
 	EndProjectSection
 EndProject
@@ -17,6 +18,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Code Analysis", "Solution Code Analysis", "{9E90DA71-5C8D-4AC9-9BB4-F29B4E3A64A0}"
 	ProjectSection(SolutionItems) = preProject
 		Solution Code Analysis\CustomDictionary.xml = Solution Code Analysis\CustomDictionary.xml
+		Settings.StyleCop = Settings.StyleCop
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAF.Data.Providers", "SAF.Data.Providers\SAF.Data.Providers.csproj", "{427F22DA-51D4-4DBA-B1EC-108C0B4F1899}"
@@ -70,6 +72,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Schema", "Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj", "{9D984C1F-1486-4718-9D52-0A36B1C06DB3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Sql", "Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj", "{1F629078-CE41-48E5-8160-C13D46121252}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Mapper", "Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj", "{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -443,6 +447,24 @@ Global
 		{1F629078-CE41-48E5-8160-C13D46121252}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{1F629078-CE41-48E5-8160-C13D46121252}.Release|x86.ActiveCfg = Release|Any CPU
 		{1F629078-CE41-48E5-8160-C13D46121252}.Release|x86.Build.0 = Release|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Debug|x86.Build.0 = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.DebugLocal|x86.Build.0 = Debug|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Release|x86.ActiveCfg = Release|Any CPU
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -468,10 +490,11 @@ Global
 		{98AAE6EB-76D9-4D84-B74B-1981D5D597C3} = {B9191F04-16D8-43DB-9E74-427EEB7D8698}
 		{9D984C1F-1486-4718-9D52-0A36B1C06DB3} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
 		{1F629078-CE41-48E5-8160-C13D46121252} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
+		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
+		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

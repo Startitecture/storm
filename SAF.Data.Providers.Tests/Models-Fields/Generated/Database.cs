@@ -17,6 +17,8 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using SAF.Data.Providers;
 
+    using Startitecture.Orm.Mapper;
+
     /// <summary>
     /// Provides the data context for the FieldsModel database.
     /// </summary>

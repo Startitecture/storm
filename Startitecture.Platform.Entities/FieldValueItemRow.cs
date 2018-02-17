@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Forms
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// Gets or sets the FieldValueItemId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FieldValueItemId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldValueItemId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_FieldValueItem", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the FieldValueId
         /// </summary>
-        [Column(@"FieldValueId", Order = 2, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FieldValueId", Order = 2, TypeName = "bigint")]
         [Required]
         [Display(Name = "Field value ID")]
         public long FieldValueId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Forms
         /// <summary>
         /// Gets or sets the Order
         /// </summary>
-        [Column(@"Order", Order = 3, TypeName = "smallint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Order", Order = 3, TypeName = "smallint")]
         [Required]
         [Display(Name = "Order")]
         public short Order { get; set; }

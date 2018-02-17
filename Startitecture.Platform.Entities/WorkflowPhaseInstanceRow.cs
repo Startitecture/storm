@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the WorkflowPhaseInstanceId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"WorkflowPhaseInstanceId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowPhaseInstanceId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_WorkflowPhaseInstance", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the WorkflowInstanceId
         /// </summary>
-        [Column(@"WorkflowInstanceId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowInstanceId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Workflow instance ID")]
         public int WorkflowInstanceId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the ProcessPhaseId
         /// </summary>
-        [Column(@"ProcessPhaseId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ProcessPhaseId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Process phase ID")]
         public int ProcessPhaseId { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the PhaseStateId
         /// </summary>
-        [Column(@"PhaseStateId", Order = 4, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"PhaseStateId", Order = 4, TypeName = "int")]
         [Required]
         [Display(Name = "Phase state ID")]
         public int PhaseStateId { get; set; }

@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the WorkflowFormSubmissionId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"WorkflowFormSubmissionId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowFormSubmissionId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_WorkflowFormSubmission", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the WorkflowPhaseInstanceId
         /// </summary>
-        [Column(@"WorkflowPhaseInstanceId", Order = 2, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"WorkflowPhaseInstanceId", Order = 2, TypeName = "bigint")]
         [Required]
         [Display(Name = "Workflow phase instance ID")]
         public long WorkflowPhaseInstanceId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the FormPhaseInstanceId
         /// </summary>
-        [Column(@"FormPhaseInstanceId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"FormPhaseInstanceId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Form phase instance ID")]
         public int FormPhaseInstanceId { get; set; }

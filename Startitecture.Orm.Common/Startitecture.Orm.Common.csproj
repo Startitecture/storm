@@ -61,7 +61,6 @@
     <Compile Include="IDependencyItem.cs" />
     <Compile Include="IEntityMapper.cs" />
     <Compile Include="IEntityRepository.cs" />
-    <Compile Include="IndexAttribute.cs" />
     <Compile Include="IReadOnlyRepository.cs" />
     <Compile Include="IRepositoryAdapter.cs" />
     <Compile Include="IRepositoryAdapterFactory.cs" />

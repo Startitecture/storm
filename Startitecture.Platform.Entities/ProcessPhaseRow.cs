@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the ProcessPhaseId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"ProcessPhaseId", Order = 1, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ProcessPhaseId", Order = 1, TypeName = "int")]
         [Index(@"PK_ProcessPhase", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -47,7 +47,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the ProcessVersionId
         /// </summary>
-        [Column(@"ProcessVersionId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"ProcessVersionId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Process version ID")]
         public int ProcessVersionId { get; set; }
@@ -55,7 +55,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the PhaseTypeId
         /// </summary>
-        [Column(@"PhaseTypeId", Order = 3, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"PhaseTypeId", Order = 3, TypeName = "int")]
         [Required]
         [Display(Name = "Phase type ID")]
         public int PhaseTypeId { get; set; }
@@ -63,7 +63,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Name (length: 50)
         /// </summary>
-        [Column(@"Name", Order = 4, TypeName = "nvarchar")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Name", Order = 4, TypeName = "nvarchar")]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]
@@ -73,7 +73,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the Order
         /// </summary>
-        [Column(@"Order", Order = 5, TypeName = "smallint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"Order", Order = 5, TypeName = "smallint")]
         [Required]
         [Display(Name = "Order")]
         public short Order { get; set; }

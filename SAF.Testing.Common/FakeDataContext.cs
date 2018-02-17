@@ -8,6 +8,8 @@ namespace SAF.Testing.Common
 {
     using SAF.Data.Providers;
 
+    using Startitecture.Orm.Mapper;
+
     /// <summary>
     /// The fake data context.
     /// </summary>

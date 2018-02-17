@@ -16,7 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
@@ -37,7 +37,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// Gets or sets the DocumentAttachmentId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"DocumentAttachmentId", Order = 1, TypeName = "bigint")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DocumentAttachmentId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_DocumentAttachment", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
@@ -48,7 +48,7 @@ namespace Startitecture.Platform.Entities.Workflow
         /// <summary>
         /// Gets or sets the DocumentVersionId
         /// </summary>
-        [Column(@"DocumentVersionId", Order = 2, TypeName = "int")]
+        [System.ComponentModel.DataAnnotations.Schema.Column(@"DocumentVersionId", Order = 2, TypeName = "int")]
         [Required]
         [Display(Name = "Document version ID")]
         public int DocumentVersionId { get; set; }

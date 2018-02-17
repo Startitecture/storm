@@ -9,6 +9,7 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
 
     [TestClass]

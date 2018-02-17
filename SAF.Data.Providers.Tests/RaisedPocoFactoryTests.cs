@@ -13,6 +13,8 @@ namespace SAF.Data.Providers.Tests
 
     using SAF.Testing.Common;
 
+    using Startitecture.Orm.Mapper;
+
     /// <summary>
     /// The raised poco factory tests.
     /// </summary>
