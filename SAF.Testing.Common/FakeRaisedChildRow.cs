@@ -11,11 +11,12 @@ namespace SAF.Testing.Common
 {
     using System.Collections.Generic;
 
-    using SAF.Data;
     using SAF.Data.Providers;
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake raised child row.
@@ -28,7 +29,7 @@ namespace SAF.Testing.Common
         /// The fake child relations.
         /// </summary>
         private static readonly IEnumerable<IEntityRelation> FakeChildRelations =
-            new TransactSqlFromClause<FakeRaisedChildRow>()
+            new SqlFromClause<FakeRaisedChildRow>()
                 .InnerJoin(
                     row => row.FakeComplexEntityId,
                     row => row.FakeComplexEntity.FakeComplexEntityId)

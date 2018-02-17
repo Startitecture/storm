@@ -9,13 +9,9 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using AutoMapper.Configuration.Conventions;
-
-    using SAF.Data;
-    using SAF.Data.Providers;
-
     using Startitecture.Core;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The raised overridden column name row.

@@ -15,6 +15,8 @@ namespace SAF.Data.Tests
     using SAF.Testing.Common;
 
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The entity relation set tests.
@@ -28,7 +30,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void InnerJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -55,7 +57,7 @@ namespace SAF.Data.Tests
         ////public void InnerJoin_WithMatchingRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            .InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -76,7 +78,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void InnerJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 .InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -102,7 +104,7 @@ namespace SAF.Data.Tests
         ////public void InnerJoin_WithMatchingSourceAndRelationProperties_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            .InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -123,7 +125,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void InnerJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -149,7 +151,7 @@ namespace SAF.Data.Tests
         ////public void InnerJoin_WithRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            .InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -170,7 +172,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void InnerJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -196,7 +198,7 @@ namespace SAF.Data.Tests
         ////public void InnerJoin_WithSourceAndRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -218,7 +220,7 @@ namespace SAF.Data.Tests
         public void InnerJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     .InnerJoin(row => row.FakeDataId, row => row.FakeRelated.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -239,7 +241,7 @@ namespace SAF.Data.Tests
         public void InnerJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     .InnerJoin(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -260,7 +262,7 @@ namespace SAF.Data.Tests
         public void InnerJoin_InferredWithRelationProperty_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -281,7 +283,7 @@ namespace SAF.Data.Tests
         public void InnerJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -301,7 +303,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void LeftJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -327,7 +329,7 @@ namespace SAF.Data.Tests
         ////public void LeftJoin_WithMatchingRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            .LeftJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -348,7 +350,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void LeftJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 .LeftJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -374,7 +376,7 @@ namespace SAF.Data.Tests
         ////public void LeftJoin_WithMatchingSourceAndRelationProperties_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            .LeftJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -395,7 +397,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void LeftJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -421,7 +423,7 @@ namespace SAF.Data.Tests
         ////public void LeftJoin_WithRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            .LeftJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -442,7 +444,7 @@ namespace SAF.Data.Tests
         [TestMethod]
         public void LeftJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new TransactSqlFromClause<FakeFlatDataRow>()
+            var relations = new SqlFromClause<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -468,7 +470,7 @@ namespace SAF.Data.Tests
         ////public void LeftJoin_WithSourceAndRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new TransactSqlFromClause<FakeRaisedDataRow>()
+        ////        new SqlFromClause<FakeRaisedDataRow>()
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -490,7 +492,7 @@ namespace SAF.Data.Tests
         public void LeftJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     .LeftJoin(row => row.FakeDataId, row => row.FakeRelated.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -511,7 +513,7 @@ namespace SAF.Data.Tests
         public void LeftJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     .LeftJoin(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -532,7 +534,7 @@ namespace SAF.Data.Tests
         public void LeftJoin_InferredWithRelationProperty_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     .LeftJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -553,7 +555,7 @@ namespace SAF.Data.Tests
         public void LeftJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
         {
             var relations =
-                new TransactSqlFromClause<FakeRaisedDataRow>()
+                new SqlFromClause<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)

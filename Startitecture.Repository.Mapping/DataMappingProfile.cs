@@ -17,10 +17,9 @@ namespace Startitecture.Repository.Mapping
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The data mapping profile.

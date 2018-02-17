@@ -13,6 +13,7 @@ namespace SAF.Data.Providers.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The data item definition provider tests.

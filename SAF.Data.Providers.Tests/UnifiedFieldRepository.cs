@@ -10,6 +10,7 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The unified field repository.

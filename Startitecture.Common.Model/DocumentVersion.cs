@@ -10,9 +10,8 @@ namespace Startitecture.Common.Model
     using System.Collections.Generic;
     using System.IO;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The document version.

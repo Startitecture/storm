@@ -12,13 +12,14 @@ namespace Startitecture.Core
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Collections.Specialized;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using System.Runtime.Serialization;
+    using System.Runtime.Caching;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Contains methods that extend existing classes.
@@ -460,5 +461,357 @@ namespace Startitecture.Core
 
             return info.GetPropertyValue(entity);
         }
+
+        /// <summary>
+        /// Gets a value from the cache or lazily adds an existing value.
+        /// </summary>
+        /// <param name="cache">
+        /// The cache to retrieve or store the value in.
+        /// </param>
+        /// <param name="synchronizationLock">
+        /// The synchronization lock for the cache.
+        /// </param>
+        /// <param name="cacheKey">
+        /// The cache key.
+        /// </param>
+        /// <param name="retrievalKey">
+        /// The retrieval key.
+        /// </param>
+        /// <param name="getValue">
+        /// A function that retrieves the value from the real store.
+        /// </param>
+        /// <param name="policy">
+        /// The policy to apply.
+        /// </param>
+        /// <typeparam name="TKey">
+        /// The type of key that retrieves the value.
+        /// </typeparam>
+        /// <typeparam name="TValue">
+        /// The type of value stored in the cache.
+        /// </typeparam>
+        /// <returns>
+        /// A <typeparamref name="TValue"/> instance, either from the cache or from the retrieval function <paramref name="getValue"/>.
+        /// </returns>
+        public static TValue GetOrLazyAddExisting<TKey, TValue>(
+            this ObjectCache cache,
+            object synchronizationLock,
+            string cacheKey,
+            TKey retrievalKey,
+            Func<TKey, TValue> getValue,
+            CacheItemPolicy policy)
+        {
+            if (cache == null)
+            {
+                throw new ArgumentNullException(nameof(cache));
+            }
+
+            if (synchronizationLock == null)
+            {
+                throw new ArgumentNullException(nameof(synchronizationLock));
+            }
+
+            if (cacheKey == null)
+            {
+                throw new ArgumentNullException(nameof(cacheKey));
+            }
+
+            if (getValue == null)
+            {
+                throw new ArgumentNullException(nameof(getValue));
+            }
+
+            if (policy == null)
+            {
+                throw new ArgumentNullException(nameof(policy));
+            }
+
+            var value = cache.Get(cacheKey);
+
+            if (value is TValue optimisticValue)
+            {
+                return optimisticValue;
+            }
+
+            lock (synchronizationLock)
+            {
+                value = cache.Get(cacheKey);
+
+                if (value is TValue cachedValue)
+                {
+                    return cachedValue;
+                }
+
+                var retrievedValue = getValue(retrievalKey);
+
+                if (Evaluate.IsNull(retrievedValue) == false)
+                {
+                    cache.Set(cacheKey, retrievedValue, policy);
+                }
+
+                return retrievedValue;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value from the cache or lazily adds an existing value.
+        /// </summary>
+        /// <param name="cache">
+        /// The cache to retrieve or store the value in.
+        /// </param>
+        /// <param name="synchronizationLock">
+        /// The synchronization lock for the cache.
+        /// </param>
+        /// <param name="cacheKey">
+        /// The cache key.
+        /// </param>
+        /// <param name="retrievalKey">
+        /// The retrieval key.
+        /// </param>
+        /// <param name="getValue">
+        /// A function that retrieves the value from the real store.
+        /// </param>
+        /// <param name="policy">
+        /// The policy to apply.
+        /// </param>
+        /// <typeparam name="TKey">
+        /// The type of key that retrieves the value.
+        /// </typeparam>
+        /// <typeparam name="TValue">
+        /// The type of value stored in the cache.
+        /// </typeparam>
+        /// <returns>
+        /// A <typeparamref name="TValue"/> instance, either from the cache or from the retrieval function <paramref name="getValue"/>.
+        /// </returns>
+        public static CacheResult<TValue> GetOrLazyAddExistingWithResult<TKey, TValue>(
+            this ObjectCache cache,
+            object synchronizationLock,
+            string cacheKey,
+            TKey retrievalKey,
+            Func<TKey, TValue> getValue,
+            CacheItemPolicy policy)
+        {
+            if (cache == null)
+            {
+                throw new ArgumentNullException(nameof(cache));
+            }
+
+            if (synchronizationLock == null)
+            {
+                throw new ArgumentNullException(nameof(synchronizationLock));
+            }
+
+            if (cacheKey == null)
+            {
+                throw new ArgumentNullException(nameof(cacheKey));
+            }
+
+            if (getValue == null)
+            {
+                throw new ArgumentNullException(nameof(getValue));
+            }
+
+            if (policy == null)
+            {
+                throw new ArgumentNullException(nameof(policy));
+            }
+
+            var value = cache.Get(cacheKey);
+
+            if (value is TValue optimisticValue)
+            {
+                return new CacheResult<TValue>(optimisticValue, true, cacheKey);
+            }
+
+            lock (synchronizationLock)
+            {
+                value = cache.Get(cacheKey);
+
+                if (value is TValue lockedValue)
+                {
+                    return new CacheResult<TValue>(lockedValue, true, cacheKey);
+                }
+
+                var retrievedValue = getValue(retrievalKey);
+
+                if (Evaluate.IsNull(retrievedValue) == false)
+                {
+                    cache.Set(cacheKey, retrievedValue, policy);
+                }
+
+                return new CacheResult<TValue>(retrievedValue, false, cacheKey);
+            }
+        }
+
+        /// <summary>
+        /// Determines if the value at the specified index within the current <see cref="NameValueCollection"/> is equivalent to the 
+        /// <see cref="Boolean"/> value <c>true</c>.
+        /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item to apply the value to.
+        /// </typeparam>
+        /// <typeparam name="TValue">
+        /// The type of value to be applied.
+        /// </typeparam>
+        /// <param name="collection">
+        /// The collection containing the value.
+        /// </param>
+        /// <param name="target">
+        /// The target to apply the setting to.
+        /// </param>
+        /// <param name="propertyExpression">
+        /// The property expression of the source value.
+        /// </param>
+        /// <param name="defaultValue">
+        /// The default value if the configured value is not set.
+        /// </param>
+        /// <param name="parser">
+        /// A parser that will convert the string value into the typed value.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyExpression"/> cannot be evaluated as a property.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="collection"/>, <paramref name="target"/> or <paramref name="propertyExpression"/> is null.
+        /// </exception>
+        public static void ApplySetting<TItem, TValue>(
+            this NameValueCollection collection,
+            TItem target,
+            Expression<Func<TItem, TValue>> propertyExpression,
+            TValue defaultValue,
+            Func<string, TValue> parser)
+        {
+            if (collection == null)
+            {
+                throw new ArgumentNullException(nameof(collection));
+            }
+
+            if (Evaluate.IsNull(target))
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (propertyExpression == null)
+            {
+                throw new ArgumentNullException(nameof(propertyExpression));
+            }
+
+            // Note: use full name and not GetRuntimeName() otherwise each item type would require a different setting.
+            var name = String.Format((string)QualifiedPropertyNameFormat, typeof(TItem).FullName, propertyExpression.GetPropertyName());
+
+            var newValue = collection.AllKeys.Contains(name)
+                               ? TryParse(collection[name], defaultValue, parser)
+                               : defaultValue;
+
+            if (!(propertyExpression.Body is MemberExpression memberSelection))
+            {
+                throw new ArgumentException(ValidationMessages.SelectorCannotBeEvaluated, nameof(propertyExpression));
+            }
+
+            var property = memberSelection.Member as PropertyInfo;
+
+            if (property == null)
+            {
+                throw new ArgumentException(ValidationMessages.SelectorCannotBeEvaluated, nameof(propertyExpression));
+            }
+
+            property.SetValue(target, newValue, null);
+        }
+
+        /// <summary>
+        /// Checks that the specified entity dependency is valid and throws a <see cref="Startitecture.Core.OperationException"/>
+        /// if the check fails.
+        /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of entity with the dependency.
+        /// </typeparam>
+        /// <typeparam name="TDependency">
+        /// The type of dependency to check.
+        /// </typeparam>
+        /// <param name="entity">
+        /// The entity with the dependency.
+        /// </param>
+        /// <param name="selector">
+        /// The selector of the property to verify.
+        /// </param>
+        /// <remarks>
+        /// Dependency checks are intended to ensure that the entity's dependencies exist.
+        /// </remarks>
+        public static void ThrowOnDependencyFailure<TItem, TDependency>(this TItem entity, Expression<Func<TItem, TDependency>> selector)
+        {
+            if (Evaluate.IsNull(entity))
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (selector == null)
+            {
+                throw new ArgumentNullException(nameof(selector));
+            }
+
+            if (Evaluate.IsSet(selector.Compile().Invoke(entity)))
+            {
+                return;
+            }
+
+            string message = String.Format(
+                ValidationMessages.EntityDependencyCheckFailed,
+                typeof(TDependency).Name,
+                selector.GetPropertyName());
+
+            throw new OperationException(entity, message);
+        }
+
+        /// <summary>
+        /// Attempts to parse a value from the specified string value.
+        /// </summary>
+        /// <param name="value">
+        /// The string value to parse.
+        /// </param>
+        /// <param name="defaultValue">
+        /// The default value if the parse fails.
+        /// </param>
+        /// <param name="parser">
+        /// The string parser.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of the expected value.
+        /// </typeparam>
+        /// <returns>
+        /// A <typeparamref name="TValue"/> value parsed from <paramref name="value"/>, or <paramref name="defaultValue"/> if the
+        /// <paramref name="parser"/> is unable to parse the string.
+        /// </returns>
+        private static TValue TryParse<TValue>(string value, TValue defaultValue, Func<string, TValue> parser)
+        {
+            if (value == null)
+            {
+                throw new ArgumentNullException(nameof(value));
+            }
+
+            if (parser == null)
+            {
+                throw new ArgumentNullException(nameof(parser));
+            }
+
+            try
+            {
+                return parser(value);
+            }
+            catch (ArgumentException)
+            {
+            }
+            catch (FormatException)
+            {
+            }
+            catch (OverflowException)
+            {
+            }
+
+            return defaultValue;
+        }
+
+        /// <summary>
+        /// The qualified property name format.
+        /// </summary>
+        public const string QualifiedPropertyNameFormat = "{0}.{1}";
     }
 }

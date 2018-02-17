@@ -6,6 +6,8 @@
 
 namespace SAF.Data.Providers.Tests
 {
+    using Startitecture.Orm.Schema;
+
     /// <summary>
     /// The person row.
     /// </summary>

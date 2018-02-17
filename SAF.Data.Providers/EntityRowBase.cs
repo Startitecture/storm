@@ -9,6 +9,7 @@ namespace SAF.Data.Providers
     using System;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The entity row base.

@@ -16,6 +16,7 @@ namespace SAF.Data.Providers.DatabaseTypes
     using SAF.Data.Providers.Internal;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Base class for DatabaseType handlers - provides default/common handling for different database engines.

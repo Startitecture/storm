@@ -18,6 +18,7 @@ namespace SAF.Data.Providers.Internal
     using SAF.Data.Providers.DatabaseTypes;
 
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The auto select helper.

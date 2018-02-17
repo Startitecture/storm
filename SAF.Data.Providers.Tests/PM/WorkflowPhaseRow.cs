@@ -12,6 +12,7 @@ namespace SAF.Data.Providers.Tests.PM
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The workflow phase row.
@@ -43,7 +44,7 @@ namespace SAF.Data.Providers.Tests.PM
         private static readonly Lazy<IEnumerable<IEntityRelation>> WorkflowPhaseRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                    new TransactSqlFromClause<WorkflowPhaseRow>().InnerJoin(row => row.WorkflowId, row => row.Workflow.WorkflowId)
+                    new SqlFromClause<WorkflowPhaseRow>().InnerJoin(row => row.WorkflowId, row => row.Workflow.WorkflowId)
                         .LeftJoin<WorkflowPhaseRetractionRow>(row => row.WorkflowPhaseId, row => row.WorkflowPhaseRetractionId)
                         .LeftJoin(row => row.WorkflowPhaseId, row => row.WorkflowSignatureOption.WorkflowSignatureOptionId)
                         .LeftJoin(

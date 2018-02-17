@@ -20,11 +20,11 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Provides a concrete implementation for a database repository.

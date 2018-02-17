@@ -11,10 +11,8 @@ namespace SAF.Testing.Common
 {
     using System.Diagnostics.CodeAnalysis;
 
-    using SAF.Data;
-    using SAF.Data.Providers;
-
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The transaction item base.

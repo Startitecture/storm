@@ -11,7 +11,7 @@ namespace Startitecture.Common.Model
 
     using Core;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The document.

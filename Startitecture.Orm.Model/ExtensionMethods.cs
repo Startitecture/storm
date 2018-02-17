@@ -14,7 +14,7 @@ namespace Startitecture.Orm.Model
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The extension methods.

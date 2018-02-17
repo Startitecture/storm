@@ -17,7 +17,7 @@ namespace SAF.Testing.Common
     using System.Runtime.Serialization;
     using System.Security.Permissions;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Represents an error that is the direct result of invalid commands or values provided by the user.

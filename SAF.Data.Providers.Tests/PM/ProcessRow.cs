@@ -10,6 +10,7 @@ namespace SAF.Data.Providers.Tests.PM
     using System.Collections.Generic;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The process row.

@@ -14,6 +14,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The layout page row.
@@ -26,7 +27,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
         private static readonly Lazy<IEnumerable<IEntityRelation>> LayoutPageRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                    new TransactSqlFromClause<LayoutPageRow>().InnerJoin(row => row.FormLayoutId, row => row.FormLayout.FormLayoutId)
+                    new SqlFromClause<LayoutPageRow>().InnerJoin(row => row.FormLayoutId, row => row.FormLayout.FormLayoutId)
                         ////.InnerJoin(row => row.FormLayout.FormVersionId, row => row.FormLayout.FormVersion.FormVersionId)
                         ////.InnerJoin(row => row.FormLayout.FormVersion.FormId, row => row.FormLayout.FormVersion.Form.FormId)
                         .Relations);

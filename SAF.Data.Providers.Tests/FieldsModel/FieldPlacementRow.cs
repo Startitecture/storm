@@ -14,6 +14,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The field placement row.
@@ -26,7 +27,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
         private static readonly Lazy<IEnumerable<IEntityRelation>> FieldPlacementRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                    new TransactSqlFromClause<FieldPlacementRow>()
+                    new SqlFromClause<FieldPlacementRow>()
                         .InnerJoin(row => row.LayoutSectionId, row => row.LayoutSection.LayoutSectionId)
                         .InnerJoin(row => row.UnifiedFieldId, row => row.UnifiedField.UnifiedFieldId)
                         .Relations);

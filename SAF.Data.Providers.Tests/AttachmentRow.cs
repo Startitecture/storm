@@ -12,6 +12,7 @@ namespace SAF.Data.Providers.Tests
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The attachment row.
@@ -38,7 +39,7 @@ namespace SAF.Data.Providers.Tests
         /// </summary>
         private static readonly Lazy<IEnumerable<IEntityRelation>> AttachmentRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
-                () => new TransactSqlFromClause<AttachmentRow>()
+                () => new SqlFromClause<AttachmentRow>()
                     .InnerJoin(row => row.DocumentTypeId, row => row.DocumentType.DocumentTypeId)
                     .Relations);
 

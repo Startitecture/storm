@@ -19,6 +19,7 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The structured SQL command tests.

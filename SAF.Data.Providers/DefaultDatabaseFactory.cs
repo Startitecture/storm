@@ -11,6 +11,8 @@ namespace SAF.Data.Providers
 {
     using System;
 
+    using Startitecture.Orm.Common;
+
     /// <summary>
     /// Creates database instances using the default constructor.
     /// </summary>

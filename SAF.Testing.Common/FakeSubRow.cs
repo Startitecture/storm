@@ -9,11 +9,12 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Data;
     using SAF.Data.Providers;
 
     using Startitecture.Core;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake sub row.
@@ -36,7 +37,7 @@ namespace SAF.Testing.Common
         /// The sub entity relations.
         /// </summary>
         private static readonly IEnumerable<IEntityRelation> SubEntityRelations =
-            new TransactSqlFromClause<FakeSubRow>().InnerJoin<FakeSubSubRow>(row => row.FakeSubSubEntityId, row => row.FakeSubSubEntityId).Relations;
+            new SqlFromClause<FakeSubRow>().InnerJoin<FakeSubSubRow>(row => row.FakeSubSubEntityId, row => row.FakeSubSubEntityId).Relations;
 
         /// <summary>
         /// Gets or sets the fake sub entity id.

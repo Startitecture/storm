@@ -18,9 +18,8 @@ namespace Startitecture.Orm.Query
 
     using Model;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Creates selection criteria for repository items.

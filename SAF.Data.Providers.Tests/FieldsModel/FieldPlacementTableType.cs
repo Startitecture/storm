@@ -9,6 +9,8 @@
 
 namespace SAF.Data.Providers.Tests.FieldsModel
 {
+    using Startitecture.Orm.Schema;
+
     /// <summary>
     /// The field placement table type.
     /// </summary>

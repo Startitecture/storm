@@ -11,8 +11,6 @@ namespace SAF.Testing.Common
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
 
-    using SAF.Data;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
 

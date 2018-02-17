@@ -12,6 +12,7 @@ namespace SAF.Data.Providers.Tests.PM
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The process phase row.
@@ -41,7 +42,7 @@ namespace SAF.Data.Providers.Tests.PM
         private static readonly Lazy<IEnumerable<IEntityRelation>> ProcessPhaseRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                    new TransactSqlFromClause<ProcessPhaseRow>()
+                    new SqlFromClause<ProcessPhaseRow>()
 
                         // Here we directly select the IDs of the tables to join. The "raised" POCOs are evaluated to automatically 
                         // create a JOIN on the desired table and alias if necessary.

@@ -9,6 +9,8 @@
 
 namespace SAF.Data.Providers
 {
+    using Startitecture.Orm.Common;
+
     /// <summary>
     /// The query repository adapter factory.
     /// </summary>
@@ -25,7 +27,7 @@ namespace SAF.Data.Providers
         /// <returns>
         /// The <see cref="IRepositoryAdapter"/>.
         /// </returns>
-        public IRepositoryAdapter Create(Database dataContext)
+        public IRepositoryAdapter Create(IDatabaseContext dataContext)
         {
             return new QueryRepositoryAdapter(dataContext);
         }

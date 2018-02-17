@@ -12,9 +12,6 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Data;
-    using SAF.Data.Providers;
-
     using Startitecture.Core;
     using Startitecture.Orm.Model;
 

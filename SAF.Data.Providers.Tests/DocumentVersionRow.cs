@@ -11,6 +11,7 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The document version row.
@@ -22,7 +23,7 @@ namespace SAF.Data.Providers.Tests
         /// </summary>
         private static readonly Lazy<IEnumerable<IEntityRelation>> DocumentVersionRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
-                () => new TransactSqlFromClause<DocumentVersionRow>()
+                () => new SqlFromClause<DocumentVersionRow>()
                     .InnerJoin(row => row.DocumentId, row => row.Document.DocumentId).Relations);
 
         /// <summary>

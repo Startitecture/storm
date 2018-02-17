@@ -14,6 +14,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The user row.
@@ -25,7 +26,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
         /// </summary>
         private static readonly Lazy<IEnumerable<IEntityRelation>> UserRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
-                () => new TransactSqlFromClause<UserRow>().InnerJoin<PersonRow>(row => row.UserId, row => row.PersonId).Relations);
+                () => new SqlFromClause<UserRow>().InnerJoin<PersonRow>(row => row.UserId, row => row.PersonId).Relations);
 
         /// <summary>
         /// Gets or sets the PersonId.

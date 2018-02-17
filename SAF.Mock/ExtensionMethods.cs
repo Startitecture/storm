@@ -20,12 +20,13 @@ namespace SAF.Mock
 
     using Rhino.Mocks;
 
-    using SAF.Data;
     using SAF.Data.Providers;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The extension methods.
@@ -795,7 +796,7 @@ namespace SAF.Mock
         #region Structured Command Providers
 
         /// <summary>
-        /// Stubs an <see cref="IStructuredCommandProvider"/> for the specified set of values. 
+        /// Stubs an <see cref="Startitecture.Orm.Sql.IStructuredCommandProvider"/> for the specified set of values. 
         /// The IDataReader mock supports FieldCount, GetOrdinal() and GetValues(). GetValues() must be called once per 
         /// IDataReader.Read() to align with expected output.
         /// </summary>
@@ -809,7 +810,7 @@ namespace SAF.Mock
         /// The type of data item to return via the command.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IStructuredCommandProvider"/>.
+        /// The <see cref="Startitecture.Orm.Sql.IStructuredCommandProvider"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="provider"/> or <paramref name="values"/> is null.

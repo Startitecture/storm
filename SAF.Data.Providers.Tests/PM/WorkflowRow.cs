@@ -15,6 +15,7 @@ namespace SAF.Data.Providers.Tests.PM
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The workflow row.

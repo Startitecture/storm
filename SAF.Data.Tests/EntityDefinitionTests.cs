@@ -17,6 +17,7 @@ namespace SAF.Data.Tests
     using SAF.Testing.Common;
 
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The entity definition tests.

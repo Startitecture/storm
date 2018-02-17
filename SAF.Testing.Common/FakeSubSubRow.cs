@@ -9,9 +9,8 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Data.Providers;
-
     using Startitecture.Core;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake sub sub row.

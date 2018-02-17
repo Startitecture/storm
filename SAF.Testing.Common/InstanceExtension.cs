@@ -3,9 +3,8 @@
     using System;
     using System.Collections.Generic;
 
-    using SAF.Data.Providers;
-
     using Startitecture.Core;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The instance extension.

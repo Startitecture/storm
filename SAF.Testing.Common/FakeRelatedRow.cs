@@ -6,10 +6,8 @@
 
 namespace SAF.Testing.Common
 {
-    using SAF.Data;
-    using SAF.Data.Providers;
-
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake related row.

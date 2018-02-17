@@ -20,6 +20,7 @@ namespace SAF.Data.Providers
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The view repository.
@@ -306,7 +307,7 @@ namespace SAF.Data.Providers
         /// </returns>
         public IEnumerable<TEntity> SelectAll()
         {
-            var exampleSelection = new TransactSqlSelection<TDataItem>(new TDataItem());
+            var exampleSelection = new SqlSelection<TDataItem>(new TDataItem());
             var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
             return this.SelectResults(dataItems);
         }
@@ -504,7 +505,7 @@ namespace SAF.Data.Providers
         /// </returns>
         private static ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
         {
-            return new TransactSqlSelection<TDataItem>(item, new[] { primaryKey.GetPropertyName() });
+            return new SqlSelection<TDataItem>(item, new[] { primaryKey.GetPropertyName() });
         }
 
         /// <summary>

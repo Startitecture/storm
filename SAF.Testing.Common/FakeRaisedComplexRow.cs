@@ -9,12 +9,13 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Data;
     using SAF.Data.Providers;
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake complex row.
@@ -29,7 +30,7 @@ namespace SAF.Testing.Common
         private static readonly Lazy<IEnumerable<IEntityRelation>> LazyRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                new TransactSqlFromClause<FakeRaisedComplexRow>()
+                new SqlFromClause<FakeRaisedComplexRow>()
                     .InnerJoin(row => row.FakeSubEntityId, row => row.FakeSubEntity.FakeSubEntityId)
                     .InnerJoin(row => row.FakeSubEntity.FakeSubSubEntityId, row => row.FakeSubEntity.FakeSubSubEntity.FakeSubSubEntityId)
                     .InnerJoin(row => row.CreatedByFakeMultiReferenceEntityId, row => row.CreatedBy.FakeMultiReferenceEntityId)

@@ -13,6 +13,7 @@ namespace SAF.Data.Tests
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The entity relation tests.

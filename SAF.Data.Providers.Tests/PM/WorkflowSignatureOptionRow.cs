@@ -12,6 +12,7 @@ namespace SAF.Data.Providers.Tests.PM
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The workflow signature option row.
@@ -36,7 +37,7 @@ namespace SAF.Data.Providers.Tests.PM
         private static readonly Lazy<IEnumerable<IEntityRelation>> WorkflowSignatureOptionRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                new TransactSqlFromClause<WorkflowSignatureOptionRow>()
+                new SqlFromClause<WorkflowSignatureOptionRow>()
                     .InnerJoin(row => row.SignatureOptionId, row => row.SignatureOption.SignatureOptionId)
                     .Relations);
 

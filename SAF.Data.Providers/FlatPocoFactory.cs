@@ -20,10 +20,10 @@ namespace SAF.Data.Providers
     using JetBrains.Annotations;
 
     using SAF.Data.Providers.Internal;
-    using SAF.StringResources;
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Creates flattened POCOs for POCO data requests.

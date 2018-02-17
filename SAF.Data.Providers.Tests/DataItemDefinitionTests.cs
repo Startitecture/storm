@@ -11,6 +11,7 @@ namespace SAF.Data.Providers.Tests
     using SAF.Testing.Common;
 
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The data item definition tests.

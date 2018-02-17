@@ -1,0 +1,36 @@
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SelectWithAttribute.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
+// </copyright>
+// <summary>
+//   Declares the selection statement to use for the current class.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Orm.Schema
+{
+    using System;
+
+    /// <summary>
+    /// Declares the selection statement to use for the current class.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Class)]
+    public sealed class SelectWithAttribute : Attribute
+    {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SelectWithAttribute"/> class.
+        /// </summary>
+        /// <param name="statement">
+        /// The statement.
+        /// </param>
+        public SelectWithAttribute(string statement)
+        {
+            this.Statement = statement;
+        }
+
+        /// <summary>
+        /// Gets the selection statement.
+        /// </summary>
+        public string Statement { get; private set; }
+    }
+}

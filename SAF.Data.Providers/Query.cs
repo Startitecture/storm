@@ -12,6 +12,7 @@ namespace SAF.Data.Providers
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// A static class for creating Transact-SQL queries.
@@ -28,12 +29,12 @@ namespace SAF.Data.Providers
         /// The type of item to query.
         /// </typeparam>
         /// <returns>
-        /// A new <see cref="TransactSqlSelection{TItem}"/> for the specified type.
+        /// A new <see cref="SqlSelection{TItem}"/> for the specified type.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selections"/> is null.
         /// </exception>
-        public static TransactSqlSelection<TItem> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] selections)
+        public static SqlSelection<TItem> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] selections)
             where TItem : ITransactionContext, new()
         {
             if (selections == null)

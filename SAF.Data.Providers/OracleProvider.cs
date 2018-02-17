@@ -13,7 +13,7 @@ namespace SAF.Data.Providers
     using System.Data.Common;
     using System.Reflection;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// An Oracle data provider for early versions of Oracle drivers.

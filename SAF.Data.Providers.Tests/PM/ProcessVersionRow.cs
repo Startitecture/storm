@@ -12,6 +12,7 @@ namespace SAF.Data.Providers.Tests.PM
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The process version row.
@@ -33,7 +34,7 @@ namespace SAF.Data.Providers.Tests.PM
         /// The process version relations.
         /// </summary>
         private static readonly IEnumerable<IEntityRelation> ProcessVersionRelations =
-            new TransactSqlFromClause<ProcessVersionRow>()
+            new SqlFromClause<ProcessVersionRow>()
                 .InnerJoin(row => row.ProcessId, row => row.Process.ProcessId)
                 .Relations;
 

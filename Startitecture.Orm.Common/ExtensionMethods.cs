@@ -10,14 +10,15 @@
 namespace Startitecture.Orm.Common
 {
     using System;
+    using System.Collections.Generic;
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Linq;
-
-    using SAF.StringResources;
+    using System.Reflection;
 
     using Startitecture.Core;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Contains extension methods for the SAF data namespace.
@@ -99,6 +100,38 @@ namespace Startitecture.Orm.Common
                 connection?.Dispose();
                 throw;
             }
+        }
+
+        /// <summary>
+        /// The not indexed property selector.
+        /// </summary>
+        private static readonly Func<PropertyInfo, bool> NotIndexedProperty = x => x.GetIndexParameters().Length == 0;
+
+        /// <summary>
+        /// Gets a collection of properties for the specified type.
+        /// </summary>
+        /// <param name="entityType">
+        /// The entity type.
+        /// </param>
+        /// <param name="propertyNames">
+        /// The names of the properties to collect. If no names are specified, all the entity's properties are returned.
+        /// </param>
+        /// <returns>
+        /// A collection of non-indexed properties for the specified type.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// None of the specified property names (case-sensitive) matched properties of the entity type.
+        /// </exception>
+        public static IEnumerable<PropertyInfo> GetNonIndexedProperties(this Type entityType, params string[] propertyNames)
+        {
+            if (entityType == null)
+            {
+                throw new ArgumentNullException(nameof(entityType));
+            }
+
+            var nonIndexedProperties = entityType.GetProperties().Where(prop => !prop.GetIndexParameters().Any());
+
+            return propertyNames.Any() ? nonIndexedProperties.Where(x => propertyNames.Contains(x.Name)) : nonIndexedProperties;
         }
     }
 }

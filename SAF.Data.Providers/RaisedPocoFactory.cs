@@ -13,10 +13,11 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Creates POCOs with raised related entity POCOs for POCO data requests.

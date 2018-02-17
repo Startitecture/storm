@@ -16,7 +16,7 @@ namespace SAF.Data.Providers.Internal
     using System.Text;
     using System.Text.RegularExpressions;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// A helper class for processing parameters.

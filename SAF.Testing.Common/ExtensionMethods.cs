@@ -20,9 +20,8 @@ namespace SAF.Testing.Common
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The extension methods.

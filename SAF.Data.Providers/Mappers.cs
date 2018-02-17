@@ -16,6 +16,7 @@ namespace SAF.Data.Providers
     using System.Threading;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// A static class for managing registration of IMapper instances with PetaPoco.

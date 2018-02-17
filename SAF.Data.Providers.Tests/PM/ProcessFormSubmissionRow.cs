@@ -11,6 +11,7 @@ namespace SAF.Data.Providers.Tests.PM
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The process form submission row.
@@ -21,7 +22,7 @@ namespace SAF.Data.Providers.Tests.PM
         /// The process form submission entity relations.
         /// </summary>
         private static readonly IEnumerable<IEntityRelation> ProcessFormSubmissionEntityRelations =
-            new TransactSqlFromClause<ProcessFormSubmissionRow>().InnerJoin<FormSubmissionRow>(
+            new SqlFromClause<ProcessFormSubmissionRow>().InnerJoin<FormSubmissionRow>(
                 row => row.ProcessFormSubmissionId,
                 row => row.FormSubmissionId).Relations;
 

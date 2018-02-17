@@ -14,11 +14,10 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
+    using Startitecture.Resources;
 
     /// <summary>
     /// A base class for data table loaders.

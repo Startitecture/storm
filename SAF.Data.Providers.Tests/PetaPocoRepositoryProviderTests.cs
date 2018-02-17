@@ -17,6 +17,7 @@ namespace SAF.Data.Providers.Tests
     using SAF.Testing.Common;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Sql;
     using Startitecture.Repository.Mapping;
 
     /// <summary>

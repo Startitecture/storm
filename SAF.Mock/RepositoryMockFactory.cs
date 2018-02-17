@@ -14,10 +14,10 @@ namespace SAF.Mock
 
     using Rhino.Mocks;
 
-    using SAF.Data;
     using SAF.Data.Providers;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Sql;
     using Startitecture.Repository.Mapping;
 
     /// <summary>
@@ -159,7 +159,7 @@ namespace SAF.Mock
         /// Creates a mock structured command provider. This must be stubbed out for each structure type.
         /// </summary>
         /// <returns>
-        /// A mocked <see cref="IStructuredCommandProvider"/>.
+        /// A mocked <see cref="Startitecture.Orm.Sql.IStructuredCommandProvider"/>.
         /// </returns>
         public static IStructuredCommandProvider CreateStructuredCommandProvider()
         {
@@ -173,7 +173,7 @@ namespace SAF.Mock
         /// The structured command provider.
         /// </param>
         /// <returns>
-        /// The <see cref="IStructuredCommandProviderFactory"/>.
+        /// The <see cref="Startitecture.Orm.Sql.IStructuredCommandProviderFactory"/>.
         /// </returns>
         public static IStructuredCommandProviderFactory CreateStructuredCommandProviderFactory(IStructuredCommandProvider structuredSqlCommandProvider)
         {

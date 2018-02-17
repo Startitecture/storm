@@ -11,6 +11,7 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The unified field row.
@@ -23,7 +24,7 @@ namespace SAF.Data.Providers.Tests
         private static readonly Lazy<IEnumerable<IEntityRelation>> LazyRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                    new TransactSqlFromClause<UnifiedFieldRow>().LeftJoin<UnifiedFieldCustomSourceRow>(
+                    new SqlFromClause<UnifiedFieldRow>().LeftJoin<UnifiedFieldCustomSourceRow>(
                             row => row.UnifiedFieldId,
                             row => row.UnifiedFieldId)
                         .LeftJoin<UnifiedFieldSystemSourceRow>(row => row.UnifiedFieldId, row => row.UnifiedFieldId)

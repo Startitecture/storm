@@ -9,13 +9,8 @@
 
 namespace SAF.Testing.Common
 {
-    using System;
-    using System.Collections.Generic;
-
-    using SAF.Data;
-    using SAF.Data.Providers;
-
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake data row base.

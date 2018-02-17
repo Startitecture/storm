@@ -14,6 +14,8 @@ namespace SAF.Data.Providers.Tests
 
     using SAF.Testing.Common;
 
+    using Startitecture.Orm.Sql;
+
     /// <summary>
     /// The example selection test.
     /// </summary>

@@ -14,10 +14,7 @@
 namespace SAF.Data.Providers.Tests.FieldsModel
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Web;
-    using Startitecture.Orm.Common;
+
     using SAF.Data.Providers;
 
     /// <summary>
@@ -128,7 +125,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[__RefactorLog] table.
@@ -179,7 +176,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[ELMAH_Error] table.
@@ -290,7 +287,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[ErrorLog] table.
@@ -389,7 +386,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[FieldPlacement] table.
@@ -464,7 +461,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[Form] table.
@@ -521,7 +518,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[FormLayout] table.
@@ -602,7 +599,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[FormSubmission] table.
@@ -671,7 +668,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[FormSubmissionValue] table.
@@ -728,7 +725,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[FormVersion] table.
@@ -845,7 +842,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[LayoutPage] table.
@@ -926,7 +923,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[LayoutPageSection] table.
@@ -995,7 +992,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[LayoutSection] table.
@@ -1076,7 +1073,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[Person] table.
@@ -1145,7 +1142,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedCurrencyValue] table.
@@ -1208,7 +1205,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedDateValue] table.
@@ -1271,7 +1268,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedField] table.
@@ -1370,7 +1367,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedFieldType] table.
@@ -1427,7 +1424,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedFieldValue] table.
@@ -1496,7 +1493,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedIdentifierValue] table.
@@ -1559,7 +1556,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedIntegerValue] table.
@@ -1622,7 +1619,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedNumericValue] table.
@@ -1685,7 +1682,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedSourceValue] table.
@@ -1772,7 +1769,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedStringValue] table.
@@ -1835,7 +1832,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[UnifiedValueType] table.
@@ -1892,7 +1889,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[User] table.
@@ -1949,7 +1946,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[WorkflowFormCompletion] table.
@@ -2006,7 +2003,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[WorkflowFormInstance] table.
@@ -2081,7 +2078,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[WorkflowFormSubmission] table.
@@ -2138,7 +2135,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
 
     using Startitecture.Orm.Common;
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains data for the [dbo].[WorkflowInstance] table.

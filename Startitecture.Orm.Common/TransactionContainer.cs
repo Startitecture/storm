@@ -11,9 +11,8 @@ namespace Startitecture.Orm.Common
 {
     using System;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Provides a event-aware implementation of the <see cref="ITransactionContext"/> interface.

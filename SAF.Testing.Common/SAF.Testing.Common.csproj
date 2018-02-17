@@ -148,6 +148,14 @@
       <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
       <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
+      <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
+      <Name>Startitecture.Orm.Schema</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj">
+      <Project>{1F629078-CE41-48E5-8160-C13D46121252}</Project>
+      <Name>Startitecture.Orm.Sql</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Repository.Mapping\Startitecture.Repository.Mapping.csproj">
       <Project>{93206D9F-C517-46E9-AFBA-34190DDDE488}</Project>
       <Name>Startitecture.Repository.Mapping</Name>

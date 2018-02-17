@@ -10,7 +10,7 @@ namespace SAF.Testing.Common
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The fake dependency entity.

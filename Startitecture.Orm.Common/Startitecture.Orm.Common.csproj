@@ -53,12 +53,18 @@
   <ItemGroup>
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="IDatabaseContext.cs" />
+    <Compile Include="IDatabaseContextProvider.cs" />
+    <Compile Include="IDatabaseFactory.cs" />
+    <Compile Include="IDataSetReader.cs" />
     <Compile Include="IDependencyContainer.cs" />
     <Compile Include="IDependencyItem.cs" />
     <Compile Include="IEntityMapper.cs" />
     <Compile Include="IEntityRepository.cs" />
     <Compile Include="IndexAttribute.cs" />
     <Compile Include="IReadOnlyRepository.cs" />
+    <Compile Include="IRepositoryAdapter.cs" />
+    <Compile Include="IRepositoryAdapterFactory.cs" />
     <Compile Include="IRepositoryProvider.cs" />
     <Compile Include="IRepositoryProviderFactory.cs" />
     <Compile Include="ITransactionContext.cs" />

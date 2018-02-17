@@ -6,7 +6,7 @@
 
 namespace SAF.Testing.Common
 {
-    using SAF.Data.Providers;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake dependency row.

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace SAF.Data.Providers.Tests
 {
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The user row.

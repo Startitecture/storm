@@ -13,6 +13,7 @@ namespace SAF.Data.Providers
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Defines a POCO data request for a POCO factory.

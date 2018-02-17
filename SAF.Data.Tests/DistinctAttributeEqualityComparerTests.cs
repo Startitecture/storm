@@ -16,6 +16,7 @@ namespace SAF.Data.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The distinct attribute equality comparer tests.

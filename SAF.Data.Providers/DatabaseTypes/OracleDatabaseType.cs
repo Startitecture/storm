@@ -14,9 +14,10 @@ namespace SAF.Data.Providers.DatabaseTypes
 
     using SAF.Data.Providers;
     using SAF.Data.Providers.Internal;
-    using SAF.StringResources;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The Oracle database type.
@@ -106,7 +107,7 @@ namespace SAF.Data.Providers.DatabaseTypes
         /// </remarks>
         public override string GetAutoIncrementExpression(TableInfo tableInfo)
         {
-            return String.IsNullOrEmpty(tableInfo.SequenceName) ? null : string.Format("{0}.nextval", tableInfo.SequenceName);
+            return String.IsNullOrEmpty(tableInfo.SequenceName) ? null : $"{tableInfo.SequenceName}.nextval";
         }
 
         /// <summary>

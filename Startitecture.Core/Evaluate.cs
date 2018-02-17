@@ -12,7 +12,7 @@ namespace Startitecture.Core
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
-    using SAF.StringResources;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Static methods for evaluating values.

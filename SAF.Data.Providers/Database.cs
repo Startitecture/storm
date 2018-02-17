@@ -21,11 +21,14 @@ namespace SAF.Data.Providers
 
     using SAF.Data.Providers.DatabaseTypes;
     using SAF.Data.Providers.Internal;
-    using SAF.StringResources;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
+    using Startitecture.Resources;
 
     /* PetaPoco - A Tiny ORMish thing for your POCO's.
      * Copyright © 2011-2012 Topten Software.  All Rights Reserved.

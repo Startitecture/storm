@@ -11,6 +11,8 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The form submission value row.
@@ -22,7 +24,7 @@ namespace SAF.Data.Providers.Tests
         /// The form submission value relations.
         /// </summary>
         private static readonly IEnumerable<IEntityRelation> FormSubmissionValueRelations =
-            new TransactSqlFromClause<FormSubmissionValueRow>().InnerJoin(
+            new SqlFromClause<FormSubmissionValueRow>().InnerJoin(
                 row => row.FormSubmissionValueId,
                 row => row.UnifiedFieldValueId).InnerJoin<UnifiedFieldRow>(row => row.UnifiedFieldId, row => row.UnifiedFieldId).Relations;
 

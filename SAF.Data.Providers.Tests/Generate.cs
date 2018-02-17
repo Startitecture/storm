@@ -22,6 +22,7 @@ namespace SAF.Data.Providers.Tests
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The generate.

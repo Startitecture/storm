@@ -8,8 +8,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 namespace SAF.Testing.Common
 {
-    using SAF.Data;
-
     using Startitecture.Repository.Mapping;
 
     /// <summary>

@@ -9,11 +9,12 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Data;
     using SAF.Data.Providers;
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake data row.
@@ -95,7 +96,7 @@ namespace SAF.Testing.Common
         private static IEnumerable<IEntityRelation> RelateEntities()
         {
             return
-                new TransactSqlFromClause<FakeFlatDataRow>()
+                new SqlFromClause<FakeFlatDataRow>()
                     .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                     .InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                     .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")

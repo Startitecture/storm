@@ -14,6 +14,8 @@ namespace SAF.Data.Providers.Tests
 
     using SAF.Testing.Common;
 
+    using Startitecture.Orm.Sql;
+
     /// <summary>
     /// The update operation test.
     /// </summary>
@@ -54,7 +56,7 @@ namespace SAF.Data.Providers.Tests
                         row => row.ValueColumn)
                     .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new TransactSqlUpdate<FakeFlatDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(match);
 
             Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
@@ -144,7 +146,7 @@ WHERE
                         row => row.ValueColumn)
                     .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new TransactSqlUpdate<FakeRaisedDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(match);
 
             Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
@@ -236,7 +238,7 @@ WHERE
                         row => row.OtherAliasRelatedProperty)
                     .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new TransactSqlUpdate<FakeFlatDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -313,7 +315,7 @@ WHERE
                         row => row.OtherAlias.RelatedProperty)
                     .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new TransactSqlUpdate<FakeRaisedDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -390,7 +392,7 @@ WHERE
                     .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new TransactSqlUpdate<FakeFlatDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -459,7 +461,7 @@ WHERE
                     .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new TransactSqlUpdate<FakeRaisedDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -530,7 +532,7 @@ WHERE
                     .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new TransactSqlUpdate<FakeFlatDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -599,7 +601,7 @@ WHERE
                     .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new TransactSqlUpdate<FakeRaisedDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);

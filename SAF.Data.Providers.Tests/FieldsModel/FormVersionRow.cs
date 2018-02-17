@@ -14,6 +14,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The form version row.
@@ -26,7 +27,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
         private static readonly Lazy<IEnumerable<IEntityRelation>> FormVersionRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                    new TransactSqlFromClause<FormVersionRow>().InnerJoin(row => row.FormId, row => row.Form.FormId)
+                    new SqlFromClause<FormVersionRow>().InnerJoin(row => row.FormId, row => row.Form.FormId)
                         .InnerJoin(row => row.CreatedByPersonId, row => row.CreatedBy.PersonId)
                         .InnerJoin(row => row.LastModifiedByPersonId, row => row.LastModifiedBy.PersonId)
                         .Relations);

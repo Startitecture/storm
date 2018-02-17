@@ -14,11 +14,11 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.StringResources;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Implements the <see cref="IRepositoryAdapter"/> interface using parameterized queries.
@@ -295,7 +295,7 @@ namespace SAF.Data.Providers
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
-            var transactSqlUpdate = new TransactSqlUpdate<TDataItem>(selection);
+            var transactSqlUpdate = new SqlUpdate<TDataItem>(selection);
             var updateOperation = setExpressions.Any() ? transactSqlUpdate.Set(dataItem, setExpressions) : transactSqlUpdate.Set(dataItem);
 
             try

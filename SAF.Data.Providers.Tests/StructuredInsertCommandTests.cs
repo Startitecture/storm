@@ -9,6 +9,7 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Sql;
 
     [TestClass]
     public class StructuredInsertCommandTests

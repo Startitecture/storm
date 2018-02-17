@@ -12,11 +12,11 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Data;
     using SAF.Data.Providers;
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake raised data row.
@@ -31,7 +31,7 @@ namespace SAF.Testing.Common
                 () =>
                     {
                         return
-                            new TransactSqlFromClause<FakeRaisedDataRow>()
+                            new SqlFromClause<FakeRaisedDataRow>()
                                 .InnerJoin(row => row.FakeDataId, row => row.FakeRelated.FakeDataId)
                                 .InnerJoin(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
