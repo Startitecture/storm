@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredMergeCommandTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="StructuredMergeCommandTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,9 +14,11 @@ namespace SAF.Data.Providers.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Core;
     using SAF.Data.Providers.Tests.PM;
     using SAF.Mock;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
 
     /// <summary>
     /// The structured SQL command tests.
@@ -45,7 +47,7 @@ namespace SAF.Data.Providers.Tests
         {
             long submissionId = 0;
 
-            using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 

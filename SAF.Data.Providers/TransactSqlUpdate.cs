@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlUpdate.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="TransactSqlUpdate.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -11,7 +11,9 @@ namespace SAF.Data.Providers
     using System.Linq;
     using System.Linq.Expressions;
 
-    using SAF.Core;
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Creates an update statement for a specific item in the repository.
@@ -191,11 +193,11 @@ SET
         /// The attribute.
         /// </param>
         /// <returns>
-        /// The <see cref="EntityAttributeInstance"/>.
+        /// The <see cref="Startitecture.Orm.Model.EntityAttributeInstance"/>.
         /// </returns>
         private static EntityAttributeInstance CreateAttributeInstance(TItem item, EntityAttributeDefinition attribute)
         {
-            return new EntityAttributeInstance(attribute, Data.ExtensionMethods.GetPropertyValue(item, attribute.PropertyName));
+            return new EntityAttributeInstance(attribute, item.GetPropertyValue(attribute.PropertyName));
         }
 
         /// <summary>
@@ -257,7 +259,7 @@ SET
         /// The property.
         /// </param>
         /// <returns>
-        /// The <see cref="EntityAttributeInstance"/>.
+        /// The <see cref="Startitecture.Orm.Model.EntityAttributeInstance"/>.
         /// </returns>
         private EntityAttributeInstance CreateAttributeInstance(TItem item, Expression<Func<TItem, object>> property)
         {

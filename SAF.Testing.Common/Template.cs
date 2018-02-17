@@ -3,8 +3,9 @@
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
     using SAF.Data.Providers;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The template.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormSubmissionValue.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FormSubmissionValue.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -12,7 +12,7 @@ namespace SAF.Data.Providers.Tests
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// The form submission value.

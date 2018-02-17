@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="LayoutPageRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="LayoutPageRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The layout page repository.
@@ -15,8 +15,11 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The layout page repository.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DataItemDefinition.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DataItemDefinition.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Defines a specific type of data entity.
@@ -11,7 +11,8 @@ namespace SAF.Data.Providers
 {
     using JetBrains.Annotations;
 
-    using SAF.Core;
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Defines a specific type of data entity.

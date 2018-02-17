@@ -1,11 +1,17 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="PersonRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="PersonRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SAF.Data.Providers.Tests
 {
+    using System;
+    using System.Collections.Generic;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
+
     /// <summary>
     /// The person repository.
     /// </summary>
@@ -20,6 +26,28 @@ namespace SAF.Data.Providers.Tests
         public PersonRepository(IRepositoryProvider repositoryProvider)
             : base(repositoryProvider)
         {
+        }
+
+        /// <summary>
+        /// Selects people from the repository matching the specified <paramref name="selection"/>.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to make.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="Person"/> items matching the <paramref name="selection"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
+        public IEnumerable<Person> SelectPeople(ItemSelection<ActionPrincipalRow> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return this.SelectEntities(selection);
         }
 
         /// <summary>

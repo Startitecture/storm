@@ -1,12 +1,14 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Utility.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="Utility.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SAF.Testing.Common
 {
     using System.Diagnostics.CodeAnalysis;
+
+    using SAF.Testing.Common;
 
     using SAF.Data;
 
@@ -22,7 +24,7 @@ namespace SAF.Testing.Common
         /// The create entity mapper.
         /// </summary>
         /// <returns>
-        /// The <see cref="IEntityMapper" />.
+        /// The <see cref="Startitecture.Orm.Common.IEntityMapper" />.
         /// </returns>
         public static AutoMapperEntityMapper CreateEntityMapper()
         {

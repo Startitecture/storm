@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IDatabaseContext.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="IDatabaseContext.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Defines the IDatabaseContext type.
@@ -12,6 +12,8 @@ namespace SAF.Data.Providers
     using System;
     using System.Collections.Generic;
     using System.Data;
+
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Provides an interface for classes that contain database contexts.

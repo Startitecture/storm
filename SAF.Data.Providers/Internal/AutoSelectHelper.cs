@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AutoSelectHelper.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="AutoSelectHelper.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The auto select helper.
@@ -16,6 +16,8 @@ namespace SAF.Data.Providers.Internal
     using JetBrains.Annotations;
 
     using SAF.Data.Providers.DatabaseTypes;
+
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// The auto select helper.

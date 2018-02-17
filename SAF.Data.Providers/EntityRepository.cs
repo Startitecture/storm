@@ -1,8 +1,9 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EntityRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="EntityRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace SAF.Data.Providers
 {
     using System;
@@ -10,7 +11,8 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
 
     /// <summary>
     /// A base class for entity repositories.
@@ -54,26 +56,6 @@ namespace SAF.Data.Providers
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:SAF.Data.Providers.EntityRepository`2"/> class.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider for this repository.
-        /// </param>
-        /// <param name="selectionComparer">
-        /// The selection comparer for ordering data items from the repository after being selected from the database.
-        /// </param>
-        /// <param name="propertyNameMapper">
-        /// The property name mapper for mapping property names from one type to another.
-        /// </param>
-        public EntityRepository(
-            IRepositoryProvider repositoryProvider,
-            IComparer<TDataItem> selectionComparer,
-            IPropertyNameMapper<TDataItem> propertyNameMapper)
-            : base(repositoryProvider, selectionComparer, propertyNameMapper)
-        {
-        }
-
-        /// <summary>
         /// Saves an item to the database.
         /// </summary>
         /// <param name="item">
@@ -86,7 +68,7 @@ namespace SAF.Data.Providers
         {
             if (Evaluate.IsNull(item))
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             var savedEntity = this.SaveEntity(item);
@@ -138,7 +120,7 @@ namespace SAF.Data.Providers
         {
             if (Evaluate.IsNull(item))
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item));
             }
 
             var entity = this.EntityMapper.Map<TEntity>(item);
@@ -162,7 +144,7 @@ namespace SAF.Data.Providers
         {
             if (Evaluate.IsNull(entity))
             {
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
 
             var dataItem = this.SaveDataItem(entity);
@@ -175,26 +157,6 @@ namespace SAF.Data.Providers
             }
 
             return savedItem;
-        }
-
-        /// <summary>
-        /// Deletes a selection of items.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the example properties.
-        /// </typeparam>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <returns>
-        /// The number of items affected as an <see cref="int"/>.
-        /// </returns>
-        public int DeleteSelection<TItem>(IExampleQuery<TItem> selection)
-        {
-            var queryConverter = new MappedQueryConverter<TItem, TDataItem>(this.EntityMapper, this.PropertyNameMapper);
-            var dataSelection = queryConverter.Convert(selection);
-            ////dataSelection = this.AssociateRelatedEntities(dataSelection);
-            return this.RepositoryProvider.DeleteItems(dataSelection);
         }
 
         /// <summary>
@@ -213,7 +175,6 @@ namespace SAF.Data.Providers
         {
             var dataItem = this.EntityMapper.Map<TDataItem>(example);
             var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
-            ////var selection = this.AssociateRelatedEntities(uniqueItemSelection);
             return this.RepositoryProvider.DeleteItems(uniqueItemSelection);
         }
 
@@ -231,7 +192,6 @@ namespace SAF.Data.Providers
             this.DeleteChildren(entity, this.RepositoryProvider);
             var dataItem = this.EntityMapper.Map<TDataItem>(entity);
             var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
-            ////var selection = this.AssociateRelatedEntities(uniqueItemSelection);
             return this.RepositoryProvider.DeleteItems(uniqueItemSelection);
         }
 

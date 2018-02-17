@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SAF.Data.Providers</RootNamespace>
     <AssemblyName>SAF.Data.Providers</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -91,7 +91,7 @@
     <Compile Include="DatabaseTypes\MySqlDatabaseType.cs" />
     <Compile Include="DatabaseTypes\OracleDatabaseType.cs" />
     <Compile Include="DataTableLoader.cs" />
-    <Compile Include="DirectPropertyNameMapper.cs" />
+    <Compile Include="DependencyContainer.cs" />
     <Compile Include="EntityRowBase.cs" />
     <Compile Include="FlatPocoFactory.cs" />
     <Compile Include="IDatabaseContext.cs" />
@@ -115,7 +115,6 @@
     <Compile Include="DataItemDefinition.cs" />
     <Compile Include="DataItemDefinitionProvider.cs" />
     <Compile Include="DefaultDatabaseFactory.cs" />
-    <Compile Include="IPropertyNameMapper.cs" />
     <Compile Include="IStructuredCommand.cs" />
     <Compile Include="IStructuredCommandFactory.cs" />
     <Compile Include="IStructuredCommandProvider.cs" />
@@ -123,7 +122,6 @@
     <Compile Include="PocoDataRequest.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="RaisedPocoFactory.cs" />
-    <Compile Include="MappedQueryConverter.cs" />
     <Compile Include="SelectWithAttribute.cs" />
     <Compile Include="StructuredCommandText.cs" />
     <Compile Include="StructuredInsertCommand.cs" />
@@ -148,7 +146,7 @@
     <Compile Include="IRepositoryAdapterFactory.cs" />
     <Compile Include="Mappers.cs" />
     <Compile Include="OracleProvider.cs" />
-    <Compile Include="PetaPocoRepositoryProvider.cs" />
+    <Compile Include="DatabaseRepositoryProvider.cs" />
     <Compile Include="PrimaryKeyAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="QueryRepositoryAdapterFactory.cs" />
@@ -166,17 +164,25 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
-      <Project>{CC6AA902-7C36-4F19-8C16-81B2FC4E38B9}</Project>
-      <Name>SAF.Core</Name>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
+      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
+      <Name>Startitecture.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SAF.Data\SAF.Data.csproj">
-      <Project>{746FAE9A-6FE4-4253-BEA3-B56AE1909B76}</Project>
-      <Name>SAF.Data</Name>
+    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
+      <Project>{5643589d-8d46-4717-ae66-994173f3d671}</Project>
+      <Name>Startitecture.Orm.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
-      <Project>{9D9DC978-66F4-4234-98BA-B55CE579D3BA}</Project>
-      <Name>SAF.StringResources</Name>
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
+      <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
+      <Name>Startitecture.Orm.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
+      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
+      <Name>Startitecture.Orm.Query</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj">
+      <Project>{199411AA-992F-48AB-B8A3-E1E5506F72F5}</Project>
+      <Name>Startitecture.Resources</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

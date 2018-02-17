@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EvaluateTest.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="EvaluateTest.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -17,6 +17,8 @@ namespace SAF.Core.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// This is a test class for EvaluateTest and is intended

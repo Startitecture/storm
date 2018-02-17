@@ -1,11 +1,22 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AttachmentDocumentRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="AttachmentDocumentRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The attachment document repository.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SAF.Data.Providers.Tests
 {
+    using System;
+    using System.Collections.Generic;
+
+    using JetBrains.Annotations;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
+
     /// <summary>
     /// The attachment document repository.
     /// </summary>
@@ -20,6 +31,25 @@ namespace SAF.Data.Providers.Tests
         public AttachmentDocumentRepository(IRepositoryProvider repositoryProvider)
             : base(repositoryProvider)
         {
+        }
+
+        /// <summary>
+        /// Queries attachment documents.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to make.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="AttachmentDocument"/> items matching the <paramref name="selection"/>.
+        /// </returns>
+        public IEnumerable<AttachmentDocument> QueryAttachmentDocuments([NotNull] ItemSelection<AttachmentDocumentRow> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return this.SelectEntities(selection);
         }
 
         /// <summary>

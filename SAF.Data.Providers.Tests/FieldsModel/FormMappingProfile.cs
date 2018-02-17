@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormMappingProfile.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FormMappingProfile.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The form mapping profile.
@@ -9,6 +9,8 @@
 
 namespace SAF.Data.Providers.Tests.FieldsModel
 {
+    using Startitecture.Repository.Mapping;
+
     /// <summary>
     /// The form mapping profile.
     /// </summary>

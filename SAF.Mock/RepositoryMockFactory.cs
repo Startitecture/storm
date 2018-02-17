@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RepositoryMockFactory.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="RepositoryMockFactory.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -17,6 +17,7 @@ namespace SAF.Mock
     using SAF.Data;
     using SAF.Data.Providers;
 
+    using Startitecture.Orm.Common;
     using Startitecture.Repository.Mapping;
 
     /// <summary>
@@ -31,7 +32,7 @@ namespace SAF.Mock
         /// The configuration action to perform.
         /// </param>
         /// <returns>
-        /// An <see cref="IEntityMapper"/> with the specified configuration.
+        /// An <see cref="Startitecture.Orm.Common.IEntityMapper"/> with the specified configuration.
         /// </returns>
         public static IEntityMapper CreateEntityMapper(Action<IMapperConfigurationExpression> configurationAction)
         {
@@ -47,7 +48,7 @@ namespace SAF.Mock
         /// The entity mapper to use in the repository provider.
         /// </param>
         /// <returns>
-        /// A mocked <see cref="IRepositoryProvider"/> with entity mapper and dependency container set.
+        /// A mocked <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with entity mapper and dependency container set.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="entityMapper"/> is null.
@@ -79,7 +80,7 @@ namespace SAF.Mock
         /// The type of database context to create a provider for.
         /// </typeparam>
         /// <returns>
-        /// A concrete <see cref="IRepositoryProvider"/> with the specified adapter factory.
+        /// A concrete <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with the specified adapter factory.
         /// </returns>
         public static IRepositoryProvider CreateConcreteProvider<TContext>(
             [NotNull] IEntityMapper entityMapper,
@@ -97,7 +98,7 @@ namespace SAF.Mock
             }
 
             var adapterFactory = CreateAdapterFactory(adapter);
-            return new PetaPocoRepositoryProvider<TContext>(adapterFactory, entityMapper);
+            return new DatabaseRepositoryProvider<TContext>(adapterFactory, entityMapper);
         }
 
         /// <summary>
@@ -107,7 +108,7 @@ namespace SAF.Mock
         /// The provider to return.
         /// </param>
         /// <returns>
-        /// A mocked <see cref="IRepositoryProviderFactory"/>.
+        /// A mocked <see cref="Startitecture.Orm.Common.IRepositoryProviderFactory"/>.
         /// </returns>
         public static IRepositoryProviderFactory CreateProviderFactory([NotNull] IRepositoryProvider provider)
         {

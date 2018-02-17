@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DocumentVersionRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DocumentVersionRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -10,6 +10,9 @@ namespace SAF.Data.Providers.Tests
     using System.Collections.Generic;
 
     using JetBrains.Annotations;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The document version repository.
@@ -46,6 +49,21 @@ namespace SAF.Data.Providers.Tests
             this.RepositoryProvider.DependencyContainer.SetDependency(document.DocumentId, document);
             var itemSelection = Query.From<DocumentVersionRow>().Matching(row => row.DocumentId, document.DocumentId.GetValueOrDefault());
             return this.SelectEntities(itemSelection);
+        }
+
+        /// <summary>
+        /// Selects the document versions for the specified document ID.
+        /// </summary>
+        /// <param name="documentId">
+        /// The document ID of the document to get the versions for.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="DocumentVersion"/> items for the specified
+        /// <paramref name="documentId"/>.
+        /// </returns>
+        public IEnumerable<DocumentVersion> SelectDocumentVersions(int documentId)
+        {
+            return this.SelectEntities(Query.From<DocumentVersionRow>().Matching(row => row.DocumentId, documentId));
         }
 
         /// <summary>

@@ -5,8 +5,9 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The workflow instance.

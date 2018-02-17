@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeChildRow.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeChildRow.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Defines the FakeChildRow type.
@@ -14,6 +14,9 @@ namespace SAF.Testing.Common
 
     using SAF.Data;
     using SAF.Data.Providers;
+
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The fake child row.

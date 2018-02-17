@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="OracleDatabaseType.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="OracleDatabaseType.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The Oracle database type.
@@ -12,10 +12,11 @@ namespace SAF.Data.Providers.DatabaseTypes
     using System;
     using System.Data;
 
-    using SAF.Core;
     using SAF.Data.Providers;
     using SAF.Data.Providers.Internal;
     using SAF.StringResources;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The Oracle database type.

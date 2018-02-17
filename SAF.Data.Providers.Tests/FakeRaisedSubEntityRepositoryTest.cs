@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeRaisedSubEntityRepositoryTest.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeRaisedSubEntityRepositoryTest.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -13,6 +13,8 @@ namespace SAF.Data.Providers.Tests
 
     using SAF.Mock;
     using SAF.Testing.Common;
+
+    using Startitecture.Orm.Common;
 
     /// <summary>
     /// The fake raised sub entity repository test.
@@ -122,7 +124,7 @@ namespace SAF.Data.Providers.Tests
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
                 var target = new FakeRaisedSubEntityRepository(repositoryProvider);
-                var actual = target.SelectEntities(new ExampleQuery<FakeRaisedSubRow>()).ToList();
+                var actual = target.SelectAll().ToList();
 
                 CollectionAssert.AreEqual(expected, actual);
 

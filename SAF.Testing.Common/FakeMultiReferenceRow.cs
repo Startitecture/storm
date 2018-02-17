@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeMultiReferenceRow.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeMultiReferenceRow.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -9,8 +9,9 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
     using SAF.Data.Providers;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The fake multi reference row.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Query.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="Query.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -10,6 +10,8 @@ namespace SAF.Data.Providers
     using System.Linq.Expressions;
 
     using JetBrains.Annotations;
+
+    using Startitecture.Orm.Common;
 
     /// <summary>
     /// A static class for creating Transact-SQL queries.

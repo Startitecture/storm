@@ -20,8 +20,9 @@ namespace SAF.Testing.Common
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.StringResources;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The extension methods.
@@ -170,7 +171,7 @@ namespace SAF.Testing.Common
         /// The type of item to compare.
         /// </typeparam>
         /// <returns>
-        /// A collection of <see cref="PropertyComparisonResult"/> items containing the non-equivalent property values of the two 
+        /// A collection of <see cref="Startitecture.Core.PropertyComparisonResult"/> items containing the non-equivalent property values of the two 
         /// items.
         /// </returns>
         public static IEnumerable<PropertyComparisonResult> GetDifferences<TItem>(

@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>SAF.Data</RootNamespace>
     <AssemblyName>SAF.Data</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SccProjectName>SAK</SccProjectName>
     <SccLocalPath>SAK</SccLocalPath>
@@ -104,52 +104,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ConstructedEntityMappingProfile.cs" />
-    <Compile Include="DataMappingProfile.cs" />
-    <Compile Include="DependencyContainer.cs" />
-    <Compile Include="DistinctAttributeEqualityComparer.cs" />
-    <Compile Include="EntityAttributeDefinition.cs" />
-    <Compile Include="EntityAttributeTypes.cs" />
-    <Compile Include="EntityDefinition.cs" />
-    <Compile Include="EntityLocation.cs" />
-    <Compile Include="EntityMappingProfile.cs" />
-    <Compile Include="EntityReference.cs" />
-    <Compile Include="EntityRelationSet.cs" />
-    <Compile Include="EntityRelationType.cs" />
-    <Compile Include="ExampleQuery.cs" />
-    <Compile Include="ICompositeEntity.cs" />
-    <Compile Include="IDependencyContainer.cs" />
-    <Compile Include="IDependencyItem.cs" />
-    <Compile Include="IEntityDefinition.cs" />
-    <Compile Include="IEntityDefinitionProvider.cs" />
-    <Compile Include="IEntityMappingProfile.cs" />
-    <Compile Include="IEntityRelation.cs" />
-    <Compile Include="IReadOnlyRepository.cs" />
-    <Compile Include="IRepositoryProvider.cs" />
-    <Compile Include="IRepositoryProviderFactory.cs" />
-    <Compile Include="ItemOperation.cs" />
-    <Compile Include="ItemSelection.cs" />
-    <Compile Include="ITransactionContext.cs" />
-    <Compile Include="LinkedSelection.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="EntityAttributeInstance.cs" />
-    <Compile Include="MappingProfileBase.cs" />
-    <Compile Include="Page.cs" />
-    <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="IEntityMapper.cs" />
-    <Compile Include="IEntityRepository.cs" />
-    <Compile Include="IExampleQuery.cs" />
-    <Compile Include="IPropertyNameSelection.cs" />
-    <Compile Include="PropertyNameSelection.cs" />
-    <Compile Include="RelatedEntityAttribute.cs" />
-    <Compile Include="RelatedEntityMappingContainer.cs" />
-    <Compile Include="RelationAttribute.cs" />
-    <Compile Include="RepositoryException.cs" />
-    <Compile Include="SelectionLinkType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="EntityRelation.cs" />
-    <Compile Include="TransactionContainer.cs" />
-    <Compile Include="ValueFilter.cs" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -169,13 +124,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
-      <Project>{CC6AA902-7C36-4F19-8C16-81B2FC4E38B9}</Project>
-      <Name>SAF.Core</Name>
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
+      <Project>{74143502-7860-42c5-b9cb-9d0ceddc41d2}</Project>
+      <Name>Startitecture.Orm.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
-      <Project>{9D9DC978-66F4-4234-98BA-B55CE579D3BA}</Project>
-      <Name>SAF.StringResources</Name>
+    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
+      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
+      <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

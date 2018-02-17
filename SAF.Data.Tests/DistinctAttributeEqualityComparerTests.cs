@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DistinctAttributeEqualityComparerTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DistinctAttributeEqualityComparerTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -11,9 +11,11 @@ namespace SAF.Data.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Core;
     using SAF.Data.Providers;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// The distinct attribute equality comparer tests.

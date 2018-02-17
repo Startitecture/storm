@@ -5,7 +5,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.Xml.Serialization;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     [ExcludeFromCodeCoverage]
     public class FakeTestItem

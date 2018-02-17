@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormSubmissionValueRow.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FormSubmissionValueRow.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -8,6 +8,9 @@ namespace SAF.Data.Providers.Tests
 {
     using System;
     using System.Collections.Generic;
+
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The form submission value row.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TemplateSection.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="TemplateSection.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The template section.
@@ -12,9 +12,11 @@ namespace SAF.Testing.Common
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
     using SAF.Data;
     using SAF.Data.Providers;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// The template section.

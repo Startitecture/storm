@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Generate.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="Generate.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -16,9 +16,12 @@ namespace SAF.Data.Providers.Tests
 
     using Rhino.Mocks;
 
-    using SAF.Core;
     using SAF.Data.Providers.Tests.PM;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// The generate.
@@ -504,24 +507,6 @@ namespace SAF.Data.Providers.Tests
         }
 
         /// <summary>
-        /// The get person.
-        /// </summary>
-        /// <param name="provider">
-        /// The provider.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Person"/>.
-        /// </returns>
-        public static Person GetPerson(IRepositoryProvider provider)
-        {
-            var personRepository = new PersonRepository(provider);
-            var actionPrincipalRow = new ActionPrincipalRow();
-            var exampleQuery = new ExampleQuery<ActionPrincipalRow>(actionPrincipalRow) { Limit = 1 };
-            var person = personRepository.SelectEntities(exampleQuery).First();
-            return person;
-        }
-
-        /// <summary>
         /// The create form submission.
         /// </summary>
         /// <param name="entityMapper">
@@ -583,6 +568,24 @@ namespace SAF.Data.Providers.Tests
             provider.InsertItem(processFormSubmissionRow);
             var expected = entityMapper.Map<FormSubmission>(formSubmissionRow);
             return expected;
+        }
+
+        /// <summary>
+        /// The get person.
+        /// </summary>
+        /// <param name="provider">
+        /// The provider.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Person"/>.
+        /// </returns>
+        private static Person GetPerson(IRepositoryProvider provider)
+        {
+            var personRepository = new PersonRepository(provider);
+            var selection = Query.From<ActionPrincipalRow>();
+            selection.Limit = 1;
+            var person = personRepository.SelectPeople(selection).First();
+            return person;
         }
 
         /// <summary>

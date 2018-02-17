@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ProcessFormSubmissionRow.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="ProcessFormSubmissionRow.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -8,6 +8,9 @@ namespace SAF.Data.Providers.Tests.PM
 {
     using System;
     using System.Collections.Generic;
+
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The process form submission row.

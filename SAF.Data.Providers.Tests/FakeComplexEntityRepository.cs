@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeComplexEntityRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeComplexEntityRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   
@@ -10,6 +10,9 @@
 namespace SAF.Data.Providers.Tests
 {
     using SAF.Testing.Common;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The fake entity repository.
@@ -83,12 +86,9 @@ namespace SAF.Data.Providers.Tests
             // Load the children of the entity using their repository.
             var childRepo = new FakeChildEntityRepository(this.RepositoryProvider);
 
-            var example = new FakeChildRow { FakeComplexEntityId = entity.FakeComplexEntityId.GetValueOrDefault() };
-            var exampleQuery = new ExampleQuery<FakeChildRow>(example, row => row.FakeComplexEntityId);
-
             // In this case, when the fake child entity is created, it is automatically added to the entity's list of children. Some 
             // other method could also be used if the child constructor does not do this.
-            var children = childRepo.SelectEntities(exampleQuery);
+            var children = childRepo.SelectForComplexEntity(entity.FakeComplexEntityId.GetValueOrDefault());
             entity.Load(children);
         }
 

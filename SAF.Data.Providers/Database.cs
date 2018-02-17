@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Database.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="Database.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The main PetaPoco Database class.  You can either use this class directly, or derive from it.
@@ -19,10 +19,13 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.Data.Providers.DatabaseTypes;
     using SAF.Data.Providers.Internal;
     using SAF.StringResources;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /* PetaPoco - A Tiny ORMish thing for your POCO's.
      * Copyright © 2011-2012 Topten Software.  All Rights Reserved.

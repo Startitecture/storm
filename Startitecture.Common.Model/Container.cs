@@ -10,8 +10,9 @@ namespace Startitecture.Common.Model
     using System.Collections.Generic;
     using System.Linq;
 
-    using SAF.Core;
     using SAF.StringResources;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The container.

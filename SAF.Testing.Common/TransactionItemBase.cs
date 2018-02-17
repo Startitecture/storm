@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactionItemBase.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="TransactionItemBase.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The transaction item base.
@@ -13,6 +13,8 @@ namespace SAF.Testing.Common
 
     using SAF.Data;
     using SAF.Data.Providers;
+
+    using Startitecture.Orm.Common;
 
     /// <summary>
     /// The transaction item base.

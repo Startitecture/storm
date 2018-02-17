@@ -9,8 +9,9 @@ namespace Startitecture.Forms.Model
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
     using SAF.StringResources;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The form.

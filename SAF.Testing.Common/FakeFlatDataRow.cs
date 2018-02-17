@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeFlatDataRow.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeFlatDataRow.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -11,6 +11,9 @@ namespace SAF.Testing.Common
 
     using SAF.Data;
     using SAF.Data.Providers;
+
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The fake data row.
@@ -87,7 +90,7 @@ namespace SAF.Testing.Common
         /// Relates the entities of the current composite entity.
         /// </summary>
         /// <returns>
-        /// A collection of <see cref="IEntityRelation"/> elements for a composite entity.
+        /// A collection of <see cref="Startitecture.Orm.Query.IEntityRelation"/> elements for a composite entity.
         /// </returns>
         private static IEnumerable<IEntityRelation> RelateEntities()
         {

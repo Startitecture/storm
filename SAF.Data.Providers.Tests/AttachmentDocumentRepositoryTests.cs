@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AttachmentDocumentRepositoryTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="AttachmentDocumentRepositoryTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The attachment document repository tests.
@@ -17,6 +17,8 @@ namespace SAF.Data.Providers.Tests
 
     using SAF.Mock;
     using SAF.Testing.Common;
+
+    using Startitecture.Orm.Common;
 
     /// <summary>
     /// The attachment document repository tests.
@@ -172,8 +174,7 @@ namespace SAF.Data.Providers.Tests
             using (var provider = RepositoryMockFactory.CreateConcreteProvider<TestDb>(this.entityMapper, adapter))
             {
                 var target = new AttachmentDocumentRepository(provider);
-                var exampleQuery = new ExampleQuery<AttachmentDocumentRow>();
-                var actual = target.SelectEntities(exampleQuery).ToList();
+                var actual = target.QueryAttachmentDocuments(Query.From<AttachmentDocumentRow>()).ToList();
 
                 CollectionAssert.AreEqual(expected, actual);
 
@@ -215,7 +216,7 @@ namespace SAF.Data.Providers.Tests
 
             try
             {
-                using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var expectedRow = this.entityMapper.Map<AttachmentDocumentRow>(attachmentDocument);
@@ -254,7 +255,7 @@ namespace SAF.Data.Providers.Tests
 
             try
             {
-                using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
@@ -264,7 +265,7 @@ namespace SAF.Data.Providers.Tests
                 attachmentDocument.ChangeSortOrder(2);
                 attachmentDocument.SetSubject("UNIT_TEST.My New Subject");
 
-                using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
 
@@ -303,14 +304,14 @@ namespace SAF.Data.Providers.Tests
 
             try
             {
-                using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
                     target.Save(expected);
                 }
 
-                using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
@@ -351,7 +352,7 @@ namespace SAF.Data.Providers.Tests
 
             try
             {
-                using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
@@ -362,12 +363,11 @@ namespace SAF.Data.Providers.Tests
                     }
                 }
 
-                using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
-                    var exampleQuery = new ExampleQuery<AttachmentDocumentRow>();
-                    var actual = target.SelectEntities(exampleQuery).ToList();
+                    var actual = target.QueryAttachmentDocuments(Query.From<AttachmentDocumentRow>()).ToList();
 
                     CollectionAssert.AreEqual(expected, actual);
 
@@ -404,7 +404,7 @@ namespace SAF.Data.Providers.Tests
         /// </summary>
         private void DeleteItems()
         {
-            using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 

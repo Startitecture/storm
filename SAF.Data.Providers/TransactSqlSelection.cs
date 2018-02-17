@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlSelection.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="TransactSqlSelection.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Creates selections based on the Transact-SQL language.
@@ -9,11 +9,14 @@
 namespace SAF.Data.Providers
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
 
-    using SAF.Core;
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Creates selections based on the Transact-SQL language.
@@ -119,7 +122,6 @@ namespace SAF.Data.Providers
         internal TransactSqlSelection(TItem example, params Expression<Func<TItem, object>>[] selectors)
             : this()
         {
-            ////this.SetRelations(example);
             this.Matching(example, selectors);
         }
 
@@ -132,30 +134,10 @@ namespace SAF.Data.Providers
         /// <param name="nameSelection">
         /// The property name selection.
         /// </param>
-        internal TransactSqlSelection(TItem example, IPropertyNameSelection nameSelection)
+        internal TransactSqlSelection(TItem example, IEnumerable<string> propertyNames)
             : this()
         {
-            ////this.SetRelations(example);
-            this.Matching(example, nameSelection);
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TransactSqlSelection{TItem}"/> class.
-        /// </summary>
-        /// <param name="lowerLimit">
-        /// The item representing the lower limit.
-        /// </param>
-        /// <param name="upperLimit">
-        /// The item representing the upper limit.
-        /// </param>
-        /// <param name="nameSelection">
-        /// The property name selection.
-        /// </param>
-        internal TransactSqlSelection(TItem lowerLimit, TItem upperLimit, IPropertyNameSelection nameSelection)
-            : this()
-        {
-            ////this.SetRelations(lowerLimit);
-            this.Between(lowerLimit, upperLimit, nameSelection);
+            this.Matching(example, propertyNames);
         }
 
         /// <summary>

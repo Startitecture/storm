@@ -1,12 +1,14 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeRaisedChildEntityMappingProfile.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeRaisedChildEntityMappingProfile.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SAF.Testing.Common
 {
     using SAF.Data;
+
+    using Startitecture.Repository.Mapping;
 
     /// <summary>
     /// The fake raised child entity mapping profile.

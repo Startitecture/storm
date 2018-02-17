@@ -1,11 +1,13 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="PersonMappingProfile.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="PersonMappingProfile.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SAF.Data.Providers.Tests
 {
+    using Startitecture.Repository.Mapping;
+
     /// <summary>
     /// The person mapping profile.
     /// </summary>

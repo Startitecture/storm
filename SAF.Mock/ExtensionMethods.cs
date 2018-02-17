@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ExtensionMethods.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="ExtensionMethods.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The extension methods.
@@ -20,9 +20,12 @@ namespace SAF.Mock
 
     using Rhino.Mocks;
 
-    using SAF.Core;
     using SAF.Data;
     using SAF.Data.Providers;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The extension methods.
@@ -49,7 +52,7 @@ namespace SAF.Mock
         /// The type of data item. 
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IRepositoryProvider"/> with methods stubbed for an existing item.
+        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for an existing item.
         /// </returns>
         public static IRepositoryProvider StubForExistingItem<TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,
@@ -89,7 +92,7 @@ namespace SAF.Mock
         /// The type of data item. 
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IRepositoryProvider"/> with methods stubbed for a new item.
+        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a new item.
         /// </returns>
         public static IRepositoryProvider StubForNewItem<TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider)
@@ -139,7 +142,7 @@ namespace SAF.Mock
         /// The type of data item. 
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IRepositoryProvider"/> with methods stubbed for a list of items.
+        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a list of items.
         /// </returns>
         public static IRepositoryProvider StubForList<TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,
@@ -165,7 +168,7 @@ namespace SAF.Mock
         /// The type of data item. 
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IRepositoryProvider"/> with methods stubbed for a list of items.
+        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a list of items.
         /// </returns>
         public static IRepositoryProvider StubForList<TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,
@@ -215,7 +218,7 @@ namespace SAF.Mock
         /// The type of data item. 
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IRepositoryProvider"/> with methods stubbed for a list of items.
+        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a list of items.
         /// </returns>
         public static IRepositoryProvider StubForList<TEntity, TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,
@@ -248,7 +251,7 @@ namespace SAF.Mock
         /// The type of data item. 
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IRepositoryProvider"/> with methods stubbed for a list of items.
+        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a list of items.
         /// </returns>
         public static IRepositoryProvider StubForList<TEntity, TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,

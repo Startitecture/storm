@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FlatPocoFactory.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FlatPocoFactory.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Defines the FlatPocoFactory type.
@@ -19,9 +19,11 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.Data.Providers.Internal;
     using SAF.StringResources;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Creates flattened POCOs for POCO data requests.

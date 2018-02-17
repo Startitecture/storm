@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IRepositoryAdapter.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="IRepositoryAdapter.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Provides an interface for interacting with data in a repository.
@@ -12,6 +12,9 @@ namespace SAF.Data.Providers
     using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Provides an interface for interacting with data in a repository.
@@ -98,7 +101,7 @@ namespace SAF.Data.Providers
         /// <returns>
         /// The inserted <typeparamref name="TDataItem"/>.
         /// </returns>
-        /// <exception cref="SAF.Data.RepositoryException">
+        /// <exception cref="RepositoryException">
         /// The insert operation failed, or there was an error mapping between the model and the data item.
         /// </exception>
         TDataItem Insert<TDataItem>(TDataItem dataItem) where TDataItem : ITransactionContext;

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IStructuredCommandProvider.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="IStructuredCommandProvider.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The StructuredCommandProvider interface.
@@ -11,8 +11,6 @@ namespace SAF.Data.Providers
 {
     using System.Data;
     using System.Data.SqlClient;
-
-    using SAF.Core;
 
     /// <summary>
     /// The StructuredCommandProvider interface.
@@ -34,7 +32,7 @@ namespace SAF.Data.Providers
         /// <returns>
         /// An <see cref="IDbCommand"/> that will execute the structured command.
         /// </returns>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// The underlying <see cref="IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
         /// </exception>
         IDbCommand CreateCommand(IStructuredCommand structuredCommand, DataTable dataTable, IDbTransaction transaction);

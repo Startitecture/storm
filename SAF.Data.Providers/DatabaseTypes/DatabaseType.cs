@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DatabaseType.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DatabaseType.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Base class for DatabaseType handlers - provides default/common handling for different database engines.
@@ -13,8 +13,9 @@ namespace SAF.Data.Providers.DatabaseTypes
     using System.Data;
     using System.Linq;
 
-    using SAF.Core;
     using SAF.Data.Providers.Internal;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// Base class for DatabaseType handlers - provides default/common handling for different database engines.

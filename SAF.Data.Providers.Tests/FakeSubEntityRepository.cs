@@ -1,12 +1,15 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeSubEntityRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeSubEntityRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SAF.Data.Providers.Tests
 {
     using SAF.Testing.Common;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The fake sub entity repository.

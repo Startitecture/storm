@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FieldPlacementValidator.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FieldPlacementValidator.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The field placement validator.
@@ -11,7 +11,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 {
     using FluentValidation;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// The field placement validator.

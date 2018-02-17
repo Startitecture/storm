@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormSubmissionMappingProfile.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FormSubmissionMappingProfile.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The process activity mapping profile.
@@ -9,6 +9,8 @@
 
 namespace SAF.Data.Providers.Tests
 {
+    using Startitecture.Repository.Mapping;
+
     /// <summary>
     /// The process activity mapping profile.
     /// </summary>

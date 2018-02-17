@@ -86,17 +86,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
-      <Project>{CC6AA902-7C36-4F19-8C16-81B2FC4E38B9}</Project>
-      <Name>SAF.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
-      <Project>{9D9DC978-66F4-4234-98BA-B55CE579D3BA}</Project>
-      <Name>SAF.StringResources</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SAF.Testing.Common\SAF.Testing.Common.csproj">
       <Project>{C501EA54-FC90-4C6E-A01B-14255BD5CBDC}</Project>
       <Name>SAF.Testing.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
+      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
+      <Name>Startitecture.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

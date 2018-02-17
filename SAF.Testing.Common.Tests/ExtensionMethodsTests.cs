@@ -15,7 +15,7 @@ namespace SAF.Testing.Common.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// The extension methods tests.

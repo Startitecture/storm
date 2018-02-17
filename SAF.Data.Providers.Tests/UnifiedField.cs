@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="UnifiedField.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="UnifiedField.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -10,9 +10,9 @@ namespace SAF.Data.Providers.Tests
     using System.Collections.Generic;
     using System.Linq;
 
-    using SAF.Core;
-    using SAF.StringResources;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The unified field.

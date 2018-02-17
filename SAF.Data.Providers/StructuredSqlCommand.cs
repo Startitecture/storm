@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredSqlCommand.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="StructuredSqlCommand.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,8 +14,9 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.StringResources;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The structured SQL command.
@@ -108,7 +109,7 @@ namespace SAF.Data.Providers
         /// <param name="dataTable">
         /// The data table containing the data to send to the operation.
         /// </param>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// The underlying <see cref="IDatabaseContextProvider"/> does not have a connection of the type
         /// <see cref="SqlConnection"/>.
         /// </exception>

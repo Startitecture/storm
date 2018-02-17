@@ -37,7 +37,11 @@
     <AssemblyOriginatorKeyFile>Startitecture.Orm.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=11.1.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.11.1.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -47,8 +51,20 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="GlobalSuppressions.cs" />
+    <Compile Include="IDependencyContainer.cs" />
+    <Compile Include="IDependencyItem.cs" />
+    <Compile Include="IEntityMapper.cs" />
+    <Compile Include="IEntityRepository.cs" />
     <Compile Include="IndexAttribute.cs" />
+    <Compile Include="IReadOnlyRepository.cs" />
+    <Compile Include="IRepositoryProvider.cs" />
+    <Compile Include="IRepositoryProviderFactory.cs" />
+    <Compile Include="ITransactionContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RepositoryException.cs" />
+    <Compile Include="TransactionContainer.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
@@ -56,7 +72,23 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Startitecture.Orm.Common.nuspec" />
     <None Include="Startitecture.Orm.snk" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
+      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
+      <Name>Startitecture.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
+      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
+      <Name>Startitecture.Orm.Query</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj">
+      <Project>{199411AA-992F-48AB-B8A3-E1E5506F72F5}</Project>
+      <Name>Startitecture.Resources</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeChildEntityRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeChildEntityRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The fake child entity repository.
@@ -11,8 +11,11 @@ namespace SAF.Data.Providers.Tests
 {
     using System.Collections.Generic;
 
-    using SAF.Core;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The fake child entity repository.
@@ -28,6 +31,20 @@ namespace SAF.Data.Providers.Tests
         public FakeChildEntityRepository(IRepositoryProvider repositoryProvider)
             : base(repositoryProvider, SelectionComparer.SomeValue)
         {
+        }
+
+        /// <summary>
+        /// Selects the fake children for a complex entity.
+        /// </summary>
+        /// <param name="complexEntityId">
+        /// The complex entity ID.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="FakeChildEntity"/> items with a matching <paramref name="complexEntityId"/>.
+        /// </returns>
+        public IEnumerable<FakeChildEntity> SelectForComplexEntity(int complexEntityId)
+        {
+            return this.SelectEntities(Query.From<FakeChildRow>().Matching(row => row.FakeComplexEntityId, complexEntityId));
         }
 
         /// <summary>

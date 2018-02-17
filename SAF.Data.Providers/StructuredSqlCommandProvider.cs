@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredSqlCommandProvider.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="StructuredSqlCommandProvider.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -12,8 +12,9 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.StringResources;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The structured SQL command provider.
@@ -51,7 +52,7 @@ namespace SAF.Data.Providers
         /// <returns>
         /// An <see cref="IDbCommand"/> that will execute the structured command.
         /// </returns>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// The underlying <see cref="IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities",

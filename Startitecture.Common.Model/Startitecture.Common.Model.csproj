@@ -51,14 +51,19 @@
     <Compile Include="ResourceClassification.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
-      <Project>{CC6AA902-7C36-4F19-8C16-81B2FC4E38B9}</Project>
-      <Name>SAF.Core</Name>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
+      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
+      <Name>Startitecture.Core</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
-      <Project>{9D9DC978-66F4-4234-98BA-B55CE579D3BA}</Project>
-      <Name>SAF.StringResources</Name>
+    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj">
+      <Project>{199411AA-992F-48AB-B8A3-E1E5506F72F5}</Project>
+      <Name>Startitecture.Resources</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
+      <Link>Code Analysis\CustomDictionary.xml</Link>
+    </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

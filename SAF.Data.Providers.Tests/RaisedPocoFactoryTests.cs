@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RaisedPocoFactoryTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="RaisedPocoFactoryTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -11,7 +11,6 @@ namespace SAF.Data.Providers.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Core;
     using SAF.Testing.Common;
 
     /// <summary>

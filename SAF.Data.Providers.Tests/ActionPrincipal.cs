@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ActionPrincipal.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="ActionPrincipal.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -8,7 +8,7 @@ namespace SAF.Data.Providers.Tests
 {
     using System;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// Contains information about a person or user associated with an action.

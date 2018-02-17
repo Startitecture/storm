@@ -70,31 +70,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Cache.cs" />
-    <Compile Include="CacheResult.cs" />
-    <Compile Include="CollectionComparer.cs" />
-    <Compile Include="DomainException.cs" />
-    <Compile Include="DoNotLogAttribute.cs" />
-    <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="NativeMethods.cs" />
-    <Compile Include="Evaluate.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="PropertyComparisonResult.cs" />
-    <Compile Include="SerializableCollection.cs" />
-    <Compile Include="OperationException.cs" />
-    <Compile Include="Singleton.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\Solution Code Analysis\CustomDictionary.xml">
       <Link>Code Analysis\CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
-      <Project>{9D9DC978-66F4-4234-98BA-B55CE579D3BA}</Project>
-      <Name>SAF.StringResources</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <None Include="SimpleApplicationFramework.snk" />

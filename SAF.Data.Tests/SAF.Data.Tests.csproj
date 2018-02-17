@@ -121,29 +121,33 @@
     <Content Include="AuthoringTests.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
-      <Project>{CC6AA902-7C36-4F19-8C16-81B2FC4E38B9}</Project>
-      <Name>SAF.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SAF.Data.Providers\SAF.Data.Providers.csproj">
       <Project>{427F22DA-51D4-4DBA-B1EC-108C0B4F1899}</Project>
       <Name>SAF.Data.Providers</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SAF.Data\SAF.Data.csproj">
-      <Project>{746FAE9A-6FE4-4253-BEA3-B56AE1909B76}</Project>
-      <Name>SAF.Data</Name>
     </ProjectReference>
     <ProjectReference Include="..\SAF.Mock\SAF.Mock.csproj">
       <Project>{1F4DF620-B163-4EAC-9D7E-9351E08A6A27}</Project>
       <Name>SAF.Mock</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
-      <Project>{9D9DC978-66F4-4234-98BA-B55CE579D3BA}</Project>
-      <Name>SAF.StringResources</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SAF.Testing.Common\SAF.Testing.Common.csproj">
       <Project>{c501ea54-fc90-4c6e-a01b-14255bd5cbdc}</Project>
       <Name>SAF.Testing.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
+      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
+      <Name>Startitecture.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
+      <Project>{5643589D-8D46-4717-AE66-994173F3D671}</Project>
+      <Name>Startitecture.Orm.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
+      <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
+      <Name>Startitecture.Orm.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
+      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
+      <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Repository.Mapping\Startitecture.Repository.Mapping.csproj">
       <Project>{93206D9F-C517-46E9-AFBA-34190DDDE488}</Project>

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormLayoutService.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FormLayoutService.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The form layout service.
@@ -14,8 +14,9 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// The form layout service.

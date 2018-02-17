@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="PetaPocoRepositoryProviderTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="PetaPocoRepositoryProviderTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -13,10 +13,10 @@ namespace SAF.Data.Providers.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Core;
     using SAF.Data.Providers.Tests.PM;
     using SAF.Testing.Common;
 
+    using Startitecture.Orm.Common;
     using Startitecture.Repository.Mapping;
 
     /// <summary>
@@ -42,7 +42,7 @@ namespace SAF.Data.Providers.Tests
         [TestCategory("Integration")]
         public void Save_NewAttachment_NoExceptionThrown()
         {
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 target.ChangeDatabase("DEVTEST01");
 
@@ -77,7 +77,7 @@ namespace SAF.Data.Providers.Tests
         [TestCategory("Integration")]
         public void GetSelection_ExistingAttachments_DoesNotThrowException()
         {
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 target.ChangeDatabase("DEVTEST01");
 
@@ -182,13 +182,13 @@ namespace SAF.Data.Providers.Tests
                                    DocumentType = contractType
                                };
 
-            using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
                 provider.Save(expected, expected.ToExampleSelection(row => row.AttachmentId));
             }
 
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 try
                 {
@@ -210,7 +210,7 @@ namespace SAF.Data.Providers.Tests
         [TestCategory("Integration")]
         public void GetFirstOrDefault_ExistingWorkflowPhase_ExpectedPropertiesAreNull()
         {
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 target.ChangeDatabase("DEVTEST01");
 
@@ -239,7 +239,7 @@ namespace SAF.Data.Providers.Tests
         [TestCategory("Integration")]
         public void GetFirstOrDefault_NonExistingAttachment_ReturnsNull()
         {
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 target.ChangeDatabase("DEVTEST01");
                 var itemSelection = Query.From<AttachmentRow>().Matching(row => row.Subject, $"UNIT_TEST:{Generator.NextDouble()}");
@@ -268,13 +268,13 @@ namespace SAF.Data.Providers.Tests
                 DocumentType = contractType
             };
 
-            using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
                 provider.Save(expected, expected.ToExampleSelection(row => row.AttachmentId));
             }
 
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 try
                 {
@@ -296,7 +296,7 @@ namespace SAF.Data.Providers.Tests
         [TestCategory("Integration")]
         public void Contains_NonExistingAttachment_ReturnsFalse()
         {
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 target.ChangeDatabase("DEVTEST01");
                 var itemSelection = Query.From<AttachmentRow>().Matching(row => row.Subject, $"UNIT_TEST:{Generator.NextDouble()}");
@@ -325,7 +325,7 @@ namespace SAF.Data.Providers.Tests
                                    DocumentType = contractType
                                };
 
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 try
                 {
@@ -366,7 +366,7 @@ namespace SAF.Data.Providers.Tests
                                    DocumentType = contractType
                                };
 
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 try
                 {
@@ -402,7 +402,7 @@ namespace SAF.Data.Providers.Tests
                 DocumentType = contractType
             };
 
-            using (var target = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 try
                 {

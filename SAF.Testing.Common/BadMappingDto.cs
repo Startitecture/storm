@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="BadMappingDto.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="BadMappingDto.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 namespace SAF.Testing.Common
@@ -9,7 +9,7 @@ namespace SAF.Testing.Common
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// Bad mapping DTO.

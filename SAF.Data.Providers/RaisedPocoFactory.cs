@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="RaisedPocoFactory.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="RaisedPocoFactory.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -13,8 +13,10 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.StringResources;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Creates POCOs with raised related entity POCOs for POCO data requests.
@@ -156,7 +158,7 @@ namespace SAF.Data.Providers
         /// <returns>
         /// The target entity as an <see cref="object"/>.
         /// </returns>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// The location path is broken for the entity node.
         /// </exception>
         /// <exception cref="ApplicationConfigurationException">

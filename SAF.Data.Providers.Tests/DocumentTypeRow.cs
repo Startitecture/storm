@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DocumentTypeRow.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DocumentTypeRow.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The document type row.
@@ -12,7 +12,7 @@ namespace SAF.Data.Providers.Tests
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// The document type row.

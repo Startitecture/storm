@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AutoMapperEntityMapper.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="AutoMapperEntityMapper.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Contains mapping for transfer object types.
@@ -13,11 +13,11 @@ namespace Startitecture.Repository.Mapping
 
     using AutoMapper;
 
-    using SAF.Core;
-    using SAF.Data;
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
 
     /// <summary>
-    /// Implements <see cref="SAF.Data.IEntityMapper"/> using AutoMapper.
+    /// Implements <see cref="Startitecture.Orm.Common.IEntityMapper"/> using AutoMapper.
     /// </summary>
     public sealed class AutoMapperEntityMapper : IEntityMapper
     {

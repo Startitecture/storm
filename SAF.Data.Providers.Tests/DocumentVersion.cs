@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DocumentVersion.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DocumentVersion.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   A specific version of a document.
@@ -14,7 +14,7 @@ namespace SAF.Data.Providers.Tests
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// A specific version of a document.

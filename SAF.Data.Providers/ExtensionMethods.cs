@@ -1,11 +1,12 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ExtensionMethods.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="ExtensionMethods.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Contains extension methods for the common repository provider library.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace SAF.Data.Providers
 {
     using System;
@@ -18,8 +19,12 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.StringResources;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Contains extension methods for the common repository provider library.
@@ -143,7 +148,7 @@ namespace SAF.Data.Providers
         /// The type of data item that represents the entity.
         /// </typeparam>
         /// <returns>
-        /// An <see cref="ItemSelection{T}"/> for the specified <typeparamref name="TDataItem"/>
+        /// An <see cref="Startitecture.Orm.Query.ItemSelection{TItem}"/> for the specified <typeparamref name="TDataItem"/>
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="repository"/> or <paramref name="selectExpressions"/> is null.
@@ -701,7 +706,7 @@ namespace SAF.Data.Providers
         }
 
         /// <summary>
-        /// Checks that the specified entity dependency is valid and throws a <see cref="OperationException"/>
+        /// Checks that the specified entity dependency is valid and throws a <see cref="Startitecture.Core.OperationException"/>
         /// if the check fails.
         /// </summary>
         /// <typeparam name="TItem">

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="EntityRepositoryTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="EntityRepositoryTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 namespace SAF.Data.Providers.Tests
@@ -15,9 +15,12 @@ namespace SAF.Data.Providers.Tests
 
     using Rhino.Mocks;
 
-    using SAF.Core;
     using SAF.Mock;
     using SAF.Testing.Common;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
+    using Startitecture.Repository.Mapping;
 
     /// <summary>
     /// The entity repository tests.
@@ -52,7 +55,7 @@ namespace SAF.Data.Providers.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -91,7 +94,7 @@ namespace SAF.Data.Providers.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -130,7 +133,7 @@ namespace SAF.Data.Providers.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -169,7 +172,7 @@ namespace SAF.Data.Providers.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -515,7 +518,7 @@ namespace SAF.Data.Providers.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -608,7 +611,7 @@ namespace SAF.Data.Providers.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var actual = target.FirstOrDefault(existing);
@@ -639,101 +642,101 @@ namespace SAF.Data.Providers.Tests
             }
         }
 
-        /// <summary>
-        /// The save test.
-        /// </summary>
-        [TestMethod]
-        public void Select_ExampleFakeComplexEntity_MatchesExpected()
-        {
-            var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
-            var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
-            var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
-            var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
-            var creationTime = DateTimeOffset.Now.AddDays(-1);
-            var match1 = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
-            {
-                Description = "OriginalComplexEntity1", 
-                ModifiedBy = modifiedBy, 
-                ModifiedTime = DateTimeOffset.Now.AddHours(1)
-            };
+        /////// <summary>
+        /////// The save test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Select_ExampleFakeComplexEntity_MatchesExpected()
+        ////{
+        ////    var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
+        ////    var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
+        ////    var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
+        ////    var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
+        ////    var creationTime = DateTimeOffset.Now.AddDays(-1);
+        ////    var match1 = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
+        ////    {
+        ////        Description = "OriginalComplexEntity1", 
+        ////        ModifiedBy = modifiedBy, 
+        ////        ModifiedTime = DateTimeOffset.Now.AddHours(1)
+        ////    };
 
-            var updatedSubSubEntity = new FakeSubSubEntity("SubSubUniqueName2", 46) { Description = "ModifiedSubSub2" };
-            var updatedSubEntity = new FakeSubEntity("SubUniqueName2", 235, updatedSubSubEntity, 17) { Description = "ModifiedSub2" };
-            var updatedMultiReferenceEntity = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
-            var newModifiedBy = new FakeModifiedBy("ModifiedBy2", 434) { Description = "UpdatedModifiedBy2" };
-            var match2 = new FakeComplexEntity("UniqueName2", updatedSubEntity, FakeEnumeration.SecondFake,  updatedMultiReferenceEntity)
-            {
-                Description = "UpdatedEntity2", 
-                ModifiedBy = newModifiedBy, 
-                ModifiedTime = DateTimeOffset.Now.AddHours(1)
-            };
+        ////    var updatedSubSubEntity = new FakeSubSubEntity("SubSubUniqueName2", 46) { Description = "ModifiedSubSub2" };
+        ////    var updatedSubEntity = new FakeSubEntity("SubUniqueName2", 235, updatedSubSubEntity, 17) { Description = "ModifiedSub2" };
+        ////    var updatedMultiReferenceEntity = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
+        ////    var newModifiedBy = new FakeModifiedBy("ModifiedBy2", 434) { Description = "UpdatedModifiedBy2" };
+        ////    var match2 = new FakeComplexEntity("UniqueName2", updatedSubEntity, FakeEnumeration.SecondFake,  updatedMultiReferenceEntity)
+        ////    {
+        ////        Description = "UpdatedEntity2", 
+        ////        ModifiedBy = newModifiedBy, 
+        ////        ModifiedTime = DateTimeOffset.Now.AddHours(1)
+        ////    };
 
-            var entities = new List<FakeComplexEntity> { match1, match2 };
-            var matches = entities.Select(this.entityMapper.Map<FakeComplexRow>).ToList();
+        ////    var entities = new List<FakeComplexEntity> { match1, match2 };
+        ////    var matches = entities.Select(this.entityMapper.Map<FakeComplexRow>).ToList();
 
-            var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
-            repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeComplexRow>>.Is.Anything)).Return(matches);
+        ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
+        ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeComplexRow>>.Is.Anything)).Return(matches);
 
-            var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
-            repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
+        ////    var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
+        ////    repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
-            {
-                var target = new FakeComplexEntityRepository(provider);
-                var actual = target.SelectEntities(new ExampleQuery<FakeComplexRow>(matches.First(), row => row.CreatedByUniqueName)).ToList();
-                CollectionAssert.AreEqual(entities, actual);
-            }
-        }
+        ////    using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+        ////    {
+        ////        var target = new FakeComplexEntityRepository(provider);
+        ////        var actual = target.SelectEntities(new ExampleQuery<FakeComplexRow>(matches.First(), row => row.CreatedByUniqueName)).ToList();
+        ////        CollectionAssert.AreEqual(entities, actual);
+        ////    }
+        ////}
 
-        /// <summary>
-        /// The save test.
-        /// </summary>
-        [TestMethod]
-        public void Select_RangeFakeComplexEntity_MatchesExpected()
-        {
-            var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
-            var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
-            var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
-            var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
-            var creationTime = DateTimeOffset.Now.AddDays(-1);
-            var match1 = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
-            {
-                Description = "OriginalComplexEntity1", 
-                ModifiedBy = modifiedBy, 
-                ModifiedTime = DateTimeOffset.Now.AddHours(1)
-            };
+        /////// <summary>
+        /////// The save test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Select_RangeFakeComplexEntity_MatchesExpected()
+        ////{
+        ////    var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
+        ////    var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
+        ////    var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
+        ////    var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
+        ////    var creationTime = DateTimeOffset.Now.AddDays(-1);
+        ////    var match1 = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
+        ////    {
+        ////        Description = "OriginalComplexEntity1", 
+        ////        ModifiedBy = modifiedBy, 
+        ////        ModifiedTime = DateTimeOffset.Now.AddHours(1)
+        ////    };
 
-            var updatedSubSubEntity = new FakeSubSubEntity("SubSubUniqueName2", 46) { Description = "ModifiedSubSub2" };
-            var updatedSubEntity = new FakeSubEntity("SubUniqueName2", 235, updatedSubSubEntity, 17) { Description = "ModifiedSub2" };
-            var updatedMultiReferenceEntity = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
-            var newModifiedBy = new FakeModifiedBy("ModifiedBy2", 434) { Description = "UpdatedModifiedBy2" };
-            var match2 = new FakeComplexEntity("UniqueName2", updatedSubEntity, FakeEnumeration.SecondFake, updatedMultiReferenceEntity)
-            {
-                Description = "UpdatedEntity2", 
-                ModifiedBy = newModifiedBy, 
-                ModifiedTime = DateTimeOffset.Now.AddHours(1)
-            };
+        ////    var updatedSubSubEntity = new FakeSubSubEntity("SubSubUniqueName2", 46) { Description = "ModifiedSubSub2" };
+        ////    var updatedSubEntity = new FakeSubEntity("SubUniqueName2", 235, updatedSubSubEntity, 17) { Description = "ModifiedSub2" };
+        ////    var updatedMultiReferenceEntity = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
+        ////    var newModifiedBy = new FakeModifiedBy("ModifiedBy2", 434) { Description = "UpdatedModifiedBy2" };
+        ////    var match2 = new FakeComplexEntity("UniqueName2", updatedSubEntity, FakeEnumeration.SecondFake, updatedMultiReferenceEntity)
+        ////    {
+        ////        Description = "UpdatedEntity2", 
+        ////        ModifiedBy = newModifiedBy, 
+        ////        ModifiedTime = DateTimeOffset.Now.AddHours(1)
+        ////    };
 
-            var entities = new List<FakeComplexEntity> { match1, match2 };
-            var matches = entities.Select(this.entityMapper.Map<FakeComplexRow>).ToList();
+        ////    var entities = new List<FakeComplexEntity> { match1, match2 };
+        ////    var matches = entities.Select(this.entityMapper.Map<FakeComplexRow>).ToList();
 
-            var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
-            repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeComplexRow>>.Is.Anything)).Return(matches);
+        ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
+        ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeComplexRow>>.Is.Anything)).Return(matches);
 
-            var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
-            repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
+        ////    var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
+        ////    repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
-            {
-                var target = new FakeComplexEntityRepository(provider);
-                var exampleQuery = new ExampleQuery<FakeComplexRow>(matches.First(), matches.Last(), row => row.ModifiedTime);
-                var actual = target.SelectEntities(exampleQuery).ToList();
-                var expectedFirst = entities.FirstOrDefault();
-                var actualFirst = actual.FirstOrDefault();
-                Assert.AreEqual(expectedFirst, actualFirst, string.Join(Environment.NewLine, expectedFirst.GetDifferences(actualFirst)));
-                CollectionAssert.AreEqual(entities, actual);
-            }
-        }
+        ////    using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+        ////    {
+        ////        var target = new FakeComplexEntityRepository(provider);
+        ////        var exampleQuery = new ExampleQuery<FakeComplexRow>(matches.First(), matches.Last(), row => row.ModifiedTime);
+        ////        var actual = target.SelectEntities(exampleQuery).ToList();
+        ////        var expectedFirst = entities.FirstOrDefault();
+        ////        var actualFirst = actual.FirstOrDefault();
+        ////        Assert.AreEqual(expectedFirst, actualFirst, string.Join(Environment.NewLine, expectedFirst.GetDifferences(actualFirst)));
+        ////        CollectionAssert.AreEqual(entities, actual);
+        ////    }
+        ////}
 
         /// <summary>
         /// The save test.
@@ -743,7 +746,7 @@ namespace SAF.Data.Providers.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -790,7 +793,7 @@ namespace SAF.Data.Providers.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName") { Description = "Mah sub sub entity" };
@@ -856,7 +859,7 @@ namespace SAF.Data.Providers.Tests
 
             var mockFactory = this.CreateComplexMockAdapterFactoryForUpdate(baseline);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -919,7 +922,7 @@ namespace SAF.Data.Providers.Tests
 
             var mockFactory = this.CreateComplexMockAdapterFactoryForUpdate(baseline);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -999,7 +1002,7 @@ namespace SAF.Data.Providers.Tests
                     Arg<ItemSelection<FakeDependentRow>>.Is.Anything,
                     Arg<Expression<Func<FakeDependentRow, object>>[]>.Is.Anything)).Return(1);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -1075,7 +1078,7 @@ namespace SAF.Data.Providers.Tests
             var mockFactory = this.CreateComplexMockAdapterFactoryForUpdate(baseline);
             mockFactory.RepositoryAdapter.Stub(adapter => adapter.DeleteSelection(Arg<ItemSelection<FakeDependentRow>>.Is.Anything)).Return(1);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -1145,7 +1148,7 @@ namespace SAF.Data.Providers.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var actual = target.FirstOrDefault(existing);
@@ -1210,7 +1213,7 @@ namespace SAF.Data.Providers.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var actual = target.FirstOrDefault(existing);
@@ -1253,104 +1256,104 @@ namespace SAF.Data.Providers.Tests
             }
         }
 
-        /// <summary>
-        /// The save test.
-        /// </summary>
-        [TestMethod]
-        public void Select_ExampleFakeChildEntity_MatchesExpected()
-        {
-            var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
-            var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
-            var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
-            var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
-            var creationTime = DateTimeOffset.Now.AddDays(-1);
-            var fakeComplexEntity = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
-            {
-                Description = "OriginalComplexEntity1", 
-                ModifiedBy = modifiedBy, 
-                ModifiedTime = DateTimeOffset.Now.AddHours(1)
-            };
+        /////// <summary>
+        /////// The save test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Select_ExampleFakeChildEntity_MatchesExpected()
+        ////{
+        ////    var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
+        ////    var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
+        ////    var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
+        ////    var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
+        ////    var creationTime = DateTimeOffset.Now.AddDays(-1);
+        ////    var fakeComplexEntity = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
+        ////    {
+        ////        Description = "OriginalComplexEntity1", 
+        ////        ModifiedBy = modifiedBy, 
+        ////        ModifiedTime = DateTimeOffset.Now.AddHours(1)
+        ////    };
 
-            var match1 = new FakeChildEntity(fakeComplexEntity, 235) { Name = "OriginalName", SomeValue = 111 };
-            var match2 = new FakeChildEntity(fakeComplexEntity, 236) { Name = "AnotherName", SomeValue = 112, Parent = match1 };
-            var match3 = new FakeChildEntity(fakeComplexEntity, 237) { Name = "YetAnotherName", SomeValue = 113, Parent = match2 };
+        ////    var match1 = new FakeChildEntity(fakeComplexEntity, 235) { Name = "OriginalName", SomeValue = 111 };
+        ////    var match2 = new FakeChildEntity(fakeComplexEntity, 236) { Name = "AnotherName", SomeValue = 112, Parent = match1 };
+        ////    var match3 = new FakeChildEntity(fakeComplexEntity, 237) { Name = "YetAnotherName", SomeValue = 113, Parent = match2 };
 
-            var entities = new List<FakeChildEntity> { match1, match2, match3 };
-            var matches = entities.Select(this.entityMapper.Map<FakeChildRow>).ToList();
+        ////    var entities = new List<FakeChildEntity> { match1, match2, match3 };
+        ////    var matches = entities.Select(this.entityMapper.Map<FakeChildRow>).ToList();
 
-            var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
-            repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeChildRow>>.Is.Anything)).Return(matches);
+        ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
+        ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeChildRow>>.Is.Anything)).Return(matches);
 
-            var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
-            repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
+        ////    var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
+        ////    repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
-            {
-                var target = new FakeChildEntityRepository(provider);
-                var actual = target.SelectEntities(new ExampleQuery<FakeChildRow>(matches.First(), row => row.CreatedByUniqueName)).ToList();
-                Assert.IsTrue(actual.Any());
-                Assert.AreEqual(
-                    entities.Last(), 
-                    actual.Last(), 
-                    string.Join(Environment.NewLine, entities.Last().GetDifferences(actual.Last())));
+        ////    using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+        ////    {
+        ////        var target = new FakeChildEntityRepository(provider);
+        ////        var actual = target.SelectEntities(new ExampleQuery<FakeChildRow>(matches.First(), row => row.CreatedByUniqueName)).ToList();
+        ////        Assert.IsTrue(actual.Any());
+        ////        Assert.AreEqual(
+        ////            entities.Last(), 
+        ////            actual.Last(), 
+        ////            string.Join(Environment.NewLine, entities.Last().GetDifferences(actual.Last())));
 
-                CollectionAssert.AreEqual(entities, actual);
+        ////        CollectionAssert.AreEqual(entities, actual);
 
-                var firstComplexEntity = actual.First().FakeComplexEntity;
+        ////        var firstComplexEntity = actual.First().FakeComplexEntity;
 
-                foreach (var childEntity in actual)
-                {
-                    Assert.IsTrue(ReferenceEquals(firstComplexEntity, childEntity.FakeComplexEntity));
-                }
-            }
-        }
+        ////        foreach (var childEntity in actual)
+        ////        {
+        ////            Assert.IsTrue(ReferenceEquals(firstComplexEntity, childEntity.FakeComplexEntity));
+        ////        }
+        ////    }
+        ////}
 
-        /// <summary>
-        /// The save test.
-        /// </summary>
-        [TestMethod]
-        public void Select_RangeFakeChildEntity_MatchesExpected()
-        {
-            var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
-            var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
-            var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
-            var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
-            var creationTime = DateTimeOffset.Now.AddDays(-1);
-            var fakeComplexEntity = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
-            {
-                Description = "OriginalComplexEntity1", 
-                ModifiedBy = modifiedBy, 
-                ModifiedTime = DateTimeOffset.Now.AddHours(1)
-            };
+        /////// <summary>
+        /////// The save test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Select_RangeFakeChildEntity_MatchesExpected()
+        ////{
+        ////    var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName1", 45) { Description = "OriginalSubSub" };
+        ////    var fakeSubEntity = new FakeSubEntity("SubUniqueName1", 234, fakeSubSubEntity, 16) { Description = "OriginalSub" };
+        ////    var originalCreatedBy = new FakeCreatedBy("CreateUniqueName", 432) { Description = "OriginalCreatedBy" };
+        ////    var modifiedBy = new FakeModifiedBy("ModifiedBy1", 433) { Description = "OriginalModifiedBy1" };
+        ////    var creationTime = DateTimeOffset.Now.AddDays(-1);
+        ////    var fakeComplexEntity = new FakeComplexEntity("UniqueName1", fakeSubEntity, FakeEnumeration.FirstFake, originalCreatedBy, creationTime, 22)
+        ////    {
+        ////        Description = "OriginalComplexEntity1", 
+        ////        ModifiedBy = modifiedBy, 
+        ////        ModifiedTime = DateTimeOffset.Now.AddHours(1)
+        ////    };
 
-            var match1 = new FakeChildEntity(fakeComplexEntity, 235) { Name = "OriginalName", SomeValue = 111 };
-            var match2 = new FakeChildEntity(fakeComplexEntity, 236) { Name = "AnotherName", SomeValue = 112, Parent = match1 };
-            var match3 = new FakeChildEntity(fakeComplexEntity, 237) { Name = "YetAnotherName", SomeValue = 113, Parent = match1 };
+        ////    var match1 = new FakeChildEntity(fakeComplexEntity, 235) { Name = "OriginalName", SomeValue = 111 };
+        ////    var match2 = new FakeChildEntity(fakeComplexEntity, 236) { Name = "AnotherName", SomeValue = 112, Parent = match1 };
+        ////    var match3 = new FakeChildEntity(fakeComplexEntity, 237) { Name = "YetAnotherName", SomeValue = 113, Parent = match1 };
 
-            var entities = new List<FakeChildEntity> { match1, match2, match3 };
-            var matches = entities.Select(this.entityMapper.Map<FakeChildRow>).ToList();
+        ////    var entities = new List<FakeChildEntity> { match1, match2, match3 };
+        ////    var matches = entities.Select(this.entityMapper.Map<FakeChildRow>).ToList();
 
-            var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
-            repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeChildRow>>.Is.Anything)).Return(matches);
+        ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
+        ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeChildRow>>.Is.Anything)).Return(matches);
 
-            var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
-            repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
+        ////    var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
+        ////    repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
-            {
-                var target = new FakeChildEntityRepository(provider);
-                var exampleQuery = new ExampleQuery<FakeChildRow>(matches.First(), matches.Last(), row => row.FakeComplexEntityModifiedTime);
-                var actual = target.SelectEntities(exampleQuery).ToList();
-                CollectionAssert.AreEqual(entities, actual);
+        ////    using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+        ////    {
+        ////        var target = new FakeChildEntityRepository(provider);
+        ////        var exampleQuery = new ExampleQuery<FakeChildRow>(matches.First(), matches.Last(), row => row.FakeComplexEntityModifiedTime);
+        ////        var actual = target.SelectEntities(exampleQuery).ToList();
+        ////        CollectionAssert.AreEqual(entities, actual);
 
-                var firstComplexEntity = actual.First().FakeComplexEntity;
+        ////        var firstComplexEntity = actual.First().FakeComplexEntity;
 
-                foreach (var childEntity in actual)
-                {
-                    Assert.IsTrue(ReferenceEquals(firstComplexEntity, childEntity.FakeComplexEntity));
-                }
-            }
-        }
+        ////        foreach (var childEntity in actual)
+        ////        {
+        ////            Assert.IsTrue(ReferenceEquals(firstComplexEntity, childEntity.FakeComplexEntity));
+        ////        }
+        ////    }
+        ////}
 
         /// <summary>
         /// The load children_ fake child entities_ matches expected.
@@ -1404,7 +1407,7 @@ namespace SAF.Data.Providers.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new PetaPocoRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var actual = target.FirstOrDefaultWithChildren(99291);

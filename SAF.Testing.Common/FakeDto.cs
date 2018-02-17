@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeDto.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeDto.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -11,8 +11,10 @@ namespace SAF.Testing.Common
     using System.Diagnostics.CodeAnalysis;
     using System.Runtime.Serialization;
 
-    using SAF.Core;
     using SAF.Data;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
 
     /// <summary>
     /// The fake dto.

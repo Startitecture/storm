@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DataItemDefinitionProvider.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DataItemDefinitionProvider.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Contains information about the structure of a data item.
@@ -14,7 +14,10 @@ namespace SAF.Data.Providers
     using System.Reflection;
     using System.Runtime.Caching;
 
-    using SAF.Core;
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Contains information about the structure of a data item.
@@ -72,7 +75,7 @@ namespace SAF.Data.Providers
         /// The type of the item to resolve.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="IEntityDefinition"/> for the specified type.
+        /// The <see cref="Startitecture.Orm.Model.IEntityDefinition"/> for the specified type.
         /// </returns>
         public IEntityDefinition Resolve<TItem>()
         {
@@ -86,7 +89,7 @@ namespace SAF.Data.Providers
         /// The type to resolve.
         /// </param>
         /// <returns>
-        /// The <see cref="IEntityDefinition"/> for the specified type.
+        /// The <see cref="Startitecture.Orm.Model.IEntityDefinition"/> for the specified type.
         /// </returns>
         public IEntityDefinition Resolve(Type type)
         {
@@ -107,7 +110,7 @@ namespace SAF.Data.Providers
         /// The entity reference to retrieve the location for.
         /// </param>
         /// <returns>
-        /// An <see cref="EntityLocation"/> instance with the location of the entity.
+        /// An <see cref="Startitecture.Orm.Model.EntityLocation"/> instance with the location of the entity.
         /// </returns>
         public EntityLocation GetEntityLocation(EntityReference entityReference)
         {
@@ -122,13 +125,13 @@ namespace SAF.Data.Providers
         }
 
         /// <summary>
-        /// Returns a collection of <see cref="EntityAttributeDefinition"/> elements for the specified entity type.
+        /// Returns a collection of <see cref="Startitecture.Orm.Model.EntityAttributeDefinition"/> elements for the specified entity type.
         /// </summary>
         /// <param name="entityType">
         /// The type of the entity to resolve definitions for.
         /// </param>
         /// <returns>
-        /// A collection of <see cref="EntityAttributeDefinition"/> based on the specified <paramref name="entityType"/>.
+        /// A collection of <see cref="Startitecture.Orm.Model.EntityAttributeDefinition"/> based on the specified <paramref name="entityType"/>.
         /// </returns>
         public IEnumerable<EntityAttributeDefinition> ResolveDefinitions(Type entityType)
         {
@@ -285,7 +288,7 @@ namespace SAF.Data.Providers
         /// The entity type to build the definitions for.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items for the specified type.
+        /// An <see cref="IEnumerable{T}"/> of <see cref="Startitecture.Orm.Model.EntityAttributeDefinition"/> items for the specified type.
         /// </returns>
         private IEnumerable<EntityAttributeDefinition> GetRelationAttributes(Type entityType)
         {
@@ -417,7 +420,7 @@ namespace SAF.Data.Providers
         /// The entity property to evaluate.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items.
+        /// An <see cref="IEnumerable{T}"/> of <see cref="Startitecture.Orm.Model.EntityAttributeDefinition"/> items.
         /// </returns>
         private IEnumerable<EntityAttributeDefinition> GetEntityDefinitions(LinkedList<EntityLocation> entityPath, PropertyInfo entityProperty)
         {
@@ -555,7 +558,7 @@ namespace SAF.Data.Providers
         /// The type to create the definition for.
         /// </param>
         /// <returns>
-        /// The <see cref="EntityDefinition"/> for the specified type.
+        /// The <see cref="Startitecture.Orm.Model.EntityDefinition"/> for the specified type.
         /// </returns>
         private EntityDefinition CreateEntityDefinition(Type type)
         {

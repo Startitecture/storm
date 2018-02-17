@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ReadOnlyRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="ReadOnlyRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The view repository.
@@ -17,7 +17,9 @@ namespace SAF.Data.Providers
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The view repository.
@@ -83,26 +85,6 @@ namespace SAF.Data.Providers
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
         protected ReadOnlyRepository(IRepositoryProvider repositoryProvider, IComparer<TDataItem> selectionComparer)
-            : this(repositoryProvider, selectionComparer, Singleton<DirectPropertyNameMapper<TDataItem>>.Instance)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:SAF.Data.Providers.ReadOnlyRepository`2"/> class.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider for this repository.
-        /// </param>
-        /// <param name="selectionComparer">
-        /// The selection comparer for ordering data items from the repository after being selected from the database.
-        /// </param>
-        /// <param name="propertyNameMapper">
-        /// The property name mapper for mapping property names from one type to another.
-        /// </param>
-        protected ReadOnlyRepository(
-            IRepositoryProvider repositoryProvider,
-            IComparer<TDataItem> selectionComparer,
-            IPropertyNameMapper<TDataItem> propertyNameMapper)
         {
             if (repositoryProvider == null)
             {
@@ -113,7 +95,6 @@ namespace SAF.Data.Providers
             this.EntityMapper = repositoryProvider.EntityMapper;
             this.RepositoryProvider = repositoryProvider;
             this.selectionComparer = selectionComparer;
-            this.PropertyNameMapper = propertyNameMapper;
         }
 
         /// <summary>
@@ -124,17 +105,12 @@ namespace SAF.Data.Providers
         /// <summary>
         /// Gets the repository provider.
         /// </summary>
-        protected IRepositoryProvider RepositoryProvider { get; private set; }
+        protected IRepositoryProvider RepositoryProvider { get; }
 
         /// <summary>
         /// Gets the entity mapper.
         /// </summary>
-        protected IEntityMapper EntityMapper { get; private set; }
-
-        /// <summary>
-        /// Gets the property name mapper.
-        /// </summary>
-        protected IPropertyNameMapper<TDataItem> PropertyNameMapper { get; }
+        protected IEntityMapper EntityMapper { get; }
 
         /// <summary>
         /// Gets the primary key expression for the current repository.
@@ -174,7 +150,6 @@ namespace SAF.Data.Providers
             var dataItem = candidate as TDataItem ?? this.EntityMapper.Map<TDataItem>(candidate);
             dataItem.SetTransactionProvider(this.RepositoryProvider);
             var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
-            ////var selection = this.AssociateRelatedEntities(uniqueItemSelection);
             return this.RepositoryProvider.Contains(uniqueItemSelection);
         }
 
@@ -332,31 +307,7 @@ namespace SAF.Data.Providers
         public IEnumerable<TEntity> SelectAll()
         {
             var exampleSelection = new TransactSqlSelection<TDataItem>(new TDataItem());
-            ////var selection = this.AssociateRelatedEntities(exampleSelection);
             var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
-            return this.SelectResults(dataItems);
-        }
-
-        /// <summary>
-        /// Selects a list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the properties to select.
-        /// </typeparam>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        public IEnumerable<TEntity> SelectEntities<TItem>(IExampleQuery<TItem> selection)
-        {
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            var dataItems = this.SelectDataItems(selection);
             return this.SelectResults(dataItems);
         }
 
@@ -374,95 +325,6 @@ namespace SAF.Data.Providers
             }
 
             this.LoadChildren(entity, this.RepositoryProvider);
-        }
-
-        /// <summary>
-        /// Selects a list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the properties to select.
-        /// </typeparam>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        public Page<TEntity> SelectEntityPage<TItem>(IExampleQuery<TItem> selection)
-        {
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            var dataPage = this.SelectDataPage(selection, selection.PageSize, selection.Page);
-            return new Page<TEntity>(this.SelectResults(dataPage.Items))
-                       {
-                           CurrentPage = dataPage.CurrentPage,
-                           ItemsPerPage = dataPage.ItemsPerPage,
-                           TotalItems = dataPage.TotalItems,
-                           TotalPages = dataPage.TotalPages
-                       };
-        }
-
-        /// <summary>
-        /// Selects a list of items from the repository. The items are converted directly to the <typeparamref name="TItem"/> type
-        /// from the underlying data item type.
-        /// </summary>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the properties to select.
-        /// </typeparam>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        public IEnumerable<TItem> SelectAs<TItem>(IExampleQuery<TItem> selection)
-        {
-            var dataItems = this.SelectDataItems(selection);
-
-            foreach (var dataItem in dataItems)
-            {
-                dataItem.SetTransactionProvider(this.RepositoryProvider);
-                yield return this.EntityMapper.Map<TItem>(dataItem);
-            }
-        }
-
-        /// <summary>
-        /// Selects a list of items from the repository. The items are converted directly to the <typeparamref name="TItem"/> type
-        /// from the underlying data item type.
-        /// </summary>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the properties to select.
-        /// </typeparam>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        public Page<TItem> SelectPageAs<TItem>(IExampleQuery<TItem> selection)
-        {
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            var dataPage = this.SelectDataPage(selection, selection.PageSize, selection.Page);
-
-            foreach (var dataItem in dataPage.Items)
-            {
-                dataItem.SetTransactionProvider(this.RepositoryProvider);
-            }
-
-            return new Page<TItem>(dataPage.Items.Select(this.EntityMapper.Map<TItem>))
-                       {
-                           CurrentPage = dataPage.CurrentPage,
-                           ItemsPerPage = dataPage.ItemsPerPage,
-                           TotalItems = dataPage.TotalItems,
-                           TotalPages = dataPage.TotalPages
-                       };
         }
 
         /// <summary>
@@ -609,7 +471,6 @@ namespace SAF.Data.Providers
                 this.PrimaryKeyExpression = primaryKey;
             }
 
-            ////var usePrimaryKey = useKey(primaryKey.Compile().Invoke(item));
             ItemSelection<TDataItem> selection;
 
             var usePrimaryKey = Evaluate.Equals(default(TKey), primaryKey.Compile().Invoke(item)) == false;
@@ -643,8 +504,7 @@ namespace SAF.Data.Providers
         /// </returns>
         private static ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
         {
-            var propertyNameSelection = new PropertyNameSelection<TDataItem>(primaryKey.GetPropertyName());
-            return new TransactSqlSelection<TDataItem>(item, propertyNameSelection);
+            return new TransactSqlSelection<TDataItem>(item, new[] { primaryKey.GetPropertyName() });
         }
 
         /// <summary>
@@ -694,30 +554,6 @@ namespace SAF.Data.Providers
         /// <summary>
         /// Selects a list of items from the repository.
         /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the properties to select.
-        /// </typeparam>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        private IEnumerable<TDataItem> SelectDataItems<TItem>(IExampleQuery<TItem> selection)
-        {
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            var queryConverter = new MappedQueryConverter<TItem, TDataItem>(this.EntityMapper, this.PropertyNameMapper);
-            var dataSelection = queryConverter.Convert(selection);
-            return this.SelectDataItems(dataSelection);
-        }
-
-        /// <summary>
-        /// Selects a list of items from the repository.
-        /// </summary>
         /// <param name="dataSelection">
         /// The data selection.
         /// </param>
@@ -726,35 +562,8 @@ namespace SAF.Data.Providers
         /// </returns>
         private IEnumerable<TDataItem> SelectDataItems(ItemSelection<TDataItem> dataSelection)
         {
-            ////dataSelection = this.AssociateRelatedEntities(dataSelection);
             var dataItems = this.RepositoryProvider.GetSelection(dataSelection);
             return dataItems;
-        }
-
-        /// <summary>
-        /// Selects a list of data items from the repository provider.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the properties to select.
-        /// </typeparam>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <param name="pageSize">
-        /// The page size.
-        /// </param>
-        /// <param name="page">
-        /// The 1-based page number of the page to retrieve.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        private Page<TDataItem> SelectDataPage<TItem>(IExampleQuery<TItem> selection, long pageSize, long page)
-        {
-            var queryConverter = new MappedQueryConverter<TItem, TDataItem>(this.EntityMapper, this.PropertyNameMapper);
-            var dataSelection = queryConverter.Convert(selection);
-            ////dataSelection = this.AssociateRelatedEntities(dataSelection);
-            return this.RepositoryProvider.GetSelection(dataSelection, pageSize, page);
         }
 
         /// <summary>

@@ -9,10 +9,10 @@ namespace Startitecture.Forms.Model
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
     using SAF.StringResources;
 
     using Startitecture.Common.Model;
+    using Startitecture.Core;
 
     /// <summary>
     /// The field.

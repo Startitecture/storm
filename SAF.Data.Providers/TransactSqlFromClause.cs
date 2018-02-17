@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlFromClause.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="TransactSqlFromClause.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Defines the TransactSqlFromClause type.
@@ -9,7 +9,8 @@
 
 namespace SAF.Data.Providers
 {
-    using SAF.Core;
+    using Startitecture.Core;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Contains the elements of a  Transact SQL FROM clause.

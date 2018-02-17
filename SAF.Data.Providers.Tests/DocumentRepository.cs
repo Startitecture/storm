@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DocumentRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DocumentRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -10,6 +10,9 @@ namespace SAF.Data.Providers.Tests
     using System.Collections.Generic;
 
     using JetBrains.Annotations;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The document repository.
@@ -46,9 +49,7 @@ namespace SAF.Data.Providers.Tests
             this.RepositoryProvider.DependencyContainer.SetDependency(document.DocumentId, document);
 
             var documentVersionRepository = new DocumentVersionRepository(this.RepositoryProvider);
-            var example = new DocumentVersionRow { DocumentId = document.DocumentId.GetValueOrDefault() };
-            var exampleQuery = new ExampleQuery<DocumentVersionRow>(example, row => row.DocumentId);
-            return documentVersionRepository.SelectEntities(exampleQuery);
+            return documentVersionRepository.SelectDocumentVersions(document.DocumentId.GetValueOrDefault());
         }
 
         /// <summary>

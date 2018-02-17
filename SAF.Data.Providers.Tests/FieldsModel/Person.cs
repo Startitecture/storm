@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Person.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="Person.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The person.
@@ -12,7 +12,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// The person.

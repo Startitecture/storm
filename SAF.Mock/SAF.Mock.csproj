@@ -79,17 +79,25 @@
     <None Include="SimpleApplicationFramework.snk" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
-      <Project>{cc6aa902-7c36-4f19-8c16-81b2fc4e38b9}</Project>
-      <Name>SAF.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\SAF.Data.Providers\SAF.Data.Providers.csproj">
       <Project>{427f22da-51d4-4dba-b1ec-108c0b4f1899}</Project>
       <Name>SAF.Data.Providers</Name>
     </ProjectReference>
-    <ProjectReference Include="..\SAF.Data\SAF.Data.csproj">
-      <Project>{746fae9a-6fe4-4253-bea3-b56ae1909b76}</Project>
-      <Name>SAF.Data</Name>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
+      <Project>{a0cdff29-b883-478a-b8c5-698f9771529f}</Project>
+      <Name>Startitecture.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
+      <Project>{5643589D-8D46-4717-AE66-994173F3D671}</Project>
+      <Name>Startitecture.Orm.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
+      <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
+      <Name>Startitecture.Orm.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
+      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
+      <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Repository.Mapping\Startitecture.Repository.Mapping.csproj">
       <Project>{93206D9F-C517-46E9-AFBA-34190DDDE488}</Project>

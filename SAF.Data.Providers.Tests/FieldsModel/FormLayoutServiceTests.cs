@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormLayoutServiceTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FormLayoutServiceTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The form layout service tests.
@@ -18,7 +18,6 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Rhino.Mocks;
 
-    using SAF.Core;
     using SAF.Testing.Common;
 
     using Startitecture.Repository.Mapping;
@@ -267,7 +266,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
             FormLayout expected;
 
-            using (var provider = new PetaPocoRepositoryProvider<FieldsModel>(entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FieldsModel>(entityMapper))
             {
                 var userRepo = new UserRepository(provider);
                 userRepo.Save(creator);
@@ -390,7 +389,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
                 }
             }
 
-            using (var provider = new PetaPocoRepositoryProvider<FieldsModel>(entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<FieldsModel>(entityMapper))
             {
                 var commandProvider = new StructuredSqlCommandProvider(provider);
                 var placementRepository = new FieldPlacementRepository(provider);

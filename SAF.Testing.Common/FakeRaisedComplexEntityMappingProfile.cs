@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeRaisedComplexEntityMappingProfile.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeRaisedComplexEntityMappingProfile.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The fake complex raised entity profile.
@@ -10,6 +10,8 @@
 namespace SAF.Testing.Common
 {
     using SAF.Data;
+
+    using Startitecture.Repository.Mapping;
 
     /// <summary>
     /// The fake complex raised entity profile.

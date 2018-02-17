@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Document.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="Document.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Represents a document in the system with one or more document versions.
@@ -15,8 +15,9 @@ namespace SAF.Data.Providers.Tests
 
     using JetBrains.Annotations;
 
-    using SAF.Core;
     using SAF.Testing.Common;
+
+    using Startitecture.Core;
 
     /// <summary>
     /// Represents a document in the system with one or more document versions.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DataItemDefinitionTests.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="DataItemDefinitionTests.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -9,6 +9,8 @@ namespace SAF.Data.Providers.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using SAF.Testing.Common;
+
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// The data item definition tests.

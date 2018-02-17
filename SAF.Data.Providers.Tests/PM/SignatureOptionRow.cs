@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SignatureOptionRow.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="SignatureOptionRow.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The signature option row.
@@ -12,7 +12,7 @@ namespace SAF.Data.Providers.Tests.PM
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// The signature option row.

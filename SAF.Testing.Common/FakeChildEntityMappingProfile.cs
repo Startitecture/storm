@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeChildEntityMappingProfile.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FakeChildEntityMappingProfile.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Defines the FakeChildEntityMappingProfile type.
@@ -9,6 +9,8 @@
 namespace SAF.Testing.Common
 {
     using SAF.Data;
+
+    using Startitecture.Repository.Mapping;
 
     /// <summary>
     /// The fake child entity mapping profile.

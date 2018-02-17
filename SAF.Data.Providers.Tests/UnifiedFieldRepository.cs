@@ -1,12 +1,15 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="UnifiedFieldRepository.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="UnifiedFieldRepository.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace SAF.Data.Providers.Tests
 {
     using System;
+
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Query;
 
     /// <summary>
     /// The unified field repository.

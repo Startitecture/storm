@@ -9,7 +9,7 @@ namespace Startitecture.Common.Model
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     /// <summary>
     /// The data slice instance.

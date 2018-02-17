@@ -43,18 +43,15 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Core\SAF.Core.csproj">
-      <Project>{CC6AA902-7C36-4F19-8C16-81B2FC4E38B9}</Project>
-      <Name>SAF.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SAF.StringResources\SAF.StringResources.csproj">
-      <Project>{9d9dc978-66f4-4234-98ba-b55ce579d3ba}</Project>
-      <Name>SAF.StringResources</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Common.Model\Startitecture.Common.Model.csproj">
       <Project>{B2A85677-E1D8-4919-A5C6-1B8BB59C819A}</Project>
       <Name>Startitecture.Common.Model</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
+      <Link>Code Analysis\CustomDictionary.xml</Link>
+    </CodeAnalysisDictionary>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

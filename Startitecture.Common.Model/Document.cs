@@ -9,7 +9,8 @@ namespace Startitecture.Common.Model
     using System;
     using System.Collections.Generic;
 
-    using SAF.Core;
+    using Core;
+
     using SAF.StringResources;
 
     /// <summary>
@@ -263,7 +264,7 @@ namespace Startitecture.Common.Model
         /// <exception cref="ArgumentException">
         /// <paramref name="fileName"/> is null or white space.
         /// </exception>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// The new revision could not be added to the sorted set because such a revision already exists.
         /// </exception>
         public DocumentVersion Revise(string fileName)

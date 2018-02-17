@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 
 namespace SAF.Data.Providers.Tests
 {
+    using Startitecture.Orm.Common;
+
     /// <summary>
     /// The user row.
     /// </summary>

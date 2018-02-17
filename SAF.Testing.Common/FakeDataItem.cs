@@ -2,7 +2,7 @@
 {
     using System;
 
-    using SAF.Core;
+    using Startitecture.Core;
 
     public class FakeDataItem : IEquatable<FakeDataItem>
     {

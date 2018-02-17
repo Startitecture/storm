@@ -5,8 +5,10 @@ namespace SAF.Data.Providers.Tests
 {
     using System.Linq;
 
-    using SAF.Core;
     using SAF.Mock;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
 
     [TestClass]
     public class StructuredInsertCommandTests
@@ -32,7 +34,7 @@ namespace SAF.Data.Providers.Tests
         {
             long submissionId = 0;
 
-            using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 
@@ -74,7 +76,7 @@ namespace SAF.Data.Providers.Tests
         {
             long submissionId = 0;
 
-            using (var provider = new PetaPocoRepositoryProvider<TestDb>(this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 

@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormSubmissionValueMappingProfile.cs" company="TractManager, Inc.">
-//   Copyright 2013 TractManager, Inc. All rights reserved.
+// <copyright file="FormSubmissionValueMappingProfile.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The form submission value mapping profile.
@@ -9,6 +9,8 @@
 
 namespace SAF.Data.Providers.Tests
 {
+    using Startitecture.Repository.Mapping;
+
     /// <summary>
     /// The form submission value mapping profile.
     /// </summary>
