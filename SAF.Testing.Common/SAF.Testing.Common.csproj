@@ -64,74 +64,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BadMappingDto.cs" />
-    <Compile Include="BusinessException.cs" />
-    <Compile Include="ExtensionMethods.cs" />
-    <Compile Include="FakeChildEntity.cs" />
-    <Compile Include="FakeChildEntityMappingProfile.cs" />
-    <Compile Include="FakeChildRow.cs" />
-    <Compile Include="FakeComplexEntity.cs" />
-    <Compile Include="FakeComplexEntityMappingProfile.cs" />
-    <Compile Include="FakeRaisedChildEntityMappingProfile.cs" />
-    <Compile Include="FakeRaisedChildRow.cs" />
-    <Compile Include="FakeRaisedComplexEntityMappingProfile.cs" />
-    <Compile Include="FakeCreatedBy.cs" />
-    <Compile Include="FakeCreatedByMappingProfile.cs" />
-    <Compile Include="FakeDataRowBase.cs" />
-    <Compile Include="FakeFlatSubRow.cs" />
-    <Compile Include="FakeModifiedBy.cs" />
-    <Compile Include="FakeModifiedByMappingProfile.cs" />
-    <Compile Include="FakeRaisedComplexRow.cs" />
-    <Compile Include="FakeComplexRow.cs" />
-    <Compile Include="FakeDataContext.cs" />
-    <Compile Include="FakeDataEntity.cs" />
-    <Compile Include="FakeDataItem.cs" />
-    <Compile Include="FakeFlatDataRow.cs" />
-    <Compile Include="FakeDataSource.cs" />
-    <Compile Include="FakeDependencyEntity.cs" />
-    <Compile Include="FakeDependencyRow.cs" />
-    <Compile Include="FakeDependentEntity.cs" />
-    <Compile Include="FakeDependentEntityMappingProfile.cs" />
-    <Compile Include="FakeDependentRow.cs" />
-    <Compile Include="FakeDto.cs" />
-    <Compile Include="FakeEntity.cs" />
-    <Compile Include="FakeEnumeration.cs" />
-    <Compile Include="FakeMultiReferenceEntity.cs" />
-    <Compile Include="FakeMultiReferenceEntityMappingProfile.cs" />
-    <Compile Include="FakeMultiReferenceRow.cs" />
-    <Compile Include="FakeOtherEnumeration.cs" />
-    <Compile Include="FakeRaisedDataRow.cs" />
-    <Compile Include="FakeRelatedEntity.cs" />
-    <Compile Include="FakeRelatedRow.cs" />
-    <Compile Include="FakeSubChildRow.cs" />
-    <Compile Include="FakeSubDataRow.cs" />
-    <Compile Include="FakeSubEntity.cs" />
-    <Compile Include="FakeSubEntityMappingProfile.cs" />
-    <Compile Include="FakeRaisedSubEntityMappingProfile.cs" />
-    <Compile Include="FakeRaisedSubRow.cs" />
-    <Compile Include="FakeSubRow.cs" />
-    <Compile Include="FakeSubSubEntity.cs" />
-    <Compile Include="FakeSubSubEntityMappingProfile.cs" />
-    <Compile Include="FakeSubSubRow.cs" />
-    <Compile Include="FakeTestItem.cs" />
-    <Compile Include="Instance.cs" />
-    <Compile Include="InstanceExtension.cs" />
-    <Compile Include="InstanceSection.cs" />
-    <Compile Include="OverriddenColumnNameRow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RaisedOverriddenColumnNameRow.cs" />
-    <Compile Include="RelatedRow.cs" />
-    <Compile Include="Template.cs" />
-    <Compile Include="TemplateSection.cs" />
-    <Compile Include="TemplateVersion.cs" />
-    <Compile Include="TransactionItemBase.cs" />
-    <Compile Include="Utility.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Data.Providers\SAF.Data.Providers.csproj">
-      <Project>{427f22da-51d4-4dba-b1ec-108c0b4f1899}</Project>
-      <Name>SAF.Data.Providers</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
       <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
       <Name>Startitecture.Core</Name>
@@ -152,6 +87,10 @@
       <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
       <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Repository\Startitecture.Orm.Repository.csproj">
+      <Project>{93206D9F-C517-46E9-AFBA-34190DDDE488}</Project>
+      <Name>Startitecture.Orm.Repository</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
       <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
       <Name>Startitecture.Orm.Schema</Name>
@@ -159,10 +98,6 @@
     <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj">
       <Project>{1F629078-CE41-48E5-8160-C13D46121252}</Project>
       <Name>Startitecture.Orm.Sql</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Repository.Mapping\Startitecture.Repository.Mapping.csproj">
-      <Project>{93206D9F-C517-46E9-AFBA-34190DDDE488}</Project>
-      <Name>Startitecture.Repository.Mapping</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj">
       <Project>{199411AA-992F-48AB-B8A3-E1E5506F72F5}</Project>

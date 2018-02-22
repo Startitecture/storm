@@ -73,6 +73,7 @@
     <Compile Include="QueryRepositoryAdapterFactory.cs" />
     <Compile Include="RaisedPocoFactory.cs" />
     <Compile Include="StandardMapper.cs" />
+    <Compile Include="TransactionItemBase.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">

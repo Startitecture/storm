@@ -14,8 +14,6 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using JetBrains.Annotations;
 
-    using SAF.Testing.Common;
-
     using Startitecture.Core;
 
     /// <summary>

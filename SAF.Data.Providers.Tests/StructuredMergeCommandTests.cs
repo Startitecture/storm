@@ -15,12 +15,12 @@ namespace SAF.Data.Providers.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using SAF.Data.Providers.Tests.PM;
-    using SAF.Mock;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
+    using Startitecture.Orm.Testing.RhinoMocks;
 
     /// <summary>
     /// The structured SQL command tests.
@@ -118,7 +118,7 @@ namespace SAF.Data.Providers.Tests
                     {
                         // Before we can insert the value instances, we must first delete them. TODO: Update UDTT to support merge here as well. 
                         var deleteIntegerQuery =
-                            Query.From<UnifiedIntegerValueRow>()
+                            Select.From<UnifiedIntegerValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 
@@ -144,7 +144,7 @@ namespace SAF.Data.Providers.Tests
                     if (numericDetailRows.Any())
                     {
                         var deleteNumericQuery =
-                            Query.From<UnifiedNumericValueRow>()
+                            Select.From<UnifiedNumericValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 
@@ -163,7 +163,7 @@ namespace SAF.Data.Providers.Tests
                     if (dateDetailRows.Any())
                     {
                         var deleteDateQuery =
-                            Query.From<UnifiedDateValueRow>()
+                            Select.From<UnifiedDateValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 
@@ -182,7 +182,7 @@ namespace SAF.Data.Providers.Tests
                     if (stringDetailRows.Any())
                     {
                         var deleteStringQuery =
-                            Query.From<UnifiedStringValueRow>()
+                            Select.From<UnifiedStringValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 

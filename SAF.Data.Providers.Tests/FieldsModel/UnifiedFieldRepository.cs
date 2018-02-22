@@ -18,6 +18,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
 
     /// <summary>
@@ -82,7 +83,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
                 throw new ArgumentNullException(nameof(sourceType));
             }
 
-            var itemSelection = Query.From<UnifiedFieldRow>().Matching(row => row.SourceType, sourceType.FullName);
+            var itemSelection = Select.From<UnifiedFieldRow>().Matching(row => row.SourceType, sourceType.FullName);
             return this.SelectEntities(itemSelection);
         }
 

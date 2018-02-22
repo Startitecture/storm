@@ -9,7 +9,7 @@
 
 namespace SAF.Data.Providers.Tests
 {
-    using Startitecture.Repository.Mapping;
+    using Startitecture.Orm.Repository;
 
     /// <summary>
     /// The unified field mapping profile.

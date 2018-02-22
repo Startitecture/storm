@@ -13,6 +13,7 @@ namespace SAF.Data.Providers.Tests
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
 
     /// <summary>
@@ -48,7 +49,7 @@ namespace SAF.Data.Providers.Tests
             }
 
             this.RepositoryProvider.DependencyContainer.SetDependency(document.DocumentId, document);
-            var itemSelection = Query.From<DocumentVersionRow>().Matching(row => row.DocumentId, document.DocumentId.GetValueOrDefault());
+            var itemSelection = Select.From<DocumentVersionRow>().Matching(row => row.DocumentId, document.DocumentId.GetValueOrDefault());
             return this.SelectEntities(itemSelection);
         }
 
@@ -64,7 +65,7 @@ namespace SAF.Data.Providers.Tests
         /// </returns>
         public IEnumerable<DocumentVersion> SelectDocumentVersions(int documentId)
         {
-            return this.SelectEntities(Query.From<DocumentVersionRow>().Matching(row => row.DocumentId, documentId));
+            return this.SelectEntities(Select.From<DocumentVersionRow>().Matching(row => row.DocumentId, documentId));
         }
 
         /// <summary>

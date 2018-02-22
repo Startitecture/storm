@@ -103,8 +103,6 @@
     <Compile Include="AttachmentMappingProfile.cs" />
     <Compile Include="AttachmentRepository.cs" />
     <Compile Include="DatabaseTests.cs" />
-    <Compile Include="DataItemDefinitionProviderTests.cs" />
-    <Compile Include="DataItemDefinitionTests.cs" />
     <Compile Include="Document.cs" />
     <Compile Include="AttachmentDocument.cs" />
     <Compile Include="DocumentMappingProfile.cs" />
@@ -116,18 +114,24 @@
     <Compile Include="DocumentVersionMappingProfile.cs" />
     <Compile Include="DocumentVersionRepository.cs" />
     <Compile Include="DocumentVersionRow.cs" />
-    <Compile Include="EntityRepositoryTests.cs" />
     <Compile Include="EnumeratedValue.cs" />
-    <Compile Include="FakeChildEntityRepository.cs" />
-    <Compile Include="FakeComplexEntityRepository.cs" />
-    <Compile Include="FakeDependencyEntityRepository.cs" />
-    <Compile Include="FakeDependentEntityRepository.cs" />
-    <Compile Include="FakeMultiReferenceEntityRepository.cs" />
-    <Compile Include="FakeRaisedChildEntityRepository.cs" />
-    <Compile Include="FakeRaisedComplexEntityRepository.cs" />
-    <Compile Include="FakeRaisedSubEntityRepository.cs" />
-    <Compile Include="FakeSubEntityRepository.cs" />
-    <Compile Include="FakeSubSubEntityRepository.cs" />
+    <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="FakeChildRow.cs" />
+    <Compile Include="FakeComplexRow.cs" />
+    <Compile Include="FakeDataRowBase.cs" />
+    <Compile Include="FakeDependencyRow.cs" />
+    <Compile Include="FakeDependentRow.cs" />
+    <Compile Include="FakeFlatDataRow.cs" />
+    <Compile Include="FakeFlatSubRow.cs" />
+    <Compile Include="FakeMultiReferenceRow.cs" />
+    <Compile Include="FakeRaisedComplexRow.cs" />
+    <Compile Include="FakeRaisedDataRow.cs" />
+    <Compile Include="FakeRaisedSubRow.cs" />
+    <Compile Include="FakeRelatedRow.cs" />
+    <Compile Include="FakeSubChildRow.cs" />
+    <Compile Include="FakeSubDataRow.cs" />
+    <Compile Include="FakeSubRow.cs" />
+    <Compile Include="FakeSubSubRow.cs" />
     <Compile Include="FieldsModel\Contract.cs" />
     <Compile Include="FieldsModel\ContractCategory.cs" />
     <Compile Include="FieldsModel\ContractingEntity.cs" />
@@ -243,6 +247,9 @@
     <Compile Include="FormSubmissionValueRow.cs" />
     <Compile Include="Generate.cs" />
     <Compile Include="IDocumentVersionService.cs" />
+    <Compile Include="Instance.cs" />
+    <Compile Include="InstanceExtension.cs" />
+    <Compile Include="InstanceSection.cs" />
     <Compile Include="Models-Fields\Generated\Database.cs">
       <DependentUpon>Database.tt</DependentUpon>
       <AutoGen>True</AutoGen>
@@ -254,6 +261,7 @@
       <DependentUpon>Database.tt</DependentUpon>
     </Compile>
     <Compile Include="AttachmentNote.cs" />
+    <Compile Include="OverriddenColumnNameRow.cs" />
     <Compile Include="Person.cs" />
     <Compile Include="PersonMappingProfile.cs" />
     <Compile Include="PersonRepository.cs" />
@@ -267,12 +275,16 @@
     <Compile Include="PM\WorkflowRow.cs" />
     <Compile Include="PM\WorkflowSignatureOptionRow.cs" />
     <Compile Include="PM\ProcessFormSubmissionRow.cs" />
+    <Compile Include="RaisedOverriddenColumnNameRow.cs" />
     <Compile Include="RaisedPocoFactoryTests.cs" />
+    <Compile Include="RelatedRow.cs" />
+    <Compile Include="Template.cs" />
+    <Compile Include="TemplateSection.cs" />
+    <Compile Include="TemplateVersion.cs" />
+    <Compile Include="TransactionItemBase.cs" />
     <Compile Include="TransactSqlSelectionTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TransactSqlUpdateTest.cs" />
-    <Compile Include="FakeRaisedSubEntityRepositoryTest.cs" />
-    <Compile Include="FakeRaisedComplexEntityRepositoryTest.cs" />
     <Compile Include="PM\WorkflowPhaseRow.cs" />
     <Compile Include="StructuredMergeCommandTests.cs" />
     <Compile Include="StructuredInsertCommandTests.cs" />
@@ -303,18 +315,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\SAF.Data.Providers\SAF.Data.Providers.csproj">
-      <Project>{427f22da-51d4-4dba-b1ec-108c0b4f1899}</Project>
-      <Name>SAF.Data.Providers</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SAF.Mock\SAF.Mock.csproj">
-      <Project>{1F4DF620-B163-4EAC-9D7E-9351E08A6A27}</Project>
-      <Name>SAF.Mock</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SAF.Testing.Common\SAF.Testing.Common.csproj">
-      <Project>{C501EA54-FC90-4C6E-A01B-14255BD5CBDC}</Project>
-      <Name>SAF.Testing.Common</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
       <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
       <Name>Startitecture.Core</Name>
@@ -335,6 +335,10 @@
       <Project>{e735ff25-2f78-4ea5-bb6c-9ab69078b10f}</Project>
       <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Repository\Startitecture.Orm.Repository.csproj">
+      <Project>{93206D9F-C517-46E9-AFBA-34190DDDE488}</Project>
+      <Name>Startitecture.Orm.Repository</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
       <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
       <Name>Startitecture.Orm.Schema</Name>
@@ -343,9 +347,13 @@
       <Project>{1F629078-CE41-48E5-8160-C13D46121252}</Project>
       <Name>Startitecture.Orm.Sql</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Repository.Mapping\Startitecture.Repository.Mapping.csproj">
-      <Project>{93206D9F-C517-46E9-AFBA-34190DDDE488}</Project>
-      <Name>Startitecture.Repository.Mapping</Name>
+    <ProjectReference Include="..\Startitecture.Orm.Testing.RhinoMocks\Startitecture.Orm.Testing.RhinoMocks.csproj">
+      <Project>{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}</Project>
+      <Name>Startitecture.Orm.Testing.RhinoMocks</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj">
+      <Project>{199411AA-992F-48AB-B8A3-E1E5506F72F5}</Project>
+      <Name>Startitecture.Resources</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

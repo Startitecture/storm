@@ -14,7 +14,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
     using System.Linq;
     using System.Reflection;
 
-    using SAF.Testing.Common;
+    using Startitecture.Core;
 
     /// <summary>
     /// The generate.

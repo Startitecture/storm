@@ -16,6 +16,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository;
 
     /// <summary>
     /// The form version repository.
@@ -68,7 +69,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
                 throw new ArgumentNullException(nameof(form));
             }
 
-            return this.SelectEntities(this.Select().Matching(row => row.FormId, form.FormId.GetValueOrDefault()));
+            return this.SelectEntities(this.Select<FormVersion, FormVersionRow>().Matching(row => row.FormId, form.FormId.GetValueOrDefault()));
         }
 
         /// <summary>

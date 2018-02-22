@@ -15,12 +15,11 @@ namespace SAF.Data.Providers.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Mock;
-    using SAF.Testing.Common;
-
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
+    using Startitecture.Orm.Testing.RhinoMocks;
 
     /// <summary>
     /// The attachment document repository tests.
@@ -176,7 +175,7 @@ namespace SAF.Data.Providers.Tests
             using (var provider = RepositoryMockFactory.CreateConcreteProvider<TestDb>(this.entityMapper, adapter))
             {
                 var target = new AttachmentDocumentRepository(provider);
-                var actual = target.QueryAttachmentDocuments(Query.From<AttachmentDocumentRow>()).ToList();
+                var actual = target.QueryAttachmentDocuments(Select.From<AttachmentDocumentRow>()).ToList();
 
                 CollectionAssert.AreEqual(expected, actual);
 
@@ -369,7 +368,7 @@ namespace SAF.Data.Providers.Tests
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
-                    var actual = target.QueryAttachmentDocuments(Query.From<AttachmentDocumentRow>()).ToList();
+                    var actual = target.QueryAttachmentDocuments(Select.From<AttachmentDocumentRow>()).ToList();
 
                     CollectionAssert.AreEqual(expected, actual);
 
@@ -411,16 +410,16 @@ namespace SAF.Data.Providers.Tests
                 provider.ChangeDatabase("DEVTEST01");
 
                 // Delete the attachment documents based on finding their versions.
-                var versionSelection = Query.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST.%");
+                var versionSelection = Select.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST.%");
                 var versionRows = provider.GetSelection(versionSelection);
                 var docVersionIds = versionRows.Select(x => x.DocumentVersionId);
-                provider.DeleteItems(Query.From<AttachmentDocumentRow>().Include(row => row.DocumentVersionId, docVersionIds.ToArray()));
+                provider.DeleteItems(Select.From<AttachmentDocumentRow>().Include(row => row.DocumentVersionId, docVersionIds.ToArray()));
 
                 // Delete the rest using a filter.
-                provider.DeleteItems(Query.From<AttachmentNoteRow>().Matching(row => row.Content, "UNIT_TEST.%"));
-                provider.DeleteItems(Query.From<AttachmentRow>().Matching(row => row.Subject, "UNIT_TEST.%"));
-                provider.DeleteItems(Query.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST.%"));
-                provider.DeleteItems(Query.From<DocumentRow>().Matching(row => row.Identifier, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<AttachmentNoteRow>().Matching(row => row.Content, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<AttachmentRow>().Matching(row => row.Subject, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<DocumentRow>().Matching(row => row.Identifier, "UNIT_TEST.%"));
             } 
         } 
     }

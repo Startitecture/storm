@@ -15,11 +15,10 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using JetBrains.Annotations;
 
-    using SAF.Testing.Common;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
 
     /// <summary>
@@ -104,7 +103,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
                 throw new ArgumentNullException(nameof(layout));
             }
 
-            var itemSelection = Query.From<LayoutPageRow>().Matching(row => row.FormLayoutId, layout.FormLayoutId.GetValueOrDefault());
+            var itemSelection = Select.From<LayoutPageRow>().Matching(row => row.FormLayoutId, layout.FormLayoutId.GetValueOrDefault());
             return this.SelectEntities(itemSelection);
         }
 

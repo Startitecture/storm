@@ -5,12 +5,11 @@ namespace SAF.Data.Providers.Tests
 {
     using System.Linq;
 
-    using SAF.Mock;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
+    using Startitecture.Orm.Testing.RhinoMocks;
 
     [TestClass]
     public class StructuredInsertCommandTests

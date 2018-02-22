@@ -17,12 +17,12 @@ namespace SAF.Data.Providers.Tests
     using Rhino.Mocks;
 
     using SAF.Data.Providers.Tests.PM;
-    using SAF.Testing.Common;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Repository.Tests.Models;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
 
@@ -65,7 +65,7 @@ namespace SAF.Data.Providers.Tests
         /// Creates a fake complex row.
         /// </summary>
         /// <returns>
-        /// A new <see cref="FakeComplexRow" /> instance.
+        /// A new <see cref="Startitecture.Orm.Repository.Tests.Models.FakeComplexRow" /> instance.
         /// </returns>
         public static FakeComplexRow CreateFakeComplexRow()
         {
@@ -104,7 +104,7 @@ namespace SAF.Data.Providers.Tests
         /// A value indicating whether to create the row with a dependent entity.
         /// </param>
         /// <returns>
-        /// A new <see cref="FakeComplexRow"/> instance.
+        /// A new <see cref="Startitecture.Orm.Repository.Tests.Models.FakeComplexRow"/> instance.
         /// </returns>
         public static FakeRaisedComplexRow CreateFakeRaisedComplexRow(bool withDependentEntity)
         {
@@ -410,7 +410,7 @@ namespace SAF.Data.Providers.Tests
         {
             var example = new FormSubmissionValueRow { FormSubmissionId = submissionId };
             var deleteSelection =
-                Query.From<UnifiedFieldValueRow>()
+                Select.From<UnifiedFieldValueRow>()
                     .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId)
                     .Matching(example, row => row.FormSubmissionId);
 
@@ -585,7 +585,7 @@ namespace SAF.Data.Providers.Tests
         private static Person GetPerson(IRepositoryProvider provider)
         {
             var personRepository = new PersonRepository(provider);
-            var selection = Query.From<ActionPrincipalRow>();
+            var selection = Select.From<ActionPrincipalRow>();
             selection.Limit = 1;
             var person = personRepository.SelectPeople(selection).First();
             return person;

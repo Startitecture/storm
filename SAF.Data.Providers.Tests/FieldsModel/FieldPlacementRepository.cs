@@ -16,6 +16,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
 
     /// <summary>
@@ -52,7 +53,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
             }
 
             var layoutSectionId = layoutSection.LayoutSectionId.GetValueOrDefault();
-            var itemSelection = Query.From<FieldPlacementRow>().Matching(row => row.LayoutSectionId, layoutSectionId);
+            var itemSelection = Select.From<FieldPlacementRow>().Matching(row => row.LayoutSectionId, layoutSectionId);
             return this.SelectEntities(itemSelection);
         }
 

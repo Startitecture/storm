@@ -8,9 +8,6 @@ namespace SAF.Data.Tests
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Data.Providers;
-    using SAF.Testing.Common;
-
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;

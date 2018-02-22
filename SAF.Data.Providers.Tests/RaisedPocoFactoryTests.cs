@@ -11,9 +11,9 @@ namespace SAF.Data.Providers.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Testing.Common;
-
+    using Startitecture.Core;
     using Startitecture.Orm.Mapper;
+    using Startitecture.Orm.Repository.Tests.Models;
 
     /// <summary>
     /// The raised poco factory tests.

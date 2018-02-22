@@ -43,13 +43,7 @@ namespace Startitecture.Core
         /// <summary>
         /// Gets the count.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return this.cacheMap.Count;
-            }
-        }
+        public int Count => this.cacheMap.Count;
 
         #endregion
 
@@ -142,10 +136,7 @@ namespace Startitecture.Core
         /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
-            if (this.cacheLock != null)
-            {
-                this.cacheLock.Dispose();
-            }
+            this.cacheLock?.Dispose();
         }
     }
 }

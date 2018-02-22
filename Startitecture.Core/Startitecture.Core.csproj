@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BusinessException.cs" />
     <Compile Include="Cache.cs" />
     <Compile Include="CacheResult.cs" />
     <Compile Include="CollectionComparer.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="PropertyComparisonResult.cs" />
     <Compile Include="SerializableCollection.cs" />
     <Compile Include="Singleton.cs" />
+    <Compile Include="TreeNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">

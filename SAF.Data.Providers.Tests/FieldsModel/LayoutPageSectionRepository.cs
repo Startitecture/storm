@@ -17,6 +17,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
 
     /// <summary>
@@ -65,7 +66,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
                 throw new ArgumentNullException(nameof(page));
             }
 
-            var itemSelection = Query.From<LayoutPageSectionRow>().Matching(row => row.LayoutPageId, page.LayoutPageId.GetValueOrDefault());
+            var itemSelection = Select.From<LayoutPageSectionRow>().Matching(row => row.LayoutPageId, page.LayoutPageId.GetValueOrDefault());
             var sections = this.SelectEntities(itemSelection).ToList();
 
             // TODO: To make this a single selection, add a method to FieldPlacementRepository that takes the entire page.
@@ -94,7 +95,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
                 throw new ArgumentNullException(nameof(layout));
             }
 
-            var itemSelection = Query.From<LayoutPageSectionRow>()
+            var itemSelection = Select.From<LayoutPageSectionRow>()
                 .Matching(row => row.LayoutPage.FormLayoutId, layout.FormLayoutId.GetValueOrDefault());
 
             return this.SelectEntities(itemSelection);

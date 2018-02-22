@@ -9,7 +9,7 @@
 
 namespace SAF.Data.Providers.Tests
 {
-    using Startitecture.Repository.Mapping;
+    using Startitecture.Orm.Repository;
 
     /// <summary>
     /// The process activity mapping profile.

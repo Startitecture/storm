@@ -813,5 +813,85 @@ namespace Startitecture.Core
         /// The qualified property name format.
         /// </summary>
         public const string QualifiedPropertyNameFormat = "{0}.{1}";
+
+        /// <summary>
+        /// Gets the property differences between two objects of the same type.
+        /// </summary>
+        /// <param name="baseline">
+        /// The baseline object.
+        /// </param>
+        /// <param name="comparison">
+        /// The comparison object.
+        /// </param>
+        /// <param name="propertiesToCompare">
+        /// The properties to compare.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to compare.
+        /// </typeparam>
+        /// <returns>
+        /// A collection of <see cref="Startitecture.Core.PropertyComparisonResult"/> items containing the non-equivalent property values of the two 
+        /// items.
+        /// </returns>
+        public static IEnumerable<PropertyComparisonResult> GetDifferences<TItem>(
+            this TItem baseline, 
+            TItem comparison, 
+            params string[] propertiesToCompare)
+        {
+            if (Evaluate.IsNull(baseline))
+            {
+                throw new ArgumentNullException(nameof(baseline));
+            }
+
+            if (Evaluate.IsNull(comparison))
+            {
+                throw new ArgumentNullException(nameof(comparison));
+            }
+
+            if (Evaluate.IsNull(propertiesToCompare))
+            {
+                throw new ArgumentNullException(nameof(propertiesToCompare));
+            }
+
+            var allProperties = GetAllProperties<TItem>(propertiesToCompare);
+
+            var originalProperties = Enumerable.ToDictionary<PropertyInfo, string, object>(allProperties, info => info.Name, info => info.GetPropertyValue(baseline));
+
+            var newProperties = Enumerable.ToDictionary<PropertyInfo, string, object>(allProperties, info => info.Name, info => info.GetPropertyValue(comparison));
+
+            return (from propertyName in Enumerable.Select<PropertyInfo, string>(allProperties, x => x.Name)
+                    let originalValue = originalProperties[propertyName]
+                    let newValue = newProperties[propertyName]
+                    where !ReferenceEquals(originalValue, newValue)
+                    where (originalValue != null && !originalValue.Equals(newValue)) || !newValue.Equals(originalValue)
+                    select
+                        new PropertyComparisonResult
+                            {
+                                PropertyName = propertyName, 
+                                OriginalValue = originalValue, 
+                                NewValue = newValue
+                            }).ToList();
+        }
+
+        /// <summary>
+        /// Gets all of the properties for the array of string properties to compare.
+        /// </summary>
+        /// <param name="propertiesToCompare">
+        /// The properties to compare.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to evaluate.
+        /// </typeparam>
+        /// <returns>
+        /// A <see cref="List{T}"/> of <see cref="PropertyInfo"/> items matching the <paramref name="propertiesToCompare"/>.
+        /// </returns>
+        private static List<PropertyInfo> GetAllProperties<TItem>(string[] propertiesToCompare)
+        {
+            var allProperties = propertiesToCompare.Any()
+                                    ? typeof(TItem).GetProperties().Where(x => propertiesToCompare.Contains(x.Name) && !x.GetIndexParameters().Any())
+                                        .OrderBy(x => x.Name).ToList()
+                                    : typeof(TItem).GetProperties().Where(x => !x.GetIndexParameters().Any()).OrderBy(x => x.Name).ToList();
+            return allProperties;
+        }
     }
 }

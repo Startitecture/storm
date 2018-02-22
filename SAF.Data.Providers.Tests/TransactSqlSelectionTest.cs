@@ -12,8 +12,7 @@ namespace SAF.Data.Providers.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using SAF.Testing.Common;
-
+    using Startitecture.Orm.Repository.Tests.Models;
     using Startitecture.Orm.Sql;
 
     /// <summary>

@@ -9,7 +9,7 @@
 
 namespace SAF.Data.Providers.Tests.FieldsModel
 {
-    using Startitecture.Repository.Mapping;
+    using Startitecture.Orm.Repository;
 
     /// <summary>
     /// The layout section mapping profile.

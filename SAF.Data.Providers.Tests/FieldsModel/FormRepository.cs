@@ -16,6 +16,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository;
 
     /// <summary>
     /// The form repository.
@@ -96,7 +97,7 @@ namespace SAF.Data.Providers.Tests.FieldsModel
                 throw new ArgumentNullException(nameof(nameSearch));
             }
 
-            var itemSelection = this.Select().Matching(row => row.Name, nameSearch);
+            var itemSelection = this.Select<Form, FormRow>().Matching(row => row.Name, nameSearch);
             return this.SelectEntities(itemSelection);
         }
 

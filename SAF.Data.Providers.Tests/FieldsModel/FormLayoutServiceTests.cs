@@ -18,12 +18,12 @@ namespace SAF.Data.Providers.Tests.FieldsModel
 
     using Rhino.Mocks;
 
-    using SAF.Testing.Common;
-
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
-    using Startitecture.Repository.Mapping;
+    using Startitecture.Orm.Repository;
+    using Startitecture.Orm.Testing.RhinoMocks;
 
     /// <summary>
     /// The form layout service tests.

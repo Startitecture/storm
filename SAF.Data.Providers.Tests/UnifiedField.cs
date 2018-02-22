@@ -10,8 +10,6 @@ namespace SAF.Data.Providers.Tests
     using System.Collections.Generic;
     using System.Linq;
 
-    using SAF.Testing.Common;
-
     using Startitecture.Core;
 
     /// <summary>

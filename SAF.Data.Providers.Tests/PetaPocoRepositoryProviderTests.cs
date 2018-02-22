@@ -14,12 +14,12 @@ namespace SAF.Data.Providers.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using SAF.Data.Providers.Tests.PM;
-    using SAF.Testing.Common;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
-    using Startitecture.Repository.Mapping;
+    using Startitecture.Orm.Repository;
 
     /// <summary>
     /// The peta poco repository provider tests.
@@ -151,7 +151,7 @@ namespace SAF.Data.Providers.Tests
                         attachments.Add(item);
                     }
 
-                    var transactSqlSelection = Query.From<AttachmentRow>().Matching(row => row.Subject, "UNIT_TEST:MyTestAttachment%");
+                    var transactSqlSelection = Select.From<AttachmentRow>().Matching(row => row.Subject, "UNIT_TEST:MyTestAttachment%");
                     transactSqlSelection.Limit = 10;
                     var actual = target.GetSelection(transactSqlSelection).ToList();
                     Assert.AreEqual(10, actual.Count);
@@ -195,7 +195,7 @@ namespace SAF.Data.Providers.Tests
                 try
                 {
                     target.ChangeDatabase("DEVTEST01");
-                    var actual = target.GetFirstOrDefault(Query.From<AttachmentRow>().Matching(row => row.Subject, expected.Subject));
+                    var actual = target.GetFirstOrDefault(Select.From<AttachmentRow>().Matching(row => row.Subject, expected.Subject));
                     Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
                 }
                 finally
@@ -217,7 +217,7 @@ namespace SAF.Data.Providers.Tests
                 target.ChangeDatabase("DEVTEST01");
 
                 var stopwatch = Stopwatch.StartNew();
-                var actual = target.GetFirstOrDefault(Query.From<WorkflowPhaseRow>().Matching(row => row.WorkflowPhaseId, 269));
+                var actual = target.GetFirstOrDefault(Select.From<WorkflowPhaseRow>().Matching(row => row.WorkflowPhaseId, 269));
                 Trace.TraceInformation($"First run: {stopwatch.Elapsed}");
 
                 Assert.IsNull(actual.ProcessPhase?.PhaseActionDeadline);
@@ -225,11 +225,11 @@ namespace SAF.Data.Providers.Tests
                 Assert.IsNull(actual.WorkflowSignatureOption);
 
                 stopwatch.Restart();
-                target.GetFirstOrDefault(Query.From<WorkflowPhaseRow>().Matching(row => row.WorkflowPhaseId, 214));
+                target.GetFirstOrDefault(Select.From<WorkflowPhaseRow>().Matching(row => row.WorkflowPhaseId, 214));
                 Trace.TraceInformation($"Second run (different ID): {stopwatch.Elapsed}");
 
                 stopwatch.Restart();
-                target.GetFirstOrDefault(Query.From<WorkflowPhaseRow>().Matching(row => row.WorkflowPhaseId, 269));
+                target.GetFirstOrDefault(Select.From<WorkflowPhaseRow>().Matching(row => row.WorkflowPhaseId, 269));
                 Trace.TraceInformation($"Third run (same ID): {stopwatch.Elapsed}");
             }
         }
@@ -244,7 +244,7 @@ namespace SAF.Data.Providers.Tests
             using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 target.ChangeDatabase("DEVTEST01");
-                var itemSelection = Query.From<AttachmentRow>().Matching(row => row.Subject, $"UNIT_TEST:{Generator.NextDouble()}");
+                var itemSelection = Select.From<AttachmentRow>().Matching(row => row.Subject, $"UNIT_TEST:{Generator.NextDouble()}");
                 var actual = target.GetFirstOrDefault(itemSelection);
                 Assert.AreEqual(null, actual);
             }
@@ -281,7 +281,7 @@ namespace SAF.Data.Providers.Tests
                 try
                 {
                     target.ChangeDatabase("DEVTEST01");
-                    var actual = target.Contains(Query.From<AttachmentRow>().Matching(row => row.Subject, expected.Subject));
+                    var actual = target.Contains(Select.From<AttachmentRow>().Matching(row => row.Subject, expected.Subject));
                     Assert.IsTrue(actual);
                 }
                 finally
@@ -301,7 +301,7 @@ namespace SAF.Data.Providers.Tests
             using (var target = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
             {
                 target.ChangeDatabase("DEVTEST01");
-                var itemSelection = Query.From<AttachmentRow>().Matching(row => row.Subject, $"UNIT_TEST:{Generator.NextDouble()}");
+                var itemSelection = Select.From<AttachmentRow>().Matching(row => row.Subject, $"UNIT_TEST:{Generator.NextDouble()}");
                 var actual = target.Contains(itemSelection);
                 Assert.AreEqual(false, actual);
             }
@@ -333,7 +333,7 @@ namespace SAF.Data.Providers.Tests
                 {
                     target.ChangeDatabase("DEVTEST01");
                     target.Save(expected, expected.ToExampleSelection(row => row.AttachmentId));
-                    var itemSelection = Query.From<AttachmentRow>().Matching(row => row.Subject, expected.Subject);
+                    var itemSelection = Select.From<AttachmentRow>().Matching(row => row.Subject, expected.Subject);
                     var result = target.DeleteItems(itemSelection);
 
                     Assert.AreEqual(1, result);
@@ -412,7 +412,7 @@ namespace SAF.Data.Providers.Tests
                     var inserted = target.InsertItem(expected);
                     expected.SortOrder = 2;
 
-                    var itemSelection = Query.From<AttachmentRow>().Matching(row => row.AttachmentId, inserted.AttachmentId);
+                    var itemSelection = Select.From<AttachmentRow>().Matching(row => row.AttachmentId, inserted.AttachmentId);
                     var result = target.Update(expected, itemSelection);
                     Assert.AreEqual(1, result);
 
@@ -446,15 +446,15 @@ namespace SAF.Data.Providers.Tests
         private static void DeleteUnitTestItems(IRepositoryProvider provider)
         {
             // Delete the attachment documents based on finding their versions.
-            var versionSelection = Query.From<DocumentVersionRow>(row => row.DocumentVersionId).Matching(row => row.Name, "UNIT_TEST:%");
+            var versionSelection = Select.From<DocumentVersionRow>(row => row.DocumentVersionId).Matching(row => row.Name, "UNIT_TEST:%");
             var docVersionIds = provider.GetSelection(versionSelection).Select(x => x.DocumentVersionId);
-            provider.DeleteItems(Query.From<AttachmentDocumentRow>().Include(row => row.DocumentVersionId, docVersionIds.ToArray()));
+            provider.DeleteItems(Select.From<AttachmentDocumentRow>().Include(row => row.DocumentVersionId, docVersionIds.ToArray()));
 
             // Delete the rest using a filter.
-            provider.DeleteItems(Query.From<AttachmentNoteRow>().Matching(row => row.Content, "UNIT_TEST:%"));
-            provider.DeleteItems(Query.From<AttachmentRow>().Matching(row => row.Subject, "UNIT_TEST:MyTestAttachment%"));
-            provider.DeleteItems(Query.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST:%"));
-            provider.DeleteItems(Query.From<DocumentRow>().Matching(row => row.Identifier, "UNIT_TEST:%"));
+            provider.DeleteItems(Select.From<AttachmentNoteRow>().Matching(row => row.Content, "UNIT_TEST:%"));
+            provider.DeleteItems(Select.From<AttachmentRow>().Matching(row => row.Subject, "UNIT_TEST:MyTestAttachment%"));
+            provider.DeleteItems(Select.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST:%"));
+            provider.DeleteItems(Select.From<DocumentRow>().Matching(row => row.Identifier, "UNIT_TEST:%"));
         }
     }
 }

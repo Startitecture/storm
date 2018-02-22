@@ -14,9 +14,8 @@ namespace SAF.Data.Providers.Tests
 
     using Rhino.Mocks;
 
-    using SAF.Testing.Common;
-
     using Startitecture.Orm.Mapper;
+    using Startitecture.Orm.Repository.Tests.Models;
 
     /// <summary>
     /// The database tests.
