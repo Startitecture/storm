@@ -9,9 +9,12 @@ namespace SAF.Data.Providers.Tests
     using System;
     using System.Collections.Generic;
 
+    using SAF.Data.Providers.Tests.FieldsModel;
+
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository;
+    using Startitecture.Orm.Testing.Model.Models;
 
     /// <summary>
     /// The person repository.
@@ -36,7 +39,7 @@ namespace SAF.Data.Providers.Tests
         /// The selection to make.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="Person"/> items matching the <paramref name="selection"/>.
+        /// An <see cref="IEnumerable{T}"/> of <see cref="Startitecture.Orm.Testing.Model.Person"/> items matching the <paramref name="selection"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.

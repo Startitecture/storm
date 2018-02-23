@@ -9,6 +9,8 @@ namespace Startitecture.Orm.Repository.Tests.Models
     using System;
     using System.Collections.Generic;
 
+    using SAF.Data.Providers.Tests;
+
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;

@@ -3,6 +3,9 @@
     using System;
     using System.Collections.Generic;
 
+    using Startitecture.Core;
+    using Startitecture.Orm.Schema;
+
     /// <summary>
     /// The template.
     /// </summary>

@@ -11,6 +11,9 @@ namespace SAF.Data.Providers.Tests
     using System.Linq;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Testing.Model;
+
+    using Person = SAF.Data.Providers.Tests.FieldsModel.Person;
 
     /// <summary>
     /// The unified field value.

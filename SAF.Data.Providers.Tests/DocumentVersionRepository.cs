@@ -15,6 +15,7 @@ namespace SAF.Data.Providers.Tests
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The document version repository.
@@ -60,7 +61,7 @@ namespace SAF.Data.Providers.Tests
         /// The document ID of the document to get the versions for.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="DocumentVersion"/> items for the specified
+        /// An <see cref="IEnumerable{T}"/> of <see cref="Startitecture.Orm.Testing.Model.DocumentVersion"/> items for the specified
         /// <paramref name="documentId"/>.
         /// </returns>
         public IEnumerable<DocumentVersion> SelectDocumentVersions(int documentId)

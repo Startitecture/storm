@@ -12,6 +12,10 @@ namespace Startitecture.Orm.Testing.Model
     using System;
     using System.Collections.Generic;
 
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
+
     /// <summary>
     /// The template version.
     /// </summary>

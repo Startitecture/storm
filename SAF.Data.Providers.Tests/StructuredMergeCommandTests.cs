@@ -20,6 +20,7 @@ namespace SAF.Data.Providers.Tests
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Sql;
+    using Startitecture.Orm.Testing.Model;
     using Startitecture.Orm.Testing.RhinoMocks;
 
     /// <summary>

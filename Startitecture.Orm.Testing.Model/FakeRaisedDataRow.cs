@@ -9,6 +9,13 @@
 
 namespace Startitecture.Orm.Testing.Model
 {
+    using System;
+    using System.Collections.Generic;
+
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
+
     /// <summary>
     /// The fake raised data row.
     /// </summary>

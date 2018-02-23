@@ -9,6 +9,8 @@ namespace Startitecture.Orm.Testing.Model
     using System;
     using System.Collections.Generic;
 
+    using Startitecture.Core;
+
     /// <summary>
     /// The fake sub entity.
     /// </summary>

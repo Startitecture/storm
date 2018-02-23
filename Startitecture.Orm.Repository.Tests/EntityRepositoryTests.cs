@@ -20,6 +20,7 @@ namespace Startitecture.Orm.Repository.Tests
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository.Tests.Models;
+    using Startitecture.Orm.Testing.Model;
     using Startitecture.Orm.Testing.RhinoMocks;
 
     /// <summary>

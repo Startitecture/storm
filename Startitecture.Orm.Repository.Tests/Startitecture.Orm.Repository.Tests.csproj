@@ -55,6 +55,7 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Xml" />
   </ItemGroup>
@@ -66,20 +67,32 @@
     <Compile Include="EntityMappingProfileTests.cs" />
     <Compile Include="EntityRepositoryTests.cs" />
     <Compile Include="ExtensionMethods.cs" />
+    <Compile Include="FakeChildEntityMappingProfile.cs" />
     <Compile Include="FakeChildEntityRepository.cs" />
+    <Compile Include="FakeComplexEntityMappingProfile.cs" />
     <Compile Include="FakeComplexEntityRepository.cs" />
+    <Compile Include="FakeCreatedByMappingProfile.cs" />
+    <Compile Include="FakeDataContext.cs" />
     <Compile Include="FakeDataEntity.cs" />
     <Compile Include="FakeDependencyEntityRepository.cs" />
+    <Compile Include="FakeDependentEntityMappingProfile.cs" />
     <Compile Include="FakeDependentEntityRepository.cs" />
     <Compile Include="FakeDto.cs" />
     <Compile Include="FakeEntity.cs" />
+    <Compile Include="FakeModifiedByMappingProfile.cs" />
+    <Compile Include="FakeMultiReferenceEntityMappingProfile.cs" />
     <Compile Include="FakeMultiReferenceEntityRepository.cs" />
+    <Compile Include="FakeRaisedChildEntityMappingProfile.cs" />
     <Compile Include="FakeRaisedChildEntityRepository.cs" />
+    <Compile Include="FakeRaisedComplexEntityMappingProfile.cs" />
     <Compile Include="FakeRaisedComplexEntityRepository.cs" />
     <Compile Include="FakeRaisedComplexEntityRepositoryTest.cs" />
+    <Compile Include="FakeRaisedSubEntityMappingProfile.cs" />
     <Compile Include="FakeRaisedSubEntityRepository.cs" />
     <Compile Include="FakeRaisedSubEntityRepositoryTest.cs" />
+    <Compile Include="FakeSubEntityMappingProfile.cs" />
     <Compile Include="FakeSubEntityRepository.cs" />
+    <Compile Include="FakeSubSubEntityMappingProfile.cs" />
     <Compile Include="FakeSubSubEntityRepository.cs" />
     <Compile Include="Models\TransactionItemBase.cs" />
     <Compile Include="RelatedEntityMappingContainerTests.cs" />
@@ -120,6 +133,10 @@
     <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj">
       <Project>{1F629078-CE41-48E5-8160-C13D46121252}</Project>
       <Name>Startitecture.Orm.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj">
+      <Project>{2541775F-1B34-4E5A-95BB-B8961633114A}</Project>
+      <Name>Startitecture.Orm.Testing.Model</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Testing.RhinoMocks\Startitecture.Orm.Testing.RhinoMocks.csproj">
       <Project>{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}</Project>

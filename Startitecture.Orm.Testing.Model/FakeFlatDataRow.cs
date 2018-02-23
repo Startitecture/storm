@@ -6,7 +6,14 @@
 
 namespace Startitecture.Orm.Testing.Model
 {
+    using System;
+    using System.Collections.Generic;
+
     using Query;
+
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake data row.

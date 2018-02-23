@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Repository.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Orm.Repository.Tests.Models;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The constructed entity mapping profile tests.

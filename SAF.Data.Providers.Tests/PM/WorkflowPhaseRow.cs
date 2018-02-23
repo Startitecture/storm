@@ -13,6 +13,7 @@ namespace SAF.Data.Providers.Tests.PM
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Sql;
+    using Startitecture.Orm.Testing.Model.FieldEntities;
 
     /// <summary>
     /// The workflow phase row.

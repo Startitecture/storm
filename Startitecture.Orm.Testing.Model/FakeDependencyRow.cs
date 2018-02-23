@@ -6,6 +6,9 @@
 
 namespace Startitecture.Orm.Testing.Model
 {
+    using Startitecture.Orm.Mapper;
+    using Startitecture.Orm.Schema;
+
     /// <summary>
     /// The fake dependency row.
     /// </summary>

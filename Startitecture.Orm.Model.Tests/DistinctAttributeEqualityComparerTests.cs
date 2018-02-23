@@ -13,6 +13,7 @@ namespace Startitecture.Orm.Model.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The distinct attribute equality comparer tests.

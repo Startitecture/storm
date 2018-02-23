@@ -7,13 +7,14 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests.Models
+namespace SAF.Data.Providers.Tests
 {
     using System;
     using System.Collections.Generic;
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository.Tests.Models;
     using Startitecture.Orm.Sql;
 
     /// <summary>

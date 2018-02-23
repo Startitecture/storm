@@ -7,10 +7,15 @@
 namespace Startitecture.Orm.Model.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Linq.Expressions;
     using System.Reflection;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+    using Startitecture.Core;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The entity definition tests.

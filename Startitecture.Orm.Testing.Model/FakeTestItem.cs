@@ -11,6 +11,8 @@ namespace Startitecture.Orm.Testing.Model
     using System.Diagnostics.CodeAnalysis;
     using System.Xml.Serialization;
 
+    using Startitecture.Core;
+
     /// <summary>
     /// The fake test item.
     /// </summary>

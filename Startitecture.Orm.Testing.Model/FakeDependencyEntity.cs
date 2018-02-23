@@ -10,6 +10,10 @@ namespace Startitecture.Orm.Testing.Model
 
     using Core;
 
+    using JetBrains.Annotations;
+
+    using Startitecture.Resources;
+
     /// <summary>
     /// The fake dependency entity.
     /// </summary>
@@ -107,7 +111,7 @@ namespace Startitecture.Orm.Testing.Model
 
             if (entity.FakeComplexEntityId.HasValue == false)
             {
-                throw new BusinessException(entity, String.Format((string)ValidationMessages.PropertyMustBeSet, "FakeComplexEntityId"));
+                throw new BusinessException(entity, String.Format(ValidationMessages.PropertyMustBeSet, "FakeComplexEntityId"));
             }
 
             this.FakeComplexEntityId = entity.FakeComplexEntityId;

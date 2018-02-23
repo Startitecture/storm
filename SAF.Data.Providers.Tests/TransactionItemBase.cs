@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests.Models
+namespace SAF.Data.Providers.Tests
 {
     using System.Diagnostics.CodeAnalysis;
 

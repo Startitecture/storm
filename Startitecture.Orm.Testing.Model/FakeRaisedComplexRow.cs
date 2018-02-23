@@ -9,6 +9,13 @@ namespace Startitecture.Orm.Testing.Model
     using System;
     using System.Collections.Generic;
 
+    using Startitecture.Core;
+    using Startitecture.Orm.Mapper;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
+
     /// <summary>
     /// The fake complex row.
     /// </summary>

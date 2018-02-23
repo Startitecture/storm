@@ -7,6 +7,7 @@
 namespace SAF.Data.Providers.Tests
 {
     using Startitecture.Orm.Repository;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The attachment document mapping profile.

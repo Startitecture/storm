@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests.Models
+namespace SAF.Data.Providers.Tests
 {
     using Startitecture.Orm.Schema;
 

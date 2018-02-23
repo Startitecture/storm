@@ -16,6 +16,7 @@ namespace Startitecture.Orm.Repository.Tests
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Repository.Tests.Models;
+    using Startitecture.Orm.Testing.Model;
     using Startitecture.Orm.Testing.RhinoMocks;
 
     /// <summary>

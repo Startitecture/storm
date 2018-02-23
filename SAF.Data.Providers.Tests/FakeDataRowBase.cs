@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests.Models
+namespace SAF.Data.Providers.Tests
 {
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;

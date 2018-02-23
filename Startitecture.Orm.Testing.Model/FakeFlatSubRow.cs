@@ -12,6 +12,9 @@ namespace Startitecture.Orm.Testing.Model
     using System;
     using System.Collections.Generic;
 
+    using Startitecture.Core;
+    using Startitecture.Orm.Model;
+
     /// <summary>
     /// The fake flat sub row.
     /// </summary>

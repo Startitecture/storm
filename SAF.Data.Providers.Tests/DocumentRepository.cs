@@ -14,6 +14,7 @@ namespace SAF.Data.Providers.Tests
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The document repository.

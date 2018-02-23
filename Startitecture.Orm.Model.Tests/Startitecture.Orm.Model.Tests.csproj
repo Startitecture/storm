@@ -60,6 +60,10 @@
       <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
       <Name>Startitecture.Core</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj">
+      <Project>{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}</Project>
+      <Name>Startitecture.Orm.Mapper</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
       <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
       <Name>Startitecture.Orm.Model</Name>
@@ -67,6 +71,10 @@
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
       <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
       <Name>Startitecture.Orm.Schema</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj">
+      <Project>{2541775F-1B34-4E5A-95BB-B8961633114A}</Project>
+      <Name>Startitecture.Orm.Testing.Model</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />

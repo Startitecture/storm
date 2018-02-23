@@ -2,6 +2,8 @@
 {
     using System;
 
+    using Startitecture.Core;
+
     public class FakeDataItem : IEquatable<FakeDataItem>
     {
         private static readonly Func<FakeDataItem, object>[] ComparisonProperties =

@@ -17,6 +17,7 @@ namespace SAF.Data.Providers.Tests
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The attachment document repository.
@@ -41,7 +42,7 @@ namespace SAF.Data.Providers.Tests
         /// The selection to make.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="AttachmentDocument"/> items matching the <paramref name="selection"/>.
+        /// An <see cref="IEnumerable{T}"/> of <see cref="Startitecture.Orm.Testing.Model.AttachmentDocument"/> items matching the <paramref name="selection"/>.
         /// </returns>
         public IEnumerable<AttachmentDocument> QueryAttachmentDocuments([NotNull] ItemSelection<AttachmentDocumentRow> selection)
         {

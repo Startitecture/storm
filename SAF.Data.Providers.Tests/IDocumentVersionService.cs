@@ -10,6 +10,8 @@ namespace SAF.Data.Providers.Tests
 
     using JetBrains.Annotations;
 
+    using Startitecture.Orm.Testing.Model;
+
     /// <summary>
     /// The DocumentVersionService interface.
     /// </summary>
@@ -22,7 +24,7 @@ namespace SAF.Data.Providers.Tests
         /// The document to get the versions for.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="DocumentVersion"/> items associated with the specified
+        /// An <see cref="IEnumerable{T}"/> of <see cref="Startitecture.Orm.Testing.Model.DocumentVersion"/> items associated with the specified
         /// <paramref name="document"/>.
         /// </returns>
         IEnumerable<DocumentVersion> GetAllVersions([NotNull] Document document);

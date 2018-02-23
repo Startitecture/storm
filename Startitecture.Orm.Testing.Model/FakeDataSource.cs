@@ -2,6 +2,8 @@
 {
     using System;
 
+    using Startitecture.Core;
+
     public class FakeDataSource : IEquatable<FakeDataSource>
     {
         private static readonly Func<FakeDataSource, object>[] ComparisonProperties =

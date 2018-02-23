@@ -8,6 +8,10 @@ namespace Startitecture.Orm.Testing.Model
     using System;
     using System.Collections.Generic;
 
+    using JetBrains.Annotations;
+
+    using Startitecture.Core;
+
     /// <summary>
     /// The fake complex entity.
     /// </summary>

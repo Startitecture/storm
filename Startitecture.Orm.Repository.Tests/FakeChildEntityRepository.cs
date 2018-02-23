@@ -18,6 +18,7 @@ namespace Startitecture.Orm.Repository.Tests
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository.Tests.Models;
     using Startitecture.Orm.Sql;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The fake child entity repository.

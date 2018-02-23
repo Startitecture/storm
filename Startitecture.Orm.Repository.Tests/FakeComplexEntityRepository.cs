@@ -9,11 +9,9 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
-    using Startitecture.Orm.Model;
-
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Repository.Tests.Models;
+    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The fake entity repository.

@@ -43,6 +43,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ActionPrincipal.cs" />
+    <Compile Include="DocumentEntities\ActionPrincipalRow.cs" />
+    <Compile Include="Attachment.cs" />
+    <Compile Include="AttachmentDocument.cs" />
+    <Compile Include="DocumentEntities\AttachmentDocumentRow.cs" />
+    <Compile Include="AttachmentNote.cs" />
+    <Compile Include="DocumentEntities\AttachmentRow.cs" />
+    <Compile Include="Document.cs" />
+    <Compile Include="DocumentType.cs" />
+    <Compile Include="DocumentEntities\DocumentTypeRow.cs" />
+    <Compile Include="DocumentVersion.cs" />
+    <Compile Include="DocumentEntities\DocumentVersionRow.cs" />
     <Compile Include="FakeChildEntity.cs" />
     <Compile Include="FakeChildRow.cs" />
     <Compile Include="FakeComplexEntity.cs" />
@@ -78,12 +90,31 @@
     <Compile Include="Instance.cs" />
     <Compile Include="InstanceExtension.cs" />
     <Compile Include="InstanceSection.cs" />
+    <Compile Include="FieldEntities\Generated\Database.cs">
+      <DependentUpon>Database.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="DocumentEntities\Generated\Database.cs">
+      <DependentUpon>Database.tt</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="OverriddenColumnNameRow.cs" />
+    <Compile Include="Person.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaisedOverriddenColumnNameRow.cs" />
+    <Compile Include="RelatedRow.cs" />
     <Compile Include="Template.cs" />
     <Compile Include="TemplateSection.cs" />
     <Compile Include="TemplateVersion.cs" />
+    <Compile Include="DocumentEntities\UserRow.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="FieldEntities\Generated\PetaPoco.Core.ttinclude" />
+    <None Include="FieldEntities\Generated\PetaPoco.Generator.ttinclude" />
+    <None Include="DocumentEntities\Generated\PetaPoco.Core.ttinclude" />
+    <None Include="DocumentEntities\Generated\PetaPoco.Generator.ttinclude" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
@@ -119,6 +150,18 @@
       <Project>{199411AA-992F-48AB-B8A3-E1E5506F72F5}</Project>
       <Name>Startitecture.Resources</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DocumentEntities\Generated\Database.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Database.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="FieldEntities\Generated\Database.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Database.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

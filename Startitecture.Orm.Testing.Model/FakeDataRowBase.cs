@@ -9,6 +9,9 @@
 
 namespace Startitecture.Orm.Testing.Model
 {
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Schema;
+
     /// <summary>
     /// The fake data row base.
     /// </summary>

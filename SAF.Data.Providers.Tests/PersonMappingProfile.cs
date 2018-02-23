@@ -6,7 +6,10 @@
 
 namespace SAF.Data.Providers.Tests
 {
+    using SAF.Data.Providers.Tests.FieldsModel;
+
     using Startitecture.Orm.Repository;
+    using Startitecture.Orm.Testing.Model.Models;
 
     /// <summary>
     /// The person mapping profile.

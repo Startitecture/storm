@@ -4,14 +4,14 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests.Models
+namespace SAF.Data.Providers.Tests
 {
     using System;
     using System.Collections.Generic;
 
-    using Query;
-
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Repository.Tests.Models;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
 
