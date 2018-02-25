@@ -21,6 +21,8 @@ namespace Startitecture.Orm.Mapper.Tests
     using Startitecture.Orm.Testing.Model.DocumentEntities;
     using Startitecture.Orm.Testing.Model.DocumentEntities.PM;
 
+    using WorkflowPhaseRow = Startitecture.Orm.Testing.Model.DocumentEntities.PM.WorkflowPhaseRow;
+
     /// <summary>
     /// The peta poco repository provider tests.
     /// </summary>

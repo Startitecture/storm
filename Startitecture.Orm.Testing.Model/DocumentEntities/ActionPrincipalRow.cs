@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Testing.Model.Models
+namespace Startitecture.Orm.Testing.Model.DocumentEntities
 {
     using Startitecture.Orm.Schema;
 

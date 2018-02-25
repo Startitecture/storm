@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.27130.2027
+VisualStudioVersion = 15.0.27130.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D49E474-547C-45FE-B0D6-DE51287A93D5}"
 	ProjectSection(SolutionItems) = preProject
@@ -9,15 +9,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Startitecture.Orm.vsmdi = Startitecture.Orm.vsmdi
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{6BD71D9F-938D-4A32-8A5C-1ECCC5B5DCA8}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Code Analysis", "Solution Code Analysis", "{9E90DA71-5C8D-4AC9-9BB4-F29B4E3A64A0}"
 	ProjectSection(SolutionItems) = preProject
 		Solution Code Analysis\CustomDictionary.xml = Solution Code Analysis\CustomDictionary.xml
 		Settings.StyleCop = Settings.StyleCop
 	EndProjectSection
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SAF.Data.Providers.Tests", "SAF.Data.Providers.Tests\SAF.Data.Providers.Tests.csproj", "{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildUtilities", "BuildUtilities", "{738BD095-1E36-47AA-822B-1D085BD3247A}"
 	ProjectSection(SolutionItems) = preProject
@@ -94,22 +90,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.DebugLocal|Any CPU.ActiveCfg = DebugLocal|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.DebugLocal|Any CPU.Build.0 = DebugLocal|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.DebugLocal|Mixed Platforms.ActiveCfg = DebugLocal|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.DebugLocal|Mixed Platforms.Build.0 = DebugLocal|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.DebugLocal|x86.ActiveCfg = DebugLocal|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.DebugLocal|x86.Build.0 = DebugLocal|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A}.Release|x86.ActiveCfg = Release|Any CPU
 		{5643589D-8D46-4717-AE66-994173F3D671}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{5643589D-8D46-4717-AE66-994173F3D671}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5643589D-8D46-4717-AE66-994173F3D671}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -538,7 +518,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{505C0B1B-18CF-4D2F-900F-C4C128AE4C7A} = {6BD71D9F-938D-4A32-8A5C-1ECCC5B5DCA8}
 		{5643589D-8D46-4717-AE66-994173F3D671} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
 		{8C414EA1-5AB4-43BA-BB01-88CE7DE25FC6} = {98AAE6EB-76D9-4D84-B74B-1981D5D597C3}
 		{B2A85677-E1D8-4919-A5C6-1B8BB59C819A} = {98AAE6EB-76D9-4D84-B74B-1981D5D597C3}
@@ -566,8 +545,8 @@ Global
 		{0190B7C6-9EB8-4EF8-8973-FE766CD800C7} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
+		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

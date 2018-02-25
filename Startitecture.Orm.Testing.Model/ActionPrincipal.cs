@@ -9,11 +9,12 @@ namespace Startitecture.Orm.Testing.Model
     using System;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Testing.Model.PM;
 
     /// <summary>
     /// Contains information about a person or user associated with an action.
     /// </summary>
-    public class ActionPrincipal : Person, IEquatable<ActionPrincipal>
+    public class ActionPrincipal : PM.Person, IEquatable<ActionPrincipal>
     {
         /// <summary>
         /// The principal comparison properties.

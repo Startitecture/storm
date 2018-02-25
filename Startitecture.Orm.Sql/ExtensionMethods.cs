@@ -164,7 +164,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public static string CreateJoinClause(this IEnumerable<IEntityRelation> selection)
         {
-            return string.Join(Environment.NewLine, selection.Select(GenerateRelationStatement));
+            return String.Join(Environment.NewLine, selection.Select(GenerateRelationStatement));
         }
 
         /// <summary>
@@ -178,10 +178,10 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public static string GetQualifiedName(this EntityLocation location)
         {
-            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
+            var isEntityAliased = String.IsNullOrWhiteSpace(location.Alias) == false;
             return isEntityAliased
-                       ? string.Concat('[', location.Alias, ']')
-                       : string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
+                       ? String.Concat('[', location.Alias, ']')
+                       : String.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(definition));
             }
 
-            return string.Concat('[', definition.EntityContainer, ']', '.', '[', definition.EntityName, ']');
+            return String.Concat('[', definition.EntityContainer, ']', '.', '[', definition.EntityName, ']');
         }
 
         /// <summary>
@@ -228,7 +228,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public static string GetCanonicalName(this EntityAttributeDefinition attribute)
         {
-            return string.Concat(attribute.Entity.GetCanonicalName(), '.', '[', attribute.PhysicalName, ']');
+            return String.Concat(attribute.Entity.GetCanonicalName(), '.', '[', attribute.PhysicalName, ']');
         }
 
         /// <summary>
@@ -271,12 +271,12 @@ namespace Startitecture.Orm.Sql
                 switch (count)
                 {
                     case 0:
-                        filterTokens.Add(string.Format(nullValuePredicate, (object)qualifiedName));
+                        filterTokens.Add(String.Format(nullValuePredicate, (object)qualifiedName));
                         break;
 
                     case 1:
                         filterTokens.Add(
-                            string.Format(EqualityFilter, qualifiedName, GetEqualityOperand(filter.FilterValues.First()), index++));
+                            String.Format(EqualityFilter, qualifiedName, GetEqualityOperand(filter.FilterValues.First()), index++));
 
                         break;
 
@@ -292,21 +292,21 @@ namespace Startitecture.Orm.Sql
                             // If both values are null, add a NOT NULL predicate.
                             if (filter.FilterValues.All(Evaluate.IsNull))
                             {
-                                filterTokens.Add(string.Format(nullValuePredicate, (object)qualifiedName));
+                                filterTokens.Add(String.Format(nullValuePredicate, (object)qualifiedName));
                             }
                             else if (filter.FilterValues.First() == null)
                             {
                                 // If the first value is null, add a less than or equals (<=) predicate.
-                                filterTokens.Add(string.Format(LessThanPredicate, qualifiedName, index++));
+                                filterTokens.Add(String.Format(LessThanPredicate, qualifiedName, index++));
                             }
                             else if (filter.FilterValues.Last() == null)
                             {
                                 // If the last value is null, add a greater than or equals (>=) predicate.
-                                filterTokens.Add(string.Format(GreaterThanPredicate, qualifiedName, index++));
+                                filterTokens.Add(String.Format(GreaterThanPredicate, qualifiedName, index++));
                             }
                             else
                             {
-                                filterTokens.Add(string.Format(BetweenFilter, qualifiedName, index++, index++));
+                                filterTokens.Add(String.Format(BetweenFilter, qualifiedName, index++, index++));
                             }
                         }
 
@@ -319,7 +319,7 @@ namespace Startitecture.Orm.Sql
                 }
             }
 
-            return string.Join(string.Concat(FilterSeparator, Environment.NewLine), filterTokens);
+            return String.Join(String.Concat(FilterSeparator, Environment.NewLine), filterTokens);
         }
 
         /// <summary>
@@ -362,11 +362,11 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private static string GetQualifiedName(this EntityAttributeDefinition attribute, string entityAlias)
         {
-            var entityQualifiedName = string.IsNullOrWhiteSpace(entityAlias)
+            var entityQualifiedName = String.IsNullOrWhiteSpace(entityAlias)
                                           ? attribute.Entity.GetQualifiedName()
-                                          : string.Concat('[', entityAlias, ']');
+                                          : String.Concat('[', entityAlias, ']');
 
-            return string.Concat(entityQualifiedName, '.', '[', attribute.PhysicalName, ']');
+            return String.Concat(entityQualifiedName, '.', '[', attribute.PhysicalName, ']');
         }
 
         /// <summary>
@@ -386,8 +386,8 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private static string GetInclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            var indexTokens = filterValues.Select((o, i) => string.Format(ParameterFormat, filterIndex + i));
-            var inclusionToken = string.Format(InclusionPredicate, qualifiedName, string.Join(ParameterSeparator, indexTokens));
+            var indexTokens = filterValues.Select((o, i) => String.Format(ParameterFormat, filterIndex + i));
+            var inclusionToken = String.Format(InclusionPredicate, qualifiedName, String.Join(ParameterSeparator, indexTokens));
             return inclusionToken;
         }
 
@@ -407,10 +407,10 @@ namespace Startitecture.Orm.Sql
             var relationEntity = entityRelation.RelationAttribute.Entity.GetCanonicalName();
             var relationName = GetQualifiedName(entityRelation.RelationAttribute, entityRelation.RelationLocation.Alias);
 
-            if (string.IsNullOrWhiteSpace(entityRelation.RelationLocation.Alias))
+            if (String.IsNullOrWhiteSpace(entityRelation.RelationLocation.Alias))
             {
                 // Use the entity names for the inner join if no alias has been requested.
-                return string.Format(
+                return String.Format(
                     RelationStatementFormat,
                     joinType,
                     relationEntity,
@@ -419,7 +419,7 @@ namespace Startitecture.Orm.Sql
             }
 
             // Use the entity names names for the inner join and alias the table.
-            return string.Format(
+            return String.Format(
                 AliasedRelationStatementFormat,
                 joinType,
                 relationEntity,
@@ -484,7 +484,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private static string GetCanonicalName(this EntityLocation location)
         {
-            return string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
+            return String.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
         }
 
         /// <summary>

@@ -44,6 +44,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ActionPrincipal.cs" />
+    <Compile Include="Contract.cs" />
+    <Compile Include="ContractCategory.cs" />
+    <Compile Include="ContractingEntity.cs" />
+    <Compile Include="ContractType.cs" />
+    <Compile Include="Department.cs" />
     <Compile Include="DocumentEntities\ActionPrincipalRow.cs" />
     <Compile Include="Attachment.cs" />
     <Compile Include="AttachmentDocument.cs" />
@@ -55,6 +60,8 @@
     <Compile Include="DocumentEntities\DocumentTypeRow.cs" />
     <Compile Include="DocumentVersion.cs" />
     <Compile Include="DocumentEntities\DocumentVersionRow.cs" />
+    <Compile Include="PM\EnumeratedValue.cs" />
+    <Compile Include="ExternalEntity.cs" />
     <Compile Include="FakeChildEntity.cs" />
     <Compile Include="FakeChildRow.cs" />
     <Compile Include="FakeComplexEntity.cs" />
@@ -87,6 +94,44 @@
     <Compile Include="FakeSubSubEntity.cs" />
     <Compile Include="FakeSubSubRow.cs" />
     <Compile Include="FakeTestItem.cs" />
+    <Compile Include="DocumentEntities\FormSubmissionRow.cs" />
+    <Compile Include="DocumentEntities\FormSubmissionValueDetailRow.cs" />
+    <Compile Include="DocumentEntities\FormSubmissionValueRow.cs" />
+    <Compile Include="DocumentEntities\UnifiedFieldRow.cs" />
+    <Compile Include="FieldPlacement.cs" />
+    <Compile Include="FieldEntities\FieldPlacementRow.cs" />
+    <Compile Include="FieldEntities\FieldPlacementTableType.cs" />
+    <Compile Include="FieldsMessages.Designer.cs">
+      <DependentUpon>FieldsMessages.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Form.cs" />
+    <Compile Include="FormLayout.cs" />
+    <Compile Include="FormSearchResult.cs" />
+    <Compile Include="FormSubmission.cs" />
+    <Compile Include="FormSubmissionValue.cs" />
+    <Compile Include="Person.cs" />
+    <Compile Include="PM\FormSubmission.cs" />
+    <Compile Include="PM\FormSubmissionValue.cs" />
+    <Compile Include="FormVersion.cs" />
+    <Compile Include="FieldEntities\FormVersionRow.cs" />
+    <Compile Include="IActionContext.cs" />
+    <Compile Include="IDocumentVersionService.cs" />
+    <Compile Include="IFieldPlacementRepository.cs" />
+    <Compile Include="IFieldPlacementService.cs" />
+    <Compile Include="IFormLayoutRepository.cs" />
+    <Compile Include="IFormLayoutService.cs" />
+    <Compile Include="IFormRepository.cs" />
+    <Compile Include="IFormSubmissionValueService.cs" />
+    <Compile Include="IFormVersionRepository.cs" />
+    <Compile Include="IFormVersionService.cs" />
+    <Compile Include="ILayoutPageRepository.cs" />
+    <Compile Include="ILayoutPageSectionRepository.cs" />
+    <Compile Include="ILayoutPageSectionService.cs" />
+    <Compile Include="ILayoutPageService.cs" />
+    <Compile Include="ILayoutSectionRepository.cs" />
+    <Compile Include="ILayoutSectionService.cs" />
     <Compile Include="Instance.cs" />
     <Compile Include="InstanceExtension.cs" />
     <Compile Include="InstanceSection.cs" />
@@ -100,15 +145,54 @@
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
+    <Compile Include="IOrderedElement.cs" />
+    <Compile Include="IOrderedElementSearcher.cs" />
+    <Compile Include="ITrackChanges.cs" />
+    <Compile Include="IUnifiedFieldRepository.cs" />
+    <Compile Include="IWorkflowFormInstanceService.cs" />
+    <Compile Include="LayoutPage.cs" />
+    <Compile Include="FieldEntities\LayoutPageRow.cs" />
+    <Compile Include="LayoutPageSection.cs" />
+    <Compile Include="FieldEntities\LayoutPageSectionRow.cs" />
+    <Compile Include="LayoutPageSectionTableType.cs" />
+    <Compile Include="LayoutSection.cs" />
+    <Compile Include="Market.cs" />
+    <Compile Include="OrderedElementComparer.cs" />
+    <Compile Include="OrderedElementSearcher.cs" />
     <Compile Include="OverriddenColumnNameRow.cs" />
-    <Compile Include="Person.cs" />
+    <Compile Include="PM\Person.cs" />
+    <Compile Include="DocumentEntities\PM\PhaseActionDeadlineRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessFormSubmissionRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessPhaseRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessVersionRow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RaisedOverriddenColumnNameRow.cs" />
     <Compile Include="RelatedRow.cs" />
+    <Compile Include="DocumentEntities\PM\SignatureOptionRow.cs" />
+    <Compile Include="Site.cs" />
     <Compile Include="Template.cs" />
     <Compile Include="TemplateSection.cs" />
     <Compile Include="TemplateVersion.cs" />
     <Compile Include="DocumentEntities\UserRow.cs" />
+    <Compile Include="DocumentEntities\PM\WorkflowPhaseRow.cs" />
+    <Compile Include="DocumentEntities\PM\WorkflowRow.cs" />
+    <Compile Include="DocumentEntities\PM\WorkflowSignatureOptionRow.cs" />
+    <Compile Include="PM\UnifiedField.cs" />
+    <Compile Include="PM\UnifiedFieldSource.cs" />
+    <Compile Include="PM\UnifiedFieldSourceType.cs" />
+    <Compile Include="PM\UnifiedFieldType.cs" />
+    <Compile Include="PM\UnifiedFieldValue.cs" />
+    <Compile Include="PM\UnifiedValueType.cs" />
+    <Compile Include="UnifiedField.cs" />
+    <Compile Include="UnifiedFieldType.cs" />
+    <Compile Include="UnifiedFieldValue.cs" />
+    <Compile Include="UnifiedSourceValue.cs" />
+    <Compile Include="UnifiedValueType.cs" />
+    <Compile Include="User.cs" />
+    <Compile Include="FieldEntities\UserRow.cs" />
+    <Compile Include="WorkflowFormInstance.cs" />
+    <Compile Include="WorkflowInstance.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="FieldEntities\Generated\PetaPoco.Core.ttinclude" />
@@ -162,6 +246,12 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Database.cs</LastGenOutput>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FieldsMessages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>FieldsMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
