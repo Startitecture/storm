@@ -199,31 +199,23 @@ namespace Startitecture.Core
             // We assume here that all of the first values are the root tree node.
             var level = 1;
             var ancestor = pathsList.First().First();
-            var allCommon = true;
 
-            while (allCommon)
+            while (true)
             {
-                foreach (var pathList in pathsList)
+                var checkLevel = level;
+                var nodes = pathsList.Select(list => list.Skip(checkLevel).FirstOrDefault()).ToList();
+
+                var firstNode = nodes.FirstOrDefault();
+
+                if (firstNode != null && nodes.Skip(1).All(n => ReferenceEquals(firstNode, n)))
                 {
-                    var candidate = pathList.Skip(level).FirstOrDefault();
-
-                    // References are the same for the same parent in the tree.
-                    if (ReferenceEquals(candidate?.Parent, ancestor))
-                    {
-                        continue;
-                    }
-
-                    allCommon = false;
-                    ancestor = ancestor.Parent;
+                    ancestor = firstNode;
+                    level++;
+                }
+                else
+                {
                     break;
                 }
-
-                if (allCommon)
-                {
-                    ancestor = pathsList.First().Skip(level).First();
-                }
-
-                level++;
             }
 
             return ancestor;

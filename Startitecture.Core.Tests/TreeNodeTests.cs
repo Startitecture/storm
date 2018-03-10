@@ -79,7 +79,7 @@ namespace Startitecture.Core.Tests
         /// The first common ancestor test.
         /// </summary>
         [TestMethod]
-        public void FirstCommonAncestor_TreeNodeOfIntsSameNode_ReturnsParent()
+        public void FirstCommonAncestor_TreeNodeOfIntsSameNode_ReturnsNode()
         {
             // Create a tree like the following
             // 1

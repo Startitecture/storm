@@ -8,8 +8,10 @@ namespace Startitecture.Orm.Mapper
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
     using System.Reflection;
+    using System.Text;
 
     using JetBrains.Annotations;
 
@@ -30,7 +32,7 @@ namespace Startitecture.Orm.Mapper
         private static readonly DataItemDefinitionProvider DefinitionProvider = Singleton<DataItemDefinitionProvider>.Instance;
 
         /// <summary>
-        /// The poco factories.
+        /// The POCO factories.
         /// </summary>
         private static readonly Cache<Tuple<string, string, int, int>, Delegate> PocoFactories =
             new Cache<Tuple<string, string, int, int>, Delegate>();
@@ -40,25 +42,30 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private static readonly FlatPocoFactory DirectFactory = FlatPocoFactory.DirectFactory;
 
-        /// <summary>
-        /// The get value methods cache.
-        /// </summary>
-        private readonly Cache<Type, MethodInfo> getValueMethodsCache = new Cache<Type, MethodInfo>();
+        /////// <summary>
+        /////// The get value methods cache.
+        /////// </summary>
+        ////private static readonly Cache<Type, MethodInfo> getValueMethodsCache = new Cache<Type, MethodInfo>();
 
         /// <summary>
         /// The relation properties cache.
         /// </summary>
-        private readonly Cache<string, PropertyInfo> relationPropertiesCache = new Cache<string, PropertyInfo>();
+        private static readonly Cache<string, PropertyInfo> RelationPropertiesCache = new Cache<string, PropertyInfo>();
 
         /// <summary>
-        /// The set methods cache.
+        /// The POCO cache. Not static because we do not want to cache pocos beyond the connection context.
         /// </summary>
-        private readonly Cache<string, MethodInfo> setMethodsCache = new Cache<string, MethodInfo>();
+        private readonly Cache<string, object> pocoCache = new Cache<string, object>();
 
-        /// <summary>
-        /// The set relation methods cache.
-        /// </summary>
-        private readonly Cache<string, MethodInfo> setRelationMethodsCache = new Cache<string, MethodInfo>();
+        /////// <summary>
+        /////// The set methods cache.
+        /////// </summary>
+        ////private readonly Cache<string, MethodInfo> setMethodsCache = new Cache<string, MethodInfo>();
+
+        /////// <summary>
+        /////// The set relation methods cache.
+        /////// </summary>
+        ////private readonly Cache<string, MethodInfo> setRelationMethodsCache = new Cache<string, MethodInfo>();
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -66,10 +73,10 @@ namespace Startitecture.Orm.Mapper
         /// <filterpriority>2</filterpriority>
         public void Dispose()
         {
-            this.getValueMethodsCache.Dispose();
-            this.relationPropertiesCache.Dispose();
-            this.setMethodsCache.Dispose();
-            this.setRelationMethodsCache.Dispose();
+            ////this.getValueMethodsCache.Dispose();
+            ////this.relationPropertiesCache.Dispose();
+            ////this.setMethodsCache.Dispose();
+            ////this.setRelationMethodsCache.Dispose();
         }
 
         /// <summary>
@@ -95,16 +102,16 @@ namespace Startitecture.Orm.Mapper
             var entityDefinition = DefinitionProvider.Resolve<T>();
             var qualifiedName = entityDefinition.GetQualifiedName();
             var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
-            var baseKey = new Tuple<string, string, int, int>(typeQualifiedName, entityDefinition.EntityName, 0, reader.FieldCount);
 
-            var baseDirectAttributes = entityDefinition.ReturnableAttributes.Where(x => x.IsReferencedDirect).ToList();
-            var basePocoDelegate = PocoFactories.Get(baseKey, () => DirectFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
-            var poco = (T)basePocoDelegate.DynamicInvoke(reader);
+            var pocoKey = GetPocoKey(entityDefinition, reader);
+            var poco = (T)this.pocoCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, typeQualifiedName, entityDefinition, reader));
 
             var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
 
             foreach (var relationAttribute in relationAttributes)
             {
+                // TODO: Need to get primamry keys from this for the related entity.
+                var relatedPocoKey = GetPocoKey(DefinitionProvider.Resolve(relationAttribute.Entity.EntityType), reader);
                 var entityReference = new EntityReference
                                           {
                                               ContainerType = typeof(T),
@@ -120,9 +127,7 @@ namespace Startitecture.Orm.Mapper
                 var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
                 var relatedType = relatedEntityLocation.EntityType;
 
-                var relatedPocoDelegate = PocoFactories.Get(
-                    relatedKey,
-                    () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
+                var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
 
                 var relatedEntity = relatedPocoDelegate.DynamicInvoke(reader);
 
@@ -147,6 +152,29 @@ namespace Startitecture.Orm.Mapper
             return poco;
         }
 
+        private static string GetPocoKey(IEntityDefinition entityDefinition, IDataRecord record)
+        {
+            var pocoKeyBuilder = new StringBuilder($"{entityDefinition.EntityContainer}.{entityDefinition.EntityName}");
+
+            foreach (var primaryKeyAttribute in entityDefinition.PrimaryKeyAttributes)
+            {
+                pocoKeyBuilder.Append($".{primaryKeyAttribute.PhysicalName}.{record.GetValue(record.GetOrdinal(primaryKeyAttribute.ReferenceName))}");
+            }
+
+            var pocoKey = pocoKeyBuilder.ToString();
+            return pocoKey;
+        }
+
+        private static T GetPocoFromReader<T>(PocoDataRequest dataRequest, string typeQualifiedName, IEntityDefinition entityDefinition, IDataReader reader)
+        {
+            var baseKey = new Tuple<string, string, int, int>(typeQualifiedName, entityDefinition.EntityName, 0, reader.FieldCount);
+
+            var baseDirectAttributes = entityDefinition.ReturnableAttributes.Where(x => x.IsReferencedDirect).ToList();
+            var basePocoDelegate = PocoFactories.Get(baseKey, () => DirectFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
+            var poco = (T)basePocoDelegate.DynamicInvoke(reader);
+            return poco;
+        }
+
         /// <summary>
         /// Navigates to the specified entity attribute, creating the path of entities on the base POCO.
         /// </summary>
@@ -159,11 +187,8 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The target entity as an <see cref="object"/>.
         /// </returns>
-        /// <exception cref="Startitecture.Core.OperationException">
+        /// <exception cref="OperationException">
         /// The location path is broken for the entity node.
-        /// </exception>
-        /// <exception cref="ApplicationConfigurationException">
-        /// An attempt was made to write to a read-only property.
         /// </exception>
         private object NavigateToEntity(LinkedListNode<EntityLocation> entityNode, object basePoco)
         {
@@ -200,7 +225,7 @@ namespace Startitecture.Orm.Mapper
                 // The property info is specific to the raised property on our POCO.
                 var entityType = currentEntity.GetType();
                 var relationKey = string.Concat(entityType, '.', relationName);
-                var propertyInfo = this.relationPropertiesCache.Get(relationKey, () => entityType.GetProperty(relationName));
+                var propertyInfo = RelationPropertiesCache.Get(relationKey, () => entityType.GetProperty(relationName));
 
                 if (propertyInfo == null)
                 {
@@ -217,7 +242,7 @@ namespace Startitecture.Orm.Mapper
                     if (propertyInfo.CanWrite == false)
                     {
                         var message = string.Format(
-                            (string)ErrorMessages.ReadOnlyPropertyCannotBeWrittenTo,
+                            ErrorMessages.ReadOnlyPropertyCannotBeWrittenTo,
                             propertyInfo.Name,
                             entityType.Name,
                             currentEntity);
@@ -225,7 +250,7 @@ namespace Startitecture.Orm.Mapper
                         throw new OperationException(propertyInfo, message);
                     }
 
-                    relation = Activator.CreateInstance((Type)propertyType);
+                    relation = Activator.CreateInstance(propertyType);
                     propertyInfo.SetMethod.Invoke(currentEntity, new[] { relation });
                 }
 

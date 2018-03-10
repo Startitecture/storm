@@ -29,7 +29,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void BeginTransaction_SqlCommand_ExecutesNonQuery()
         {
-            using (var target = new Database("TestConnection"))
+            using (var target = new Database("MasterDatabase"))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;
                 Assert.IsNotNull(transaction);

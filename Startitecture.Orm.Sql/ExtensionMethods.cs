@@ -1,11 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ExtensionMethods.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Sql
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
 
@@ -17,6 +20,9 @@ namespace Startitecture.Orm.Sql
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
 
+    /// <summary>
+    /// The extension methods.
+    /// </summary>
     public static class ExtensionMethods
     {
         /// <summary>
@@ -100,10 +106,14 @@ namespace Startitecture.Orm.Sql
         private const string LeftJoinClause = "LEFT JOIN";
 
         /// <summary>
-        /// A collection of all property names associated with the <see cref="Startitecture.Orm.Common.ITransactionContext"/> interface.
+        /// The name selector.
         /// </summary>
-        public static readonly IEnumerable<string> TransactionProperties =
-            typeof(ITransactionContext).GetNonIndexedProperties().Select(NameSelector);
+        private static readonly Func<PropertyInfo, string> NameSelector = x => x.Name;
+
+        /// <summary>
+        /// A collection of all property names associated with the <see cref="ITransactionContext" /> interface.
+        /// </summary>
+        private static readonly IEnumerable<string> TransactionProperties = typeof(ITransactionContext).GetNonIndexedProperties().Select(NameSelector);
 
         /// <summary>
         /// Gets an example selection for the current item.
@@ -120,9 +130,8 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// A <see cref="T:SAF.Data.ExampleSelection`1"/> for the current item using the specified selectors.
         /// </returns>
-        public static SqlSelection<TItem> ToExampleSelection<TItem>(
-            this TItem example, 
-            params Expression<Func<TItem, object>>[] selectors) where TItem : ITransactionContext, new()
+        public static SqlSelection<TItem> ToExampleSelection<TItem>(this TItem example, params Expression<Func<TItem, object>>[] selectors)
+            where TItem : ITransactionContext, new()
         {
             return new SqlSelection<TItem>(example, selectors);
         }
@@ -148,7 +157,8 @@ namespace Startitecture.Orm.Sql
         public static SqlSelection<TItem> ToRangeSelection<TItem>(
             this TItem lowerLimit,
             TItem upperLimit,
-            params Expression<Func<TItem, object>>[] selectors) where TItem : ITransactionContext, new()
+            params Expression<Func<TItem, object>>[] selectors)
+            where TItem : ITransactionContext, new()
         {
             return new SqlSelection<TItem>(lowerLimit, upperLimit, selectors);
         }
@@ -164,7 +174,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public static string CreateJoinClause(this IEnumerable<IEntityRelation> selection)
         {
-            return String.Join(Environment.NewLine, selection.Select(GenerateRelationStatement));
+            return string.Join(Environment.NewLine, selection.Select(GenerateRelationStatement));
         }
 
         /// <summary>
@@ -178,10 +188,10 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public static string GetQualifiedName(this EntityLocation location)
         {
-            var isEntityAliased = String.IsNullOrWhiteSpace(location.Alias) == false;
+            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
             return isEntityAliased
-                       ? String.Concat('[', location.Alias, ']')
-                       : String.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
+                       ? string.Concat('[', location.Alias, ']')
+                       : string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
         }
 
         /// <summary>
@@ -200,7 +210,7 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(definition));
             }
 
-            return String.Concat('[', definition.EntityContainer, ']', '.', '[', definition.EntityName, ']');
+            return string.Concat('[', definition.EntityContainer, ']', '.', '[', definition.EntityName, ']');
         }
 
         /// <summary>
@@ -228,7 +238,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public static string GetCanonicalName(this EntityAttributeDefinition attribute)
         {
-            return String.Concat(attribute.Entity.GetCanonicalName(), '.', '[', attribute.PhysicalName, ']');
+            return string.Concat(attribute.Entity.GetCanonicalName(), '.', '[', attribute.PhysicalName, ']');
         }
 
         /// <summary>
@@ -271,12 +281,11 @@ namespace Startitecture.Orm.Sql
                 switch (count)
                 {
                     case 0:
-                        filterTokens.Add(String.Format(nullValuePredicate, (object)qualifiedName));
+                        filterTokens.Add(string.Format(nullValuePredicate, qualifiedName));
                         break;
 
                     case 1:
-                        filterTokens.Add(
-                            String.Format(EqualityFilter, qualifiedName, GetEqualityOperand(filter.FilterValues.First()), index++));
+                        filterTokens.Add(string.Format(EqualityFilter, qualifiedName, GetEqualityOperand(filter.FilterValues.First()), index++));
 
                         break;
 
@@ -292,21 +301,21 @@ namespace Startitecture.Orm.Sql
                             // If both values are null, add a NOT NULL predicate.
                             if (filter.FilterValues.All(Evaluate.IsNull))
                             {
-                                filterTokens.Add(String.Format(nullValuePredicate, (object)qualifiedName));
+                                filterTokens.Add(string.Format(nullValuePredicate, qualifiedName));
                             }
                             else if (filter.FilterValues.First() == null)
                             {
                                 // If the first value is null, add a less than or equals (<=) predicate.
-                                filterTokens.Add(String.Format(LessThanPredicate, qualifiedName, index++));
+                                filterTokens.Add(string.Format(LessThanPredicate, qualifiedName, index++));
                             }
                             else if (filter.FilterValues.Last() == null)
                             {
                                 // If the last value is null, add a greater than or equals (>=) predicate.
-                                filterTokens.Add(String.Format(GreaterThanPredicate, qualifiedName, index++));
+                                filterTokens.Add(string.Format(GreaterThanPredicate, qualifiedName, index++));
                             }
                             else
                             {
-                                filterTokens.Add(String.Format(BetweenFilter, qualifiedName, index++, index++));
+                                filterTokens.Add(string.Format(BetweenFilter, qualifiedName, index++, index++));
                             }
                         }
 
@@ -319,7 +328,7 @@ namespace Startitecture.Orm.Sql
                 }
             }
 
-            return String.Join(String.Concat(FilterSeparator, Environment.NewLine), filterTokens);
+            return string.Join(string.Concat(FilterSeparator, Environment.NewLine), filterTokens);
         }
 
         /// <summary>
@@ -349,6 +358,40 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
+        /// Gets object values except for indexed and <see cref="Startitecture.Orm.Common.ITransactionContext"/> properties.
+        /// </summary>
+        /// <param name="obj">
+        /// The <see cref="Startitecture.Orm.Common.ITransactionContext"/> to obtain the properties for.
+        /// </param>
+        /// <returns>
+        /// A collection of <see cref="System.Object"/> items containing property values of the object.
+        /// </returns>
+        public static IEnumerable<object> ToValueCollection(this ITransactionContext obj)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException(nameof(obj));
+            }
+
+            var values = new List<object>();
+
+            var nonIndexedProperties = obj.GetType().GetNonIndexedProperties();
+
+            // ReSharper disable once LoopCanBeConvertedToQuery
+            foreach (var propertyInfo in nonIndexedProperties.OrderBy(NameSelector))
+            {
+                if (TransactionProperties.Contains(propertyInfo.Name))
+                {
+                    continue;
+                }
+
+                values.Add(propertyInfo.GetPropertyValue(obj));
+            }
+
+            return values;
+        }
+
+        /// <summary>
         /// Gets the qualified name for the specified attribute.
         /// </summary>
         /// <param name="attribute">
@@ -362,11 +405,11 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private static string GetQualifiedName(this EntityAttributeDefinition attribute, string entityAlias)
         {
-            var entityQualifiedName = String.IsNullOrWhiteSpace(entityAlias)
+            var entityQualifiedName = string.IsNullOrWhiteSpace(entityAlias)
                                           ? attribute.Entity.GetQualifiedName()
-                                          : String.Concat('[', entityAlias, ']');
+                                          : string.Concat('[', entityAlias, ']');
 
-            return String.Concat(entityQualifiedName, '.', '[', attribute.PhysicalName, ']');
+            return string.Concat(entityQualifiedName, '.', '[', attribute.PhysicalName, ']');
         }
 
         /// <summary>
@@ -386,8 +429,8 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private static string GetInclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            var indexTokens = filterValues.Select((o, i) => String.Format(ParameterFormat, filterIndex + i));
-            var inclusionToken = String.Format(InclusionPredicate, qualifiedName, String.Join(ParameterSeparator, indexTokens));
+            var indexTokens = filterValues.Select((o, i) => string.Format(ParameterFormat, filterIndex + i));
+            var inclusionToken = string.Format(InclusionPredicate, qualifiedName, string.Join(ParameterSeparator, indexTokens));
             return inclusionToken;
         }
 
@@ -407,19 +450,14 @@ namespace Startitecture.Orm.Sql
             var relationEntity = entityRelation.RelationAttribute.Entity.GetCanonicalName();
             var relationName = GetQualifiedName(entityRelation.RelationAttribute, entityRelation.RelationLocation.Alias);
 
-            if (String.IsNullOrWhiteSpace(entityRelation.RelationLocation.Alias))
+            if (string.IsNullOrWhiteSpace(entityRelation.RelationLocation.Alias))
             {
                 // Use the entity names for the inner join if no alias has been requested.
-                return String.Format(
-                    RelationStatementFormat,
-                    joinType,
-                    relationEntity,
-                    sourceName,
-                    relationName);
+                return string.Format(RelationStatementFormat, joinType, relationEntity, sourceName, relationName);
             }
 
             // Use the entity names names for the inner join and alias the table.
-            return String.Format(
+            return string.Format(
                 AliasedRelationStatementFormat,
                 joinType,
                 relationEntity,
@@ -484,46 +522,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private static string GetCanonicalName(this EntityLocation location)
         {
-            return String.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
+            return string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
         }
-
-        /// <summary>
-        /// Gets object values except for indexed and <see cref="Startitecture.Orm.Common.ITransactionContext"/> properties.
-        /// </summary>
-        /// <param name="obj">
-        /// The <see cref="Startitecture.Orm.Common.ITransactionContext"/> to obtain the properties for.
-        /// </param>
-        /// <returns>
-        /// A collection of <see cref="System.Object"/> items containing property values of the object.
-        /// </returns>
-        public static IEnumerable<object> ToValueCollection(this ITransactionContext obj)
-        {
-            if (obj == null)
-            {
-                throw new ArgumentNullException(nameof(obj));
-            }
-
-            var values = new List<object>();
-
-            var nonIndexedProperties = obj.GetType().GetNonIndexedProperties();
-
-            // ReSharper disable once LoopCanBeConvertedToQuery
-            foreach (var propertyInfo in nonIndexedProperties.OrderBy(NameSelector))
-            {
-                if (TransactionProperties.Contains(propertyInfo.Name))
-                {
-                    continue;
-                }
-
-                values.Add(propertyInfo.GetPropertyValue((object)obj));
-            }
-
-            return values;
-        }
-
-        /// <summary>
-        /// The name selector.
-        /// </summary>
-        private static readonly Func<PropertyInfo, string> NameSelector = x => x.Name;
     }
 }
