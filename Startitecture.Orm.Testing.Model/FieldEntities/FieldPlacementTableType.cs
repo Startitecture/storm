@@ -9,6 +9,8 @@
 
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
+    using System.ComponentModel.DataAnnotations.Schema;
+
     using Startitecture.Orm.Schema;
 
     /// <summary>

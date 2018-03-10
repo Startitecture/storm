@@ -103,15 +103,19 @@ namespace Startitecture.Orm.Mapper
             var qualifiedName = entityDefinition.GetQualifiedName();
             var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
 
-            var pocoKey = GetPocoKey(entityDefinition, reader);
+            var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.PhysicalName));
             var poco = (T)this.pocoCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, typeQualifiedName, entityDefinition, reader));
 
             var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
 
             foreach (var relationAttribute in relationAttributes)
             {
-                // TODO: Need to get primamry keys from this for the related entity.
-                var relatedPocoKey = GetPocoKey(DefinitionProvider.Resolve(relationAttribute.Entity.EntityType), reader);
+                var relatedDefinition = DefinitionProvider.Resolve(relationAttribute.PropertyInfo.PropertyType);
+                var keyDefinitions = entityDefinition.ReturnableAttributes.Where(x => x.Entity == relationAttribute.Entity && x.IsPrimaryKey)
+                    .OrderBy(x => x.PhysicalName);
+
+                var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions);
+
                 var entityReference = new EntityReference
                                           {
                                               ContainerType = typeof(T),
@@ -119,17 +123,9 @@ namespace Startitecture.Orm.Mapper
                                               EntityAlias = relationAttribute.Alias
                                           };
 
-                var relatedEntityLocation = DefinitionProvider.GetEntityLocation(entityReference);
-                var relatedQualifiedName = relatedEntityLocation.GetQualifiedName();
-                var relatedKey = new Tuple<string, string, int, int>(typeQualifiedName, relatedQualifiedName, 0, reader.FieldCount);
-
-                // TODO: Cache attributes with their locations, or build explicitly.
-                var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
-                var relatedType = relatedEntityLocation.EntityType;
-
-                var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
-
-                var relatedEntity = relatedPocoDelegate.DynamicInvoke(reader);
+                var relatedEntity = this.pocoCache.Get(
+                    relatedPocoKey,
+                    () => GetRelatedEntity(dataRequest, typeQualifiedName, entityDefinition, reader, entityReference));
 
                 // Prevents "ghost" POCO properties when resolving second-order or higher relations.
                 if (relatedEntity == null)
@@ -152,13 +148,34 @@ namespace Startitecture.Orm.Mapper
             return poco;
         }
 
-        private static string GetPocoKey(IEntityDefinition entityDefinition, IDataRecord record)
+        private static object GetRelatedEntity(
+            PocoDataRequest dataRequest,
+            string typeQualifiedName,
+            IEntityDefinition entityDefinition,
+            IDataRecord reader,
+            EntityReference entityReference)
+        {
+            var relatedEntityLocation = DefinitionProvider.GetEntityLocation(entityReference);
+            var relatedQualifiedName = relatedEntityLocation.GetQualifiedName();
+            var relatedKey = new Tuple<string, string, int, int>(typeQualifiedName, relatedQualifiedName, 0, reader.FieldCount);
+
+            // TODO: Cache attributes with their locations, or build explicitly.
+            var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
+            var relatedType = relatedEntityLocation.EntityType;
+
+            var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
+
+            var relatedEntity = relatedPocoDelegate.DynamicInvoke(reader);
+            return relatedEntity;
+        }
+
+        private static string GetPocoKey(IEntityDefinition entityDefinition, IDataRecord record, IEnumerable<EntityAttributeDefinition> keyDefinitions)
         {
             var pocoKeyBuilder = new StringBuilder($"{entityDefinition.EntityContainer}.{entityDefinition.EntityName}");
 
-            foreach (var primaryKeyAttribute in entityDefinition.PrimaryKeyAttributes)
+            foreach (var definition in keyDefinitions)
             {
-                pocoKeyBuilder.Append($".{primaryKeyAttribute.PhysicalName}.{record.GetValue(record.GetOrdinal(primaryKeyAttribute.ReferenceName))}");
+                pocoKeyBuilder.Append($".{definition.PhysicalName}.{record.GetValue(record.GetOrdinal(definition.ReferenceName))}");
             }
 
             var pocoKey = pocoKeyBuilder.ToString();

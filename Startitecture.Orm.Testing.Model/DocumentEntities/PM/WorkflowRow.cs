@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Testing.Model.DocumentEntities.PM
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;

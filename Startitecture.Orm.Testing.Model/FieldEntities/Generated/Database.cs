@@ -123,6 +123,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -174,6 +175,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -285,6 +287,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -384,6 +387,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -459,6 +463,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -516,6 +521,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -597,6 +603,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -666,6 +673,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -723,6 +731,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -840,6 +849,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -921,6 +931,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -990,6 +1001,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1071,6 +1083,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1140,6 +1153,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1203,6 +1217,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1266,6 +1281,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1365,6 +1381,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1422,6 +1439,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1491,6 +1509,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1554,6 +1573,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1617,6 +1637,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1680,6 +1701,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1767,6 +1789,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1830,6 +1853,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1887,6 +1911,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -1944,6 +1969,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -2001,6 +2027,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -2076,6 +2103,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -2133,6 +2161,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 namespace Startitecture.Orm.Testing.Model.FieldEntities
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;

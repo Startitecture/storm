@@ -34,6 +34,7 @@
       <HintPath>..\packages\JetBrains.Annotations.11.1.0\lib\net20\JetBrains.Annotations.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -60,7 +61,7 @@
     <Compile Include="DocumentEntities\DocumentTypeRow.cs" />
     <Compile Include="DocumentVersion.cs" />
     <Compile Include="DocumentEntities\DocumentVersionRow.cs" />
-    <Compile Include="PM\EnumeratedValue.cs" />
+    <Compile Include="EnumeratedValue.cs" />
     <Compile Include="ExternalEntity.cs" />
     <Compile Include="FakeChildEntity.cs" />
     <Compile Include="FakeChildRow.cs" />

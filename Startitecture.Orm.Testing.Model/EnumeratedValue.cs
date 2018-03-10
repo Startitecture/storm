@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Testing.Model.PM
+namespace Startitecture.Orm.Testing.Model
 {
     using System;
     using System.Collections.Generic;

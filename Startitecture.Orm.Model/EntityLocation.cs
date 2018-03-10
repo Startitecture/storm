@@ -134,6 +134,11 @@ namespace Startitecture.Orm.Model
         public string Alias { get; }
 
         /// <summary>
+        /// Gets the reference name for the entity.
+        /// </summary>
+        public string ReferenceName => this.Alias ?? this.ToString();
+
+        /// <summary>
         /// Compares the equality of two values of the same type.
         /// </summary>
         /// <param name="valueA">

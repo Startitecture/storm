@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FormSubmission.cs" company="">
-//   
+// <copyright file="FormSubmission.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The form submission.
@@ -16,7 +16,6 @@ namespace Startitecture.Orm.Testing.Model
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Testing.Model.PM;
 
     /// <summary>
     /// The form submission.

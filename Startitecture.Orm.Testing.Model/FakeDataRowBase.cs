@@ -9,6 +9,8 @@
 
 namespace Startitecture.Orm.Testing.Model
 {
+    using System.ComponentModel.DataAnnotations.Schema;
+
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
 

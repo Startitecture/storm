@@ -6,6 +6,8 @@
 
 namespace Startitecture.Orm.Testing.Model
 {
+    using System.ComponentModel.DataAnnotations.Schema;
+
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Schema;
 
