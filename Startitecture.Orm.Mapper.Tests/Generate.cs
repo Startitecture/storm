@@ -141,7 +141,7 @@ namespace Startitecture.Orm.Mapper.Tests
         }
 
         /// <summary>
-        /// Creates a poco data request.
+        /// Creates a POCO data request.
         /// </summary>
         /// <param name="item">
         /// The item to use as the source of the property values.

@@ -11,6 +11,7 @@ namespace Startitecture.Core
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.Threading;
 
     /// <summary>
@@ -94,6 +95,7 @@ namespace Startitecture.Core
             {
                 if (this.cacheMap.TryGetValue(key, out value))
                 {
+                    Trace.TraceInformation($"Got '{value}' from cache.");
                     return value;
                 }
             }
@@ -110,11 +112,15 @@ namespace Startitecture.Core
                 // Check again
                 if (this.cacheMap.TryGetValue(key, out value))
                 {
+                    Trace.TraceInformation($"Got '{value}' from cache (attempt 2).");
                     return value;
                 }
 
                 // Create it
+                var watch = Stopwatch.StartNew();
                 value = factory();
+                watch.Stop();
+                Trace.TraceInformation($"Got '{value}' from factory: {watch.Elapsed}.");
 
                 // Store it
                 this.cacheMap.Add(key, value);

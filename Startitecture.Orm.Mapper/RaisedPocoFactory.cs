@@ -42,41 +42,20 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private static readonly FlatPocoFactory DirectFactory = FlatPocoFactory.DirectFactory;
 
-        /////// <summary>
-        /////// The get value methods cache.
-        /////// </summary>
-        ////private static readonly Cache<Type, MethodInfo> getValueMethodsCache = new Cache<Type, MethodInfo>();
-
         /// <summary>
         /// The relation properties cache.
         /// </summary>
         private static readonly Cache<string, PropertyInfo> RelationPropertiesCache = new Cache<string, PropertyInfo>();
 
         /// <summary>
-        /// The POCO cache. Not static because we do not want to cache pocos beyond the connection context.
+        /// The POCO cache. Not static because we do not want to cache POCOs beyond the connection context.
         /// </summary>
         private readonly Cache<string, object> pocoCache = new Cache<string, object>();
 
-        /////// <summary>
-        /////// The set methods cache.
-        /////// </summary>
-        ////private readonly Cache<string, MethodInfo> setMethodsCache = new Cache<string, MethodInfo>();
-
-        /////// <summary>
-        /////// The set relation methods cache.
-        /////// </summary>
-        ////private readonly Cache<string, MethodInfo> setRelationMethodsCache = new Cache<string, MethodInfo>();
-
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        /// <filterpriority>2</filterpriority>
+        /// <inheritdoc />
         public void Dispose()
         {
-            ////this.getValueMethodsCache.Dispose();
-            ////this.relationPropertiesCache.Dispose();
-            ////this.setMethodsCache.Dispose();
-            ////this.setRelationMethodsCache.Dispose();
+            this.pocoCache.Dispose();
         }
 
         /// <summary>
@@ -148,6 +127,27 @@ namespace Startitecture.Orm.Mapper
             return poco;
         }
 
+        /// <summary>
+        /// Gets a related entity POCO from the reader.
+        /// </summary>
+        /// <param name="dataRequest">
+        /// The data request.
+        /// </param>
+        /// <param name="typeQualifiedName">
+        /// The type qualified name.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="reader">
+        /// The reader.
+        /// </param>
+        /// <param name="entityReference">
+        /// The entity reference.
+        /// </param>
+        /// <returns>
+        /// The related POCO as an <see cref="object"/>.
+        /// </returns>
         private static object GetRelatedEntity(
             PocoDataRequest dataRequest,
             string typeQualifiedName,
@@ -169,8 +169,27 @@ namespace Startitecture.Orm.Mapper
             return relatedEntity;
         }
 
-        private static string GetPocoKey(IEntityDefinition entityDefinition, IDataRecord record, IEnumerable<EntityAttributeDefinition> keyDefinitions)
+        /// <summary>
+        /// Gets a POCO key from the data record.
+        /// </summary>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="record">
+        /// The record.
+        /// </param>
+        /// <param name="keyDefinitions">
+        /// The key definitions.
+        /// </param>
+        /// <returns>
+        /// The POCO key as a <see cref="string"/>.
+        /// </returns>
+        private static string GetPocoKey(
+            IEntityDefinition entityDefinition,
+            IDataRecord record,
+            IEnumerable<EntityAttributeDefinition> keyDefinitions)
         {
+            // TODO: Ensure the order of keys according to the ordinality of the columns to skip re-ordering operations.
             var pocoKeyBuilder = new StringBuilder($"{entityDefinition.EntityContainer}.{entityDefinition.EntityName}");
 
             foreach (var definition in keyDefinitions)
@@ -182,13 +201,38 @@ namespace Startitecture.Orm.Mapper
             return pocoKey;
         }
 
-        private static T GetPocoFromReader<T>(PocoDataRequest dataRequest, string typeQualifiedName, IEntityDefinition entityDefinition, IDataReader reader)
+        /// <summary>
+        /// Gets a POCO from the data record.
+        /// </summary>
+        /// <param name="dataRequest">
+        /// The data request.
+        /// </param>
+        /// <param name="typeQualifiedName">
+        /// The type qualified name.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="record">
+        /// The data record to read.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of POCO to generate.
+        /// </typeparam>
+        /// <returns>
+        /// The POCO object as a type of <typeparamref name="T"/>.
+        /// </returns>
+        private static T GetPocoFromReader<T>(
+            PocoDataRequest dataRequest,
+            string typeQualifiedName,
+            IEntityDefinition entityDefinition,
+            IDataRecord record)
         {
-            var baseKey = new Tuple<string, string, int, int>(typeQualifiedName, entityDefinition.EntityName, 0, reader.FieldCount);
+            var baseKey = new Tuple<string, string, int, int>(typeQualifiedName, entityDefinition.EntityName, 0, record.FieldCount);
 
             var baseDirectAttributes = entityDefinition.ReturnableAttributes.Where(x => x.IsReferencedDirect).ToList();
             var basePocoDelegate = PocoFactories.Get(baseKey, () => DirectFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
-            var poco = (T)basePocoDelegate.DynamicInvoke(reader);
+            var poco = (T)basePocoDelegate.DynamicInvoke(record);
             return poco;
         }
 

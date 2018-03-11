@@ -346,10 +346,7 @@ namespace Startitecture.Orm.Mapper
 
         #endregion
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        /// <filterpriority>2</filterpriority>
+        /// <inheritdoc />
         public void Dispose()
         {
             this.Dispose(true);
@@ -1065,6 +1062,8 @@ namespace Startitecture.Orm.Mapper
             {
                 this.Connection.Dispose();
             }
+
+            this.pocoFactory?.Dispose();
         }
 
         /// <summary>
