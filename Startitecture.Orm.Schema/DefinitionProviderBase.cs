@@ -105,17 +105,6 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <summary>
-        /// Gets the relation attributes for the type.
-        /// </summary>
-        /// <param name="entityType">
-        /// The entity type.
-        /// </param>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items for the specified type.
-        /// </returns>
-        protected abstract IEnumerable<EntityAttributeDefinition> GetRelationAttributes(Type entityType);
-
-        /// <summary>
         /// Gets the entity location by reference.
         /// </summary>
         /// <param name="entityReference">
@@ -160,7 +149,7 @@ namespace Startitecture.Orm.Schema
         protected abstract string GetEntityQualifiedName(Type entityType);
 
         /// <summary>
-        /// Gets only properties related to direct attributes, related attributes or related entities.
+        /// Gets properties related to direct attributes, related attributes or related entities.
         /// </summary>
         /// <param name="entityType">
         /// The entity type.
@@ -226,6 +215,17 @@ namespace Startitecture.Orm.Schema
         protected abstract IEnumerable<AttributeReference> GetKeyAttributes(Type entityType);
 
         /// <summary>
+        /// Gets the attribute references for the <paramref name="entityType"/>.
+        /// </summary>
+        /// <param name="entityType">
+        /// The entity type.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of attribute references for the <paramref name="entityType"/>.
+        /// </returns>
+        protected abstract IEnumerable<AttributeReference> GetAttributes(Type entityType);
+
+        /// <summary>
         /// Gets the attribute reference.
         /// </summary>
         /// <param name="propertyInfo">
@@ -248,7 +248,7 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items.
         /// </returns>
-        protected IEnumerable<EntityAttributeDefinition> GetEntityDefinitions(LinkedList<EntityLocation> entityPath, PropertyInfo entityProperty)
+        private IEnumerable<EntityAttributeDefinition> GetEntityDefinitions(LinkedList<EntityLocation> entityPath, PropertyInfo entityProperty)
         {
             var entityType = entityProperty.PropertyType;
             var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
@@ -382,6 +382,140 @@ namespace Startitecture.Orm.Schema
         private EntityDefinition CreateEntityDefinition(Type type)
         {
             return new EntityDefinition(this, new EntityReference { EntityType = type });
+        }
+
+        /// <summary>
+        /// Gets the attributes for a relation.
+        /// </summary>
+        /// <param name="entityType">
+        /// The entity type.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items for the <paramref name="entityType"/>.
+        /// </returns>
+        private IEnumerable<EntityAttributeDefinition> GetRelationAttributes(Type entityType)
+        {
+            ////var includedProperties = this.GetFilteredRelationProperties(entityType);
+            var entityReference = new EntityReference { EntityType = entityType };
+            var entityLocation = this.GetEntityLocation(entityReference);
+
+            var entityPath = new LinkedList<EntityLocation>();
+            entityPath.AddLast(entityLocation);
+
+            var attributeReferences = this.GetAttributes(entityType);
+            var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
+
+            foreach (var attributeReference in attributeReferences)
+            {
+                var physicalName = this.GetPhysicalName(attributeReference.PropertyInfo);
+                var attributeName = physicalName;
+                ////var relatedEntity = attributeReference.GetCustomAttribute<RelatedEntityAttribute>(false);
+                ////var relation = attributeReference.GetCustomAttribute<RelationAttribute>(false);
+
+                var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey && x.IsIdentity == false).Select(x => x.PhysicalName)
+                    .Contains(physicalName);
+
+                var isIdentity = keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
+
+                if (isPrimaryKey)
+                {
+                    var entityAttributeDefinition = new EntityAttributeDefinition(
+                        entityPath,
+                        attributeReference.PropertyInfo,
+                        attributeName,
+                        EntityAttributeTypes.DirectPrimaryKey);
+
+                    yield return entityAttributeDefinition;
+                }
+                else if (isIdentity)
+                {
+                    var entityAttributeDefinition = new EntityAttributeDefinition(
+                        entityPath,
+                        attributeReference.PropertyInfo,
+                        attributeName,
+                        EntityAttributeTypes.DirectAutoNumberKey);
+
+                    yield return entityAttributeDefinition;
+                }
+                else if (attributeReference.IgnoreReference)
+                {
+                    var entityAttributeDefinition = new EntityAttributeDefinition(
+                        entityPath,
+                        attributeReference.PropertyInfo,
+                        attributeName,
+                        EntityAttributeTypes.MappedAttribute);
+
+                    yield return entityAttributeDefinition;
+                }
+                else if (attributeReference.IsRelatedAttribute)
+                {
+                    var relatedEntityReference = new EntityReference
+                                                     {
+                                                         EntityType = attributeReference.EntityReference.EntityType, // relatedEntity.EntityType,
+                                                         ContainerType = entityType,
+                                                         EntityAlias = attributeReference.EntityReference.EntityAlias // relatedEntity.EntityAlias
+                                                     };
+
+                    var relatedLocation = this.GetEntityLocation(relatedEntityReference);
+
+                    // This is not a physical object on the POCO, so we indicate it as virtual.
+                    relatedLocation.IsVirtual = true;
+
+                    entityPath.AddLast(relatedLocation);
+
+                    var isEntityAlias = string.IsNullOrWhiteSpace(relatedLocation.Alias) == false;
+                    var entityIdentifier = isEntityAlias ? relatedLocation.Alias : relatedLocation.Name;
+
+                    // Use the physical name if overridden.
+                    physicalName = attributeReference.PhysicalName ?? physicalName; // relatedEntity.PhysicalName ?? physicalName;
+
+                    attributeName = attributeReference.UseAttributeAlias && // relatedEntity.UseAttributeAlias && 
+                                    physicalName.StartsWith(entityIdentifier)
+                                        ? physicalName.Substring(entityIdentifier.Length)
+                                        : physicalName;
+
+                    var attributeAlias = attributeReference.UseAttributeAlias ? // relatedEntity.UseAttributeAlias ? 
+                                             attributeReference.Name : null;
+
+                    var entityAttributeDefinition = new EntityAttributeDefinition(
+                        entityPath,
+                        attributeReference.PropertyInfo,
+                        attributeName,
+                        EntityAttributeTypes.ExplicitRelatedAttribute,
+                        attributeAlias);
+
+                    entityPath.RemoveLast();
+
+                    yield return entityAttributeDefinition;
+                }
+                else if (attributeReference.IsRelation)
+                {
+                    // Include the relation itself for quick access to getter/setter methods.
+                    var entityAttributeDefinition = new EntityAttributeDefinition(
+                        entityPath,
+                        attributeReference.PropertyInfo,
+                        attributeName,
+                        EntityAttributeTypes.Relation,
+                        attributeReference.Name);
+
+                    yield return entityAttributeDefinition;
+
+                    foreach (var definition in this.GetEntityDefinitions(entityPath, attributeReference.PropertyInfo))
+                    {
+                        yield return definition;
+                    }
+                }
+                else
+                {
+                    var entityAttributeDefinition = new EntityAttributeDefinition(
+                        entityPath,
+                        attributeReference.PropertyInfo,
+                        attributeName,
+                        EntityAttributeTypes.DirectAttribute);
+
+                    yield return entityAttributeDefinition;
+                }
+            }
         }
     }
 }

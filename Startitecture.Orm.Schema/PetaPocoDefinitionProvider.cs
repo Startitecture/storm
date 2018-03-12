@@ -27,11 +27,6 @@ namespace Startitecture.Orm.Schema
         #region Static Fields
 
         /// <summary>
-        /// The key name selector.
-        /// </summary>
-        private static readonly Func<PrimaryKeyAttribute, string> KeyNameSelector = x => x.ColumnName;
-
-        /// <summary>
         /// The property name selector.
         /// </summary>
         private static readonly Func<PropertyInfo, string> PropertyNameSelector = x => x.Name;
@@ -87,124 +82,9 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<EntityAttributeDefinition> GetRelationAttributes(Type entityType)
+        protected virtual IEnumerable<PropertyInfo> GetFilteredRelationProperties(Type entityType)
         {
-            var includedProperties = GetFilteredEntityProperties(entityType).ToList();
-            var entityReference = new EntityReference { EntityType = entityType };
-            var entityLocation = this.GetEntityLocation(entityReference);
-
-            var entityPath = new LinkedList<EntityLocation>();
-            entityPath.AddLast(entityLocation);
-
-            var keyAttributes = entityType.GetCustomAttributes<PrimaryKeyAttribute>().ToList();
-
-            var primaryKeys = new List<string>(keyAttributes.Where(x => x.AutoIncrement == false).Select(KeyNameSelector));
-            var autonumberKeys = new List<string>(keyAttributes.Where(x => x.AutoIncrement).Select(KeyNameSelector));
-
-            foreach (var entityProperty in includedProperties)
-            {
-                var physicalName = this.GetPhysicalName(entityProperty);
-                var attributeName = physicalName;
-                var relatedEntity = entityProperty.GetCustomAttribute<RelatedEntityAttribute>(false);
-                var relation = entityProperty.GetCustomAttribute<RelationAttribute>(false);
-
-                if (primaryKeys.Contains(physicalName))
-                {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                                                        entityPath,
-                                                        entityProperty,
-                                                        attributeName,
-                                                        EntityAttributeTypes.DirectPrimaryKey);
-
-                    yield return entityAttributeDefinition;
-                }
-                else if (autonumberKeys.Contains(physicalName))
-                {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                                                        entityPath,
-                                                        entityProperty,
-                                                        attributeName,
-                                                        EntityAttributeTypes.DirectAutoNumberKey);
-
-                    yield return entityAttributeDefinition;
-                }
-                else if (entityProperty.GetCustomAttributes(typeof(IgnoreAttribute), false).Any())
-                {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                                                        entityPath,
-                                                        entityProperty,
-                                                        attributeName,
-                                                        EntityAttributeTypes.MappedAttribute);
-
-                    yield return entityAttributeDefinition;
-                }
-                else if (relatedEntity != null)
-                {
-                    var relatedEntityReference = new EntityReference
-                    {
-                        EntityType = relatedEntity.EntityType,
-                        ContainerType = entityType,
-                        EntityAlias = relatedEntity.EntityAlias
-                    };
-
-                    var relatedLocation = this.GetEntityLocation(relatedEntityReference);
-
-                    // This is not a physical object on the POCO, so we indicate it as virtual.
-                    relatedLocation.IsVirtual = true;
-
-                    entityPath.AddLast(relatedLocation);
-
-                    var isEntityAlias = string.IsNullOrWhiteSpace(relatedLocation.Alias) == false;
-                    var entityIdentifier = isEntityAlias ? relatedLocation.Alias : relatedLocation.Name;
-
-                    // Use the physical name if overridden.
-                    physicalName = relatedEntity.PhysicalName ?? physicalName;
-
-                    attributeName = relatedEntity.UseAttributeAlias && physicalName.StartsWith(entityIdentifier)
-                                        ? physicalName.Substring(entityIdentifier.Length)
-                                        : physicalName;
-
-                    var attributeAlias = relatedEntity.UseAttributeAlias ? entityProperty.Name : null;
-
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                                                        entityPath,
-                                                        entityProperty,
-                                                        attributeName,
-                                                        EntityAttributeTypes.ExplicitRelatedAttribute,
-                                                        attributeAlias);
-
-                    entityPath.RemoveLast();
-
-                    yield return entityAttributeDefinition;
-                }
-                else if (relation != null)
-                {
-                    // Include the relation itself for quick access to getter/setter methods.
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                                                        entityPath,
-                                                        entityProperty,
-                                                        attributeName,
-                                                        EntityAttributeTypes.Relation,
-                                                        entityProperty.Name);
-
-                    yield return entityAttributeDefinition;
-
-                    foreach (var definition in this.GetEntityDefinitions(entityPath, entityProperty))
-                    {
-                        yield return definition;
-                    }
-                }
-                else
-                {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                                                        entityPath,
-                                                        entityProperty,
-                                                        attributeName,
-                                                        EntityAttributeTypes.DirectAttribute);
-
-                    yield return entityAttributeDefinition;
-                }
-            }
+            return GetPocoFilteredEntityProperties(entityType).ToList();
         }
 
         /// <inheritdoc />
@@ -226,23 +106,104 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
+        protected override IEnumerable<AttributeReference> GetAttributes(Type entityType)
+        {
+            var keyAttributes = entityType.GetCustomAttributes<PrimaryKeyAttribute>().ToList();
+
+            foreach (var entityProperty in GetPocoFilteredEntityProperties(entityType))
+            {
+                var physicalName = this.GetPhysicalName(entityProperty);
+
+                var relatedEntity = entityProperty.GetCustomAttribute<RelatedEntityAttribute>(false);
+                var relation = entityProperty.GetCustomAttribute<RelationAttribute>(false);
+                var propertyName = entityProperty.Name;
+
+                if (keyAttributes.Select(x => x.ColumnName).Contains(physicalName))
+                {
+                    var primaryKeyAttribute = keyAttributes.First(x => x.ColumnName == physicalName);
+
+                    yield return new AttributeReference
+                                     {
+                                         EntityReference = new EntityReference { EntityType = entityType },
+                                         Name = primaryKeyAttribute.ColumnName,
+                                         PhysicalName = primaryKeyAttribute.ColumnName,
+                                         IsIdentity = primaryKeyAttribute.AutoIncrement,
+                                         IsPrimaryKey = true,
+                                         PropertyInfo = entityProperty
+                                     };
+                }
+                else if (entityProperty.GetCustomAttributes(typeof(IgnoreAttribute), false).Any())
+                {
+                    yield return new AttributeReference
+                                     {
+                                         EntityReference = new EntityReference { EntityType = entityType },
+                                         IgnoreReference = true,
+                                         Name = propertyName,
+                                         PhysicalName = physicalName,
+                                         PropertyInfo = entityProperty
+                                     };
+                }
+                else if (relatedEntity != null)
+                {
+                    var entityReference = new EntityReference
+                                              {
+                                                  EntityType = relatedEntity.EntityType,
+                                                  EntityAlias = relatedEntity.EntityAlias
+                                              };
+
+                    yield return new AttributeReference
+                                     {
+                                         EntityReference = entityReference,
+                                         Name = propertyName,
+                                         PhysicalName = physicalName,
+                                         UseAttributeAlias = relatedEntity.UseAttributeAlias,
+                                         IsRelatedAttribute = true,
+                                         PropertyInfo = entityProperty
+                                     };
+                }
+                else if (relation != null)
+                {
+                    var entityReference = new EntityReference
+                                              {
+                                                  EntityType = entityProperty.PropertyType,
+                                                  EntityAlias = propertyName
+                                              };
+
+                    yield return new AttributeReference
+                                     {
+                                         EntityReference = entityReference,
+                                         Name = propertyName,
+                                         PhysicalName = physicalName,
+                                         IsRelation = true,
+                                         PropertyInfo = entityProperty
+                                     };
+                }
+                else
+                {
+                    yield return new AttributeReference
+                                     {
+                                         EntityReference = new EntityReference { EntityType = entityType },
+                                         Name = propertyName,
+                                         PhysicalName = physicalName,
+                                         PropertyInfo = entityProperty
+                                     };
+                }
+            }
+        }
+
+        /// <inheritdoc />
         protected override AttributeReference GetAttributeReference(MemberInfo propertyInfo)
         {
             var relatedEntity = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
-
-            var relatedEntityReference = new EntityReference
-            {
-                EntityType = relatedEntity.EntityType,
-                EntityAlias = relatedEntity.EntityAlias
-            };
+            var relatedEntityReference = new EntityReference { EntityType = relatedEntity.EntityType, EntityAlias = relatedEntity.EntityAlias };
 
             return new AttributeReference
-            {
-                EntityReference = relatedEntityReference,
-                Name = propertyInfo.Name,
-                UseAttributeAlias = relatedEntity.UseAttributeAlias,
-                PhysicalName = relatedEntity.PhysicalName
-            };
+                       {
+                           EntityReference = relatedEntityReference,
+                           Name = propertyInfo.Name,
+                           UseAttributeAlias = relatedEntity.UseAttributeAlias,
+                           PhysicalName = relatedEntity.PhysicalName
+                       };
         }
 
         /// <inheritdoc />
@@ -266,7 +227,7 @@ namespace Startitecture.Orm.Schema
         /// <inheritdoc />
         protected override IEnumerable<PropertyInfo> GetFilteredEntityProperties(Type entityType)
         {
-            return GetFilteredEntityProperties(entityType, RelationPropertyAttributeTypes);
+            return GetPocoFilteredEntityProperties(entityType, RelationPropertyAttributeTypes);
         }
 
         /// <summary>
@@ -281,10 +242,9 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of property info objects for the type.
         /// </returns>
-        private static IEnumerable<PropertyInfo> GetFilteredEntityProperties(Type entityType, params Type[] attributeTypes)
+        private static IEnumerable<PropertyInfo> GetPocoFilteredEntityProperties(Type entityType, params Type[] attributeTypes)
         {
             var properties = entityType.GetNonIndexedProperties();
-
             var excludedProperties = new List<string>();
 
             if (typeof(ITransactionContext).IsAssignableFrom(entityType))

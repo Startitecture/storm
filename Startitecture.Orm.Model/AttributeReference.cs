@@ -6,6 +6,8 @@
 
 namespace Startitecture.Orm.Model
 {
+    using System.Reflection;
+
     /// <summary>
     /// The attribute reference.
     /// </summary>
@@ -27,6 +29,11 @@ namespace Startitecture.Orm.Model
         public string PhysicalName { get; set; }
 
         /// <summary>
+        /// Gets or sets the property info for the attribute.
+        /// </summary>
+        public PropertyInfo PropertyInfo { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the attribute is a primary key.
         /// </summary>
         public bool IsPrimaryKey { get; set; }
@@ -35,6 +42,21 @@ namespace Startitecture.Orm.Model
         /// Gets or sets a value indicating whether the attribute is an identity attribute.
         /// </summary>
         public bool IsIdentity { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the attribute is a related attribute.
+        /// </summary>
+        public bool IsRelatedAttribute { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether the attribute is a relation.
+        /// </summary>
+        public bool IsRelation { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether to ignore the reference.
+        /// </summary>
+        public bool IgnoreReference { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether use attribute alias.
