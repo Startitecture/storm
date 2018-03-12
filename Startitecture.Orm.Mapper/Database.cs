@@ -74,6 +74,11 @@ namespace Startitecture.Orm.Mapper
         private readonly RaisedPocoFactory pocoFactory = new RaisedPocoFactory();
 
         /// <summary>
+        /// The definition provider.
+        /// </summary>
+        private readonly IEntityDefinitionProvider definitionProvider;
+
+        /// <summary>
         /// The database type.
         /// </summary>
         private DatabaseType databaseType;
@@ -114,15 +119,25 @@ namespace Startitecture.Orm.Mapper
         /// <param name="connection">
         /// The IDbConnection to use
         /// </param>
+        /// <param name="definitionProvider">
+        /// The entity definition provider.
+        /// </param>
         /// <remarks>
         /// The supplied IDbConnection will not be closed/disposed - that remains the responsibility of the caller.
         /// </remarks>
-        public Database([NotNull] IDbConnection connection)
+        public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (connection == null)
             {
                 throw new ArgumentNullException(nameof(connection));
             }
+
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            this.definitionProvider = definitionProvider;
 
             // TODO: This seems to fail with SqlConnection.
             this.isConnectionUserProvided = true;
@@ -141,10 +156,13 @@ namespace Startitecture.Orm.Mapper
         /// <param name="providerName">
         /// The name of the DB provider to use
         /// </param>
+        /// <param name="definitionProvider">
+        /// The entity definition provider.
+        /// </param>
         /// <remarks>
         /// This class will automatically close and dispose any connections it creates.
         /// </remarks>
-        public Database([NotNull] string connectionString, [NotNull] string providerName)
+        public Database([NotNull] string connectionString, [NotNull] string providerName, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -156,8 +174,14 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(providerName));
             }
 
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
             this.connectionString = connectionString;
             this.providerName = providerName;
+            this.definitionProvider = definitionProvider;
             this.CommonConstruct();
         }
 
@@ -171,7 +195,13 @@ namespace Startitecture.Orm.Mapper
         /// <param name="provider">
         /// The DbProviderFactory to use for instantiating IDbConnection's
         /// </param>
-        public Database(string connectionString, DbProviderFactory provider)
+        /// <param name="definitionProvider">
+        /// The entity definition provider.
+        /// </param>
+        public Database(
+            [NotNull] string connectionString,
+            [NotNull] DbProviderFactory provider,
+            [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -183,8 +213,14 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(provider));
             }
 
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
             this.connectionString = connectionString;
             this.factory = provider;
+            this.definitionProvider = definitionProvider;
             this.CommonConstruct();
         }
 
@@ -196,13 +232,23 @@ namespace Startitecture.Orm.Mapper
         /// <param name="connectionStringName">
         /// The name of the connection
         /// </param>
-        public Database(string connectionStringName)
+        /// <param name="definitionProvider">
+        /// The entity definition provider.
+        /// </param>
+        public Database(string connectionStringName, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             // Use first?
             if (string.IsNullOrWhiteSpace(connectionStringName))
             {
                 connectionStringName = ConfigurationManager.ConnectionStrings[0].Name;
             }
+
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            this.definitionProvider = definitionProvider;
 
             // Work out connection string and provider name
             var providerType = "System.Data.SqlClient";
@@ -466,7 +512,7 @@ namespace Startitecture.Orm.Mapper
         {
             if (this.EnableAutoSelect)
             {
-                var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<T>();
+                var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
                 var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
                 sql = autoSelectHelper.AddSelectClause(sql);
             }
@@ -809,7 +855,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(poco));
             }
 
-            var definition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<T>();
+            var definition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
             var tableInfo = definition.ToTableInfo();
 
             try
@@ -1277,7 +1323,7 @@ namespace Startitecture.Orm.Mapper
             // Add auto select clause
             if (this.EnableAutoSelect)
             {
-                var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<T>();
+                var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
                 var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
                 sql = autoSelectHelper.AddSelectClause(sql);
             }

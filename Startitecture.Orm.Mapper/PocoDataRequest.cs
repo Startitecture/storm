@@ -42,7 +42,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.DataReader = dataReader;
-            this.EntityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve(pocoType);
+            this.EntityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve(pocoType);
         }
 
         /// <summary>

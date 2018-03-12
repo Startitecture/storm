@@ -25,7 +25,7 @@ namespace Startitecture.Orm.Sql
         /// Initializes a new instance of the <see cref="SqlFromClause{TItem}"/> class.
         /// </summary>
         public SqlFromClause()
-            : base(Singleton<DataItemDefinitionProvider>.Instance)
+            : base(Singleton<PetaPocoDefinitionProvider>.Instance)
         {
         }
     }

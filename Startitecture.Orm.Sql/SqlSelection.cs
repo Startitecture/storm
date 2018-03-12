@@ -104,7 +104,7 @@ namespace Startitecture.Orm.Sql
         /// Initializes a new instance of the <see cref="SqlSelection{TItem}"/> class.
         /// </summary>
         public SqlSelection()
-            : base(Singleton<DataItemDefinitionProvider>.Instance)
+            : base(Singleton<PetaPocoDefinitionProvider>.Instance)
         {
             this.SetRelations(new TItem());
             var selectionAttribute = typeof(TItem).GetCustomAttributes<SelectWithAttribute>(true).FirstOrDefault();

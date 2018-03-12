@@ -30,7 +30,7 @@ namespace Startitecture.Orm.Model.Tests
         public void Find_DirectAttribute_MatchesExpected()
         {
             var entityReference = new EntityReference { EntityType = typeof(FakeRaisedChildRow) };
-            var definitionProvider = new DataItemDefinitionProvider();
+            var definitionProvider = new PetaPocoDefinitionProvider();
             var target = new EntityDefinition(definitionProvider, entityReference);
 
             var attributeLocation = definitionProvider.GetEntityLocation(entityReference);
@@ -53,7 +53,7 @@ namespace Startitecture.Orm.Model.Tests
         public void Find_RelatedAttribute_MatchesExpected()
         {
             var entityReference = new EntityReference { EntityType = typeof(FakeRaisedChildRow) };
-            var definitionProvider = new DataItemDefinitionProvider();
+            var definitionProvider = new PetaPocoDefinitionProvider();
             var target = new EntityDefinition(definitionProvider, entityReference);
 
             var relationReference = new EntityReference { EntityType = typeof(FakeRaisedComplexRow) };
@@ -78,7 +78,7 @@ namespace Startitecture.Orm.Model.Tests
         public void Find_RelatedAttributeAliasedEntity_MatchesExpected()
         {
             var entityReference = new EntityReference { EntityType = typeof(FakeRaisedChildRow) };
-            var definitionProvider = new DataItemDefinitionProvider();
+            var definitionProvider = new PetaPocoDefinitionProvider();
             var target = new EntityDefinition(definitionProvider, entityReference);
 
             var relationReference = new EntityReference { EntityType = typeof(FakeRaisedSubRow), EntityAlias = "FakeSubEntity" };

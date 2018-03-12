@@ -91,7 +91,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public StructuredInsertCommand<TStructure> InsertInto<TDataItem>()
         {
-            this.itemDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<TDataItem>();
+            this.itemDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TDataItem>();
             return this;
         }
 
@@ -106,7 +106,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public StructuredInsertCommand<TStructure> SelectResults(params Expression<Func<TStructure, object>>[] matchProperties)
         {
-            var structureDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TStructure>();
             this.selectionAttributes.Clear();
             this.selectionAttributes.AddRange(matchProperties.Select<Expression<Func<TStructure, object>>, string>(x => x.GetPropertyName()).Select(structureDefinition.Find));
             return this;
@@ -154,7 +154,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private string CompileCommandText()
         {
-            var structureDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TStructure>();
             var directAttributes = this.itemDefinition.DirectAttributes.ToList();
             var insertAttributes = this.itemDefinition.DirectAttributes.Any(x => x.IsIdentityColumn)
                                        ? this.itemDefinition.UpdateableAttributes.ToList()

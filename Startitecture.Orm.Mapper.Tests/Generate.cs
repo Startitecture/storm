@@ -154,7 +154,7 @@ namespace Startitecture.Orm.Mapper.Tests
         /// </returns>
         public static PocoDataRequest CreatePocoDataRequest<T>(T item)
         {
-            var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<T>();
+            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
             var attributeDefinitions = new ConcurrentDictionary<string, EntityAttributeDefinition>();
 
             foreach (var attributeDefinition in entityDefinition.ReturnableAttributes)

@@ -118,7 +118,7 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(mergeMatchExpressions));
             }
 
-            var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<TDataItem>();
+            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TDataItem>();
             this.itemDefinition = entityDefinition;
             this.directAttributes.AddRange(entityDefinition.DirectAttributes);
             this.insertAttributes.AddRange(
@@ -182,7 +182,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private string CompileCommandText()
         {
-            var structureDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TStructure>();
             var allAttributes = structureDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
             // If there's an auto number primary key, then don't try to insert it. Only use the updatable attributes.

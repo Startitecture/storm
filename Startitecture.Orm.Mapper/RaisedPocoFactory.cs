@@ -29,7 +29,7 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The definition provider.
         /// </summary>
-        private static readonly DataItemDefinitionProvider DefinitionProvider = Singleton<DataItemDefinitionProvider>.Instance;
+        private static readonly PetaPocoDefinitionProvider DefinitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
 
         /// <summary>
         /// The POCO factories.

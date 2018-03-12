@@ -14,6 +14,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
     using Rhino.Mocks;
 
+    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
@@ -29,7 +30,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void BeginTransaction_SqlCommand_ExecutesNonQuery()
         {
-            using (var target = new Database("MasterDatabase"))
+            using (var target = new Database("MasterDatabase", new PetaPocoDefinitionProvider()))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;
                 Assert.IsNotNull(transaction);
@@ -53,7 +54,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var expected = 423;
 
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
-            using (var target = new Database(connection))
+            using (var target = new Database(connection, new PetaPocoDefinitionProvider()))
             {
                 var command = CreateMockCommand(connection);
 
@@ -88,7 +89,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var expected = 423;
 
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
-            using (var target = new Database(connection))
+            using (var target = new Database(connection, new PetaPocoDefinitionProvider()))
             {
                 var command = CreateMockCommand(connection);
 

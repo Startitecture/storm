@@ -86,7 +86,7 @@ namespace Startitecture.Orm.Sql
             }
 
             this.StructureTypeName = tableTypeAttribute.TypeName;
-            var structureDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TStructure>();
             this.Parameter = $"@{structureDefinition.EntityName}Table";
         }
 

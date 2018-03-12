@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void Join_LocalAttributeToRelatedAttribute()
         {
-            var definitionProvider = new DataItemDefinitionProvider();
+            var definitionProvider = new PetaPocoDefinitionProvider();
             var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedChildRow>(row => row.FakeComplexEntityId, row => row.FakeComplexEntity.FakeComplexEntityId);
 
@@ -51,7 +51,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void Join_RelatedAttributeToTransitiveRelatedAttribute()
         {
-            var definitionProvider = new DataItemDefinitionProvider();
+            var definitionProvider = new PetaPocoDefinitionProvider();
             var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedDataRow>(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeDependencyEntityId);
 
@@ -78,7 +78,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void Join_RelatedAttributeToTransitiveRelatedAttributeWithAlias()
         {
-            var definitionProvider = new DataItemDefinitionProvider();
+            var definitionProvider = new PetaPocoDefinitionProvider();
             var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedChildRow>(row => row.FakeComplexEntity.FakeSubEntityId, row => row.FakeComplexEntity.FakeSubEntity.FakeSubEntityId);
 
@@ -105,7 +105,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void Join_RelatedAttributeWithAliasToTransitiveRelatedAttributeWithAlias()
         {
-            var definitionProvider = new DataItemDefinitionProvider();
+            var definitionProvider = new PetaPocoDefinitionProvider();
             var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedDataRow>(row => row.RelatedAlias.RelatedId, row => row.RelatedDependency.FakeDependencyEntityId);
 

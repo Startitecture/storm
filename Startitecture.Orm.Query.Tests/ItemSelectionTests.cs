@@ -43,7 +43,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
 
             expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
@@ -65,7 +65,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
         ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -89,7 +89,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -110,7 +110,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
         ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -134,7 +134,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
             expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -155,7 +155,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
         ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -179,7 +179,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -200,7 +200,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
         ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -221,7 +221,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
             expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -242,7 +242,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -263,7 +263,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
             expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -284,7 +284,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.InnerJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -308,7 +308,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -329,7 +329,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
         ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -353,7 +353,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -374,7 +374,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
         ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -398,7 +398,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -419,7 +419,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
         ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -443,7 +443,7 @@ namespace Startitecture.Orm.Query.Tests
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -464,7 +464,7 @@ namespace Startitecture.Orm.Query.Tests
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
         ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -485,7 +485,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -506,7 +506,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -527,7 +527,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -548,7 +548,7 @@ namespace Startitecture.Orm.Query.Tests
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
-            var expected = new EntityRelation(new DataItemDefinitionProvider(), EntityRelationType.LeftJoin);
+            var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
             expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -573,7 +573,7 @@ namespace Startitecture.Orm.Query.Tests
         public void Select_DataItemWithDistinctAttributeReferences_MatchesExpected()
         {
             var selection = new SqlSelection<FakeRaisedChildRow>();
-            var expected = Singleton<DataItemDefinitionProvider>.Instance.Resolve<FakeRaisedChildRow>().ReturnableAttributes.ToList();
+            var expected = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<FakeRaisedChildRow>().ReturnableAttributes.ToList();
             var actual = selection.PropertiesToReturn.ToList();
             CollectionAssert.AreEqual(expected, actual);
         }
@@ -595,7 +595,7 @@ namespace Startitecture.Orm.Query.Tests
 
             var selection = new SqlSelection<FakeRaisedChildRow>().Select(expressions.ToArray());
 
-            var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<FakeRaisedChildRow>();
+            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<FakeRaisedChildRow>();
             var expected = expressions.Select(entityDefinition.Find).ToList();
 
             var actual = selection.PropertiesToReturn.ToList();
@@ -610,7 +610,7 @@ namespace Startitecture.Orm.Query.Tests
         {
             var selection = new SqlSelection<InstanceSection>();
             var expected =
-                Singleton<DataItemDefinitionProvider>.Instance.Resolve<InstanceSection>()
+                Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<InstanceSection>()
                     .ReturnableAttributes.Distinct(new DistinctAttributeEqualityComparer())
                     .ToList();
 
@@ -638,7 +638,7 @@ namespace Startitecture.Orm.Query.Tests
 
             var selection = new SqlSelection<InstanceSection>().Select(expressions.ToArray());
 
-            var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<InstanceSection>();
+            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<InstanceSection>();
             var expected = expressions.Select(entityDefinition.Find).Distinct(new DistinctAttributeEqualityComparer()).ToList();
 
             var actual = selection.PropertiesToReturn.ToList();

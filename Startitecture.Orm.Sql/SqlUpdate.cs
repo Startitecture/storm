@@ -67,7 +67,7 @@ SET
         /// <summary>
         /// The item definition.
         /// </summary>
-        private readonly IEntityDefinition itemDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<TItem>();
+        private readonly IEntityDefinition itemDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TItem>();
 
         /// <summary>
         /// The selection.

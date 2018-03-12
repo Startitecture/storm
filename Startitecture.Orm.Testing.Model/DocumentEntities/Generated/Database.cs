@@ -35,7 +35,7 @@ namespace Startitecture.Orm.Testing.Model.DocumentEntities
         /// Initializes a new instance of the TestDb class.
         /// </summary>
         public TestDb()
-            : base("TestConnection")
+            : base("TestConnection", new PetaPocoDefinitionProvider())
         {
             this.CommonConstruct();
         }
@@ -47,7 +47,7 @@ namespace Startitecture.Orm.Testing.Model.DocumentEntities
         /// The name of the connection string.
         /// </param>
         public TestDb(string connectionStringName)
-            : base(connectionStringName)
+            : base(connectionStringName, new PetaPocoDefinitionProvider())
         {
             this.CommonConstruct();
         }

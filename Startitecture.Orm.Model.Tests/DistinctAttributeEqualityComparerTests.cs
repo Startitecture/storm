@@ -32,7 +32,7 @@ namespace Startitecture.Orm.Model.Tests
             // A duplicate of our previous expression.
             Expression<Func<InstanceSection, object>> expr2 = row => row.TemplateSection.TemplateVersion.Revision;
 
-            var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<InstanceSection>();
+            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<InstanceSection>();
             var firstAttribute = entityDefinition.Find(expr1);
             var secondAttribute = entityDefinition.Find(expr2);
 
@@ -52,7 +52,7 @@ namespace Startitecture.Orm.Model.Tests
             // A duplicate of our previous expression.
             Expression<Func<InstanceSection, object>> expr2 = row => row.TemplateSection.TemplateVersion.Revision;
 
-            var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<InstanceSection>();
+            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<InstanceSection>();
             var firstAttribute = entityDefinition.Find(expr1);
             var compareAttribute = entityDefinition.Find(expr2);
             var secondAttribute = new EntityAttributeDefinition(
@@ -75,7 +75,7 @@ namespace Startitecture.Orm.Model.Tests
         {
             Expression<Func<InstanceSection, object>> expr1 = row => row.InstanceExtension.Enabled;
 
-            var entityDefinition = Singleton<DataItemDefinitionProvider>.Instance.Resolve<InstanceSection>();
+            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<InstanceSection>();
             var firstAttribute = entityDefinition.Find(expr1);
             var secondAttribute = new EntityAttributeDefinition(
                                       firstAttribute.EntityNode.List,

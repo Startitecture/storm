@@ -16,6 +16,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
     using System;
 
     using Startitecture.Orm.Mapper;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Provides the data context for the FieldsModel database.
@@ -32,7 +33,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
         /// Initializes a new instance of the FieldsModel class.
         /// </summary>
         public FieldsModel()
-            : base("FieldsModel")
+            : base("FieldsModel", new PetaPocoDefinitionProvider())
         {
             this.CommonConstruct();
         }
@@ -44,7 +45,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
         /// The name of the connection string.
         /// </param>
         public FieldsModel(string connectionStringName)
-            : base(connectionStringName)
+            : base(connectionStringName, new PetaPocoDefinitionProvider())
         {
             this.CommonConstruct();
         }

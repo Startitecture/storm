@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DataItemDefinitionProviderTests.cs" company="Startitecture">
+// <copyright file="PetaPocoDefinitionProviderTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -19,7 +19,7 @@ namespace Startitecture.Orm.Schema.Tests
     /// The data item definition provider tests.
     /// </summary>
     [TestClass]
-    public class DataItemDefinitionProviderTests
+    public class PetaPocoDefinitionProviderTests
     {
         /// <summary>
         /// The resolve test.
@@ -27,7 +27,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_EntityWithAutoNumberPrimaryKey_KeyIncludedInPrimaryKeys()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<EntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<EntityRow>();
             Assert.IsNotNull(actual.AutoNumberPrimaryKey);
             var autoNumberPrimaryKey = actual.AutoNumberPrimaryKey.GetValueOrDefault();
             Assert.IsTrue(actual.PrimaryKeyAttributes.Contains(autoNumberPrimaryKey));
@@ -39,7 +39,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_EntityWithAutoNumberPrimaryKey_KeyIncludedInDirectAttributes()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<EntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<EntityRow>();
             Assert.IsNotNull(actual.AutoNumberPrimaryKey);
             var autoNumberPrimaryKey = actual.AutoNumberPrimaryKey.GetValueOrDefault();
             Assert.IsTrue(actual.DirectAttributes.Contains(autoNumberPrimaryKey));
@@ -51,7 +51,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_EntityWithIdentifyingPrimaryKey_KeyIsNotAutoNumberKey()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<ExtendedEntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<ExtendedEntityRow>();
             Assert.IsNull(actual.AutoNumberPrimaryKey);
         }
 
@@ -61,7 +61,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_EntityWithIdentifyingPrimaryKey_KeyIsContainedInPrimaryKey()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<ExtendedEntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<ExtendedEntityRow>();
             Assert.IsNotNull(actual.PrimaryKeyAttributes.FirstOrDefault());
         }
 
@@ -71,7 +71,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_EntityWithIdentifyingPrimaryKey_KeyIncludedInDirectAttributes()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<ExtendedEntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<ExtendedEntityRow>();
             var primaryKey = actual.PrimaryKeyAttributes.FirstOrDefault();
             Assert.IsTrue(actual.DirectAttributes.Contains(primaryKey));
         }
@@ -82,7 +82,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_RaisedEntityWithAutoNumberPrimaryKey_KeyIncludedInPrimaryKeys()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<RaisedEntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<RaisedEntityRow>();
             Assert.IsNotNull(actual.AutoNumberPrimaryKey);
             var autoNumberPrimaryKey = actual.AutoNumberPrimaryKey.GetValueOrDefault();
             Assert.IsTrue(actual.PrimaryKeyAttributes.Contains(autoNumberPrimaryKey));
@@ -94,7 +94,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_RaisedEntityWithAutoNumberPrimaryKey_KeyIncludedInDirectAttributes()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<RaisedEntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<RaisedEntityRow>();
             Assert.IsNotNull(actual.AutoNumberPrimaryKey);
             var autoNumberPrimaryKey = actual.AutoNumberPrimaryKey.GetValueOrDefault();
             Assert.IsTrue(actual.DirectAttributes.Contains(autoNumberPrimaryKey));
@@ -106,7 +106,7 @@ namespace Startitecture.Orm.Schema.Tests
         [TestMethod]
         public void Resolve_RaisedEntityWithRelations_MatchesExpected()
         {
-            var actual = new DataItemDefinitionProvider().Resolve<RaisedEntityRow>();
+            var actual = new PetaPocoDefinitionProvider().Resolve<RaisedEntityRow>();
 
             Assert.AreEqual(actual.EntityName, "Entity");
             Assert.AreEqual(actual.EntityContainer, "dbo");
@@ -297,7 +297,7 @@ namespace Startitecture.Orm.Schema.Tests
 
             foreach (var definition in definitions)
             {
-                Assert.IsTrue(actual.AllAttributes.Contains(definition), Convert.ToString((object)definition));
+                Assert.IsTrue(actual.AllAttributes.Contains(definition), Convert.ToString(definition));
             }
         }
 
