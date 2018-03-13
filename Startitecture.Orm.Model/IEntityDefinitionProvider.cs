@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Model
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq.Expressions;
 
     /// <summary>
     /// Provides an interface to classes that define the definitions of entity types.
@@ -60,5 +61,16 @@ namespace Startitecture.Orm.Model
         /// A collection of <see cref="EntityAttributeDefinition"/> based on the specified <paramref name="entityType"/>.
         /// </returns>
         IEnumerable<EntityAttributeDefinition> ResolveDefinitions(Type entityType);
+
+        /// <summary>
+        /// Gets an entity reference from the specified <paramref name="attributeExpression"/>.
+        /// </summary>
+        /// <param name="attributeExpression">
+        /// The attribute expression.
+        /// </param>
+        /// <returns>
+        /// An <see cref="EntityReference"/> based on the <paramref name="attributeExpression"/>.
+        /// </returns>
+        EntityReference GetEntityReference(LambdaExpression attributeExpression);
     }
 }

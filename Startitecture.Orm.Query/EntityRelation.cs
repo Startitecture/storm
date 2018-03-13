@@ -202,14 +202,14 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightAttribute));
             }
 
-            var leftReference = leftAttribute.GetEntityReference();
+            var leftReference = this.definitionProvider.GetEntityReference(leftAttribute);
 
             this.SourceLocation = this.definitionProvider.GetEntityLocation(leftReference);
             this.SourceAttribute =
                 this.definitionProvider.Resolve(leftReference.EntityType)
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == leftAttribute.GetPropertyName());
 
-            var rightReference = rightAttribute.GetEntityReference();
+            var rightReference = this.definitionProvider.GetEntityReference(rightAttribute);
 
             this.RelationLocation = this.definitionProvider.GetEntityLocation(rightReference);
             this.RelationAttribute =

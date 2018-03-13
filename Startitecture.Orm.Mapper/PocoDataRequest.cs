@@ -11,9 +11,7 @@ namespace Startitecture.Orm.Mapper
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Defines a POCO data request for a POCO factory.
@@ -29,7 +27,10 @@ namespace Startitecture.Orm.Mapper
         /// <param name="pocoType">
         /// The POCO data type for the data record.
         /// </param>
-        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] Type pocoType)
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
+        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] Type pocoType, IEntityDefinitionProvider definitionProvider)
         {
             if (dataReader == null)
             {
@@ -42,7 +43,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.DataReader = dataReader;
-            this.EntityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve(pocoType);
+            this.EntityDefinition = definitionProvider.Resolve(pocoType);
         }
 
         /// <summary>

@@ -12,12 +12,15 @@ namespace Startitecture.Orm.Schema
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
 
     using Model;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Contains information about the structure of a data item.
@@ -42,6 +45,38 @@ namespace Startitecture.Orm.Schema
             };
 
         #endregion
+
+        /// <inheritdoc />
+        public override EntityReference GetEntityReference(LambdaExpression attributeExpression)
+        {
+            if (attributeExpression == null)
+            {
+                throw new ArgumentNullException(nameof(attributeExpression));
+            }
+
+            var attributeMember = attributeExpression.GetMember();
+
+            if (attributeMember == null)
+            {
+                throw new OperationException(attributeExpression, ValidationMessages.SelectorCannotBeEvaluated);
+            }
+
+            // Check whether there's a RelatedEntityAttribute that will override the natural type.
+            // Do not use .Member.DeclaringType in place of .Expression.Type because this could be the base type of an inherited type.
+            var relatedEntityAttribute = attributeMember.Member.GetCustomAttribute<RelatedEntityAttribute>();
+            var declaringType = relatedEntityAttribute?.EntityType ?? attributeMember.Expression.Type;
+
+            if (declaringType == null)
+            {
+                throw new OperationException(attributeExpression, ValidationMessages.PropertyMustHaveDeclaringType);
+            }
+
+            // This will be null for RelatedEntityAttributes, so we check from the attribute directly (below).
+            var entityMember = attributeMember.Expression as MemberExpression;
+
+            // The definition provider will handle identical alias/entity names.
+            return new EntityReference { EntityType = declaringType, EntityAlias = relatedEntityAttribute?.EntityAlias ?? entityMember?.Member.Name };
+        }
 
         /// <inheritdoc />
         protected override string GetEntityQualifiedName(Type entityType)
@@ -81,11 +116,13 @@ namespace Startitecture.Orm.Schema
             return physicalName;
         }
 
+/*
         /// <inheritdoc />
         protected virtual IEnumerable<PropertyInfo> GetFilteredRelationProperties(Type entityType)
         {
             return GetPocoFilteredEntityProperties(entityType).ToList();
         }
+*/
 
         /// <inheritdoc />
         protected override IEnumerable<AttributeReference> GetKeyAttributes(Type entityType)
@@ -189,21 +226,6 @@ namespace Startitecture.Orm.Schema
                                      };
                 }
             }
-        }
-
-        /// <inheritdoc />
-        protected override AttributeReference GetAttributeReference(MemberInfo propertyInfo)
-        {
-            var relatedEntity = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
-            var relatedEntityReference = new EntityReference { EntityType = relatedEntity.EntityType, EntityAlias = relatedEntity.EntityAlias };
-
-            return new AttributeReference
-                       {
-                           EntityReference = relatedEntityReference,
-                           Name = propertyInfo.Name,
-                           UseAttributeAlias = relatedEntity.UseAttributeAlias,
-                           PhysicalName = relatedEntity.PhysicalName
-                       };
         }
 
         /// <inheritdoc />

@@ -63,11 +63,9 @@
     <Compile Include="EntityDefinition.cs" />
     <Compile Include="EntityLocation.cs" />
     <Compile Include="EntityReference.cs" />
-    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="IEntityDefinition.cs" />
     <Compile Include="IEntityDefinitionProvider.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RelatedEntityAttribute.cs" />
     <Compile Include="RelationAttribute.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -146,15 +146,18 @@ namespace Startitecture.Orm.Mapper.Tests
         /// <param name="item">
         /// The item to use as the source of the property values.
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <typeparam name="T">
         /// The type of POCO to create the request for.
         /// </typeparam>
         /// <returns>
         /// A <see cref="Startitecture.Orm.Mapper.PocoDataRequest"/> for the specified type.
         /// </returns>
-        public static PocoDataRequest CreatePocoDataRequest<T>(T item)
+        public static PocoDataRequest CreatePocoDataRequest<T>(T item, IEntityDefinitionProvider definitionProvider)
         {
-            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
+            var entityDefinition = definitionProvider.Resolve<T>();
             var attributeDefinitions = new ConcurrentDictionary<string, EntityAttributeDefinition>();
 
             foreach (var attributeDefinition in entityDefinition.ReturnableAttributes)
@@ -262,7 +265,12 @@ namespace Startitecture.Orm.Mapper.Tests
                 ordinal++;
             }
 
-            var pocoDataRequest = new PocoDataRequest(dataReader, typeof(T)) { FieldCount = attributeDefinitions.Count, FirstColumn = 0 };
+            var pocoDataRequest =
+                new PocoDataRequest(dataReader, typeof(T), definitionProvider)
+                    {
+                        FieldCount = attributeDefinitions.Count, FirstColumn = 0
+                    };
+
             return pocoDataRequest;
         }
 

@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Schema
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
     using System.Runtime.Caching;
 
@@ -65,7 +66,7 @@ namespace Startitecture.Orm.Schema
                 throw new ArgumentNullException(nameof(type));
             }
 
-            var cacheKey = $"{typeof(IEntityDefinition).FullName}:{type.FullName}";
+            var cacheKey = $"{this.GetType().FullName}:{type.FullName}";
             var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, type, this.CreateEntityDefinition, ItemPolicy);
             return result.Item;
         }
@@ -98,11 +99,14 @@ namespace Startitecture.Orm.Schema
             }
 
             var listName = typeof(List<EntityAttributeDefinition>).ToRuntimeName();
-            var cacheKey = string.Format(CacheKeyFormat, typeof(IEntityDefinition).FullName, entityType.FullName, listName);
+            var cacheKey = string.Format(CacheKeyFormat, this.GetType().FullName, entityType.FullName, listName);
             var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, entityType, this.GetRelationAttributes, ItemPolicy);
 
             return result.Item;
         }
+
+        /// <inheritdoc />
+        public abstract EntityReference GetEntityReference(LambdaExpression attributeExpression);
 
         /// <summary>
         /// Gets the entity location by reference.
@@ -226,15 +230,27 @@ namespace Startitecture.Orm.Schema
         protected abstract IEnumerable<AttributeReference> GetAttributes(Type entityType);
 
         /// <summary>
-        /// Gets the attribute reference.
+        /// Gets the related entity attribute reference for the specified <paramref name="propertyInfo"/>.
         /// </summary>
         /// <param name="propertyInfo">
         /// The property info.
         /// </param>
         /// <returns>
-        /// The <see cref="AttributeReference"/>.
+        /// The <see cref="AttributeReference"/> for the <paramref name="propertyInfo"/>.
         /// </returns>
-        protected abstract AttributeReference GetAttributeReference(MemberInfo propertyInfo);
+        private static AttributeReference GetRelatedEntityAttributeReference(MemberInfo propertyInfo)
+        {
+            var relatedEntity = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
+            var relatedEntityReference = new EntityReference { EntityType = relatedEntity.EntityType, EntityAlias = relatedEntity.EntityAlias };
+
+            return new AttributeReference
+                       {
+                           EntityReference = relatedEntityReference,
+                           Name = propertyInfo.Name,
+                           UseAttributeAlias = relatedEntity.UseAttributeAlias,
+                           PhysicalName = relatedEntity.PhysicalName
+                       };
+        }
 
         /// <summary>
         /// Gets the entity definitions for the specified entity property.
@@ -274,6 +290,7 @@ namespace Startitecture.Orm.Schema
                 var propertyAlias = string.Concat(relationLocation.Alias ?? relationLocation.Name, '.', propertyName);
                 var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
 
+                // TODO: refactor to use AttributeReferences
                 var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey && x.IsIdentity == false).Select(x => x.PhysicalName)
                     .Contains(physicalName);
 
@@ -318,7 +335,7 @@ namespace Startitecture.Orm.Schema
             // Next, handle direct related entity attributes.
             foreach (var propertyInfo in this.GetRelatedColumnPropertyInfos(entityProperties))
             {
-                var attributeReference = this.GetAttributeReference(propertyInfo);
+                var attributeReference = GetRelatedEntityAttributeReference(propertyInfo);
 
                 // This is not a physical object on the POCO, so we indicate it as virtual.
                 var relatedLocation = this.GetEntityLocation(attributeReference.EntityReference);

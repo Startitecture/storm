@@ -14,6 +14,7 @@ namespace Startitecture.Orm.Testing.Model
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake flat sub row.

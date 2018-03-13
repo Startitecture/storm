@@ -13,6 +13,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
@@ -29,7 +30,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var target = new FlatPocoFactory();
             var fakeComplexRow = Generate.CreateFakeComplexRow();
-            var pocoDataRequest = Generate.CreatePocoDataRequest(fakeComplexRow);
+            var pocoDataRequest = Generate.CreatePocoDataRequest(fakeComplexRow, new PetaPocoDefinitionProvider());
             var actual = target.CreateDelegate<FakeComplexRow>(pocoDataRequest);
             Assert.IsNotNull(actual);
         }
@@ -42,7 +43,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var target = new FlatPocoFactory();
             var expected = Generate.CreateFakeComplexRow();
-            var pocoDataRequest = Generate.CreatePocoDataRequest(expected);
+            var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new PetaPocoDefinitionProvider());
 
             var stopwatch = Stopwatch.StartNew();
             var pocoDelegate = target.CreateDelegate<FakeComplexRow>(pocoDataRequest) as Func<IDataReader, FakeComplexRow>;
@@ -89,7 +90,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                    RelatedRowName = "RelatedName"
                                };
 
-            var pocoDataRequest = Generate.CreatePocoDataRequest(expected);
+            var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new PetaPocoDefinitionProvider());
 
             var stopwatch = Stopwatch.StartNew();
             var pocoDelegate = target.CreateDelegate<OverriddenColumnNameRow>(pocoDataRequest) as Func<IDataReader, OverriddenColumnNameRow>;

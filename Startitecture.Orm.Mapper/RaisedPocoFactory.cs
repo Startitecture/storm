@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Mapper
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
@@ -26,11 +25,6 @@ namespace Startitecture.Orm.Mapper
     /// </summary>
     public sealed class RaisedPocoFactory : IDisposable
     {
-        /// <summary>
-        /// The definition provider.
-        /// </summary>
-        private static readonly PetaPocoDefinitionProvider DefinitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
-
         /// <summary>
         /// The POCO factories.
         /// </summary>
@@ -51,6 +45,31 @@ namespace Startitecture.Orm.Mapper
         /// The POCO cache. Not static because we do not want to cache POCOs beyond the connection context.
         /// </summary>
         private readonly Cache<string, object> pocoCache = new Cache<string, object>();
+
+        /// <summary>
+        /// The definition provider.
+        /// </summary>
+        [NotNull]
+        private readonly IEntityDefinitionProvider definitionProvider;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RaisedPocoFactory"/> class.
+        /// </summary>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="definitionProvider"/> is not null.
+        /// </exception>
+        public RaisedPocoFactory([NotNull] IEntityDefinitionProvider definitionProvider)
+        {
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            this.definitionProvider = definitionProvider;
+        }
 
         /// <inheritdoc />
         public void Dispose()
@@ -78,7 +97,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             var reader = dataRequest.DataReader;
-            var entityDefinition = DefinitionProvider.Resolve<T>();
+            var entityDefinition = this.definitionProvider.Resolve<T>();
             var qualifiedName = entityDefinition.GetQualifiedName();
             var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
 
@@ -89,7 +108,7 @@ namespace Startitecture.Orm.Mapper
 
             foreach (var relationAttribute in relationAttributes)
             {
-                var relatedDefinition = DefinitionProvider.Resolve(relationAttribute.PropertyInfo.PropertyType);
+                var relatedDefinition = this.definitionProvider.Resolve(relationAttribute.PropertyInfo.PropertyType);
                 var keyDefinitions = entityDefinition.ReturnableAttributes.Where(x => x.Entity == relationAttribute.Entity && x.IsPrimaryKey)
                     .OrderBy(x => x.PhysicalName);
 
@@ -104,7 +123,7 @@ namespace Startitecture.Orm.Mapper
 
                 var relatedEntity = this.pocoCache.Get(
                     relatedPocoKey,
-                    () => GetRelatedEntity(dataRequest, typeQualifiedName, entityDefinition, reader, entityReference));
+                    () => this.GetRelatedEntity(dataRequest, typeQualifiedName, entityDefinition, reader, entityReference));
 
                 // Prevents "ghost" POCO properties when resolving second-order or higher relations.
                 if (relatedEntity == null)
@@ -119,54 +138,12 @@ namespace Startitecture.Orm.Mapper
                 }
                 else
                 {
-                    var relationContainer = this.NavigateToEntity(relationAttribute.ReferenceNode, poco);
+                    var relationContainer = NavigateToEntity(relationAttribute.ReferenceNode, poco);
                     relationAttribute.SetValueDelegate.DynamicInvoke(relationContainer, relatedEntity);
                 }
             }
 
             return poco;
-        }
-
-        /// <summary>
-        /// Gets a related entity POCO from the reader.
-        /// </summary>
-        /// <param name="dataRequest">
-        /// The data request.
-        /// </param>
-        /// <param name="typeQualifiedName">
-        /// The type qualified name.
-        /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition.
-        /// </param>
-        /// <param name="reader">
-        /// The reader.
-        /// </param>
-        /// <param name="entityReference">
-        /// The entity reference.
-        /// </param>
-        /// <returns>
-        /// The related POCO as an <see cref="object"/>.
-        /// </returns>
-        private static object GetRelatedEntity(
-            PocoDataRequest dataRequest,
-            string typeQualifiedName,
-            IEntityDefinition entityDefinition,
-            IDataRecord reader,
-            EntityReference entityReference)
-        {
-            var relatedEntityLocation = DefinitionProvider.GetEntityLocation(entityReference);
-            var relatedQualifiedName = relatedEntityLocation.GetQualifiedName();
-            var relatedKey = new Tuple<string, string, int, int>(typeQualifiedName, relatedQualifiedName, 0, reader.FieldCount);
-
-            // TODO: Cache attributes with their locations, or build explicitly.
-            var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
-            var relatedType = relatedEntityLocation.EntityType;
-
-            var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
-
-            var relatedEntity = relatedPocoDelegate.DynamicInvoke(reader);
-            return relatedEntity;
         }
 
         /// <summary>
@@ -251,7 +228,7 @@ namespace Startitecture.Orm.Mapper
         /// <exception cref="OperationException">
         /// The location path is broken for the entity node.
         /// </exception>
-        private object NavigateToEntity(LinkedListNode<EntityLocation> entityNode, object basePoco)
+        private static object NavigateToEntity(LinkedListNode<EntityLocation> entityNode, object basePoco)
         {
             // We eventually need to get to the property containing our attribute.
             var targetNode = entityNode;
@@ -320,6 +297,48 @@ namespace Startitecture.Orm.Mapper
             }
 
             return currentEntity;
+        }
+
+        /// <summary>
+        /// Gets a related entity POCO from the reader.
+        /// </summary>
+        /// <param name="dataRequest">
+        /// The data request.
+        /// </param>
+        /// <param name="typeQualifiedName">
+        /// The type qualified name.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="reader">
+        /// The reader.
+        /// </param>
+        /// <param name="entityReference">
+        /// The entity reference.
+        /// </param>
+        /// <returns>
+        /// The related POCO as an <see cref="object"/>.
+        /// </returns>
+        private object GetRelatedEntity(
+            PocoDataRequest dataRequest,
+            string typeQualifiedName,
+            IEntityDefinition entityDefinition,
+            IDataRecord reader,
+            EntityReference entityReference)
+        {
+            var relatedEntityLocation = this.definitionProvider.GetEntityLocation(entityReference);
+            var relatedQualifiedName = relatedEntityLocation.GetQualifiedName();
+            var relatedKey = new Tuple<string, string, int, int>(typeQualifiedName, relatedQualifiedName, 0, reader.FieldCount);
+
+            // TODO: Cache attributes with their locations, or build explicitly.
+            var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
+            var relatedType = relatedEntityLocation.EntityType;
+
+            var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
+
+            var relatedEntity = relatedPocoDelegate.DynamicInvoke(reader);
+            return relatedEntity;
         }
     }
 }

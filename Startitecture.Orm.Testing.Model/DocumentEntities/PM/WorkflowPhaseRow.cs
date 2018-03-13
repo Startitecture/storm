@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Testing.Model.DocumentEntities.PM
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
 
     /// <summary>

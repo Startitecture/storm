@@ -71,7 +71,7 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The POCO factory. 
         /// </summary>
-        private readonly RaisedPocoFactory pocoFactory = new RaisedPocoFactory();
+        private readonly RaisedPocoFactory pocoFactory;
 
         /// <summary>
         /// The definition provider.
@@ -138,6 +138,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.definitionProvider = definitionProvider;
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
 
             // TODO: This seems to fail with SqlConnection.
             this.isConnectionUserProvided = true;
@@ -182,6 +183,7 @@ namespace Startitecture.Orm.Mapper
             this.connectionString = connectionString;
             this.providerName = providerName;
             this.definitionProvider = definitionProvider;
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
             this.CommonConstruct();
         }
 
@@ -221,6 +223,7 @@ namespace Startitecture.Orm.Mapper
             this.connectionString = connectionString;
             this.factory = provider;
             this.definitionProvider = definitionProvider;
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
             this.CommonConstruct();
         }
 
@@ -249,6 +252,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.definitionProvider = definitionProvider;
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
 
             // Work out connection string and provider name
             var providerType = "System.Data.SqlClient";
@@ -512,7 +516,7 @@ namespace Startitecture.Orm.Mapper
         {
             if (this.EnableAutoSelect)
             {
-                var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
+                var entityDefinition = this.definitionProvider.Resolve<T>();
                 var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
                 sql = autoSelectHelper.AddSelectClause(sql);
             }
@@ -551,7 +555,12 @@ namespace Startitecture.Orm.Mapper
                                 yield break;
                             }
 
-                            var pocoDataRequest = new PocoDataRequest(dataReader, typeof(T)) { FieldCount = dataReader.FieldCount, FirstColumn = 0 };
+                            var pocoDataRequest = new PocoDataRequest(dataReader, typeof(T), this.definitionProvider)
+                                                      {
+                                                          FieldCount = dataReader.FieldCount,
+                                                          FirstColumn = 0
+                                                      };
+
                             poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
                         }
                         catch (Exception ex)
@@ -855,7 +864,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(poco));
             }
 
-            var definition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
+            var definition = this.definitionProvider.Resolve<T>();
             var tableInfo = definition.ToTableInfo();
 
             try
@@ -1323,7 +1332,7 @@ namespace Startitecture.Orm.Mapper
             // Add auto select clause
             if (this.EnableAutoSelect)
             {
-                var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<T>();
+                var entityDefinition = this.definitionProvider.Resolve<T>();
                 var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
                 sql = autoSelectHelper.AddSelectClause(sql);
             }

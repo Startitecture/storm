@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Model
+namespace Startitecture.Orm.Schema
 {
     using System;
 

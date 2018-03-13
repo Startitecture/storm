@@ -180,7 +180,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the definition provider for this definition.
         /// </summary>
-        protected IEntityDefinitionProvider DefinitionProvider { get; }
+        private IEntityDefinitionProvider DefinitionProvider { get; }
 
         /// <summary>
         /// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name. Direct attributes are queried
@@ -268,7 +268,7 @@ namespace Startitecture.Orm.Model
                 throw new ArgumentNullException(nameof(attributeExpression));
             }
 
-            var reference = attributeExpression.GetEntityReference();
+            var reference = this.DefinitionProvider.GetEntityReference(attributeExpression);
             var location = this.DefinitionProvider.GetEntityLocation(reference);
             var propertyName = attributeExpression.GetPropertyName();
 

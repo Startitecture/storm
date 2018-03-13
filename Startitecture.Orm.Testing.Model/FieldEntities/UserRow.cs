@@ -14,6 +14,7 @@ namespace Startitecture.Orm.Testing.Model.FieldEntities
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
 
     /// <summary>
