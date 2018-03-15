@@ -12,8 +12,6 @@ namespace Startitecture.Orm.Sql
     using System.Linq.Expressions;
     using System.Reflection;
 
-    using JetBrains.Annotations;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
@@ -175,42 +173,6 @@ namespace Startitecture.Orm.Sql
         public static string CreateJoinClause(this IEnumerable<IEntityRelation> selection)
         {
             return string.Join(Environment.NewLine, selection.Select(GenerateRelationStatement));
-        }
-
-        /// <summary>
-        /// Gets the qualified name for the specified entity.
-        /// </summary>
-        /// <param name="location">
-        /// The location of the entity.
-        /// </param>
-        /// <returns>
-        /// The qualified name as a <see cref="string"/>.
-        /// </returns>
-        public static string GetQualifiedName(this EntityLocation location)
-        {
-            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
-            return isEntityAliased
-                       ? string.Concat('[', location.Alias, ']')
-                       : string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
-        }
-
-        /// <summary>
-        /// Gets the qualified name for the specified entity.
-        /// </summary>
-        /// <param name="definition">
-        /// The location of the entity.
-        /// </param>
-        /// <returns>
-        /// The qualified name as a <see cref="string"/>.
-        /// </returns>
-        public static string GetQualifiedName([NotNull] this IEntityDefinition definition)
-        {
-            if (definition == null)
-            {
-                throw new ArgumentNullException(nameof(definition));
-            }
-
-            return string.Concat('[', definition.EntityContainer, ']', '.', '[', definition.EntityName, ']');
         }
 
         /// <summary>
@@ -406,7 +368,7 @@ namespace Startitecture.Orm.Sql
         private static string GetQualifiedName(this EntityAttributeDefinition attribute, string entityAlias)
         {
             var entityQualifiedName = string.IsNullOrWhiteSpace(entityAlias)
-                                          ? attribute.Entity.GetQualifiedName()
+                                          ? attribute.Entity.ReferenceName
                                           : string.Concat('[', entityAlias, ']');
 
             return string.Concat(entityQualifiedName, '.', '[', attribute.PhysicalName, ']');

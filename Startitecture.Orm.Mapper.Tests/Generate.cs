@@ -261,6 +261,12 @@ namespace Startitecture.Orm.Mapper.Tests
                     dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal)))
                         .Return((DateTimeOffset?)value ?? default(DateTimeOffset));
                 }
+                else if (propertyType == typeof(decimal))
+                {
+                    dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
+                    dataReader.Stub(reader => reader.GetDecimal(Arg<int>.Matches(i => i == localOrdinal)))
+                        .Return((decimal?)value ?? default(decimal));
+                }   
 
                 ordinal++;
             }

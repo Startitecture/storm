@@ -207,7 +207,7 @@ namespace Startitecture.Orm.Sql
             get
             {
                 // Rely on the underlying entity definition for delimiters.
-                var primaryTableName = this.ItemDefinition.GetQualifiedName();
+                var primaryTableName = this.ItemDefinition.QualifiedName;
                 var filter = this.Filters.Any()
                                  ? string.Concat(
                                      Environment.NewLine, 
@@ -350,7 +350,7 @@ namespace Startitecture.Orm.Sql
             if (selection.SelectionSource == selection.ItemDefinition.EntityName)
             {
                 // Select as we normally would. Do not add delimiters for tables.
-                fromClause = string.Concat(FromStatement, selection.ItemDefinition.GetQualifiedName());
+                fromClause = string.Concat(FromStatement, selection.ItemDefinition.QualifiedName);
             }
             else
             {

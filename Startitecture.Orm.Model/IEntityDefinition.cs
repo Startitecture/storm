@@ -61,6 +61,11 @@ namespace Startitecture.Orm.Model
         EntityAttributeDefinition? AutoNumberPrimaryKey { get; }
 
         /// <summary>
+        /// Gets the qualified name of the entity.
+        /// </summary>
+        string QualifiedName { get; }
+
+        /// <summary>
         /// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name.
         /// </summary>
         /// <param name="propertyName">

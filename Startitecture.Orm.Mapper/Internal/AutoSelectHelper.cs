@@ -103,7 +103,7 @@ namespace Startitecture.Orm.Mapper.Internal
                 return sql;
             }
 
-            string tableName = this.entityDefinition.GetQualifiedName(); //// this.databaseType.EscapeTableName(this.pocoData.TableInfo.TableName);
+            string tableName = this.entityDefinition.QualifiedName; //// this.databaseType.EscapeTableName(this.pocoData.TableInfo.TableName);
             var queryColumns = from c in this.entityDefinition.DirectAttributes
                                select tableName + "." + this.databaseType.EscapeSqlIdentifier(c.PhysicalName);
 

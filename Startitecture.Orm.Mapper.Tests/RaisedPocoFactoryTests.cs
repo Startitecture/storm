@@ -201,6 +201,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                OtherAggregate =
                                                    new OtherAggregateRow
                                                        {
+                                                           OtherAggregateId = 29,
                                                            AggregateOptionTypeId = 5,
                                                            Name = "OtherAggregate"
                                                        },

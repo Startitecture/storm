@@ -162,6 +162,9 @@ namespace Startitecture.Orm.Model
         /// </summary>
         public EntityAttributeDefinition? AutoNumberPrimaryKey => this.autoNumberPrimaryKey.Value;
 
+        /// <inheritdoc />
+        public string QualifiedName => $"[{this.EntityContainer}].[{this.EntityName}]";
+
         /// <summary>
         /// Gets the updateable attributes of the data item.
         /// </summary>

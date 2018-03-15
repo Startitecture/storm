@@ -98,7 +98,7 @@ namespace Startitecture.Orm.Mapper
 
             var reader = dataRequest.DataReader;
             var entityDefinition = this.definitionProvider.Resolve<T>();
-            var qualifiedName = entityDefinition.GetQualifiedName();
+            var qualifiedName = entityDefinition.QualifiedName;
             var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
 
             var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.PhysicalName));
@@ -108,9 +108,14 @@ namespace Startitecture.Orm.Mapper
 
             foreach (var relationAttribute in relationAttributes)
             {
+                // TODO: Change this brittle code. We need to match on aliases to get the right IDs.
                 var relatedDefinition = this.definitionProvider.Resolve(relationAttribute.PropertyInfo.PropertyType);
-                var keyDefinitions = entityDefinition.ReturnableAttributes.Where(x => x.Entity == relationAttribute.Entity && x.IsPrimaryKey)
-                    .OrderBy(x => x.PhysicalName);
+                var relationReferenceName = string.IsNullOrWhiteSpace(relationAttribute.Alias)
+                                                ? relatedDefinition.QualifiedName
+                                                : $"[{relationAttribute.Alias}]";
+
+                var keyDefinitions = entityDefinition.ReturnableAttributes
+                    .Where(x => x.Entity.ReferenceName == relationReferenceName && x.IsPrimaryKey).OrderBy(x => x.PhysicalName);
 
                 var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions);
 
@@ -328,7 +333,7 @@ namespace Startitecture.Orm.Mapper
             EntityReference entityReference)
         {
             var relatedEntityLocation = this.definitionProvider.GetEntityLocation(entityReference);
-            var relatedQualifiedName = relatedEntityLocation.GetQualifiedName();
+            var relatedQualifiedName = relatedEntityLocation.ReferenceName;
             var relatedKey = new Tuple<string, string, int, int>(typeQualifiedName, relatedQualifiedName, 0, reader.FieldCount);
 
             // TODO: Cache attributes with their locations, or build explicitly.

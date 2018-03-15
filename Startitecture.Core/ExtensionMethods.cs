@@ -13,7 +13,6 @@ namespace Startitecture.Core
     using System.Collections;
     using System.Collections.Generic;
     using System.Collections.Specialized;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -30,6 +29,21 @@ namespace Startitecture.Core
         /// The item key.
         /// </summary>
         private const string ItemKey = "{Item}";
+
+        /// <summary>
+        /// The qualified property name format.
+        /// </summary>
+        private const string QualifiedPropertyNameFormat = "{0}.{1}";
+
+        /// <summary>
+        /// The friendly generic type format string.
+        /// </summary>
+        private const string FriendlyGenericTypeFormat = "{0}<{1}>";
+
+        /// <summary>
+        /// The type name selector.
+        /// </summary>
+        private static readonly Func<Type, string> TypeNameSelector = x => x.Name;
 
         /// <summary>
         /// The property name selector.
@@ -109,120 +123,6 @@ namespace Startitecture.Core
         }
 
         /// <summary>
-        /// Returns the property names and values of the current item.
-        /// </summary>
-        /// <param name="item">
-        /// The item to evaluate.
-        /// </param>
-        /// <param name="propertiesToInclude">
-        /// The properties to include. If no properties are specified, all valid properties are included.
-        /// </param>
-        /// <returns>
-        /// A <see cref="T:System.Collections.Generic.Dictionary`2"/> of the item's properties.
-        /// </returns>
-        private static Dictionary<string, object> ToPropertyDictionary(this object item, params string[] propertiesToInclude)
-        {
-            if (propertiesToInclude == null)
-            {
-                throw new ArgumentNullException(nameof(propertiesToInclude));
-            }
-
-            if (item == null)
-            {
-                return new Dictionary<string, object>();
-            }
-
-            var propertyValues = new Dictionary<string, object>();
-
-            // If we use the generic type then we may get nothing back if the item is passed as an object.
-            var properties = item.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(PropertyNameSelector);
-            bool filterByName = propertiesToInclude.Length > 0;
-
-            // ReSharper disable LoopCanBeConvertedToQuery - performance
-            foreach (var propertyInfo in properties)
-            {
-                // ReSharper restore LoopCanBeConvertedToQuery
-                if (propertyInfo.GetIndexParameters().Length > 0)
-                {
-                    continue;
-                }
-
-                if (filterByName && !propertiesToInclude.Contains(propertyInfo.Name))
-                {
-                    continue;
-                }
-
-                if (propertyInfo.GetCustomAttributes(typeof(DoNotLogAttribute), false).Any())
-                {
-                    continue;
-                }
-
-                propertyValues.Add(propertyInfo.Name, propertyInfo.GetPropertyValue(item));
-            }
-
-            return propertyValues;
-        }
-
-        /// <summary>
-        /// Gets property names and values for the specified item, replacing any non-serializable items with their string 
-        /// representations.
-        /// </summary>
-        /// <param name="item">
-        /// The item to retrieve the properties of.
-        /// </param>
-        /// <param name="propertiesToInclude">
-        /// The properties to include.
-        /// </param>
-        /// <returns>
-        /// A dictionary of name value pairs joined as <see cref="string"/>, ordered by the property name.
-        /// </returns>
-        private static Dictionary<string, object> ToSerializableDictionary(
-            this object item,
-            params string[] propertiesToInclude)
-        {
-            if (Evaluate.IsNull(item))
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            if (propertiesToInclude == null)
-            {
-                throw new ArgumentNullException(nameof(propertiesToInclude));
-            }
-
-            return item.ToPropertyDictionary(propertiesToInclude).ToDictionary(pair => pair.Key, GetSerializableValue);
-        }
-
-        /// <summary>
-        /// Gets the serializable value of the value in the key value pair.
-        /// </summary>
-        /// <param name="pair">
-        /// The pair to evaluate.
-        /// </param>
-        /// <returns>
-        /// The serializable value of the key value pair as an <see cref="object"/>.
-        /// </returns>
-        private static object GetSerializableValue(KeyValuePair<string, object> pair)
-        {
-            if (pair.Value == null)
-            {
-                return null;
-            }
-
-            return pair.Value.GetType().IsSerializable ? pair.Value : Convert.ToString(pair.Value);
-        }
-
-        /// <summary>
-        /// The friendly generic type format string.
-        /// </summary>
-        private const string FriendlyGenericTypeFormat = "{0}<{1}>";
-
-        /// <summary>
-        /// The type name selector.
-        /// </summary>
-        private static readonly Func<Type, string> TypeNameSelector = x => x.Name;
-
-        /// <summary>
         /// Gets the property name from a selector.
         /// </summary>
         /// <param name="selector">
@@ -267,72 +167,6 @@ namespace Startitecture.Core
         }
 
         /// <summary>
-        /// Determines whether an exception contains an inner exception of an exact type.
-        /// </summary>
-        /// <param name="exception">
-        /// The exception to evaluate.
-        /// </param>
-        /// <typeparam name="TException">
-        /// The type of inner exception to evaluate for.
-        /// </typeparam>
-        /// <returns>
-        /// <c>true</c> if the inner exception is the exact type of the <typeparamref name="TException"/> type; otherwise, <c>false</c>.
-        /// </returns>
-        [SuppressMessage(
-            "Microsoft.Design", 
-            "CA1004:GenericMethodsShouldProvideTypeParameter", 
-            Justification = "This is now common practice for methods with a single generic parameter.")]
-        public static bool ContainsInnerException<TException>(this Exception exception)
-            where TException : Exception
-        {
-            return exception?.InnerException != null && exception.InnerException.GetType() == typeof(TException);
-        }
-
-        /// <summary>
-        /// Retrieves the innermost exception message that is an instance of the specified types to include.
-        /// </summary>
-        /// <param name="exception">
-        /// The current exception.
-        /// </param>
-        /// <param name="typesToExclude">
-        /// The exception types to exclude when searching for the inner exception.
-        /// </param>
-        /// <returns>
-        /// The error message as a <see cref="string"/>.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="exception"/> or <paramref name="typesToExclude"/> are null.
-        /// </exception>
-        public static string GetInnerExceptionMessage(this Exception exception, params Type[] typesToExclude)
-        {
-            if (exception == null)
-            {
-                throw new ArgumentNullException(nameof(exception));
-            }
-
-            if (typesToExclude == null)
-            {
-                throw new ArgumentNullException(nameof(typesToExclude));
-            }
-
-            string errorMessage = null;
-
-            var currentException = exception;
-
-            while (currentException != null)
-            {
-                if (!typesToExclude.Any(x => x.IsInstanceOfType(currentException)))
-                {
-                    errorMessage = currentException.Message;
-                }
-
-                currentException = currentException.InnerException;
-            }
-
-            return errorMessage ?? exception.Message;
-        }
-
-        /// <summary>
         /// Converts a type to its runtime name, including generic arguments.
         /// </summary>
         /// <param name="type">
@@ -350,7 +184,7 @@ namespace Startitecture.Core
 
             if (type.GetGenericArguments().Any())
             {
-                return String.Format(FriendlyGenericTypeFormat, type.Name, String.Join(", ", type.GetGenericArguments().Select(TypeNameSelector)));
+                return string.Format(FriendlyGenericTypeFormat, type.Name, string.Join(", ", type.GetGenericArguments().Select(TypeNameSelector)));
             }
 
             return type.Name;
@@ -440,7 +274,7 @@ namespace Startitecture.Core
         /// </exception>
         public static object GetPropertyValue<T>(this T entity, string propertyName)
         {
-            if (String.IsNullOrWhiteSpace(propertyName))
+            if (string.IsNullOrWhiteSpace(propertyName))
             {
                 throw new ArgumentNullException(nameof(propertyName));
             }
@@ -455,7 +289,7 @@ namespace Startitecture.Core
             if (info == null)
             {
                 throw new ArgumentException(
-                    String.Format((string)ValidationMessages.TypeDoesNotContainProperty, typeof(T).Name, propertyName),
+                    string.Format(ValidationMessages.TypeDoesNotContainProperty, typeof(T).Name, propertyName),
                     nameof(propertyName));
             }
 
@@ -696,7 +530,7 @@ namespace Startitecture.Core
             }
 
             // Note: use full name and not GetRuntimeName() otherwise each item type would require a different setting.
-            var name = String.Format((string)QualifiedPropertyNameFormat, typeof(TItem).FullName, propertyExpression.GetPropertyName());
+            var name = string.Format(QualifiedPropertyNameFormat, typeof(TItem).FullName, propertyExpression.GetPropertyName());
 
             var newValue = collection.AllKeys.Contains(name)
                                ? TryParse(collection[name], defaultValue, parser)
@@ -753,12 +587,71 @@ namespace Startitecture.Core
                 return;
             }
 
-            string message = String.Format(
+            string message = string.Format(
                 ValidationMessages.EntityDependencyCheckFailed,
                 typeof(TDependency).Name,
                 selector.GetPropertyName());
 
             throw new OperationException(entity, message);
+        }
+
+        /// <summary>
+        /// Gets the property differences between two objects of the same type.
+        /// </summary>
+        /// <param name="baseline">
+        /// The baseline object.
+        /// </param>
+        /// <param name="comparison">
+        /// The comparison object.
+        /// </param>
+        /// <param name="propertiesToCompare">
+        /// The properties to compare.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to compare.
+        /// </typeparam>
+        /// <returns>
+        /// A collection of <see cref="Startitecture.Core.PropertyComparisonResult"/> items containing the non-equivalent property values of the two 
+        /// items.
+        /// </returns>
+        public static IEnumerable<PropertyComparisonResult> GetDifferences<TItem>(
+            this TItem baseline,
+            TItem comparison,
+            params string[] propertiesToCompare)
+        {
+            if (Evaluate.IsNull(baseline))
+            {
+                throw new ArgumentNullException(nameof(baseline));
+            }
+
+            if (Evaluate.IsNull(comparison))
+            {
+                throw new ArgumentNullException(nameof(comparison));
+            }
+
+            if (Evaluate.IsNull(propertiesToCompare))
+            {
+                throw new ArgumentNullException(nameof(propertiesToCompare));
+            }
+
+            var allProperties = GetAllProperties<TItem>(propertiesToCompare);
+
+            var originalProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(baseline));
+
+            var newProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(comparison));
+
+            return (from propertyName in allProperties.Select(x => x.Name)
+                    let originalValue = originalProperties[propertyName]
+                    let newValue = newProperties[propertyName]
+                    where !ReferenceEquals(originalValue, newValue)
+                    where (originalValue != null && !originalValue.Equals(newValue)) || !newValue.Equals(originalValue)
+                    select
+                        new PropertyComparisonResult
+                        {
+                            PropertyName = propertyName,
+                            OriginalValue = originalValue,
+                            NewValue = newValue
+                        }).ToList();
         }
 
         /// <summary>
@@ -810,70 +703,6 @@ namespace Startitecture.Core
         }
 
         /// <summary>
-        /// The qualified property name format.
-        /// </summary>
-        public const string QualifiedPropertyNameFormat = "{0}.{1}";
-
-        /// <summary>
-        /// Gets the property differences between two objects of the same type.
-        /// </summary>
-        /// <param name="baseline">
-        /// The baseline object.
-        /// </param>
-        /// <param name="comparison">
-        /// The comparison object.
-        /// </param>
-        /// <param name="propertiesToCompare">
-        /// The properties to compare.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to compare.
-        /// </typeparam>
-        /// <returns>
-        /// A collection of <see cref="Startitecture.Core.PropertyComparisonResult"/> items containing the non-equivalent property values of the two 
-        /// items.
-        /// </returns>
-        public static IEnumerable<PropertyComparisonResult> GetDifferences<TItem>(
-            this TItem baseline, 
-            TItem comparison, 
-            params string[] propertiesToCompare)
-        {
-            if (Evaluate.IsNull(baseline))
-            {
-                throw new ArgumentNullException(nameof(baseline));
-            }
-
-            if (Evaluate.IsNull(comparison))
-            {
-                throw new ArgumentNullException(nameof(comparison));
-            }
-
-            if (Evaluate.IsNull(propertiesToCompare))
-            {
-                throw new ArgumentNullException(nameof(propertiesToCompare));
-            }
-
-            var allProperties = GetAllProperties<TItem>(propertiesToCompare);
-
-            var originalProperties = Enumerable.ToDictionary<PropertyInfo, string, object>(allProperties, info => info.Name, info => info.GetPropertyValue(baseline));
-
-            var newProperties = Enumerable.ToDictionary<PropertyInfo, string, object>(allProperties, info => info.Name, info => info.GetPropertyValue(comparison));
-
-            return (from propertyName in Enumerable.Select<PropertyInfo, string>(allProperties, x => x.Name)
-                    let originalValue = originalProperties[propertyName]
-                    let newValue = newProperties[propertyName]
-                    where !ReferenceEquals(originalValue, newValue)
-                    where (originalValue != null && !originalValue.Equals(newValue)) || !newValue.Equals(originalValue)
-                    select
-                        new PropertyComparisonResult
-                            {
-                                PropertyName = propertyName, 
-                                OriginalValue = originalValue, 
-                                NewValue = newValue
-                            }).ToList();
-        }
-
-        /// <summary>
         /// Gets all of the properties for the array of string properties to compare.
         /// </summary>
         /// <param name="propertiesToCompare">
@@ -892,6 +721,110 @@ namespace Startitecture.Core
                                         .OrderBy(x => x.Name).ToList()
                                     : typeof(TItem).GetProperties().Where(x => !x.GetIndexParameters().Any()).OrderBy(x => x.Name).ToList();
             return allProperties;
+        }
+
+        /// <summary>
+        /// Returns the property names and values of the current item.
+        /// </summary>
+        /// <param name="item">
+        /// The item to evaluate.
+        /// </param>
+        /// <param name="propertiesToInclude">
+        /// The properties to include. If no properties are specified, all valid properties are included.
+        /// </param>
+        /// <returns>
+        /// A <see cref="T:System.Collections.Generic.Dictionary`2"/> of the item's properties.
+        /// </returns>
+        private static Dictionary<string, object> ToPropertyDictionary(this object item, params string[] propertiesToInclude)
+        {
+            if (propertiesToInclude == null)
+            {
+                throw new ArgumentNullException(nameof(propertiesToInclude));
+            }
+
+            if (item == null)
+            {
+                return new Dictionary<string, object>();
+            }
+
+            var propertyValues = new Dictionary<string, object>();
+
+            // If we use the generic type then we may get nothing back if the item is passed as an object.
+            var properties = item.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance).OrderBy(PropertyNameSelector);
+            bool filterByName = propertiesToInclude.Length > 0;
+
+            // ReSharper disable LoopCanBeConvertedToQuery - performance
+            foreach (var propertyInfo in properties)
+            {
+                // ReSharper restore LoopCanBeConvertedToQuery
+                if (propertyInfo.GetIndexParameters().Length > 0)
+                {
+                    continue;
+                }
+
+                if (filterByName && !propertiesToInclude.Contains(propertyInfo.Name))
+                {
+                    continue;
+                }
+
+                if (propertyInfo.GetCustomAttributes(typeof(DoNotLogAttribute), false).Any())
+                {
+                    continue;
+                }
+
+                propertyValues.Add(propertyInfo.Name, propertyInfo.GetPropertyValue(item));
+            }
+
+            return propertyValues;
+        }
+
+        /// <summary>
+        /// Gets property names and values for the specified item, replacing any non-serializable items with their string 
+        /// representations.
+        /// </summary>
+        /// <param name="item">
+        /// The item to retrieve the properties of.
+        /// </param>
+        /// <param name="propertiesToInclude">
+        /// The properties to include.
+        /// </param>
+        /// <returns>
+        /// A dictionary of name value pairs joined as <see cref="string"/>, ordered by the property name.
+        /// </returns>
+        private static Dictionary<string, object> ToSerializableDictionary(
+            this object item,
+            params string[] propertiesToInclude)
+        {
+            if (Evaluate.IsNull(item))
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
+            if (propertiesToInclude == null)
+            {
+                throw new ArgumentNullException(nameof(propertiesToInclude));
+            }
+
+            return item.ToPropertyDictionary(propertiesToInclude).ToDictionary(pair => pair.Key, GetSerializableValue);
+        }
+
+        /// <summary>
+        /// Gets the serializable value of the value in the key value pair.
+        /// </summary>
+        /// <param name="pair">
+        /// The pair to evaluate.
+        /// </param>
+        /// <returns>
+        /// The serializable value of the key value pair as an <see cref="object"/>.
+        /// </returns>
+        private static object GetSerializableValue(KeyValuePair<string, object> pair)
+        {
+            if (pair.Value == null)
+            {
+                return null;
+            }
+
+            return pair.Value.GetType().IsSerializable ? pair.Value : Convert.ToString(pair.Value);
         }
     }
 }

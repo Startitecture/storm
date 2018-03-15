@@ -254,7 +254,7 @@ namespace Startitecture.Orm.Sql
                     Enumerable.ToList<string>(
                         allAttributes.Join(
                             this.directAttributes,
-                            tvp => tvp.GetCanonicalName(),
+                            tvp => tvp.GetQualifiedName(),
                             i => i.GetCanonicalName(),
                             (structure, entity) => structure).OrderBy(x => x.PhysicalName).Select(x => $"[{x.PropertyName}]"));
 

@@ -231,7 +231,7 @@ SET
 
             var itemSelection = operation.selection;
 
-            var entityName = operation.itemDefinition.GetQualifiedName();
+            var entityName = operation.itemDefinition.QualifiedName;
             string joinClause = itemSelection.Relations.Any()
                                     ? string.Concat(
                                         Environment.NewLine,
