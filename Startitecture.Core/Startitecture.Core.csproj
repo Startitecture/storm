@@ -82,8 +82,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="Snippets\ComparisonGenerator.snippet" />
+    <None Include="Snippets\EqualityGenerator.snippet" />
     <None Include="Startitecture.Core.nuspec" />
     <None Include="Startitecture.Core.pfx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
