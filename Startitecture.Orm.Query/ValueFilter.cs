@@ -61,30 +61,16 @@ namespace Startitecture.Orm.Query
         /// <param name="itemAttribute">
         /// The item attribute.
         /// </param>
-        /// <param name="values">
-        /// The values.
-        /// </param>
-        public ValueFilter(EntityAttributeDefinition itemAttribute, params object[] values)
-            : this(itemAttribute, false, values)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ValueFilter"/> class.
-        /// </summary>
-        /// <param name="itemAttribute">
-        /// The item attribute.
-        /// </param>
-        /// <param name="valuesAreDiscrete">
-        /// Indicates whether the supplied filter values are discrete.
+        /// <param name="filterType">
+        /// The filter type for this value filter.
         /// </param>
         /// <param name="values">
         /// The values.
         /// </param>
-        public ValueFilter(EntityAttributeDefinition itemAttribute, bool valuesAreDiscrete, params object[] values)
+        public ValueFilter(EntityAttributeDefinition itemAttribute, FilterType filterType, params object[] values)
         {
             this.ItemAttribute = itemAttribute;
-            this.IsDiscrete = valuesAreDiscrete;
+            this.FilterType = filterType;
             this.values.AddRange(values);
         }
 
@@ -95,23 +81,17 @@ namespace Startitecture.Orm.Query
         /// <summary>
         /// Gets the item attribute for the current filter.
         /// </summary>
-        public EntityAttributeDefinition ItemAttribute { get; private set; }
+        public EntityAttributeDefinition ItemAttribute { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the value filter is for discrete values.
+        /// Gets the filter type for this value filter.
         /// </summary>
-        public bool IsDiscrete { get; private set; }
+        public FilterType FilterType { get; }
 
         /// <summary>
         /// Gets the filter values for the current filter.
         /// </summary>
-        public IEnumerable<object> FilterValues
-        {
-            get
-            {
-                return this.values;
-            }
-        }
+        public IEnumerable<object> FilterValues => this.values;
 
         #endregion
 

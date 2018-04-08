@@ -350,8 +350,7 @@ namespace Startitecture.Orm.Repository
             this.SaveDependencies(entity, this.RepositoryProvider, dataItem);
             this.EntityMapper.MapTo(entity, dataItem);
 
-            var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
-            dataItem = this.RepositoryProvider.Save(dataItem, uniqueItemSelection);
+            dataItem = this.RepositoryProvider.Save(dataItem);
 
             // In an update operation, dataItem will be a different object reference blended with the original.
             dataItem.SetTransactionProvider(this.RepositoryProvider);

@@ -177,77 +177,37 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
-        /// Gets the selection statement for the current selection.
-        /// </summary>
-        public override string SelectionStatement
-        {
-            get
-            {
-                return this.CreateCompleteStatement(this, false);
-            }
-        }
-
-        /// <summary>
-        /// Gets a statement that determines whether the repository contains the current selection.
-        /// </summary>
-        public override string ContainsStatement
-        {
-            get
-            {
-                return string.Format(IfExistsClause, this.CreateCompleteStatement(this, true));
-            }
-        }
-
-        /// <summary>
         /// Gets a statement that removes items from the repository based on the current selection.
         /// TODO: Either put this in its own operation that prevents UNIONs or fix updates to allow them.
         /// </summary>
-        public override string RemovalStatement
-        {
-            get
-            {
-                // Rely on the underlying entity definition for delimiters.
-                var primaryTableName = this.ItemDefinition.QualifiedName;
-                var filter = this.Filters.Any()
-                                 ? string.Concat(
-                                     Environment.NewLine, 
-                                     string.Format(SqlWhereClause, this.Filters.CreateFilter(0, this.NullPropertiesRequireSetValue)))
-                                 : string.Empty;
+        ////public override string RemovalStatement
+        ////{
+        ////    get
+        ////    {
+        ////        // Rely on the underlying entity definition for delimiters.
+        ////        var primaryTableName = this.ItemDefinition.QualifiedName;
+        ////        var filter = this.Filters.Any()
+        ////                         ? string.Concat(
+        ////                             Environment.NewLine, 
+        ////                             string.Format(SqlWhereClause, this.Filters.CreateFilter(0)))
+        ////                         : string.Empty;
 
-                if (this.Relations.Any() == false)
-                {
-                    return string.Concat(DeleteFromStatement, primaryTableName, filter);
-                }
+        ////        if (this.Relations.Any() == false)
+        ////        {
+        ////            return string.Concat(DeleteFromStatement, primaryTableName, filter);
+        ////        }
 
-                return string.Concat(
-                    DeleteStatement, 
-                    primaryTableName, 
-                    Environment.NewLine, 
-                    FromStatement, 
-                    primaryTableName, 
-                    Environment.NewLine, 
-                    this.Relations.CreateJoinClause(), 
-                    filter);
-            }
-        }
-
-        /// <summary>
-        /// The get column selection.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to create a column selection for.
-        /// </param>
-        /// <returns>
-        /// The column selection as a <see cref="string"/>.
-        /// </returns>
-        private static string GetQualifiedColumnName(EntityAttributeDefinition attribute)
-        {
-            var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
-                                          ? string.Format((string)SelectColumnFormat, (object)attribute.GetQualifiedName())
-                                          : string.Format(AliasColumnFormat, attribute.GetQualifiedName(), attribute.Alias);
-
-            return qualifiedColumnName;
-        }
+        ////        return string.Concat(
+        ////            DeleteStatement, 
+        ////            primaryTableName, 
+        ////            Environment.NewLine, 
+        ////            FromStatement, 
+        ////            primaryTableName, 
+        ////            Environment.NewLine, 
+        ////            this.Relations.CreateJoinClause(), 
+        ////            filter);
+        ////    }
+        ////}
 
         /// <summary>
         /// Creates a selection link statement for the specified type.
@@ -277,10 +237,28 @@ namespace Startitecture.Orm.Sql
                     linkStatement = ExceptionStatement;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("linkType");
+                    throw new ArgumentOutOfRangeException(nameof(linkType));
             }
 
             return linkStatement;
+        }
+
+        /// <summary>
+        /// The get column selection.
+        /// </summary>
+        /// <param name="attribute">
+        /// The attribute to create a column selection for.
+        /// </param>
+        /// <returns>
+        /// The column selection as a <see cref="string"/>.
+        /// </returns>
+        private static string GetQualifiedColumnName(EntityAttributeDefinition attribute)
+        {
+            var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
+                                          ? string.Format((string)SelectColumnFormat, (object)attribute.GetQualifiedName())
+                                          : string.Format(AliasColumnFormat, attribute.GetQualifiedName(), attribute.Alias);
+
+            return qualifiedColumnName;
         }
 
         /// <summary>
@@ -365,7 +343,7 @@ namespace Startitecture.Orm.Sql
             var filter = selection.Filters.Any()
                              ? string.Concat(
                                  Environment.NewLine, 
-                                 string.Format(SqlWhereClause, selection.Filters.CreateFilter(indexOffset, this.NullPropertiesRequireSetValue)))
+                                 string.Format(SqlWhereClause, selection.Filters.CreateFilter(indexOffset)))
                              : string.Empty;
 
             return string.Concat(

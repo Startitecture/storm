@@ -269,7 +269,8 @@ namespace Startitecture.Orm.Repository.Tests
 
             FormLayout expected;
 
-            using (var provider = new DatabaseRepositoryProvider<FieldsModel>(entityMapper))
+            var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+            using (var provider = new DatabaseRepositoryProvider(databaseFactory, entityMapper))
             {
                 var userRepo = new UserRepository(provider);
                 userRepo.Save(creator);
@@ -392,7 +393,7 @@ namespace Startitecture.Orm.Repository.Tests
                 }
             }
 
-            using (var provider = new DatabaseRepositoryProvider<FieldsModel>(entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(databaseFactory, entityMapper))
             {
                 var commandProvider = new StructuredSqlCommandProvider(provider);
                 var placementRepository = new FieldPlacementRepository(provider);

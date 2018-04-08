@@ -30,11 +30,7 @@ namespace Startitecture.Orm.Mapper
     /// <summary>
     /// Provides a concrete implementation for a database repository.
     /// </summary>
-    /// <typeparam name="TContext">
-    /// The type of data context to provide access to.
-    /// </typeparam>
-    public sealed class DatabaseRepositoryProvider<TContext> : IRepositoryProvider, IDatabaseContextProvider
-        where TContext : Database
+    public sealed class DatabaseRepositoryProvider : IRepositoryProvider, IDatabaseContextProvider
     {
         /// <summary>
         /// The to string format.
@@ -57,14 +53,9 @@ namespace Startitecture.Orm.Mapper
         private readonly IRepositoryAdapter repositoryAdapter;
 
         /// <summary>
-        /// Gets the internal identifier for this provider.
-        /// </summary>
-        private readonly Guid internalIdentifier = Guid.NewGuid();
-
-        /// <summary>
         /// The data context for this repository. Required to maintain a specific Exists method signature.
         /// </summary>
-        private readonly TContext dataContext;
+        private readonly IDatabaseContext dataContext;
 
         /// <summary>
         /// The item cache.
@@ -77,74 +68,85 @@ namespace Startitecture.Orm.Mapper
         private readonly object itemLock = new object();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Mapper.DatabaseRepositoryProvider`1"/> class.
-        /// </summary>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        public DatabaseRepositoryProvider(IEntityMapper entityMapper)
-            : this((IRepositoryAdapterFactory)new QueryRepositoryAdapterFactory(), entityMapper)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Mapper.DatabaseRepositoryProvider`1"/> class.
-        /// </summary>
-        /// <param name="adapterFactory">
-        /// The repository adapter.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        public DatabaseRepositoryProvider(IRepositoryAdapterFactory adapterFactory, IEntityMapper entityMapper)
-            : this(DefaultDatabaseFactory<TContext>.Default, adapterFactory, entityMapper)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Mapper.DatabaseRepositoryProvider`1"/> class.
+        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
         /// </summary>
         /// <param name="databaseFactory">
         /// The database factory.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        public DatabaseRepositoryProvider(IDatabaseFactory<TContext> databaseFactory, IEntityMapper entityMapper)
-            : this(databaseFactory, new QueryRepositoryAdapterFactory(), entityMapper)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Mapper.DatabaseRepositoryProvider`1"/> class.
-        /// </summary>
-        /// <param name="databaseFactory">
-        /// The database factory.
-        /// </param>
-        /// <param name="adapterFactory">
-        /// The repository adapter.
         /// </param>
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
         public DatabaseRepositoryProvider(
-            IDatabaseFactory<TContext> databaseFactory,
-            IRepositoryAdapterFactory adapterFactory,
-            IEntityMapper entityMapper)
+            [NotNull] IDatabaseFactory databaseFactory,
+            [NotNull] IEntityMapper entityMapper)
+            : this(databaseFactory, entityMapper, Singleton<SqlServerRepositoryAdapterFactory>.Instance)
         {
-            if (databaseFactory == null)
-            {
-                throw new ArgumentNullException(nameof(databaseFactory));
-            }
+        }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
+        /// </summary>
+        /// <param name="databaseFactory">
+        /// The database factory.
+        /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        /// <param name="adapterFactory">
+        /// The repository adapter.
+        /// </param>
+        public DatabaseRepositoryProvider(
+            [NotNull] IDatabaseFactory databaseFactory,
+            [NotNull] IEntityMapper entityMapper,
+            [NotNull] IRepositoryAdapterFactory adapterFactory)
+            : this(databaseFactory, entityMapper, adapterFactory, MemoryCache.Default)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
+        /// </summary>
+        /// <param name="databaseFactory">
+        /// The database factory.
+        /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        /// <param name="adapterFactory">
+        /// The repository adapter.
+        /// </param>
+        /// <param name="itemCache">
+        /// The item cache.
+        /// </param>
+        public DatabaseRepositoryProvider(
+            [NotNull] IDatabaseFactory databaseFactory,
+            [NotNull] IEntityMapper entityMapper,
+            [NotNull] IRepositoryAdapterFactory adapterFactory,
+            [NotNull] ObjectCache itemCache)
+        {
             if (adapterFactory == null)
             {
                 throw new ArgumentNullException(nameof(adapterFactory));
             }
 
+            if (itemCache == null)
+            {
+                throw new ArgumentNullException(nameof(itemCache));
+            }
+
+            if (databaseFactory == null)
+            {
+                throw new ArgumentNullException(nameof(databaseFactory));
+            }
+
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
+            }
+
             this.EntityMapper = entityMapper;
             this.DependencyContainer = new DependencyContainer();
-            this.itemCache = MemoryCache.Default;
+            this.itemCache = itemCache;
 
             ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.EnableCaching, false, bool.Parse);
             ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.CacheExpiration, this.cacheTime, TimeSpan.Parse);
@@ -168,67 +170,33 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Occurs when the provider is disposed.
-        /// </summary>
+        /// <inheritdoc />
         public event EventHandler Disposed;
 
-        /// <summary>
-        /// Gets the entity mapper.
-        /// </summary>
-        public IEntityMapper EntityMapper { get; private set; }
+        /// <inheritdoc />
+        public IEntityMapper EntityMapper { get; }
 
-        /// <summary>
-        /// Gets the current database context.
-        /// </summary>
-        public IDatabaseContext DatabaseContext
-        {
-            get
-            {
-                return this.dataContext;
-            }
-        }
+        /// <inheritdoc />
+        public IDatabaseContext DatabaseContext => this.dataContext;
 
-        /// <summary>
-        /// Gets a value indicating whether the current instance is disposed.
-        /// </summary>
+        /// <inheritdoc />
         public bool IsDisposed { get; private set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether to enable caching for the current provider.
-        /// </summary>
+        /// <inheritdoc />
         public bool EnableCaching { get; set; }
 
-        /// <summary>
-        /// Gets or sets the amount of time after which cached items will expire.
-        /// </summary>
+        /// <inheritdoc />
         public TimeSpan CacheExpiration { get; set; }
 
         /// <summary>
         /// Gets the internal identifier for this provider.
         /// </summary>
-        public Guid InstanceIdentifier
-        {
-            get
-            {
-                return this.internalIdentifier;
-            }
-        }
+        public Guid InstanceIdentifier { get; } = Guid.NewGuid();
 
-        /// <summary>
-        /// Gets the dependency container.
-        /// </summary>
+        /// <inheritdoc />
         public IDependencyContainer DependencyContainer { get; private set; }
 
-        /// <summary>
-        /// Sets the dependency container for the item.
-        /// </summary>
-        /// <param name="container">
-        /// The container that the item should use.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="container"/> is null.
-        /// </exception>
+        /// <inheritdoc />
         public void SetDependencyContainer([NotNull] IDependencyContainer container)
         {
             if (container == null)
@@ -239,28 +207,17 @@ namespace Startitecture.Orm.Mapper
             this.DependencyContainer = container;
         }
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        /// <filterpriority>2</filterpriority>
+        /// <inheritdoc />
         public void Dispose()
         {
             this.IsDisposed = true;
 
-            if (this.dataContext != null)
-            {
-                this.dataContext.Dispose();
-            }
+            this.dataContext?.Dispose();
 
             this.OnDisposed();
         }
 
-        /// <summary>
-        /// Changes the database of the current provider.
-        /// </summary>
-        /// <param name="databaseName">
-        /// The name of the database to switch to.
-        /// </param>
+        /// <inheritdoc />
         public void ChangeDatabase(string databaseName)
         {
             if (string.IsNullOrWhiteSpace(databaseName))
@@ -273,12 +230,7 @@ namespace Startitecture.Orm.Mapper
             this.dataContext.Connection.ChangeDatabase(databaseName);
         }
 
-        /// <summary>
-        /// Starts a transaction in the repository.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="IDbTransaction"/> started by the provider.
-        /// </returns>
+        /// <inheritdoc />
         public IDbTransaction StartTransaction()
         {
             try
@@ -300,15 +252,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Start a transaction in the repository.
-        /// </summary>
-        /// <param name="isolationLevel">
-        /// The isolation level for the transaction.
-        /// </param>
-        /// <returns>
-        /// The <see cref="IDbTransaction"/> started by the provider.
-        /// </returns>
+        /// <inheritdoc />
         public IDbTransaction StartTransaction(IsolationLevel isolationLevel)
         {
             try
@@ -330,9 +274,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Complete a transaction in the repository.
-        /// </summary>
+        /// <inheritdoc />
         public void CompleteTransaction()
         {
             try
@@ -353,9 +295,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Abort a transaction, rolling back changes in the repository.
-        /// </summary>
+        /// <inheritdoc />
         public void AbortTransaction()
         {
             try
@@ -376,18 +316,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Determines whether an item exists given the specified unique key.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the item exists; otherwise, <c>false</c>.
-        /// </returns>
+        /// <inheritdoc />
         public bool Contains<TDataItem>(ItemSelection<TDataItem> selection)
             where TDataItem : ITransactionContext
         {
@@ -415,18 +344,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Gets the first item matching the filter, or the default value if the item cannot be found.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// The data item that represents the item to retrieve.
-        /// </param>
-        /// <returns>
-        /// The first <typeparamref name="TDataItem"/> item matching the filter, or the default value if no matching item is found.
-        /// </returns>
+        /// <inheritdoc />
         public TDataItem GetFirstOrDefault<TDataItem>(ItemSelection<TDataItem> selection)
             where TDataItem : ITransactionContext
         {
@@ -435,21 +353,10 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.FirstOrDefault<TDataItem>(selection, this.EnableCaching);
+            return this.FirstOrDefault(selection, this.EnableCaching);
         }
 
-        /// <summary>
-        /// Selects a matching list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the filter.
-        /// </returns>
+        /// <inheritdoc />
         public IEnumerable<TDataItem> GetSelection<TDataItem>(ItemSelection<TDataItem> selection)
             where TDataItem : ITransactionContext
         {
@@ -462,24 +369,7 @@ namespace Startitecture.Orm.Mapper
             return this.repositoryAdapter.SelectItems(selection);
         }
 
-        /// <summary>
-        /// Selects a matching list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <param name="pageSize">
-        /// The page size.
-        /// </param>
-        /// <param name="page">
-        /// The 1-based page to return.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the filter.
-        /// </returns>
+        /// <inheritdoc />
         public Page<TDataItem> GetSelection<TDataItem>(ItemSelection<TDataItem> selection, long pageSize, long page)
             where TDataItem : ITransactionContext
         {
@@ -492,30 +382,18 @@ namespace Startitecture.Orm.Mapper
             return this.repositoryAdapter.SelectItems(selection, pageSize, page);
         }
 
-        /// <summary>
-        /// Saves an item into the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="item">
-        /// The item to save.
-        /// </param>
-        /// <param name="selection">
-        /// The selection to use to uniquely select the item.
-        /// </param>
-        /// <returns>
-        /// The saved item as a <typeparamref name="TDataItem"/>.
-        /// </returns>
+        /// <inheritdoc />
         /// <exception cref="Startitecture.Orm.Common.RepositoryException">
         /// The item could not be saved in the repository.
         /// </exception>
-        public TDataItem Save<TDataItem>(TDataItem item, ItemSelection<TDataItem> selection)
+        public TDataItem Save<TDataItem>(TDataItem item)
             where TDataItem : ITransactionContext
         {
+            var uniqueSelection = new UniqueQuery<TDataItem>(this.dataContext.DefinitionProvider, item);
+
             // If caching is enabled, incoming items will be compared against the cache. This will catch forward changes (A1 -> A2) but 
             // will ignore reverse changes (A2 -> A1) until the cached item expires.
-            var existingItem = this.FirstOrDefault<TDataItem>(selection, this.EnableCaching);
+            var existingItem = this.FirstOrDefault(uniqueSelection, this.EnableCaching);
 
             var savePolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) };
 
@@ -526,17 +404,18 @@ namespace Startitecture.Orm.Mapper
 
                 // When the item already exists, we use the data item mapping to merge fields. The data item mapping should ensure that
                 // primary keys are ignored so that the merged item contains the primary key from the existing entity.
+                // TODO: To eliminate mapping at this layer, eliminate write-once and use an internal mapper.
                 var mergedItem = this.EntityMapper.MapTo(item, existingItem);
                 var mergedValues = mergedItem.ToValueCollection();
 
                 // Do not update unless needed.
-                if (Enumerable.SequenceEqual<object>(existingValues, mergedValues))
+                if (existingValues.SequenceEqual(mergedValues))
                 {
                     if (this.EnableCaching)
                     {
                         lock (this.itemLock)
                         {
-                            this.itemCache.Set(CreateCacheKey<TDataItem>(selection), mergedItem, savePolicy);
+                            this.itemCache.Set(CreateCacheKey(uniqueSelection), mergedItem, savePolicy);
                         }
                     }
 
@@ -544,7 +423,7 @@ namespace Startitecture.Orm.Mapper
                     return mergedItem;
                 }
 
-                this.Update<TDataItem>(mergedItem, selection);
+                this.Update(mergedItem, uniqueSelection);
 
                 // According to http://stackoverflow.com/questions/7477431/executenonquery-returning-a-value-of-2-when-only-1-record-was-updated,
                 // if an update causes a trigger to fire then it's possible to get a 2 or higher with the rows affected, making this
@@ -552,27 +431,15 @@ namespace Startitecture.Orm.Mapper
                 ////if (rowsAffected == 1)
                 ////{
                 if (this.EnableCaching)
+                {
+                    lock (this.itemLock)
                     {
-                        lock (this.itemLock)
-                        {
-                            this.itemCache.Set(CreateCacheKey<TDataItem>(selection), mergedItem, savePolicy);
-                        }
+                        this.itemCache.Set(CreateCacheKey(uniqueSelection), mergedItem, savePolicy);
                     }
+                }
 
-                    mergedItem.SetTransactionProvider(this);
-                    return mergedItem;
-                ////}
-
-                ////if (rowsAffected > 1)
-                ////{
-                ////    string message = string.Format(ErrorMessages.DataItemUpdateAffectedMultipleRows, typeof(TDataItem).Name, mergedItem);
-                ////    throw new RepositoryException(mergedItem, message);
-                ////}
-                ////else
-                ////{
-                ////    string message = string.Format(ErrorMessages.DataItemUpdateNotApplied, typeof(TDataItem).Name, mergedItem);
-                ////    throw new RepositoryException(mergedItem, message);
-                ////}
+                mergedItem.SetTransactionProvider(this);
+                return mergedItem;
             }
 
             var savedItem = this.InsertItem(item);
@@ -581,7 +448,7 @@ namespace Startitecture.Orm.Mapper
             {
                 lock (this.itemLock)
                 {
-                    this.itemCache.Set(CreateCacheKey<TDataItem>(selection), savedItem, savePolicy);
+                    this.itemCache.Set(CreateCacheKey(uniqueSelection), savedItem, savePolicy);
                 }
             }
 
@@ -589,18 +456,7 @@ namespace Startitecture.Orm.Mapper
             return savedItem;
         }
 
-        /// <summary>
-        /// Deletes the items matching the filter.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <returns>
-        /// The number of deleted items as an <see cref="int"/>.
-        /// </returns>
+        /// <inheritdoc />
         public int DeleteItems<TDataItem>(ItemSelection<TDataItem> selection) 
             where TDataItem : ITransactionContext
         {
@@ -613,21 +469,7 @@ namespace Startitecture.Orm.Mapper
             return this.repositoryAdapter.DeleteSelection(selection);
         }
 
-        /// <summary>
-        /// Inserts a data item into the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="dataItem">
-        /// The data item to insert.
-        /// </param>
-        /// <returns>
-        /// The inserted <typeparamref name="TDataItem"/>.
-        /// </returns>
-        /// <exception cref="Startitecture.Orm.Common.RepositoryException">
-        /// The insert operation failed, or there was an error mapping between the model and the data item.
-        /// </exception>
+        /// <inheritdoc />
         public TDataItem InsertItem<TDataItem>(TDataItem dataItem)
             where TDataItem : ITransactionContext
         {
@@ -642,24 +484,27 @@ namespace Startitecture.Orm.Mapper
             return item;
         }
 
-        /// <summary>
-        /// Updates a selection of items in the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="dataItem">
-        /// The item that contains the update.
-        /// </param>
-        /// <param name="selection">
-        /// The selection to update.
-        /// </param>
-        /// <param name="setExpressions">
-        /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
-        /// </param>
-        /// <returns>
-        /// The number of updated rows.
-        /// </returns>
+        /// <inheritdoc />
+        public void UpdateItem<TDataItem>(TDataItem dataItem, params Expression<Func<TDataItem, object>>[] setExpressions)
+        {
+            if (dataItem == null)
+            {
+                throw new ArgumentNullException(nameof(dataItem));
+            }
+
+            if (setExpressions == null)
+            {
+                throw new ArgumentNullException(nameof(setExpressions));
+            }
+
+            // PetaPoco sees only one primary key. Obviously this is a problem as we do not want to update based on primary key 
+            // alone. So we generate a unique selection.
+            this.CheckDisposed();
+            var selection = new UniqueQuery<TDataItem>(this.dataContext.DefinitionProvider, dataItem);
+            this.repositoryAdapter.Update(dataItem, selection, setExpressions);
+        }
+
+        /// <inheritdoc />
         public int Update<TDataItem>(
             [NotNull] TDataItem dataItem,
             [NotNull] ItemSelection<TDataItem> selection,
@@ -687,15 +532,7 @@ namespace Startitecture.Orm.Mapper
             return this.repositoryAdapter.Update(dataItem, selection, setExpressions);
         }
 
-        /// <summary>
-        /// Executes the specified operation.
-        /// </summary>
-        /// <param name="executionStatement">
-        /// The execution statement.
-        /// </param>
-        /// <param name="parameterValues">
-        /// The parameter values.
-        /// </param>
+        /// <inheritdoc />
         public void Execute(string executionStatement, params object[] parameterValues)
         {
             if (parameterValues == null)
@@ -715,21 +552,7 @@ namespace Startitecture.Orm.Mapper
             this.dataContext.EnableAutoSelect = autoSelect;
         }
 
-        /// <summary>
-        /// Executes the specified operation for a scalar result.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type of the result value.
-        /// </typeparam>
-        /// <param name="executionStatement">
-        /// The execution statement.
-        /// </param>
-        /// <param name="parameterValues">
-        /// The parameter values.
-        /// </param>
-        /// <returns>
-        /// The first column of the first row of the result as a type of <typeparamref name="T"/>.
-        /// </returns>
+        /// <inheritdoc />
         public T ExecuteScalar<T>(string executionStatement, params object[] parameterValues)
         {
             if (parameterValues == null)
@@ -750,18 +573,7 @@ namespace Startitecture.Orm.Mapper
             return result;
         }
 
-        /// <summary>
-        /// Executes the specified operation for a table result.
-        /// </summary>
-        /// <param name="executionStatement">
-        /// The execution statement.
-        /// </param>
-        /// <param name="parameterValues">
-        /// The parameter values.
-        /// </param>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of objects returned by the statement.
-        /// </returns>
+        /// <inheritdoc />
         public IEnumerable<dynamic> ExecuteForResult(string executionStatement, params object[] parameterValues)
         {
             if (parameterValues == null)
@@ -782,21 +594,7 @@ namespace Startitecture.Orm.Mapper
             return result;
         }
 
-        /// <summary>
-        /// Executes the specified operation for a table result.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type of the result.
-        /// </typeparam>
-        /// <param name="executionStatement">
-        /// The execution statement.
-        /// </param>
-        /// <param name="parameterValues">
-        /// The parameter values.
-        /// </param>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of items in the type of <typeparamref name="T"/>.
-        /// </returns>
+        /// <inheritdoc />
         public IEnumerable<T> ExecuteForResult<T>(string executionStatement, params object[] parameterValues)
         {
             if (parameterValues == null)
@@ -843,7 +641,7 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         private static string CreateCacheKey<TDataItem>(ItemSelection<TDataItem> selection)
         {
-            return string.Format((string)CacheKeyFormat, (object)typeof(TDataItem).ToRuntimeName(), (object)selection);
+            return string.Format(CacheKeyFormat, typeof(TDataItem).ToRuntimeName(), selection);
         }
 
         /// <summary>
@@ -869,7 +667,7 @@ namespace Startitecture.Orm.Mapper
 
             if (useCache)
             {
-                var cacheKey = CreateCacheKey<TDataItem>(selection);
+                var cacheKey = CreateCacheKey(selection);
 
                 lock (this.itemLock)
                 {
@@ -912,10 +710,7 @@ namespace Startitecture.Orm.Mapper
         {
             var handler = this.Disposed;
 
-            if (handler != null)
-            {
-                handler(this, EventArgs.Empty);
-            }
+            handler?.Invoke(this, EventArgs.Empty);
         }
     }
 }

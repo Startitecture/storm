@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="QueryRepositoryAdapter.cs" company="Startitecture">
+// <copyright file="SqlServerRepositoryAdapter.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -13,7 +13,6 @@ namespace Startitecture.Orm.Mapper
     using System.Linq.Expressions;
 
     using Common;
-    using Common;
 
     using JetBrains.Annotations;
 
@@ -23,23 +22,33 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Resources;
 
     /// <summary>
-    /// Implements the <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> interface using parameterized queries.
+    /// Implements the <see cref="IRepositoryAdapter"/> interface using parameterized queries.
     /// </summary>
-    public class QueryRepositoryAdapter : IRepositoryAdapter
+    public class SqlServerRepositoryAdapter : IRepositoryAdapter
     {
+        /// <summary>
+        /// The statement factory.
+        /// </summary>
+        private static readonly TransactSqlQueryFactory QueryFactory = new TransactSqlQueryFactory();
+
         /// <summary>
         /// The data context.
         /// </summary>
         private readonly IDatabaseContext dataContext;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueryRepositoryAdapter"/> class.
+        /// Initializes a new instance of the <see cref="SqlServerRepositoryAdapter"/> class.
         /// </summary>
         /// <param name="dataContext">
         /// The data context.
         /// </param>
-        public QueryRepositoryAdapter(IDatabaseContext dataContext)
+        public SqlServerRepositoryAdapter([NotNull] IDatabaseContext dataContext)
         {
+            if (dataContext == null)
+            {
+                throw new ArgumentNullException(nameof(dataContext));
+            }
+
             this.dataContext = dataContext;
         }
 
@@ -63,7 +72,8 @@ namespace Startitecture.Orm.Mapper
             }
 
             // Always remember to supply this method with an array of values!
-            return this.dataContext.ExecuteScalar<int>(selection.ContainsStatement, Enumerable.ToArray<object>(selection.PropertyValues)) > 0;
+            var sql = QueryFactory.Create(selection, StatementOutputType.Contains);
+            return this.dataContext.ExecuteScalar<int>(sql, selection.PropertyValues.ToArray()) > 0;
         }
 
         /// <summary>
@@ -87,10 +97,10 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                var statement = selection.SelectionStatement;
+                var statement = QueryFactory.Create(selection, StatementOutputType.Select);
 
                 ////Trace.TraceInformation("Using unique query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
-                return this.dataContext.FirstOrDefault<TDataItem>(statement, Enumerable.ToArray<object>(selection.PropertyValues));
+                return this.dataContext.FirstOrDefault<TDataItem>(statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
             {
@@ -130,10 +140,10 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                var statement = selection.SelectionStatement;
+                var statement = QueryFactory.Create(selection, StatementOutputType.Select);
 
                 ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
-                return this.dataContext.Fetch<TDataItem>(statement, Enumerable.ToArray<object>(selection.PropertyValues));
+                return this.dataContext.Fetch<TDataItem>(statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
             {
@@ -189,10 +199,10 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                var statement = selection.SelectionStatement;
+                var statement = QueryFactory.Create(selection, StatementOutputType.Select);
 
                 ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
-                return this.dataContext.FetchPage<TDataItem>(page, pageSize, statement, Enumerable.ToArray<object>(selection.PropertyValues));
+                return this.dataContext.FetchPage<TDataItem>(page, pageSize, statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
             {
@@ -252,7 +262,7 @@ namespace Startitecture.Orm.Mapper
 
             if (result == null)
             {
-                string message = String.Format((string)ErrorMessages.DataItemInsertionFailed, (object)typeof(TDataItem).Name, (object)dataItem);
+                string message = string.Format(ErrorMessages.DataItemInsertionFailed, typeof(TDataItem).Name, dataItem);
                 throw new RepositoryException(dataItem, message);
             }
 
@@ -303,7 +313,7 @@ namespace Startitecture.Orm.Mapper
             try
             {
                 // Always use ToArray()!
-                return this.dataContext.Execute(updateOperation.ExecutionStatement, Enumerable.ToArray<object>(updateOperation.ExecutionParameters));
+                return this.dataContext.Execute(updateOperation.ExecutionStatement, updateOperation.ExecutionParameters.ToArray());
             }
             catch (InvalidOperationException ex)
             {
@@ -343,7 +353,8 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                return this.dataContext.Execute(selection.RemovalStatement, Enumerable.ToArray<object>(selection.PropertyValues));
+                var statement = QueryFactory.Create(selection, StatementOutputType.Delete);
+                return this.dataContext.Execute(statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
             {

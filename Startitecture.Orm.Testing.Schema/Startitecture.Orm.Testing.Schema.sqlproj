@@ -36,6 +36,9 @@
     <DefineTrace>true</DefineTrace>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunSqlCodeAnalysis>True</RunSqlCodeAnalysis>
+    <SqlCodeAnalysisRules>
+    </SqlCodeAnalysisRules>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <OutputPath>bin\Debug\</OutputPath>
@@ -48,6 +51,9 @@
     <DefineTrace>true</DefineTrace>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <RunSqlCodeAnalysis>True</RunSqlCodeAnalysis>
+    <SqlCodeAnalysisRules>
+    </SqlCodeAnalysisRules>
   </PropertyGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">11.0</VisualStudioVersion>
@@ -61,6 +67,10 @@
     <Folder Include="Properties" />
     <Folder Include="dbo\" />
     <Folder Include="dbo\Tables\" />
+    <Folder Include="Scripts" />
+    <Folder Include="Scripts\PreDeployment" />
+    <Folder Include="Scripts\PostDeployment" />
+    <Folder Include="dbo\Procedures" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\MoneyElement.sql" />
@@ -85,12 +95,20 @@
     <Build Include="dbo\Tables\FieldValue.sql" />
     <Build Include="dbo\Tables\GenericSubmissionValue.sql" />
     <Build Include="dbo\Tables\CurrentAggregateSubmission.sql" />
-    <Build Include="dbo\Tables\AggregateSubmissionId.sql" />
+    <Build Include="dbo\Tables\AggregateSubmission.sql" />
     <Build Include="dbo\Tables\AggregateEventStart.sql" />
     <Build Include="dbo\Tables\AggregateEventCompletion.sql" />
     <Build Include="dbo\Tables\DateElement.sql" />
+    <Build Include="dbo\Procedures\spGenerateMergeScript.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Startitecture.Orm.Testing.Schema.publish.xml" />
+    <None Include="Scripts\PostDeployment\AggregateOptionTypeData.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <PostDeploy Include="Scripts\PostDeployment\Script.PostDeployment.sql" />
+  </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="Startitecture.Orm.Testing.Schema.refactorlog" />
   </ItemGroup>
 </Project>

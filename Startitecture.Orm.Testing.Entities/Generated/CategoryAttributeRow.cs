@@ -16,6 +16,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Orm.Testing.Entities
 {
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Schema;
 
     /// <summary>
@@ -23,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("CategoryAttribute", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class CategoryAttributeRow
+    public partial class CategoryAttributeRow: TransactionItemBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="CategoryAttributeRow"/> class.

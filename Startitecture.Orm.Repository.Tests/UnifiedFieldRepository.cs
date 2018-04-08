@@ -84,7 +84,7 @@ namespace Startitecture.Orm.Repository.Tests
                 throw new ArgumentNullException(nameof(sourceType));
             }
 
-            var itemSelection = Select.From<UnifiedFieldRow>().Matching(row => row.SourceType, sourceType.FullName);
+            var itemSelection = Select.From<UnifiedFieldRow>().WhereEqual(row => row.SourceType, sourceType.FullName);
             return this.SelectEntities(itemSelection);
         }
 

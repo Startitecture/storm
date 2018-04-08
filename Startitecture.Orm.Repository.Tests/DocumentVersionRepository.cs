@@ -50,7 +50,7 @@ namespace Startitecture.Orm.Repository.Tests
             }
 
             this.RepositoryProvider.DependencyContainer.SetDependency(document.DocumentId, document);
-            var itemSelection = Select.From<DocumentVersionRow>().Matching(row => row.DocumentId, document.DocumentId.GetValueOrDefault());
+            var itemSelection = Select.From<DocumentVersionRow>().WhereEqual(row => row.DocumentId, document.DocumentId.GetValueOrDefault());
             return this.SelectEntities(itemSelection);
         }
 
@@ -66,7 +66,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </returns>
         public IEnumerable<DocumentVersion> SelectDocumentVersions(int documentId)
         {
-            return this.SelectEntities(Select.From<DocumentVersionRow>().Matching(row => row.DocumentId, documentId));
+            return this.SelectEntities(Select.From<DocumentVersionRow>().WhereEqual(row => row.DocumentId, documentId));
         }
 
         /// <summary>

@@ -70,7 +70,7 @@ namespace Startitecture.Orm.Repository.Tests
                 throw new ArgumentNullException(nameof(form));
             }
 
-            return this.SelectEntities(this.Select<FormVersion, FormVersionRow>().Matching(row => row.FormId, form.FormId.GetValueOrDefault()));
+            return this.SelectEntities(this.Select<FormVersion, FormVersionRow>().WhereEqual(row => row.FormId, form.FormId.GetValueOrDefault()));
         }
 
         /// <summary>

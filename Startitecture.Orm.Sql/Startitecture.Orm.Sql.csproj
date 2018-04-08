@@ -67,6 +67,7 @@
     <Compile Include="Select.cs" />
     <Compile Include="SqlFromClause.cs" />
     <Compile Include="SqlSelection.cs" />
+    <Compile Include="TransactSqlQueryFactory.cs" />
     <Compile Include="SqlUpdate.cs" />
     <Compile Include="StructuredCommandText.cs" />
     <Compile Include="StructuredInsertCommand.cs" />

@@ -212,16 +212,13 @@ namespace Startitecture.Orm.Sql
         /// <param name="indexOffset">
         /// The index offset.
         /// </param>
-        /// <param name="nullValueIsNotNullPredicate">
-        /// A value indicating whether a null value should be interpreted as a NOT NULL predicate.
-        /// </param>
         /// <returns>
         /// The filter clause as a <see cref="string"/>.
         /// </returns>
         /// <exception cref="IndexOutOfRangeException">
         /// The number of filter values is outside the range handled by the method.
         /// </exception>
-        public static string CreateFilter(this IEnumerable<ValueFilter> filters, int indexOffset, bool nullValueIsNotNullPredicate)
+        public static string CreateFilter(this IEnumerable<ValueFilter> filters, int indexOffset)
         {
             if (filters == null)
             {
@@ -235,58 +232,42 @@ namespace Startitecture.Orm.Sql
             {
                 var attribute = filter.ItemAttribute;
                 var qualifiedName = attribute.GetQualifiedName();
-                var count = filter.FilterValues.Count();
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
-                var nullValuePredicate = nullValueIsNotNullPredicate ? NotNullPredicate : NullPredicate;
-
-                switch (count)
+                switch (filter.FilterType)
                 {
-                    case 0:
-                        filterTokens.Add(string.Format(nullValuePredicate, qualifiedName));
-                        break;
-
-                    case 1:
+                    case FilterType.Equality:
                         filterTokens.Add(string.Format(EqualityFilter, qualifiedName, GetEqualityOperand(filter.FilterValues.First()), index++));
-
                         break;
-
-                    case 2:
-
-                        if (filter.IsDiscrete)
-                        {
-                            filterTokens.Add(GetInclusionFilter(qualifiedName, index, setValues));
-                            index += setValues.Count;
-                        }
-                        else
-                        {
-                            // If both values are null, add a NOT NULL predicate.
-                            if (filter.FilterValues.All(Evaluate.IsNull))
-                            {
-                                filterTokens.Add(string.Format(nullValuePredicate, qualifiedName));
-                            }
-                            else if (filter.FilterValues.First() == null)
-                            {
-                                // If the first value is null, add a less than or equals (<=) predicate.
-                                filterTokens.Add(string.Format(LessThanPredicate, qualifiedName, index++));
-                            }
-                            else if (filter.FilterValues.Last() == null)
-                            {
-                                // If the last value is null, add a greater than or equals (>=) predicate.
-                                filterTokens.Add(string.Format(GreaterThanPredicate, qualifiedName, index++));
-                            }
-                            else
-                            {
-                                filterTokens.Add(string.Format(BetweenFilter, qualifiedName, index++, index++));
-                            }
-                        }
-
+                    case FilterType.Inequality:
+                        throw new NotImplementedException();
+                    case FilterType.LessThan:
+                        throw new NotImplementedException();
+                    case FilterType.LessThanOrEqualTo:
+                        filterTokens.Add(string.Format(LessThanPredicate, qualifiedName, index++));
                         break;
-
-                    default:
+                    case FilterType.GreaterThan:
+                        throw new NotImplementedException();
+                    case FilterType.GreaterThanOrEqualTo:
+                        filterTokens.Add(string.Format(GreaterThanPredicate, qualifiedName, index++));
+                        break;
+                    case FilterType.Between:
+                        filterTokens.Add(string.Format(BetweenFilter, qualifiedName, index++, index++));
+                        break;
+                    case FilterType.MatchesSet:
                         filterTokens.Add(GetInclusionFilter(qualifiedName, index, setValues));
                         index += setValues.Count;
                         break;
+                    case FilterType.DoesNotMatchSet:
+                        throw new NotImplementedException();
+                    case FilterType.IsSet:
+                        filterTokens.Add(string.Format(NotNullPredicate, qualifiedName));
+                        break;
+                    case FilterType.IsNotSet:
+                        filterTokens.Add(string.Format(NullPredicate, qualifiedName));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(filter.FilterType));
                 }
             }
 

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Operations Version="1.0" xmlns="http://schemas.microsoft.com/sqlserver/dac/Serialization/2012/02">
+  <Operation Name="Rename Refactor" Key="ccbce620-8629-426d-83f8-e7fef5bb0ba8" ChangeDateTime="04/07/2018 22:19:30">
+    <Property Name="ElementName" Value="[dbo].[AggregateSubmissionId]" />
+    <Property Name="ElementType" Value="SqlTable" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[AggregateSubmission]" />
+  </Operation>
+</Operations>

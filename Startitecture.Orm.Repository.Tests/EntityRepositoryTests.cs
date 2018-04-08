@@ -56,7 +56,7 @@ namespace Startitecture.Orm.Repository.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -95,7 +95,7 @@ namespace Startitecture.Orm.Repository.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -134,7 +134,7 @@ namespace Startitecture.Orm.Repository.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -173,7 +173,7 @@ namespace Startitecture.Orm.Repository.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -519,7 +519,7 @@ namespace Startitecture.Orm.Repository.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -612,7 +612,7 @@ namespace Startitecture.Orm.Repository.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var actual = target.FirstOrDefault(existing);
@@ -747,7 +747,7 @@ namespace Startitecture.Orm.Repository.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
@@ -794,7 +794,7 @@ namespace Startitecture.Orm.Repository.Tests
         {
             var repositoryAdapterFactory = CreateInsertRepositoryAdapterFactory();
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName") { Description = "Mah sub sub entity" };
@@ -860,7 +860,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             var mockFactory = this.CreateComplexMockAdapterFactoryForUpdate(baseline);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, mockFactory.RepositoryAdapterFactory))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -923,7 +923,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             var mockFactory = this.CreateComplexMockAdapterFactoryForUpdate(baseline);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, mockFactory.RepositoryAdapterFactory))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -1003,7 +1003,7 @@ namespace Startitecture.Orm.Repository.Tests
                     Arg<ItemSelection<FakeDependentRow>>.Is.Anything,
                     Arg<Expression<Func<FakeDependentRow, object>>[]>.Is.Anything)).Return(1);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, mockFactory.RepositoryAdapterFactory))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -1079,7 +1079,7 @@ namespace Startitecture.Orm.Repository.Tests
             var mockFactory = this.CreateComplexMockAdapterFactoryForUpdate(baseline);
             mockFactory.RepositoryAdapter.Stub(adapter => adapter.DeleteSelection(Arg<ItemSelection<FakeDependentRow>>.Is.Anything)).Return(1);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(mockFactory.RepositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, mockFactory.RepositoryAdapterFactory))
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
@@ -1149,7 +1149,7 @@ namespace Startitecture.Orm.Repository.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var actual = target.FirstOrDefault(existing);
@@ -1214,7 +1214,7 @@ namespace Startitecture.Orm.Repository.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeChildEntityRepository(provider);
                 var actual = target.FirstOrDefault(existing);
@@ -1408,7 +1408,7 @@ namespace Startitecture.Orm.Repository.Tests
             var repositoryAdapterFactory = MockRepository.GenerateMock<IRepositoryAdapterFactory>();
             repositoryAdapterFactory.Stub(factory => factory.Create(Arg<Database>.Is.Anything)).Return(repositoryAdapter);
 
-            using (var provider = new DatabaseRepositoryProvider<FakeDataContext>(repositoryAdapterFactory, this.entityMapper))
+            using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
                 var target = new FakeComplexEntityRepository(provider);
                 var actual = target.FirstOrDefaultWithChildren(99291);

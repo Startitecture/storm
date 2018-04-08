@@ -49,6 +49,7 @@
     <Compile Include="CategoryAttributeRow.cs" />
     <Compile Include="DomainAggregateRow.cs" />
     <Compile Include="DomainIdentityRow.cs" />
+    <Compile Include="FieldRow.cs" />
     <Compile Include="Generated\AggregateEventCompletionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
@@ -153,6 +154,14 @@
     <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
       <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
       <Name>Startitecture.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
+      <Project>{5643589d-8d46-4717-ae66-994173f3d671}</Project>
+      <Name>Startitecture.Orm.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj">
+      <Project>{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}</Project>
+      <Name>Startitecture.Orm.Mapper</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
       <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>

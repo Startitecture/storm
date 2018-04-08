@@ -104,7 +104,7 @@ namespace Startitecture.Orm.Repository.Tests
                 throw new ArgumentNullException(nameof(layout));
             }
 
-            var itemSelection = Select.From<LayoutPageRow>().Matching(row => row.FormLayoutId, layout.FormLayoutId.GetValueOrDefault());
+            var itemSelection = Select.From<LayoutPageRow>().WhereEqual(row => row.FormLayoutId, layout.FormLayoutId.GetValueOrDefault());
             return this.SelectEntities(itemSelection);
         }
 

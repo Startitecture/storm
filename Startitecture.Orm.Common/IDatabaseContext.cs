@@ -13,6 +13,7 @@ namespace Startitecture.Orm.Common
     using System.Collections.Generic;
     using System.Data;
 
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
 
     /// <summary>
@@ -46,6 +47,11 @@ namespace Startitecture.Orm.Common
         /// Gets or sets the timeout value for the next (and only next) SQL statement.
         /// </summary>
         int OnetimeCommandTimeout { get; set; }
+
+        /// <summary>
+        /// Gets the definition provider for the database context.
+        /// </summary>
+        IEntityDefinitionProvider DefinitionProvider { get; }
 
         /// <summary>
         /// Open a connection that will be used for all subsequent queries.

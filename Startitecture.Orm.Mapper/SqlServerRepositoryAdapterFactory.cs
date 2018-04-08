@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="QueryRepositoryAdapterFactory.cs" company="Startitecture">
+// <copyright file="SqlServerRepositoryAdapterFactory.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -14,22 +14,14 @@ namespace Startitecture.Orm.Mapper
     /// <summary>
     /// The query repository adapter factory.
     /// </summary>
-    public class QueryRepositoryAdapterFactory : IRepositoryAdapterFactory
+    public class SqlServerRepositoryAdapterFactory : IRepositoryAdapterFactory
     {
         #region Public Methods and Operators
 
-        /// <summary>
-        /// The create.
-        /// </summary>
-        /// <param name="dataContext">
-        /// The data context.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/>.
-        /// </returns>
+        /// <inheritdoc />
         public IRepositoryAdapter Create(IDatabaseContext dataContext)
         {
-            return new QueryRepositoryAdapter(dataContext);
+            return new SqlServerRepositoryAdapter(dataContext);
         }
 
         #endregion

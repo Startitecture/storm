@@ -71,22 +71,22 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <summary>
         /// The create concrete provider.
         /// </summary>
+        /// <typeparam name="TContext">
+        /// The type of data context that the provider will access.
+        /// </typeparam>
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
         /// <param name="adapter">
         /// The repository adapter.
         /// </param>
-        /// <typeparam name="TContext">
-        /// The type of database context to create a provider for.
-        /// </typeparam>
         /// <returns>
         /// A concrete <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with the specified adapter factory.
         /// </returns>
         public static IRepositoryProvider CreateConcreteProvider<TContext>(
             [NotNull] IEntityMapper entityMapper,
             [NotNull] IRepositoryAdapter adapter)
-            where TContext : Database
+            where TContext : IDatabaseContext
         {
             if (entityMapper == null)
             {
@@ -99,7 +99,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             }
 
             var adapterFactory = CreateAdapterFactory(adapter);
-            return new DatabaseRepositoryProvider<TContext>(adapterFactory, entityMapper);
+            return new DatabaseRepositoryProvider(GenericDatabaseFactory<TContext>.Default, entityMapper,  adapterFactory);
         }
 
         /// <summary>

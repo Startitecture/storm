@@ -49,7 +49,8 @@ namespace Startitecture.Orm.Sql.Tests
         {
             long submissionId = 0;
 
-            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+            var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+            using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 

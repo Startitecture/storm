@@ -19,13 +19,11 @@ namespace Startitecture.Orm.Mapper
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper.DatabaseTypes;
     using Startitecture.Orm.Mapper.Internal;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
@@ -72,11 +70,6 @@ namespace Startitecture.Orm.Mapper
         /// The POCO factory. 
         /// </summary>
         private readonly RaisedPocoFactory pocoFactory;
-
-        /// <summary>
-        /// The definition provider.
-        /// </summary>
-        private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
         /// The database type.
@@ -137,7 +130,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
-            this.definitionProvider = definitionProvider;
+            this.DefinitionProvider = definitionProvider;
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
 
             // TODO: This seems to fail with SqlConnection.
@@ -182,7 +175,7 @@ namespace Startitecture.Orm.Mapper
 
             this.connectionString = connectionString;
             this.providerName = providerName;
-            this.definitionProvider = definitionProvider;
+            this.DefinitionProvider = definitionProvider;
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
             this.CommonConstruct();
         }
@@ -222,7 +215,7 @@ namespace Startitecture.Orm.Mapper
 
             this.connectionString = connectionString;
             this.factory = provider;
-            this.definitionProvider = definitionProvider;
+            this.DefinitionProvider = definitionProvider;
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
             this.CommonConstruct();
         }
@@ -251,7 +244,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
-            this.definitionProvider = definitionProvider;
+            this.DefinitionProvider = definitionProvider;
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
 
             // Work out connection string and provider name
@@ -306,6 +299,9 @@ namespace Startitecture.Orm.Mapper
         /// Gets or sets the timeout value for the next (and only next) SQL statement.
         /// </summary>
         public int OnetimeCommandTimeout { get; set; }
+
+        /// <inheritdoc />
+        public IEntityDefinitionProvider DefinitionProvider { get; }
 
         #endregion
 
@@ -516,7 +512,7 @@ namespace Startitecture.Orm.Mapper
         {
             if (this.EnableAutoSelect)
             {
-                var entityDefinition = this.definitionProvider.Resolve<T>();
+                var entityDefinition = this.DefinitionProvider.Resolve<T>();
                 var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
                 sql = autoSelectHelper.AddSelectClause(sql);
             }
@@ -555,7 +551,7 @@ namespace Startitecture.Orm.Mapper
                                 yield break;
                             }
 
-                            var pocoDataRequest = new PocoDataRequest(dataReader, typeof(T), this.definitionProvider)
+                            var pocoDataRequest = new PocoDataRequest(dataReader, typeof(T), this.DefinitionProvider)
                                                       {
                                                           FieldCount = dataReader.FieldCount,
                                                           FirstColumn = 0
@@ -864,7 +860,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(poco));
             }
 
-            var definition = this.definitionProvider.Resolve<T>();
+            var definition = this.DefinitionProvider.Resolve<T>();
             var tableInfo = definition.ToTableInfo();
 
             try
@@ -1332,7 +1328,7 @@ namespace Startitecture.Orm.Mapper
             // Add auto select clause
             if (this.EnableAutoSelect)
             {
-                var entityDefinition = this.definitionProvider.Resolve<T>();
+                var entityDefinition = this.DefinitionProvider.Resolve<T>();
                 var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
                 sql = autoSelectHelper.AddSelectClause(sql);
             }

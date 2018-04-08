@@ -54,7 +54,7 @@ namespace Startitecture.Orm.Repository.Tests
             }
 
             var layoutSectionId = layoutSection.LayoutSectionId.GetValueOrDefault();
-            var itemSelection = Select.From<FieldPlacementRow>().Matching<int>(row => row.LayoutSectionId, layoutSectionId);
+            var itemSelection = Select.From<FieldPlacementRow>().WhereEqual<int>(row => row.LayoutSectionId, layoutSectionId);
             return this.SelectEntities(itemSelection);
         }
 

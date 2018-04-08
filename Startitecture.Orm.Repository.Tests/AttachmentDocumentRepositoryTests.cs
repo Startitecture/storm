@@ -219,7 +219,8 @@ namespace Startitecture.Orm.Repository.Tests
 
             try
             {
-                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+                var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var expectedRow = this.entityMapper.Map<AttachmentDocumentRow>(attachmentDocument);
@@ -258,7 +259,8 @@ namespace Startitecture.Orm.Repository.Tests
 
             try
             {
-                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+                var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
@@ -268,7 +270,7 @@ namespace Startitecture.Orm.Repository.Tests
                 attachmentDocument.ChangeSortOrder(2);
                 attachmentDocument.SetSubject("UNIT_TEST.My New Subject");
 
-                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
 
@@ -307,14 +309,15 @@ namespace Startitecture.Orm.Repository.Tests
 
             try
             {
-                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+                var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
                     target.Save(expected);
                 }
 
-                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
@@ -355,7 +358,8 @@ namespace Startitecture.Orm.Repository.Tests
 
             try
             {
-                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+                var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
@@ -366,7 +370,7 @@ namespace Startitecture.Orm.Repository.Tests
                     }
                 }
 
-                using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
@@ -407,21 +411,22 @@ namespace Startitecture.Orm.Repository.Tests
         /// </summary>
         private void DeleteItems()
         {
-            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+            var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+            using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 
                 // Delete the attachment documents based on finding their versions.
-                var versionSelection = Select.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST.%");
+                var versionSelection = Select.From<DocumentVersionRow>().WhereEqual(row => row.Name, "UNIT_TEST.%");
                 var versionRows = provider.GetSelection(versionSelection);
                 var docVersionIds = versionRows.Select(x => x.DocumentVersionId);
                 provider.DeleteItems(Select.From<AttachmentDocumentRow>().Include(row => row.DocumentVersionId, Enumerable.ToArray<long>(docVersionIds)));
 
                 // Delete the rest using a filter.
-                provider.DeleteItems(Select.From<AttachmentNoteRow>().Matching(row => row.Content, "UNIT_TEST.%"));
-                provider.DeleteItems(Select.From<AttachmentRow>().Matching(row => row.Subject, "UNIT_TEST.%"));
-                provider.DeleteItems(Select.From<DocumentVersionRow>().Matching(row => row.Name, "UNIT_TEST.%"));
-                provider.DeleteItems(Select.From<DocumentRow>().Matching(row => row.Identifier, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<AttachmentNoteRow>().WhereEqual(row => row.Content, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<AttachmentRow>().WhereEqual(row => row.Subject, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<DocumentVersionRow>().WhereEqual(row => row.Name, "UNIT_TEST.%"));
+                provider.DeleteItems(Select.From<DocumentRow>().WhereEqual(row => row.Identifier, "UNIT_TEST.%"));
             } 
         } 
     }

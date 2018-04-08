@@ -38,7 +38,8 @@
         {
             long submissionId = 0;
 
-            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+            var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+            using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 
@@ -80,7 +81,8 @@
         {
             long submissionId = 0;
 
-            using (var provider = new DatabaseRepositoryProvider<TestDb>(this.entityMapper))
+            var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
+            using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
                 provider.ChangeDatabase("DEVTEST01");
 

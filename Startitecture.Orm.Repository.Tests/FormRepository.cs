@@ -98,7 +98,7 @@ namespace Startitecture.Orm.Repository.Tests
                 throw new ArgumentNullException(nameof(nameSearch));
             }
 
-            var itemSelection = this.Select<Form, FormRow>().Matching(row => row.Name, nameSearch);
+            var itemSelection = this.Select<Form, FormRow>().WhereEqual(row => row.Name, nameSearch);
             return this.SelectEntities(itemSelection);
         }
 

@@ -304,7 +304,7 @@ WHERE
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
             var selection =
                 match.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .Matching(row => row.RelatedAlias.RelatedProperty, "Related")
+                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
                     .Select(
                         row => row.FakeDataId,
                         row => row.NormalColumn,
@@ -589,7 +589,7 @@ WHERE
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
             var selection =
                 match.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .Matching(row => row.RelatedAlias.RelatedProperty, "Related")
+                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
                     .Select(
                         row => row.FakeDataId,
                         row => row.NormalColumn,

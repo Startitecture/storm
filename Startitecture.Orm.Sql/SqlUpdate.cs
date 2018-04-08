@@ -12,7 +12,6 @@ namespace Startitecture.Orm.Sql
     using System.Linq.Expressions;
 
     using Model;
-    using Model;
 
     using Startitecture.Core;
     using Startitecture.Orm.Query;
@@ -96,13 +95,7 @@ SET
         /// <summary>
         /// Gets the execution statement.
         /// </summary>
-        public string ExecutionStatement
-        {
-            get
-            {
-                return this.CreateUpdateStatement(this);
-            }
-        }
+        public string ExecutionStatement => this.CreateUpdateStatement(this);
 
         /// <summary>
         /// Gets the execution parameters for the update query.
@@ -120,11 +113,6 @@ SET
                 return parameters;
             }
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether null properties require a set value.
-        /// </summary>
-        public bool NullPropertiesRequireSetValue { get; set; }
 
         #endregion
 
@@ -220,7 +208,7 @@ SET
             foreach (var attributeInstance in operation.attributesToSet)
             {
                 setItems.Add(attributeInstance.Value == null
-                                 ? string.Format((string)NullParameterFormat, (object)attributeInstance.AttributeDefinition.GetQualifiedName())
+                                 ? string.Format(NullParameterFormat, attributeInstance.AttributeDefinition.GetQualifiedName())
                                  : string.Format(ParameterFormat, attributeInstance.AttributeDefinition.GetQualifiedName(), index));
 
                 if (attributeInstance.Value != null)
@@ -242,7 +230,7 @@ SET
                                     : string.Empty;
 
             var setClause = string.Join(string.Concat(',', Environment.NewLine), setItems);
-            var predicateClause = itemSelection.Filters.CreateFilter(index, this.NullPropertiesRequireSetValue);
+            var predicateClause = itemSelection.Filters.CreateFilter(index);
             return string.Concat(
                 string.Format(SqlUpdateClause, entityName, setClause),
                 joinClause,

@@ -67,7 +67,7 @@ namespace Startitecture.Orm.Repository.Tests
                 throw new ArgumentNullException(nameof(page));
             }
 
-            var itemSelection = Select.From<LayoutPageSectionRow>().Matching(row => row.LayoutPageId, page.LayoutPageId.GetValueOrDefault());
+            var itemSelection = Select.From<LayoutPageSectionRow>().WhereEqual(row => row.LayoutPageId, page.LayoutPageId.GetValueOrDefault());
             var sections = Enumerable.ToList<LayoutPageSection>(this.SelectEntities(itemSelection));
 
             // TODO: To make this a single selection, add a method to FieldPlacementRepository that takes the entire page.
@@ -97,7 +97,7 @@ namespace Startitecture.Orm.Repository.Tests
             }
 
             var itemSelection = Select.From<LayoutPageSectionRow>()
-                .Matching(row => row.LayoutPage.FormLayoutId, layout.FormLayoutId.GetValueOrDefault());
+                .WhereEqual(row => row.LayoutPage.FormLayoutId, layout.FormLayoutId.GetValueOrDefault());
 
             return this.SelectEntities(itemSelection);
         }

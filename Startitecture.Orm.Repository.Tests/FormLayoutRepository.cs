@@ -90,7 +90,7 @@ namespace Startitecture.Orm.Repository.Tests
                 throw new ArgumentNullException(nameof(formVersion));
             }
 
-            var itemSelection = Select.From<FormLayoutRow>().Matching(row => row.FormVersionId, formVersion.FormVersionId.GetValueOrDefault());
+            var itemSelection = Select.From<FormLayoutRow>().WhereEqual(row => row.FormVersionId, formVersion.FormVersionId.GetValueOrDefault());
             return this.SelectEntities(itemSelection);
         }
 

@@ -69,7 +69,7 @@ namespace Startitecture.Orm.Sql.Tests
                                      SystemFieldSourceId = Convert.ToInt32(entity.SystemFieldSourceId)
                                  };
 
-                provider.Save(source, source.ToExampleSelection(row => row.UnifiedFieldId));
+                provider.Save(source);
             }
             else
             {
@@ -79,7 +79,7 @@ namespace Startitecture.Orm.Sql.Tests
                                      CustomFieldId = Convert.ToInt32(entity.CustomFieldId)
                                  };
 
-                provider.Save(source, source.ToExampleSelection(row => row.UnifiedFieldId));
+                provider.Save(source);
             }
         }
 

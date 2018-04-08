@@ -1,59 +1,85 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DefaultDatabaseFactory.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
-// <summary>
-//   Creates database instances using the default constructor.
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper
 {
     using System;
 
+    using JetBrains.Annotations;
+
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Resources;
 
     /// <summary>
-    /// Creates database instances using the default constructor.
+    /// The default database factory.
     /// </summary>
-    /// <typeparam name="TContext">
-    /// The type of database to create.
-    /// </typeparam>
-    public class DefaultDatabaseFactory<TContext> : IDatabaseFactory<TContext>
-        where TContext : Database
+    public class DefaultDatabaseFactory : IDatabaseFactory
     {
         /// <summary>
-        /// The default factory.
+        /// The connection name.
         /// </summary>
-        private static readonly DefaultDatabaseFactory<TContext> DefaultFactory = new DefaultDatabaseFactory<TContext>();
+        private readonly string connectionName;
 
         /// <summary>
-        /// Prevents a default instance of the <see cref="T:Startitecture.Orm.Mapper.DefaultDatabaseFactory`1"/> class from being created.
+        /// The definition provider.
         /// </summary>
-        private DefaultDatabaseFactory()
+        private readonly IEntityDefinitionProvider definitionProvider;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DefaultDatabaseFactory"/> class.
+        /// </summary>
+        /// <param name="connectionName">
+        /// The connection name.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="connectionName"/> is null or whitespace.
+        /// </exception>
+        public DefaultDatabaseFactory([NotNull] string connectionName)
+            : this(connectionName, Singleton<DataAnnotationsDefinitionProvider>.Instance)
         {
         }
 
         /// <summary>
-        /// Gets the default database factory instance.
+        /// Initializes a new instance of the <see cref="DefaultDatabaseFactory"/> class.
         /// </summary>
-        public static DefaultDatabaseFactory<TContext> Default
+        /// <param name="connectionName">
+        /// The connection name.
+        /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="connectionName"/> is null or whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="definitionProvider"/> is null
+        /// </exception>
+        public DefaultDatabaseFactory([NotNull] string connectionName, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
-            get
+            if (string.IsNullOrWhiteSpace(connectionName))
             {
-                return DefaultFactory;
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionName));
             }
+
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            this.connectionName = connectionName;
+            this.definitionProvider = definitionProvider;
         }
 
-        /// <summary>
-        /// Creates a new database instance.
-        /// </summary>
-        /// <returns>
-        /// A new database instance of the type <typeparamref name="TContext"/>.
-        /// </returns>
-        public TContext Create()
+        /// <inheritdoc />
+        public IDatabaseContext Create()
         {
-            return Activator.CreateInstance<TContext>();
+            return new Database(this.connectionName, this.definitionProvider);
         }
     }
 }

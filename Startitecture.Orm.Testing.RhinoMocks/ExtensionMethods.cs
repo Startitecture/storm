@@ -80,7 +80,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
             repositoryProvider.Stub(provider => provider.Contains(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(true);
             repositoryProvider.Stub(provider => provider.GetFirstOrDefault(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(dataItem);
-            repositoryProvider.Stub(provider => provider.Save(Arg<TDataItem>.Is.Anything, Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(dataItem);
+            repositoryProvider.Stub(provider => provider.Save(Arg<TDataItem>.Is.Anything)).Return(dataItem);
             return repositoryProvider;
         }
 
@@ -106,7 +106,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             }
 
             repositoryProvider.Stub(provider => provider.Contains(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(false);
-            repositoryProvider.Stub(provider => provider.Save(Arg<TDataItem>.Is.Anything, Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(null)
+            repositoryProvider.Stub(provider => provider.Save(Arg<TDataItem>.Is.Anything)).Return(null)
                 .WhenCalled(
                     invocation =>
                     {

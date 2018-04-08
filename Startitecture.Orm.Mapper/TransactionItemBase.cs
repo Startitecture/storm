@@ -9,7 +9,10 @@
 
 namespace Startitecture.Orm.Mapper
 {
+    using System;
     using System.Diagnostics.CodeAnalysis;
+
+    using JetBrains.Annotations;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
@@ -17,7 +20,6 @@ namespace Startitecture.Orm.Mapper
     /// <summary>
     /// The transaction item base.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public class TransactionItemBase : ITransactionContext
     {
         /// <summary>
@@ -32,8 +34,13 @@ namespace Startitecture.Orm.Mapper
         /// <param name="repositoryProvider">
         /// The repository provider to use for the transaction context.
         /// </param>
-        public void SetTransactionProvider(IRepositoryProvider repositoryProvider)
+        public void SetTransactionProvider([NotNull] IRepositoryProvider repositoryProvider)
         {
+            if (repositoryProvider == null)
+            {
+                throw new ArgumentNullException(nameof(repositoryProvider));
+            }
+
             this.TransactionProvider = repositoryProvider;
         }
     }

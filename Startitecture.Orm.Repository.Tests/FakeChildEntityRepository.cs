@@ -47,7 +47,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </returns>
         public IEnumerable<FakeChildEntity> SelectForComplexEntity(int complexEntityId)
         {
-            return this.SelectEntities(Select.From<FakeChildRow>().Matching(row => row.FakeComplexEntityId, complexEntityId));
+            return this.SelectEntities(Select.From<FakeChildRow>().WhereEqual(row => row.FakeComplexEntityId, complexEntityId));
         }
 
         /// <summary>

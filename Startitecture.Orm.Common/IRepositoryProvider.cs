@@ -160,16 +160,13 @@ namespace Startitecture.Orm.Common
         /// <param name="item">
         /// The item to save.
         /// </param>
-        /// <param name="selection">
-        /// The selection to use to uniquely select the item.
-        /// </param>
         /// <returns>
         /// The saved item as a <typeparamref name="TDataItem"/>.
         /// </returns>
         /// <exception cref="RepositoryException">
         /// The item could not be saved in the repository.
         /// </exception>
-        TDataItem Save<TDataItem>(TDataItem item, ItemSelection<TDataItem> selection)
+        TDataItem Save<TDataItem>(TDataItem item)
             where TDataItem : ITransactionContext;
 
         /// <summary>
@@ -201,6 +198,20 @@ namespace Startitecture.Orm.Common
         /// </returns>
         TDataItem InsertItem<TDataItem>(TDataItem dataItem) 
             where TDataItem : ITransactionContext;
+
+        /// <summary>
+        /// Updates a selection of items in the repository.
+        /// </summary>
+        /// <typeparam name="TDataItem">
+        /// The type of data item in the repository.
+        /// </typeparam>
+        /// <param name="dataItem">
+        /// The item that contains the update.
+        /// </param>
+        /// <param name="setExpressions">
+        /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
+        /// </param>
+        void UpdateItem<TDataItem>(TDataItem dataItem, params Expression<Func<TDataItem, object>>[] setExpressions);
 
         /// <summary>
         /// Updates a selection of items in the repository.

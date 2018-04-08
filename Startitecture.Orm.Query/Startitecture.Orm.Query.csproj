@@ -58,13 +58,18 @@
     <Compile Include="EntityRelation.cs" />
     <Compile Include="EntityRelationSet.cs" />
     <Compile Include="EntityRelationType.cs" />
+    <Compile Include="FilterType.cs" />
     <Compile Include="ICompositeEntity.cs" />
     <Compile Include="IEntityRelation.cs" />
+    <Compile Include="IQueryFactory.cs" />
     <Compile Include="ItemSelection.cs" />
     <Compile Include="LinkedSelection.cs" />
+    <Compile Include="NullPredicate.cs" />
     <Compile Include="Page.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SelectionLinkType.cs" />
+    <Compile Include="StatementOutputType.cs" />
+    <Compile Include="UniqueQuery.cs" />
     <Compile Include="ValueFilter.cs" />
   </ItemGroup>
   <ItemGroup>

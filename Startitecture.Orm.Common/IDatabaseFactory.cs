@@ -12,18 +12,14 @@ namespace Startitecture.Orm.Common
     /// <summary>
     /// Provides an interface for classes that create database instances.
     /// </summary>
-    /// <typeparam name="TContext">
-    /// The type of database to create.
-    /// </typeparam>
-    public interface IDatabaseFactory<out TContext>
-        where TContext : IDatabaseContext
+    public interface IDatabaseFactory
     {
         /// <summary>
         /// Creates a new database instance.
         /// </summary>
         /// <returns>
-        /// A new <see cref="SAF.Data.Providers.Database"/> instance.
+        /// A new <see cref="IDatabaseContext"/> instance.
         /// </returns>
-        TContext Create();
+        IDatabaseContext Create();
     }
 }

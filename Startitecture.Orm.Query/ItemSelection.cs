@@ -27,7 +27,7 @@ namespace Startitecture.Orm.Query
     /// <typeparam name="TItem">
     /// The type of item to select.
     /// </typeparam>
-    public abstract class ItemSelection<TItem>
+    public class ItemSelection<TItem>
     {
         /// <summary>
         /// The value separator for the ToString() method.
@@ -65,7 +65,7 @@ namespace Startitecture.Orm.Query
         /// <param name="definitionProvider">
         /// The definition Provider.
         /// </param>
-        protected ItemSelection(IEntityDefinitionProvider definitionProvider)
+        public ItemSelection(IEntityDefinitionProvider definitionProvider)
         {
             if (definitionProvider == null)
             {
@@ -74,6 +74,7 @@ namespace Startitecture.Orm.Query
 
             this.definitionProvider = definitionProvider;
             this.ItemDefinition = definitionProvider.Resolve<TItem>();
+            this.SelectionSource = this.ItemDefinition.EntityName;
             this.SetPropertiesToReturn(this.ItemDefinition.ReturnableAttributes.Distinct(this.distinctAttributeEqualityComparer).ToArray());
         }
 
@@ -83,30 +84,9 @@ namespace Startitecture.Orm.Query
         public int Limit { get; set; }
 
         /// <summary>
-        /// Gets a statement that selects items from the repository based on the current selection.
-        /// </summary>
-        public abstract string SelectionStatement { get; }
-
-        /// <summary>
-        /// Gets a statement that determines whether the repository contains the current selection.
-        /// </summary>
-        public abstract string ContainsStatement { get; }
-
-        /// <summary>
-        /// Gets a statement that removes items from the repository based on the current selection.
-        /// </summary>
-        public abstract string RemovalStatement { get; }
-
-        /// <summary>
         /// Gets the entity relations represented in the selection.
         /// </summary>
-        public IEnumerable<IEntityRelation> Relations
-        {
-            get
-            {
-                return this.relations;
-            }
-        }
+        public IEnumerable<IEntityRelation> Relations => this.relations;
 
         /// <summary>
         /// Gets the child selection, if any, for the current selection.
@@ -121,7 +101,7 @@ namespace Startitecture.Orm.Query
         /// <summary>
         /// Gets the source of the selection.
         /// </summary>
-        public abstract string SelectionSource { get; }
+        public virtual string SelectionSource { get; }
 
         /// <summary>
         /// Gets the property values for the filter.
@@ -147,24 +127,12 @@ namespace Startitecture.Orm.Query
         /// <summary>
         /// Gets the properties to return.
         /// </summary>
-        public IEnumerable<EntityAttributeDefinition> PropertiesToReturn
-        {
-            get
-            {
-                return this.propertiesToReturn;
-            }
-        }
+        public IEnumerable<EntityAttributeDefinition> PropertiesToReturn => this.propertiesToReturn;
 
         /// <summary>
         /// Gets the filters for the current selection.
         /// </summary>
-        public IEnumerable<ValueFilter> Filters
-        {
-            get
-            {
-                return this.valueFilters;
-            }
-        }
+        public IEnumerable<ValueFilter> Filters => this.valueFilters;
 
         #region Selection
 
@@ -213,6 +181,29 @@ namespace Startitecture.Orm.Query
         #region Predicates
 
         /// <summary>
+        /// Adds a <see cref="ValueFilter"/> to the selection.
+        /// </summary>
+        /// <param name="valueFilter">
+        /// The value filter to add.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueFilter"/> is null.
+        /// </exception>
+        public ItemSelection<TItem> AddFilter([NotNull] ValueFilter valueFilter)
+        {
+            if (valueFilter == null)
+            {
+                throw new ArgumentNullException(nameof(valueFilter));
+            }
+
+            this.valueFilters.Add(valueFilter);
+            return this;
+        }
+
+        /// <summary>
         /// Adds a match filter for the specified example item.
         /// </summary>
         /// <param name="example">
@@ -238,7 +229,9 @@ namespace Startitecture.Orm.Query
 
             foreach (var selector in selectors)
             {
-                this.AddEqualityFilter(this.FindAttribute(selector), selector.Compile().Invoke(example));
+                var attributeDefinition = this.FindAttribute(selector);
+                var value = selector.Compile().Invoke(example);
+                this.valueFilters.Add(new ValueFilter(attributeDefinition, FilterType.Equality, value));
             }
 
             return this;
@@ -273,9 +266,9 @@ namespace Startitecture.Orm.Query
 
             foreach (var selector in selectors)
             {
-                this.AddEqualityFilter(
-                    this.definitionProvider.Resolve<TDataItem>().Find(selector.GetPropertyName()),
-                    selector.Compile().Invoke(example));
+                var attributeDefinition = this.definitionProvider.Resolve<TDataItem>().Find(selector.GetPropertyName());
+                var value = selector.Compile().Invoke(example);
+                this.valueFilters.Add(new ValueFilter(attributeDefinition, FilterType.Equality, value));
             }
 
             return this;
@@ -299,14 +292,15 @@ namespace Startitecture.Orm.Query
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
-        public ItemSelection<TItem> Matching<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        public ItemSelection<TItem> WhereEqual<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
         {
             if (valueExpression == null)
             {
                 throw new ArgumentNullException(nameof(valueExpression));
             }
 
-            this.AddEqualityFilter(this.FindAttribute(valueExpression), value);
+            var valueFilter = new ValueFilter(this.FindAttribute(valueExpression), FilterType.Equality, value);
+            this.valueFilters.Add(valueFilter);
             return this;
         }
 
@@ -340,7 +334,7 @@ namespace Startitecture.Orm.Query
             }
 
             var attributeDefinition = this.FindAttribute(selector);
-            var valueFilter = new ValueFilter(attributeDefinition, true, inclusionValues.Cast<object>().ToArray());
+            var valueFilter = new ValueFilter(attributeDefinition, FilterType.MatchesSet, inclusionValues.Cast<object>().ToArray());
             this.valueFilters.Add(valueFilter);
             return this;
         }
@@ -378,7 +372,7 @@ namespace Startitecture.Orm.Query
             }
 
             var attributeDefinition = this.definitionProvider.Resolve<TDataItem>().Find(selector.GetPropertyName());
-            var valueFilter = new ValueFilter(attributeDefinition, true, inclusionValues.Cast<object>().ToArray());
+            var valueFilter = new ValueFilter(attributeDefinition, FilterType.MatchesSet, inclusionValues.Cast<object>().ToArray());
             this.valueFilters.Add(valueFilter);
             return this;
         }
@@ -969,7 +963,7 @@ namespace Startitecture.Orm.Query
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return string.Join(ValueSeparator, this.valueFilters.OrderBy<ValueFilter, string>(x => x.ItemAttribute.PropertyName));
+            return string.Join(ValueSeparator, this.valueFilters.OrderBy(x => x.ItemAttribute.PropertyName));
         }
 
         /// <summary>
@@ -1001,9 +995,9 @@ namespace Startitecture.Orm.Query
 
             foreach (var selector in propertyNames)
             {
-                this.AddEqualityFilter(
-                    this.definitionProvider.Resolve<TDataItem>().Find(selector),
-                    example.GetPropertyValue(selector));
+                var attributeDefinition = this.definitionProvider.Resolve<TDataItem>().Find(selector);
+                var value = example.GetPropertyValue(selector);
+                this.valueFilters.Add(new ValueFilter(attributeDefinition, FilterType.Equality, value));
             }
 
             return this;
@@ -1064,20 +1058,6 @@ namespace Startitecture.Orm.Query
         }
 
         /// <summary>
-        /// Adds an equality filter.
-        /// </summary>
-        /// <param name="attribute">
-        /// The property name.
-        /// </param>
-        /// <param name="value">
-        /// The value. If null, the equality filter will create a clause that includes any non-null value of that property.
-        /// </param>
-        private void AddEqualityFilter(EntityAttributeDefinition attribute, object value)
-        {
-            this.valueFilters.Add(value == null ? new ValueFilter(attribute) : new ValueFilter(attribute, value));
-        }
-
-        /// <summary>
         /// Adds a BETWEEN filter.
         /// </summary>
         /// <param name="attribute">
@@ -1093,7 +1073,7 @@ namespace Startitecture.Orm.Query
         {
             if (Evaluate.Equals(leftValue, rightValue))
             {
-                this.AddEqualityFilter(attribute, leftValue);
+                this.valueFilters.Add(new ValueFilter(attribute, FilterType.Equality, leftValue));
             }
             else
             {
@@ -1109,7 +1089,7 @@ namespace Startitecture.Orm.Query
                     rightValue = tempValue;
                 }
 
-                this.valueFilters.Add(new ValueFilter(attribute, leftValue, rightValue));
+                this.valueFilters.Add(new ValueFilter(attribute, FilterType.Between, leftValue, rightValue));
             }
         }
     }
