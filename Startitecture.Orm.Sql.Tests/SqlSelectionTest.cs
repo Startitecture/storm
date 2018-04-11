@@ -6,9 +6,7 @@
 
 namespace Startitecture.Orm.Sql.Tests
 {
-    using System;
     using System.Diagnostics.CodeAnalysis;
-    using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -33,21 +31,22 @@ namespace Startitecture.Orm.Sql.Tests
             var match = new FakeFlatDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeFlatDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeFlatDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn,
-                        row => row.AnotherColumn,
-                        row => row.AnotherValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                    .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn,
+                    row => row.AnotherColumn,
+                    row => row.AnotherValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId)
+                .GreaterThanOrEqualTo(row => row.NormalColumn, baseline.NormalColumn)
+                .LessThanOrEqualTo(row => row.AnotherColumn, boundary.AnotherColumn)
+                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -100,21 +99,23 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeFlatDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeFlatDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeFlatDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn,
-                        row => row.AnotherColumn,
-                        row => row.AnotherValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                    .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn,
+                    row => row.AnotherColumn,
+                    row => row.AnotherValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId)
+                .GreaterThanOrEqualTo(row => row.NormalColumn, baseline.NormalColumn)
+                .LessThanOrEqualTo(row => row.AnotherColumn, boundary.AnotherColumn)
+                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
 
             const string Expected = @"IF EXISTS (
 SELECT
@@ -149,21 +150,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeFlatDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeFlatDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeFlatDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn,
-                        row => row.AnotherColumn,
-                        row => row.AnotherValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                    .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn,
+                    row => row.AnotherColumn,
+                    row => row.AnotherValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId)
+                .GreaterThanOrEqualTo(row => row.NormalColumn, baseline.NormalColumn)
+                .LessThanOrEqualTo(row => row.AnotherColumn, boundary.AnotherColumn)
+                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -195,21 +197,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn,
-                        row => row.AnotherColumn,
-                        row => row.AnotherValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                    .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn,
+                    row => row.AnotherColumn,
+                    row => row.AnotherValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId)
+                .GreaterThanOrEqualTo(row => row.NormalColumn, baseline.NormalColumn)
+                .LessThanOrEqualTo(row => row.AnotherColumn, boundary.AnotherColumn)
+                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -248,21 +251,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn,
-                        row => row.AnotherColumn,
-                        row => row.AnotherValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                    .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn,
+                    row => row.AnotherColumn,
+                    row => row.AnotherValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId)
+                .GreaterThanOrEqualTo(row => row.NormalColumn, baseline.NormalColumn)
+                .LessThanOrEqualTo(row => row.AnotherColumn, boundary.AnotherColumn)
+                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
 
             const string Expected = @"IF EXISTS (
 SELECT
@@ -297,21 +301,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn,
-                        row => row.AnotherColumn,
-                        row => row.AnotherValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                    .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn,
+                    row => row.AnotherColumn,
+                    row => row.AnotherValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId)
+                .GreaterThanOrEqualTo(row => row.NormalColumn, baseline.NormalColumn)
+                .LessThanOrEqualTo(row => row.AnotherColumn, boundary.AnotherColumn)
+                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -350,23 +355,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var transactionSelection =
-                match.ToExampleSelection(
-                    row => row.ValueColumn,
-                    row => row.NullableColumn,
-                    row => row.NullableValueColumn,
-                    row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.FakeRelatedRelatedId,
-                        row => row.FakeRelatedRelatedProperty,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedId,
-                        row => row.OtherAliasRelatedProperty,
-                        row => row.ParentFakeDataId)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.FakeRelatedRelatedId,
+                    row => row.FakeRelatedRelatedProperty,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedId,
+                    row => row.OtherAliasRelatedProperty,
+                    row => row.ParentFakeDataId)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -392,7 +396,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Delete);
+            var actual = target.Create(transactionSelection, StatementOutputType.Select);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -412,23 +416,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var transactionSelection =
-                match.ToExampleSelection(
-                    row => row.ValueColumn,
-                    row => row.NullableColumn,
-                    row => row.NullableValueColumn,
-                    row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.FakeRelatedRelatedId,
-                        row => row.FakeRelatedRelatedProperty,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedId,
-                        row => row.OtherAliasRelatedProperty,
-                        row => row.ParentFakeDataId)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.FakeRelatedRelatedId,
+                    row => row.FakeRelatedRelatedProperty,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedId,
+                    row => row.OtherAliasRelatedProperty,
+                    row => row.ParentFakeDataId)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             const string Expected = @"IF EXISTS (
 SELECT
@@ -468,23 +471,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var transactionSelection =
-                match.ToExampleSelection(
-                    row => row.ValueColumn,
-                    row => row.NullableColumn,
-                    row => row.NullableValueColumn,
-                    row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.FakeRelatedRelatedId,
-                        row => row.FakeRelatedRelatedProperty,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedId,
-                        row => row.OtherAliasRelatedProperty,
-                        row => row.ParentFakeDataId)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.FakeRelatedRelatedId,
+                    row => row.FakeRelatedRelatedProperty,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedId,
+                    row => row.OtherAliasRelatedProperty,
+                    row => row.ParentFakeDataId)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -521,22 +523,23 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var transactionSelection =
-                match.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.ParentFakeDataId,
-                        row => row.FakeRelated.RelatedId,
-                        row => row.FakeRelated.RelatedProperty,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedId,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.ParentFakeDataId,
+                    row => row.FakeRelated.RelatedId,
+                    row => row.FakeRelated.RelatedProperty,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedId,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
-            // TODO: The query builder uses tabs. Replace with spaces and fix all tests.
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
     [dbo].[FakeData].[NormalColumn],
@@ -581,20 +584,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var transactionSelection =
-                match.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.ParentFakeDataId,
-                        row => row.FakeRelated.RelatedId,
-                        row => row.FakeRelated.RelatedProperty,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedId,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.ParentFakeDataId,
+                    row => row.FakeRelated.RelatedId,
+                    row => row.FakeRelated.RelatedProperty,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedId,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             const string Expected = @"IF EXISTS (
 SELECT
@@ -634,20 +639,22 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var transactionSelection =
-                match.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.ParentFakeDataId,
-                        row => row.FakeRelated.RelatedId,
-                        row => row.FakeRelated.RelatedProperty,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedId,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.ParentFakeDataId,
+                    row => row.FakeRelated.RelatedId,
+                    row => row.FakeRelated.RelatedProperty,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedId,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -706,44 +713,45 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline3 = new FakeFlatDataRow { FakeDataId = 60 };
             var boundary3 = new FakeFlatDataRow { FakeDataId = 70 };
-            
-            var transactionSelection =
-                match1.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline1, boundary1, row => row.FakeDataId)
-                    .Union(match2.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline2, boundary2, row => row.FakeDataId)
-                    .Union(match3.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline3, boundary3, row => row.FakeDataId)));
+
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match1.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedProperty)
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Union(
+                    Select.From<FakeFlatDataRow>()
+                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
+                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
+                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAliasRelatedProperty, match2.RelatedAliasRelatedProperty)
+                        .Select(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedId,
+                            row => row.RelatedAliasRelatedProperty,
+                            row => row.OtherAliasRelatedProperty)
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Union(
+                            Select.From<FakeFlatDataRow>()
+                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
+                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
+                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAliasRelatedProperty, match3.RelatedAliasRelatedProperty)
+                                .Select(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedId,
+                                    row => row.RelatedAliasRelatedProperty,
+                                    row => row.OtherAliasRelatedProperty)
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -846,43 +854,44 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeFlatDataRow { FakeDataId = 60 };
             var boundary3 = new FakeFlatDataRow { FakeDataId = 70 };
 
-            var transactionSelection =
-                match1.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline1, boundary1, row => row.FakeDataId)
-                    .Union(match2.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline2, boundary2, row => row.FakeDataId)
-                    .Union(match3.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline3, boundary3, row => row.FakeDataId)));
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match1.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedProperty)
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Union(
+                    Select.From<FakeFlatDataRow>()
+                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
+                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
+                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAliasRelatedProperty, match2.RelatedAliasRelatedProperty)
+                        .Select(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedId,
+                            row => row.RelatedAliasRelatedProperty,
+                            row => row.OtherAliasRelatedProperty)
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Union(
+                            Select.From<FakeFlatDataRow>()
+                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
+                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
+                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAliasRelatedProperty, match3.RelatedAliasRelatedProperty)
+                                .Select(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedId,
+                                    row => row.RelatedAliasRelatedProperty,
+                                    row => row.OtherAliasRelatedProperty)
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
 
             const string Expected = @"IF EXISTS (
 SELECT
@@ -975,43 +984,44 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeFlatDataRow { FakeDataId = 60 };
             var boundary3 = new FakeFlatDataRow { FakeDataId = 70 };
 
-            var transactionSelection =
-                match1.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline1, boundary1, row => row.FakeDataId)
-                    .Union(match2.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline2, boundary2, row => row.FakeDataId)
-                    .Union(match3.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline3, boundary3, row => row.FakeDataId)));
+            var transactionSelection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match1.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedProperty)
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Union(
+                    Select.From<FakeFlatDataRow>()
+                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
+                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
+                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAliasRelatedProperty, match2.RelatedAliasRelatedProperty)
+                        .Select(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedId,
+                            row => row.RelatedAliasRelatedProperty,
+                            row => row.OtherAliasRelatedProperty)
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Union(
+                            Select.From<FakeFlatDataRow>()
+                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
+                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
+                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAliasRelatedProperty, match3.RelatedAliasRelatedProperty)
+                                .Select(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedId,
+                                    row => row.RelatedAliasRelatedProperty,
+                                    row => row.OtherAliasRelatedProperty)
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -1071,36 +1081,44 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var baseline3 = new FakeRaisedDataRow { FakeDataId = 60 };
             var boundary3 = new FakeRaisedDataRow { FakeDataId = 70 };
 
-            var transactionSelection =
-                match1.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline1, boundary1, row => row.FakeDataId)
-                    .Union(
-                        match2.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                            .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                            .Select(
-                                row => row.FakeDataId,
-                                row => row.NormalColumn,
-                                row => row.RelatedAlias.RelatedId,
-                                row => row.RelatedAlias.RelatedProperty,
-                                row => row.OtherAlias.RelatedProperty)
-                            .Between(baseline2, boundary2, row => row.FakeDataId)
-                            .Union(
-                                match3.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                    .Select(
-                                        row => row.FakeDataId,
-                                        row => row.NormalColumn,
-                                        row => row.RelatedAlias.RelatedId,
-                                        row => row.RelatedAlias.RelatedProperty,
-                                        row => row.OtherAlias.RelatedProperty)
-                                    .Between(baseline3, boundary3, row => row.FakeDataId)));
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Union(
+                    Select.From<FakeRaisedDataRow>()
+                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
+                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
+                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                        .Select(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedAlias.RelatedId,
+                            row => row.RelatedAlias.RelatedProperty,
+                            row => row.OtherAlias.RelatedProperty)
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Union(
+                            Select.From<FakeRaisedDataRow>()
+                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
+                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
+                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                .Select(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedAlias.RelatedId,
+                                    row => row.RelatedAlias.RelatedProperty,
+                                    row => row.OtherAlias.RelatedProperty)
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -1203,36 +1221,44 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeRaisedDataRow { FakeDataId = 60 };
             var boundary3 = new FakeRaisedDataRow { FakeDataId = 70 };
 
-            var transactionSelection =
-                match1.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline1, boundary1, row => row.FakeDataId)
-                    .Union(
-                        match2.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                            .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                            .Select(
-                                row => row.FakeDataId,
-                                row => row.NormalColumn,
-                                row => row.RelatedAlias.RelatedId,
-                                row => row.RelatedAlias.RelatedProperty,
-                                row => row.OtherAlias.RelatedProperty)
-                            .Between(baseline2, boundary2, row => row.FakeDataId)
-                            .Union(
-                                match3.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                    .Select(
-                                        row => row.FakeDataId,
-                                        row => row.NormalColumn,
-                                        row => row.RelatedAlias.RelatedId,
-                                        row => row.RelatedAlias.RelatedProperty,
-                                        row => row.OtherAlias.RelatedProperty)
-                                    .Between(baseline3, boundary3, row => row.FakeDataId)));
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Union(
+                    Select.From<FakeRaisedDataRow>()
+                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
+                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
+                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                        .Select(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedAlias.RelatedId,
+                            row => row.RelatedAlias.RelatedProperty,
+                            row => row.OtherAlias.RelatedProperty)
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Union(
+                            Select.From<FakeRaisedDataRow>()
+                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
+                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
+                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                .Select(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedAlias.RelatedId,
+                                    row => row.RelatedAlias.RelatedProperty,
+                                    row => row.OtherAlias.RelatedProperty)
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
 
             const string Expected = @"IF EXISTS (
 SELECT
@@ -1325,36 +1351,44 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeRaisedDataRow { FakeDataId = 60 };
             var boundary3 = new FakeRaisedDataRow { FakeDataId = 70 };
 
-            var transactionSelection =
-                match1.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline1, boundary1, row => row.FakeDataId)
-                    .Union(
-                        match2.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                            .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                            .Select(
-                                row => row.FakeDataId,
-                                row => row.NormalColumn,
-                                row => row.RelatedAlias.RelatedId,
-                                row => row.RelatedAlias.RelatedProperty,
-                                row => row.OtherAlias.RelatedProperty)
-                            .Between(baseline2, boundary2, row => row.FakeDataId)
-                            .Union(
-                                match3.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                    .Select(
-                                        row => row.FakeDataId,
-                                        row => row.NormalColumn,
-                                        row => row.RelatedAlias.RelatedId,
-                                        row => row.RelatedAlias.RelatedProperty,
-                                        row => row.OtherAlias.RelatedProperty)
-                                    .Between(baseline3, boundary3, row => row.FakeDataId)));
+            var transactionSelection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Union(
+                    Select.From<FakeRaisedDataRow>()
+                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
+                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
+                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                        .Select(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedAlias.RelatedId,
+                            row => row.RelatedAlias.RelatedProperty,
+                            row => row.OtherAlias.RelatedProperty)
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Union(
+                            Select.From<FakeRaisedDataRow>()
+                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
+                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
+                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                .Select(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedAlias.RelatedId,
+                                    row => row.RelatedAlias.RelatedProperty,
+                                    row => row.OtherAlias.RelatedProperty)
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]

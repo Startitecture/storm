@@ -275,7 +275,7 @@ namespace Startitecture.Orm.Query
         }
 
         /// <summary>
-        /// Adds a match filter for the specified property.
+        /// Adds a equality filter for the specified property.
         /// </summary>
         /// <param name="valueExpression">
         /// The value expression.
@@ -299,8 +299,127 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(valueExpression));
             }
 
-            var valueFilter = new ValueFilter(this.FindAttribute(valueExpression), FilterType.Equality, value);
+            var valueFilter = Evaluate.IsNull(value)
+                                  ? new ValueFilter(this.FindAttribute(valueExpression), FilterType.IsNotSet, value)
+                                  : new ValueFilter(this.FindAttribute(valueExpression), FilterType.Equality, value);
+
             this.valueFilters.Add(valueFilter);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a greater than filter for the specified property and <paramref name="value"/>.
+        /// </summary>
+        /// <param name="valueExpression">
+        /// The value expression.
+        /// </param>
+        /// <param name="value">
+        /// The value.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of value to evaluate.
+        /// </typeparam>
+        /// <returns>
+        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueExpression"/> is null.
+        /// </exception>
+        public ItemSelection<TItem> GreaterThan<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        {
+            if (valueExpression == null)
+            {
+                throw new ArgumentNullException(nameof(valueExpression));
+            }
+
+            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.GreaterThan, value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a greater than filter for the specified property and <paramref name="value"/>.
+        /// </summary>
+        /// <param name="valueExpression">
+        /// The value expression.
+        /// </param>
+        /// <param name="value">
+        /// The value.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of value to evaluate.
+        /// </typeparam>
+        /// <returns>
+        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueExpression"/> is null.
+        /// </exception>
+        public ItemSelection<TItem> GreaterThanOrEqualTo<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        {
+            if (valueExpression == null)
+            {
+                throw new ArgumentNullException(nameof(valueExpression));
+            }
+
+            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.GreaterThanOrEqualTo, value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a less than filter for the specified property and <paramref name="value"/>.
+        /// </summary>
+        /// <param name="valueExpression">
+        /// The value expression.
+        /// </param>
+        /// <param name="value">
+        /// The value.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of value to evaluate.
+        /// </typeparam>
+        /// <returns>
+        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueExpression"/> is null.
+        /// </exception>
+        public ItemSelection<TItem> LessThan<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        {
+            if (valueExpression == null)
+            {
+                throw new ArgumentNullException(nameof(valueExpression));
+            }
+
+            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.LessThan, value));
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a less than or equal to filter for the specified property and <paramref name="value"/>.
+        /// </summary>
+        /// <param name="valueExpression">
+        /// The value expression.
+        /// </param>
+        /// <param name="value">
+        /// The value.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of value to evaluate.
+        /// </typeparam>
+        /// <returns>
+        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueExpression"/> is null.
+        /// </exception>
+        public ItemSelection<TItem> LessThanOrEqualTo<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        {
+            if (valueExpression == null)
+            {
+                throw new ArgumentNullException(nameof(valueExpression));
+            }
+
+            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.LessThanOrEqualTo, value));
             return this;
         }
 
@@ -1079,8 +1198,8 @@ namespace Startitecture.Orm.Query
             {
                 // Needed when caller can't or won't assign the values such that the lower bound property value is less than the upper 
                 // bound property value.
-                bool valuesFlipped = leftValue is IComparable && rightValue is IComparable
-                                     && (leftValue as IComparable).CompareTo(rightValue as IComparable) > 0;
+                bool valuesFlipped = leftValue is IComparable comparable && rightValue is IComparable
+                                     && comparable.CompareTo((IComparable)rightValue) > 0;
 
                 if (valuesFlipped)
                 {
