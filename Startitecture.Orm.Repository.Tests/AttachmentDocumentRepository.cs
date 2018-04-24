@@ -31,7 +31,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The repository provider.
         /// </param>
         public AttachmentDocumentRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider)
+            : base(repositoryProvider, document => document.AttachmentDocumentId)
         {
         }
 

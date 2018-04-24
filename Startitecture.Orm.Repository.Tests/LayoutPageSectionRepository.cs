@@ -41,7 +41,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The placement service.
         /// </param>
         public LayoutPageSectionRepository(IRepositoryProvider repositoryProvider, [NotNull] IFieldPlacementService placementService)
-            : base(repositoryProvider)
+            : base(repositoryProvider, section => section.LayoutSectionId)
         {
             if (placementService == null)
             {

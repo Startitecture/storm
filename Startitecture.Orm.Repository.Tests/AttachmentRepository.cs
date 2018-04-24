@@ -23,7 +23,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The repository provider.
         /// </param>
         public AttachmentRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider)
+            : base(repositoryProvider, attachment => attachment.AttachmentId)
         {
         }
 

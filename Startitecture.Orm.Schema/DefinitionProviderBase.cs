@@ -24,10 +24,12 @@ namespace Startitecture.Orm.Schema
     /// </summary>
     public abstract class DefinitionProviderBase : IEntityDefinitionProvider
     {
+/*
         /// <summary>
         /// The cache key format.
         /// </summary>
         private const string CacheKeyFormat = "{0}:{1}:{2}";
+*/
 
         /// <summary>
         /// The default schema.
@@ -44,15 +46,7 @@ namespace Startitecture.Orm.Schema
         /// </summary>
         private static readonly CacheItemPolicy ItemPolicy = new CacheItemPolicy { AbsoluteExpiration = ObjectCache.InfiniteAbsoluteExpiration };
 
-        /// <summary>
-        /// Resolves the entity definition for the specified type.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of the item to resolve.
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Model.IEntityDefinition"/> for the specified type.
-        /// </returns>
+        /// <inheritdoc />
         public IEntityDefinition Resolve<TItem>()
         {
             return this.Resolve(typeof(TItem));
@@ -99,7 +93,8 @@ namespace Startitecture.Orm.Schema
             }
 
             var listName = typeof(List<EntityAttributeDefinition>).ToRuntimeName();
-            var cacheKey = string.Format(CacheKeyFormat, this.GetType().FullName, entityType.FullName, listName);
+            var cacheKey = $"{this.GetType().FullName}:{entityType.FullName}:{listName}";
+            ////string.Format(CacheKeyFormat, this.GetType().FullName, entityType.FullName, listName);
             var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, entityType, this.GetRelationAttributes, ItemPolicy);
 
             return result.Item;

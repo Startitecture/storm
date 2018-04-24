@@ -90,6 +90,10 @@
       <Project>{5643589D-8D46-4717-AE66-994173F3D671}</Project>
       <Name>Startitecture.Orm.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
+      <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
+      <Name>Startitecture.Orm.Model</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
       <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
       <Name>Startitecture.Orm.Query</Name>

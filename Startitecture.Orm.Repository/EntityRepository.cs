@@ -8,6 +8,8 @@ namespace Startitecture.Orm.Repository
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Linq.Expressions;
 
     using JetBrains.Annotations;
 
@@ -36,8 +38,11 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
-        public EntityRepository(IRepositoryProvider repositoryProvider)
-            : this(repositoryProvider, null)
+        /// <param name="key">
+        /// The key property for the <typeparamref name="TEntity"/>.
+        /// </param>
+        public EntityRepository(IRepositoryProvider repositoryProvider, Expression<Func<TEntity, object>> key)
+            : this(repositoryProvider, key, null)
         {
         }
 
@@ -47,11 +52,14 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
+        /// <param name="key">
+        /// The key property for the <typeparamref name="TEntity"/>.
+        /// </param>
         /// <param name="selectionComparer">
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
-        public EntityRepository(IRepositoryProvider repositoryProvider, IComparer<TDataItem> selectionComparer)
-            : base(repositoryProvider, selectionComparer)
+        public EntityRepository(IRepositoryProvider repositoryProvider, Expression<Func<TEntity, object>> key, IComparer<TDataItem> selectionComparer)
+            : base(repositoryProvider, key, selectionComparer)
         {
         }
 
@@ -284,7 +292,11 @@ namespace Startitecture.Orm.Repository
             }
 
             var dependency = dependencySelector(entity);
-            var entityKey = this.PrimaryKeyExpression == null ? dataItem : this.PrimaryKeyExpression.Compile().DynamicInvoke(dataItem);
+            var entityKey = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>()
+                .PrimaryKeyAttributes.First()
+                .GetValueDelegate.DynamicInvoke(dataItem);
+
+                //// this.PrimaryKeyExpression == null ? dataItem : this.PrimaryKeyExpression.Compile().DynamicInvoke(dataItem);
 
             if (dependency == null)
             {
@@ -370,24 +382,28 @@ namespace Startitecture.Orm.Repository
         {
             var dataItem = this.SaveDataItem(item);
 
-            // Map the data item key to the entity if one has been set.
-            if (this.PrimaryKeyExpression != null)
-            {
-                var key = this.PrimaryKeyExpression.Compile().DynamicInvoke(dataItem);
+            ////// Map the data item key to the entity if one has been set.
+            ////if (this.PrimaryKeyExpression != null)
+            ////{
+            var key = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>()
+                .PrimaryKeyAttributes.First()
+                .GetValueDelegate.DynamicInvoke(dataItem);
 
-                if (key is int)
+                    ////.PrimaryKeyExpression.Compile().DynamicInvoke(dataItem);
+
+                if (key is int integerKey)
                 {
-                    this.EntityMapper.MapTo((int)key, item);
+                    this.EntityMapper.MapTo(integerKey, item);
                 }
 
-                if (key is long)
+                if (key is long longKey)
                 {
-                    this.EntityMapper.MapTo((long)key, item);
+                    this.EntityMapper.MapTo(longKey, item);
                 }
 
                 // The mapping must also have set the primary key.
                 this.EntityMapper.MapTo(key, item);
-            }
+            ////}
 
             this.SaveDependents(item, this.RepositoryProvider, dataItem);
 

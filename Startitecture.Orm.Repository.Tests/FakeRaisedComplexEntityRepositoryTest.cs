@@ -159,10 +159,10 @@ namespace Startitecture.Orm.Repository.Tests
                 Assert.AreEqual(expected.FakeSubSubEntityId, actual.FakeSubSubEntityId);
                 Assert.AreEqual(expected, actual);
 
-                Func<FakeChildEntity, string> keySelector = entity => string.Concat(entity.FakeComplexEntityId, '.', entity.SomeValue);
+                string KeySelector(FakeChildEntity entity) => string.Concat(entity.FakeComplexEntityId, '.', entity.SomeValue);
 
-                var expectedChildren = expected.ChildEntities.OrderBy(keySelector);
-                var actualChildren = actual.ChildEntities.OrderBy(keySelector);
+                var expectedChildren = expected.ChildEntities.OrderBy(KeySelector);
+                var actualChildren = actual.ChildEntities.OrderBy(KeySelector);
 
                 var firstExpected = expectedChildren.ElementAtOrDefault(1);
                 var firstActual = actualChildren.ElementAtOrDefault(1);

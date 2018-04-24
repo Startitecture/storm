@@ -26,7 +26,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The repository provider.
         /// </param>
         public FakeRaisedChildEntityRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, SelectionComparer.SomeValue)
+            : base(repositoryProvider, entity => entity.FakeChildEntityId, SelectionComparer.SomeValue)
         {
         }
 

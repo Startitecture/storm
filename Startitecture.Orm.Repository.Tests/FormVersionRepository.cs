@@ -39,7 +39,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The layout service.
         /// </param>
         public FormVersionRepository([NotNull] IRepositoryProvider repositoryProvider, [NotNull] IFormLayoutService layoutService)
-            : base(repositoryProvider)
+            : base(repositoryProvider, version => version.FormVersionId)
         {
             if (repositoryProvider == null)
             {

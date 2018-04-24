@@ -53,7 +53,7 @@ namespace Startitecture.Orm.Repository.Tests
             [NotNull] IRepositoryProvider repositoryProvider,
             [NotNull] IStructuredCommandProvider structuredCommandProvider,
             [NotNull] ILayoutPageSectionService pageSectionService)
-            : base(repositoryProvider)
+            : base(repositoryProvider, layout => layout.FormLayoutId)
         {
             if (repositoryProvider == null)
             {

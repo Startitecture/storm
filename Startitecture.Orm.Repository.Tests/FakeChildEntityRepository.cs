@@ -32,7 +32,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The repository provider.
         /// </param>
         public FakeChildEntityRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, SelectionComparer.SomeValue)
+            : base(repositoryProvider, entity => entity.FakeChildEntityId, SelectionComparer.SomeValue)
         {
         }
 

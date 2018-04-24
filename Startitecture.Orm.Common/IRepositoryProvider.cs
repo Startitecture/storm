@@ -16,6 +16,7 @@ namespace Startitecture.Orm.Common
 
     using JetBrains.Annotations;
 
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
 
     /// <summary>
@@ -32,6 +33,11 @@ namespace Startitecture.Orm.Common
         /// Gets the entity mapper.
         /// </summary>
         IEntityMapper EntityMapper { get; }
+
+        /// <summary>
+        /// Gets the entity definition provider.
+        /// </summary>
+        IEntityDefinitionProvider EntityDefinitionProvider { get; }
 
         /// <summary>
         /// Gets a value indicating whether the current instance is disposed.

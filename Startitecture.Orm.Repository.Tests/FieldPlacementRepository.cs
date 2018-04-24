@@ -32,7 +32,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The repository provider.
         /// </param>
         public FieldPlacementRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider)
+            : base(repositoryProvider, placement => placement.FieldPlacementId)
         {
         }
 

@@ -71,8 +71,11 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
-        protected ReadOnlyRepository(IRepositoryProvider repositoryProvider)
-            : this(repositoryProvider, null)
+        /// <param name="key">
+        /// The key property for the <typeparamref name="TEntity"/>.
+        /// </param>
+        protected ReadOnlyRepository(IRepositoryProvider repositoryProvider, Expression<Func<TEntity, object>> key)
+            : this(repositoryProvider, key, null)
         {
         }
 
@@ -82,15 +85,23 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
+        /// <param name="key">
+        /// The key property for the <typeparamref name="TEntity"/>.
+        /// </param>
         /// <param name="selectionComparer">
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
-        protected ReadOnlyRepository(IRepositoryProvider repositoryProvider, IComparer<TDataItem> selectionComparer)
+        protected ReadOnlyRepository(
+            IRepositoryProvider repositoryProvider,
+            Expression<Func<TEntity, object>> key,
+            IComparer<TDataItem> selectionComparer)
         {
             if (repositoryProvider == null)
             {
                 throw new ArgumentNullException(nameof(repositoryProvider));
             }
+
+            this.PrimaryKeyExpression = key;
 
             repositoryProvider.ThrowOnDependencyFailure(provider => provider.EntityMapper);
             this.EntityMapper = repositoryProvider.EntityMapper;
@@ -179,7 +190,7 @@ namespace Startitecture.Orm.Repository
 
             if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext)
             {
-                (candidate as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
+                ((ITransactionContext)candidate).SetTransactionProvider(this.RepositoryProvider);
             }
 
             TEntity entity;
@@ -308,7 +319,7 @@ namespace Startitecture.Orm.Repository
         public IEnumerable<TEntity> SelectAll()
         {
             var exampleSelection = new SqlSelection<TDataItem>(new TDataItem());
-            var dataItems = this.RepositoryProvider.GetSelection<TDataItem>(exampleSelection);
+            var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
             return this.SelectResults(dataItems);
         }
 
@@ -474,7 +485,11 @@ namespace Startitecture.Orm.Repository
 
             ItemSelection<TDataItem> selection;
 
-            var usePrimaryKey = Evaluate.Equals(default(TKey), primaryKey.Compile().Invoke(item)) == false;
+            var keyValue = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>()
+                .PrimaryKeyAttributes.First()
+                .GetValueDelegate.DynamicInvoke(item);
+
+            var usePrimaryKey = Evaluate.Equals(default(TKey), keyValue) == false;
 
             if (usePrimaryKey || alternateKeys.Length == 0)
             {

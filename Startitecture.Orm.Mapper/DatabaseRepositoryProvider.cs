@@ -23,6 +23,7 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Sql;
     using Startitecture.Resources;
@@ -154,6 +155,7 @@ namespace Startitecture.Orm.Mapper
             try
             {
                 this.dataContext = databaseFactory.Create();
+                this.EntityDefinitionProvider = this.dataContext.DefinitionProvider;
                 this.repositoryAdapter = adapterFactory.Create(this.dataContext);
             }
             catch (InvalidOperationException ex)
@@ -175,6 +177,9 @@ namespace Startitecture.Orm.Mapper
 
         /// <inheritdoc />
         public IEntityMapper EntityMapper { get; }
+
+        /// <inheritdoc />
+        public IEntityDefinitionProvider EntityDefinitionProvider { get; }
 
         /// <inheritdoc />
         public IDatabaseContext DatabaseContext => this.dataContext;

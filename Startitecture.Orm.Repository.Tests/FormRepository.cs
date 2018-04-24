@@ -39,7 +39,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The version service.
         /// </param>
         public FormRepository(IRepositoryProvider repositoryProvider, [NotNull] IFormVersionService versionService)
-            : base(repositoryProvider)
+            : base(repositoryProvider, form => form.FormId)
         {
             if (versionService == null)
             {

@@ -41,31 +41,21 @@ namespace Startitecture.Orm.Sql.Tests
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(match);
 
-            Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Statement compiled in {0}.", watch.Elapsed);
-
-            watch.Restart();
-            var statement2 = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
-
             var expected = new object[]
                                {
                                    "NormalColumn",
@@ -79,7 +69,7 @@ namespace Startitecture.Orm.Sql.Tests
                                    20
                                };
 
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(
                 expected,
@@ -110,7 +100,7 @@ WHERE
 [dbo].[FakeData].[NullableValueColumn] IS NULL AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
 
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         /// <summary>
@@ -131,31 +121,21 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(match);
 
-            Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Statement compiled in {0}.", watch.Elapsed);
-
-            watch.Restart();
-            var statement2 = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
-
             var expected = new object[]
                                {
                                    "NormalColumn",
@@ -169,7 +149,7 @@ WHERE
                                    20
                                };
 
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(
                 expected,
@@ -200,7 +180,7 @@ WHERE
 [dbo].[FakeData].[NullableValueColumn] IS NULL AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
 
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         /// <summary>
@@ -222,23 +202,22 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(
                 expected,
@@ -270,7 +249,7 @@ WHERE
 [RelatedAlias].[RelatedProperty] LIKE @7 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
 
-            Stopwatch watch = Stopwatch.StartNew();
+            var watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
             watch.Stop();
             Trace.TraceInformation("Statement compiled in {0}.", watch.Elapsed);
@@ -280,7 +259,7 @@ WHERE
             watch.Stop();
             Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
         
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         /// <summary>
@@ -302,20 +281,22 @@ WHERE
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(
                 expected,
@@ -347,17 +328,8 @@ WHERE
 [RelatedAlias].[RelatedProperty] LIKE @7 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
 
-            Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Statement compiled in {0}.", watch.Elapsed);
-
-            watch.Restart();
-            var statement2 = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
-
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         /// <summary>
@@ -376,18 +348,17 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
             var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(
@@ -396,7 +367,7 @@ WHERE
                 row => row.NullableColumn);
 
             var expected = new object[] { "UpdatedNormalColumn", 2, "CouldHaveBeenNull", 10, 20 };
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(expected, actual);
             const string ExpectedSelection = @"UPDATE [dbo].[FakeData]
@@ -416,17 +387,8 @@ WHERE
 [dbo].[FakeData].[NullableValueColumn] IS NULL AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
-            Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Statement compiled in {0}.", watch.Elapsed);
-
-            watch.Restart();
-            var statement2 = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
-
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         /// <summary>
@@ -445,18 +407,17 @@ WHERE
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.ValueColumn)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
             var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(
@@ -465,7 +426,7 @@ WHERE
                 row => row.NullableColumn);
 
             var expected = new object[] { "UpdatedNormalColumn", 2, "CouldHaveBeenNull", 10, 20 };
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(expected, actual);
             const string ExpectedSelection = @"UPDATE [dbo].[FakeData]
@@ -495,7 +456,7 @@ WHERE
             watch.Stop();
             Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
 
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         /// <summary>
@@ -515,19 +476,18 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeFlatDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAliasRelatedProperty, match.RelatedAliasRelatedProperty)
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedId,
+                    row => row.RelatedAliasRelatedProperty,
+                    row => row.OtherAliasRelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
             var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(
@@ -536,7 +496,7 @@ WHERE
                 row => row.NullableColumn);
 
             var expected = new object[] { "UpdatedNormalColumn", 2, "CouldHaveBeenNull", "Related", 10, 20 };
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(expected, actual);
             const string ExpectedSelection = @"UPDATE [dbo].[FakeData]
@@ -557,17 +517,8 @@ WHERE
 [RelatedAlias].[RelatedProperty] LIKE @3 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
 
-            Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Statement compiled in {0}.", watch.Elapsed);
-
-            watch.Restart();
-            var statement2 = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
-
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         /// <summary>
@@ -587,16 +538,18 @@ WHERE
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection =
-                match.ToExampleSelection(row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                    .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedAlias.RelatedId,
-                        row => row.RelatedAlias.RelatedProperty,
-                        row => row.OtherAlias.RelatedProperty)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+            var selection = Select.From<FakeRaisedDataRow>()
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                .Select(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
             var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(
@@ -605,7 +558,7 @@ WHERE
                 row => row.NullableColumn);
 
             var expected = new object[] { "UpdatedNormalColumn", 2, "CouldHaveBeenNull", "Related", 10, 20 };
-            var actual = Enumerable.ToArray<object>(updateOperation.ExecutionParameters);
+            var actual = updateOperation.ExecutionParameters.ToArray();
 
             CollectionAssert.AreEqual(expected, actual);
             const string ExpectedSelection = @"UPDATE [dbo].[FakeData]
@@ -626,17 +579,8 @@ WHERE
 [RelatedAlias].[RelatedProperty] LIKE @3 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
 
-            Stopwatch watch = Stopwatch.StartNew();
             var statement = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Statement compiled in {0}.", watch.Elapsed);
-
-            watch.Restart();
-            var statement2 = updateOperation.ExecutionStatement;
-            watch.Stop();
-            Trace.TraceInformation("Second compilation in {0}.", watch.Elapsed);
-
-            Assert.AreEqual<string>(ExpectedSelection, statement);
+            Assert.AreEqual(ExpectedSelection, statement);
         }
 
         #endregion

@@ -52,7 +52,7 @@ namespace Startitecture.Orm.Repository.Tests
             [NotNull] IRepositoryProvider repositoryProvider,
             [NotNull] IStructuredCommandProvider structuredCommandProvider,
             [NotNull] IFieldPlacementService placementService)
-            : base(repositoryProvider)
+            : base(repositoryProvider, section => section.LayoutSectionId)
         {
             if (repositoryProvider == null)
             {

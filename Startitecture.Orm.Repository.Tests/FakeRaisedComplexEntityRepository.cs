@@ -6,6 +6,9 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
+    using System;
+    using System.Linq.Expressions;
+
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Testing.Model;
@@ -22,19 +25,12 @@ namespace Startitecture.Orm.Repository.Tests
         /// The repository provider.
         /// </param>
         public FakeRaisedComplexEntityRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider)
+            : base(repositoryProvider, entity => entity.FakeComplexEntityId)
         {
+            Expression<Func<FakeComplexEntity, object>> expression = key => key.FakeComplexEntityId;
         }
 
-        /// <summary>
-        /// Gets a unique item selection for the specified item.
-        /// </summary>
-        /// <param name="item">
-        /// The item to create the selection for.
-        /// </param>
-        /// <returns>
-        /// A <see cref="T:SAF.Data.ItemSelection`1"/> for the specified item.
-        /// </returns>
+        /// <inheritdoc />
         protected override ItemSelection<FakeRaisedComplexRow> GetUniqueItemSelection(FakeRaisedComplexRow item)
         {
             return this.GetKeySelection(item, row => row.FakeComplexEntityId, row => row.UniqueName);
@@ -62,21 +58,7 @@ namespace Startitecture.Orm.Repository.Tests
             entity.Load(children);
         }
 
-        /// <summary>
-        /// Saves the dependencies of the specified entity.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity to save.
-        /// </param>
-        /// <param name="provider">
-        /// The repository provider for the current operation.
-        /// </param>
-        /// <param name="dataItem">
-        /// The data item mapped from the entity.
-        /// </param>
-        /// <remarks>
-        /// Use repositories with the entity to save dependencies and apply the results to the <paramref name="dataItem"/>.
-        /// </remarks>
+        /// <inheritdoc />
         protected override void SaveDependencies(FakeComplexEntity entity, IRepositoryProvider provider, FakeRaisedComplexRow dataItem)
         {
             var subEntityRepo = new FakeRaisedSubEntityRepository(provider);

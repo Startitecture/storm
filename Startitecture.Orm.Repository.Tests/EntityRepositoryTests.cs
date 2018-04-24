@@ -1749,7 +1749,7 @@ namespace Startitecture.Orm.Repository.Tests
             /// The repository provider.
             /// </param>
             public ConstructedFakeComplexEntityRepository(IRepositoryProvider repositoryProvider)
-                : base(repositoryProvider)
+                : base(repositoryProvider, entity => entity.FakeComplexEntityId)
             {
             }
 

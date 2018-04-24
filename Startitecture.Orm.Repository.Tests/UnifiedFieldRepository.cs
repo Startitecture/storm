@@ -42,7 +42,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The command provider.
         /// </param>
         public UnifiedFieldRepository([NotNull] IRepositoryProvider repositoryProvider, [NotNull] IStructuredCommandProvider commandProvider)
-            : base(repositoryProvider)
+            : base(repositoryProvider, field => field.UnifiedFieldId)
         {
             if (repositoryProvider == null)
             {
