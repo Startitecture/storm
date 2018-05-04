@@ -385,9 +385,8 @@ namespace Startitecture.Orm.Repository
             ////// Map the data item key to the entity if one has been set.
             ////if (this.PrimaryKeyExpression != null)
             ////{
-            var key = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>()
-                .PrimaryKeyAttributes.First()
-                .GetValueDelegate.DynamicInvoke(dataItem);
+            var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>();
+            var key = entityDefinition.PrimaryKeyAttributes.First().GetValueDelegate.DynamicInvoke(dataItem);
 
                     ////.PrimaryKeyExpression.Compile().DynamicInvoke(dataItem);
 

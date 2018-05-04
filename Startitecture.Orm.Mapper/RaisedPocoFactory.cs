@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Mapper
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
     /// <summary>
@@ -101,7 +100,7 @@ namespace Startitecture.Orm.Mapper
             var qualifiedName = entityDefinition.QualifiedName;
             var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
 
-            var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.PhysicalName));
+            var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.PhysicalName).ToList());
             var poco = (T)this.pocoCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, typeQualifiedName, entityDefinition, reader));
 
             var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
@@ -117,7 +116,7 @@ namespace Startitecture.Orm.Mapper
                 var keyDefinitions = entityDefinition.ReturnableAttributes
                     .Where(x => x.Entity.ReferenceName == relationReferenceName && x.IsPrimaryKey).OrderBy(x => x.PhysicalName);
 
-                var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions);
+                var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions.ToList());
 
                 var entityReference = new EntityReference
                                           {
@@ -169,10 +168,17 @@ namespace Startitecture.Orm.Mapper
         private static string GetPocoKey(
             IEntityDefinition entityDefinition,
             IDataRecord record,
-            IEnumerable<EntityAttributeDefinition> keyDefinitions)
+            ICollection<EntityAttributeDefinition> keyDefinitions)
         {
             // TODO: Ensure the order of keys according to the ordinality of the columns to skip re-ordering operations.
             var pocoKeyBuilder = new StringBuilder($"{entityDefinition.EntityContainer}.{entityDefinition.EntityName}");
+
+            if (keyDefinitions.Count == 0)
+            {
+                throw new OperationException(
+                    entityDefinition,
+                    $"No keys provided for {entityDefinition.EntityContainer}.{entityDefinition.EntityName}.");
+            }
 
             foreach (var definition in keyDefinitions)
             {

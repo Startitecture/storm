@@ -120,7 +120,7 @@ namespace Startitecture.Core
                 var watch = Stopwatch.StartNew();
                 value = factory();
                 watch.Stop();
-                Trace.TraceInformation($"{key}: Got '{value}' from factory: {watch.Elapsed}.");
+                ////Trace.TraceInformation($"{key}: Got '{value}' from factory: {watch.Elapsed}.");
 
                 // Store it
                 this.cacheMap.Add(key, value);

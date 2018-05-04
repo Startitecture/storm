@@ -165,6 +165,11 @@ namespace Startitecture.Orm.Schema
 
             foreach (var propertyInfo in entityType.GetNonIndexedProperties())
             {
+                if (propertyInfo.GetCustomAttribute<IgnoreAttribute>() != null)
+                {
+                    continue;
+                }
+
                 var isIdentity = propertyInfo.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption
                                  == DatabaseGeneratedOption.Identity;
 

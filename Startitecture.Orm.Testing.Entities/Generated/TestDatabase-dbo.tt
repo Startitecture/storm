@@ -362,7 +362,7 @@
         return r.ToString();
         */
 
-        return ": TransactionItemBase";
+        return " : TransactionItemBase";
     };
 
     // Writes any boilerplate stuff inside the POCO class

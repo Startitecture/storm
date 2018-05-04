@@ -72,7 +72,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return $"{this.UniqueIdentifier} ({this.FirstName} {this.MiddleName} {this.LastName}";
+            return $"{this.UniqueIdentifier} ({this.FirstName} {this.MiddleName} {this.LastName})";
         }
 
         /// <summary>

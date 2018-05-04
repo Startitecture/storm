@@ -21,8 +21,8 @@ namespace Startitecture.Orm.Testing.Model
     /// <summary>
     /// The fake child row.
     /// </summary>
-    [TableName("FakeComplexEntity")]
-    [PrimaryKey("FakeComplexEntityId")]
+    [TableName("FakeChildEntity")]
+    [PrimaryKey("FakeChildEntityId")]
     public class FakeChildRow : TransactionItemBase, ICompositeEntity
     {
         /// <summary>

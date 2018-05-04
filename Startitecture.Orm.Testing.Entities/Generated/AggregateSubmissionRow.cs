@@ -20,36 +20,34 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The CurrentAggregateSubmission entity POCO.
+    /// The AggregateSubmission entity POCO.
     /// </summary>
-    [Table("CurrentAggregateSubmission", Schema = "dbo")]
+    [Table("AggregateSubmission", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class CurrentAggregateSubmissionRow : TransactionItemBase
+    public partial class AggregateSubmissionRow : TransactionItemBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="CurrentAggregateSubmissionRow"/> class.
+        /// Initializes a new instance of the <see cref="AggregateSubmissionRow"/> class.
         /// </summary>
-        public CurrentAggregateSubmissionRow()
+        public AggregateSubmissionRow()
         {
         }
 
         /// <summary>
-        /// Gets or sets the CurrentAggregateSubmissionId (Primary key)
+        /// Gets or sets the AggregateSubmissionId (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"CurrentAggregateSubmissionId", Order = 1, TypeName = "int")]
-        [Index(@"PK_CurrentAggregateSubmission", 1, IsUnique = true, IsClustered = true)]
+        [Column(@"AggregateSubmissionId", Order = 1, TypeName = "int")]
+        [Index(@"PK_AggregateSubmission", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
-        [Display(Name = "Current aggregate submission ID")]
-        [ForeignKey("GenericSubmission")]
-        public int CurrentAggregateSubmissionId { get; set; }
+        [Display(Name = "Aggregate submission ID")]
+        public int AggregateSubmissionId { get; set; }
 
         /// <summary>
         /// Gets or sets the DomainAggregateId
         /// </summary>
         [Column(@"DomainAggregateId", Order = 2, TypeName = "int")]
-        [Index(@"UK_CurrentAggregateSubmission_DomainAggregateId", 1, IsUnique = true, IsClustered = false)]
         [Required]
         [Display(Name = "Domain aggregate ID")]
         public int DomainAggregateId { get; set; }

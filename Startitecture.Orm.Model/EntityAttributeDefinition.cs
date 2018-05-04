@@ -162,6 +162,13 @@ namespace Startitecture.Orm.Model
                 () => CreateFunctionDelegate(propertyInfo, getMethodInfo));
 
             var setMethodInfo = propertyInfo.GetSetMethod(true);
+
+            if (setMethodInfo == null)
+            {
+                throw new InvalidOperationException(
+                    $"The property '{propertyInfo.PropertyType.Name}.{propertyInfo.Name}' requires a set method for this delegate to be built.");
+            }
+
             this.SetValueMethod = setMethodInfo;
             this.SetValueDelegate = DelegateCache.Get(
                 $"{nameof(setMethodInfo)}.{propertyInfo.DeclaringType}.{propertyInfo.Name}",

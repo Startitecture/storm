@@ -62,7 +62,7 @@
     <Compile Include="Generated\AggregateOptionTypeRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\AggregateSubmissionIdRow.cs">
+    <Compile Include="Generated\AggregateSubmissionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
     <Compile Include="Generated\AssociationRow.cs">
@@ -114,6 +114,9 @@
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
     <Compile Include="Generated\OtherAggregateRow.cs">
+      <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
+    </Compile>
+    <Compile Include="Generated\RefactorLogRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
     <Compile Include="Generated\SubContainerRow.cs">

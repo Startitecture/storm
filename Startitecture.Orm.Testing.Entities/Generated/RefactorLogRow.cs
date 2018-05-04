@@ -20,37 +20,32 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The AggregateSubmissionId entity POCO.
+    /// The __RefactorLog entity POCO.
     /// </summary>
-    [Table("AggregateSubmissionId", Schema = "dbo")]
+    /// <summary>
+    /// refactoring log
+    /// </summary>
+    [Table("__RefactorLog", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class AggregateSubmissionIdRow: TransactionItemBase
+    public partial class RefactorLogRow : TransactionItemBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AggregateSubmissionIdRow"/> class.
+        /// Initializes a new instance of the <see cref="RefactorLogRow"/> class.
         /// </summary>
-        public AggregateSubmissionIdRow()
+        public RefactorLogRow()
         {
         }
 
         /// <summary>
-        /// Gets or sets the AggregateSubmissionId (Primary key)
+        /// Gets or sets the OperationKey (Primary key)
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        [Column(@"AggregateSubmissionId", Order = 1, TypeName = "int")]
-        [Index(@"PK_AggregateSubmissionId", 1, IsUnique = true, IsClustered = true)]
+        [Column(@"OperationKey", Order = 1, TypeName = "uniqueidentifier")]
+        [Index(@"PK____Refact__D3AEFFDBDA866624", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
-        [Display(Name = "Aggregate submission ID")]
-        public int AggregateSubmissionId_ { get; set; }
-
-        /// <summary>
-        /// Gets or sets the DomainAggregateId
-        /// </summary>
-        [Column(@"DomainAggregateId", Order = 2, TypeName = "int")]
-        [Required]
-        [Display(Name = "Domain aggregate ID")]
-        public int DomainAggregateId { get; set; }
+        [Display(Name = "Operation key")]
+        public System.Guid OperationKey { get; set; }
     }
 
 }

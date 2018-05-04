@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("FlagAttribute", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class FlagAttributeRow: TransactionItemBase
+    public partial class FlagAttributeRow : TransactionItemBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FlagAttributeRow"/> class.
