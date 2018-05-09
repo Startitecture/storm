@@ -66,6 +66,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Select.cs" />
     <Compile Include="SqlFromClause.cs" />
+    <Compile Include="TransactSqlJoin.cs" />
+    <Compile Include="TransactSqlQualifier.cs" />
     <Compile Include="SqlSelection.cs" />
     <Compile Include="TransactSqlQueryFactory.cs" />
     <Compile Include="SqlUpdate.cs" />

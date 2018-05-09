@@ -12,13 +12,10 @@ namespace Startitecture.Orm.Query
     public interface IQueryFactory
     {
         /// <summary>
-        /// Creates a query language statement for the specified <paramref name="selection"/>.
+        /// Creates a query language statement for the specified <paramref name="queryContext"/>.
         /// </summary>
-        /// <param name="selection">
-        /// The selection to create a statement for.
-        /// </param>
-        /// <param name="outputType">
-        /// The output type for the statement.
+        /// <param name="queryContext">
+        /// The query Context.
         /// </param>
         /// <typeparam name="TItem">
         /// The type of item that is the target of the selection.
@@ -26,6 +23,6 @@ namespace Startitecture.Orm.Query
         /// <returns>
         /// The query language statement as a <see cref="string"/>.
         /// </returns>
-        string Create<TItem>(ItemSelection<TItem> selection, StatementOutputType outputType);
+        string Create<TItem>(QueryContext<TItem> queryContext);
     }
 }

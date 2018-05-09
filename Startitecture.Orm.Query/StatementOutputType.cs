@@ -22,8 +22,13 @@ namespace Startitecture.Orm.Query
         Contains = 1,
 
         /// <summary>
+        /// The statement is an update.
+        /// </summary>
+        Update = 2,
+
+        /// <summary>
         /// The statement is a delete.
         /// </summary>
-        Delete = 2
+        Delete = 3
     }
 }

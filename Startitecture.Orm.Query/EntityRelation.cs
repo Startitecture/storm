@@ -10,13 +10,11 @@ namespace Startitecture.Orm.Query
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Linq.Expressions;
 
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Model;
 
     /// <summary>
     /// The base class for defining relations between two entities.
@@ -24,66 +22,30 @@ namespace Startitecture.Orm.Query
     public class EntityRelation : IEntityRelation, IEquatable<EntityRelation>
     {
         /// <summary>
-        /// The comparison properties.
-        /// </summary>
-        private static readonly Func<EntityRelation, object>[] ComparisonProperties =
-            {
-                item => item.RelationLocation,
-                item => item.RelationAttribute,
-                item => item.RelationType,
-                item => item.SourceLocation,
-                item => item.SourceAttribute,
-            };
-
-        /// <summary>
-        /// The definition provider.
-        /// </summary>
-        private readonly IEntityDefinitionProvider definitionProvider;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="EntityRelation"/> class.
         /// </summary>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
         /// <param name="relationType">
         /// The relation type.
         /// </param>
-        public EntityRelation(IEntityDefinitionProvider definitionProvider, EntityRelationType relationType)
+        public EntityRelation(EntityRelationType relationType)
         {
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
             this.RelationType = relationType;
-            this.definitionProvider = definitionProvider;
         }
 
-        /// <summary>
-        /// Gets the type of entity relation.
-        /// </summary>
+        /// <inheritdoc />
         public EntityRelationType RelationType { get; }
 
-        /// <summary>
-        /// Gets the source location.
-        /// </summary>
-        public EntityLocation SourceLocation { get; private set; }
+        /// <inheritdoc />
+        public LambdaExpression SourceExpression { get; private set; }
 
-        /// <summary>
-        /// Gets the source selector.
-        /// </summary>
-        public EntityAttributeDefinition SourceAttribute { get; private set; }
+        /// <inheritdoc />
+        public string SourceEntityAlias { get; private set; }
 
-        /// <summary>
-        /// Gets the relation location.
-        /// </summary>
-        public EntityLocation RelationLocation { get; private set; }
+        /// <inheritdoc />
+        public LambdaExpression RelationExpression { get; private set; }
 
-        /// <summary>
-        /// Gets the relation selector.
-        /// </summary>
-        public EntityAttributeDefinition RelationAttribute { get; private set; }
+        /// <inheritdoc />
+        public string RelationEntityAlias { get; private set; }
 
         #region Equality Methods
 
@@ -130,12 +92,7 @@ namespace Startitecture.Orm.Query
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return
-                string.Concat(
-                    $"{this.SourceLocation}.{this.SourceLocation} ",
-                    $"{this.RelationType} ",
-                    $"{this.RelationLocation}.{this.RelationLocation} ",
-                    $"([{this.SourceAttribute}] = [{this.RelationAttribute}])");
+            return $"([{this.SourceExpression}] = [{this.RelationExpression}])";
         }
 
         /// <summary>
@@ -147,7 +104,16 @@ namespace Startitecture.Orm.Query
         /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
-            return Evaluate.GenerateHashCode(this, ComparisonProperties);
+            var sourceProperty = this.SourceExpression?.GetProperty();
+            var relationProperty = this.RelationExpression?.GetProperty();
+
+            return Evaluate.GenerateHashCode(
+                sourceProperty?.PropertyType,
+                sourceProperty?.Name,
+                this.SourceEntityAlias,
+                relationProperty?.PropertyType,
+                relationProperty?.Name,
+                this.RelationEntityAlias);
         }
 
         /// <summary>
@@ -162,16 +128,21 @@ namespace Startitecture.Orm.Query
             return Evaluate.Equals(this, obj);
         }
 
-        /// <summary>
-        /// Indicates whether the current object is equal to another object of the same type.
-        /// </summary>
-        /// <returns>
-        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
-        /// </returns>
-        /// <param name="other">An object to compare with this object.</param>
+        /// <inheritdoc />
         public bool Equals(EntityRelation other)
         {
-            return Evaluate.Equals(this, other, ComparisonProperties);
+            var sourceProperty = this.SourceExpression?.GetProperty();
+            var relationProperty = this.RelationExpression?.GetProperty();
+
+            var otherSourceProperty = other?.SourceExpression?.GetProperty();
+            var otherRelationProperty = other?.RelationExpression.GetProperty();
+
+            return sourceProperty?.PropertyType == otherSourceProperty?.PropertyType && sourceProperty?.Name == otherSourceProperty?.Name
+                                                                                     && this.SourceEntityAlias == other?.SourceEntityAlias
+                                                                                     && relationProperty?.PropertyType
+                                                                                     == otherRelationProperty?.PropertyType
+                                                                                     && relationProperty?.Name == otherRelationProperty?.Name
+                                                                                     && this.RelationEntityAlias == other?.RelationEntityAlias;
         }
 
         #endregion
@@ -202,19 +173,23 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightAttribute));
             }
 
-            var leftReference = this.definitionProvider.GetEntityReference(leftAttribute);
+            this.SourceExpression = leftAttribute;
+            this.RelationExpression = rightAttribute;
 
-            this.SourceLocation = this.definitionProvider.GetEntityLocation(leftReference);
-            this.SourceAttribute =
-                this.definitionProvider.Resolve(leftReference.EntityType)
-                    .DirectAttributes.FirstOrDefault(x => x.PropertyName == leftAttribute.GetPropertyName());
+            ////var leftReference = this.definitionProvider.GetEntityReference(leftAttribute);
 
-            var rightReference = this.definitionProvider.GetEntityReference(rightAttribute);
+            ////this.SourceAttribute =
+            ////    this.definitionProvider.Resolve(leftReference.EntityType)
+            ////        .DirectAttributes.FirstOrDefault(x => x.PropertyName == leftAttribute.GetPropertyName());
 
-            this.RelationLocation = this.definitionProvider.GetEntityLocation(rightReference);
-            this.RelationAttribute =
-                this.definitionProvider.Resolve(rightReference.EntityType)
-                    .DirectAttributes.FirstOrDefault(x => x.PropertyName == rightAttribute.GetPropertyName());
+            ////this.SourceLocation = this.definitionProvider.GetEntityLocation(leftReference);
+
+            ////var rightReference = this.definitionProvider.GetEntityReference(rightAttribute);
+
+            ////this.RelationLocation = this.definitionProvider.GetEntityLocation(rightReference);
+            ////this.RelationAttribute =
+            ////    this.definitionProvider.Resolve(rightReference.EntityType)
+            ////        .DirectAttributes.FirstOrDefault(x => x.PropertyName == rightAttribute.GetPropertyName());
         }
 
         /// <summary>
@@ -277,16 +252,21 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(relationAttribute));
             }
 
-            var sourceReference = new EntityReference { EntityType = typeof(TSource), EntityAlias = sourceAlias };
-            this.SourceLocation = this.definitionProvider.GetEntityLocation(sourceReference);
+            this.SourceExpression = sourceAttribute;
+            this.SourceEntityAlias = sourceAlias;
+            this.RelationExpression = relationAttribute;
+            this.RelationEntityAlias = relationAlias;
 
-            var relationReference = new EntityReference { EntityType = typeof(TRelation), EntityAlias = relationAlias };
-            this.RelationLocation = this.definitionProvider.GetEntityLocation(relationReference);
+            ////var sourceReference = new EntityReference { EntityType = typeof(TSource), EntityAlias = sourceAlias };
+            ////this.SourceLocation = this.definitionProvider.GetEntityLocation(sourceReference);
 
-            var sourceDefinition = this.definitionProvider.Resolve<TSource>();
-            var relationDefinition = this.definitionProvider.Resolve<TRelation>();
-            this.SourceAttribute = sourceDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == sourceAttribute.GetPropertyName());
-            this.RelationAttribute = relationDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == relationAttribute.GetPropertyName());
+            ////var relationReference = new EntityReference { EntityType = typeof(TRelation), EntityAlias = relationAlias };
+            ////this.RelationLocation = this.definitionProvider.GetEntityLocation(relationReference);
+
+            ////var sourceDefinition = this.definitionProvider.Resolve<TSource>();
+            ////var relationDefinition = this.definitionProvider.Resolve<TRelation>();
+            ////this.SourceAttribute = sourceDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == sourceAttribute.GetPropertyName());
+            ////this.RelationAttribute = relationDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == relationAttribute.GetPropertyName());
         }
     }
 }

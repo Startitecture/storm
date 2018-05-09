@@ -50,32 +50,31 @@ namespace Startitecture.Orm.Query
         private readonly List<ValueFilter> valueFilters = new List<ValueFilter>();
 
         /// <summary>
-        /// The properties to return.
+        /// The selection expressions.
         /// </summary>
-        private readonly List<EntityAttributeDefinition> propertiesToReturn = new List<EntityAttributeDefinition>();
+        private readonly List<LambdaExpression> selectExpressions = new List<LambdaExpression>();
 
+        /*
         /// <summary>
         /// The distinct attribute equality comparer.
         /// </summary>
         private readonly DistinctAttributeEqualityComparer distinctAttributeEqualityComparer = Singleton<DistinctAttributeEqualityComparer>.Instance;
+*/
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ItemSelection{TItem}"/> class.
         /// </summary>
-        /// <param name="definitionProvider">
-        /// The definition Provider.
-        /// </param>
-        public ItemSelection(IEntityDefinitionProvider definitionProvider)
+        public ItemSelection()
         {
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
+            ////if (definitionProvider == null)
+            ////{
+            ////    throw new ArgumentNullException(nameof(definitionProvider));
+            ////}
 
-            this.definitionProvider = definitionProvider;
-            this.ItemDefinition = definitionProvider.Resolve<TItem>();
-            this.SelectionSource = this.ItemDefinition.EntityName;
-            this.SetPropertiesToReturn(this.ItemDefinition.ReturnableAttributes.Distinct(this.distinctAttributeEqualityComparer).ToArray());
+            ////this.definitionProvider = definitionProvider;
+            ////this.ItemDefinition = definitionProvider.Resolve<TItem>();
+            ////this.SetPropertiesToReturn(this.ItemDefinition.DirectAttributes.ToArray());
+            ////.Distinct(this.distinctAttributeEqualityComparer).ToArray());
         }
 
         /// <summary>
@@ -92,16 +91,6 @@ namespace Startitecture.Orm.Query
         /// Gets the child selection, if any, for the current selection.
         /// </summary>
         public LinkedSelection<TItem> LinkedSelection { get; private set; }
-
-        /// <summary>
-        /// Gets the item definition for the current selection.
-        /// </summary>
-        public IEntityDefinition ItemDefinition { get; }
-
-        /// <summary>
-        /// Gets the source of the selection.
-        /// </summary>
-        public virtual string SelectionSource { get; }
 
         /// <summary>
         /// Gets the property values for the filter.
@@ -125,9 +114,9 @@ namespace Startitecture.Orm.Query
         }
 
         /// <summary>
-        /// Gets the properties to return.
+        /// Gets the selection expressions.
         /// </summary>
-        public IEnumerable<EntityAttributeDefinition> PropertiesToReturn => this.propertiesToReturn;
+        public IEnumerable<LambdaExpression> SelectExpressions => this.selectExpressions;
 
         /// <summary>
         /// Gets the filters for the current selection.
@@ -152,11 +141,15 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(selectors));
             }
 
-            this.SetPropertiesToReturn(
-                selectors.Any()
-                    ? selectors.Select(this.FindAttribute).Distinct(this.distinctAttributeEqualityComparer).ToArray()
-                    : this.ItemDefinition.ReturnableAttributes.ToArray());
+            this.selectExpressions.AddRange(selectors);
 
+            // TODO: use distinct attribute definitions during rendering
+            ////var attributeDefinitions = this.manualSelection
+            ////                               ? selectors.Select(this.FindAttribute).Distinct(this.distinctAttributeEqualityComparer).ToArray()
+            ////                               : this.GetReturnableAttributes(this.ItemDefinition);
+
+            ////// Don't add already existing properties.
+            ////this.propertiesToReturn.AddRange(attributeDefinitions.Except(this.propertiesToReturn));
             return this;
         }
 
@@ -172,7 +165,17 @@ namespace Startitecture.Orm.Query
         /// </returns>
         public ItemSelection<TItem> ClearRelations()
         {
+            // Clear out return values and filters not covered in the 
             this.relations.Clear();
+
+            ////var filtersToRetain = this.valueFilters.Where(filter => filter.ItemAttribute.IsDirect);
+            ////this.valueFilters.Clear();
+            ////this.valueFilters.AddRange(filtersToRetain);
+
+            ////var selectionsToRetain = this.propertiesToReturn.Where(definition => definition.IsDirect);
+            ////this.propertiesToReturn.Clear();
+            ////this.propertiesToReturn.AddRange(selectionsToRetain);
+
             return this;
         }
 
@@ -229,9 +232,8 @@ namespace Startitecture.Orm.Query
 
             foreach (var selector in selectors)
             {
-                var attributeDefinition = this.FindAttribute(selector);
                 var value = selector.Compile().Invoke(example);
-                this.valueFilters.Add(new ValueFilter(attributeDefinition, FilterType.Equality, value));
+                this.valueFilters.Add(new ValueFilter(selector, FilterType.Equality, value));
             }
 
             return this;
@@ -266,9 +268,8 @@ namespace Startitecture.Orm.Query
 
             foreach (var selector in selectors)
             {
-                var attributeDefinition = this.definitionProvider.Resolve<TDataItem>().Find(selector.GetPropertyName());
                 var value = selector.Compile().Invoke(example);
-                this.valueFilters.Add(new ValueFilter(attributeDefinition, FilterType.Equality, value));
+                this.valueFilters.Add(new ValueFilter(selector, FilterType.Equality, value));
             }
 
             return this;
@@ -300,8 +301,8 @@ namespace Startitecture.Orm.Query
             }
 
             var valueFilter = Evaluate.IsNull(value)
-                                  ? new ValueFilter(this.FindAttribute(valueExpression), FilterType.IsNotSet, value)
-                                  : new ValueFilter(this.FindAttribute(valueExpression), FilterType.Equality, value);
+                                  ? new ValueFilter(valueExpression, FilterType.IsNotSet, value)
+                                  : new ValueFilter(valueExpression, FilterType.Equality, value);
 
             this.valueFilters.Add(valueFilter);
             return this;
@@ -332,7 +333,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(valueExpression));
             }
 
-            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.GreaterThan, value));
+            this.valueFilters.Add(new ValueFilter(valueExpression, FilterType.GreaterThan, value));
             return this;
         }
 
@@ -361,7 +362,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(valueExpression));
             }
 
-            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.GreaterThanOrEqualTo, value));
+            this.valueFilters.Add(new ValueFilter(valueExpression, FilterType.GreaterThanOrEqualTo, value));
             return this;
         }
 
@@ -390,7 +391,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(valueExpression));
             }
 
-            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.LessThan, value));
+            this.valueFilters.Add(new ValueFilter(valueExpression, FilterType.LessThan, value));
             return this;
         }
 
@@ -419,7 +420,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(valueExpression));
             }
 
-            this.valueFilters.Add(new ValueFilter(this.FindAttribute(valueExpression), FilterType.LessThanOrEqualTo, value));
+            this.valueFilters.Add(new ValueFilter(valueExpression, FilterType.LessThanOrEqualTo, value));
             return this;
         }
 
@@ -452,8 +453,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(inclusionValues));
             }
 
-            var attributeDefinition = this.FindAttribute(selector);
-            var valueFilter = new ValueFilter(attributeDefinition, FilterType.MatchesSet, inclusionValues.Cast<object>().ToArray());
+            var valueFilter = new ValueFilter(selector, FilterType.MatchesSet, inclusionValues.Cast<object>().ToArray());
             this.valueFilters.Add(valueFilter);
             return this;
         }
@@ -490,8 +490,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(inclusionValues));
             }
 
-            var attributeDefinition = this.definitionProvider.Resolve<TDataItem>().Find(selector.GetPropertyName());
-            var valueFilter = new ValueFilter(attributeDefinition, FilterType.MatchesSet, inclusionValues.Cast<object>().ToArray());
+            var valueFilter = new ValueFilter(selector, FilterType.MatchesSet, inclusionValues.Cast<object>().ToArray());
             this.valueFilters.Add(valueFilter);
             return this;
         }
@@ -539,7 +538,7 @@ namespace Startitecture.Orm.Query
             foreach (var selector in selectors)
             {
                 var compiledSelector = selector.Compile();
-                this.AddRangeFilter(this.FindAttribute(selector), compiledSelector.Invoke(baseline), compiledSelector.Invoke(boundary));
+                this.AddRangeFilter(selector, compiledSelector.Invoke(baseline), compiledSelector.Invoke(boundary));
             }
 
             return this;
@@ -591,10 +590,7 @@ namespace Startitecture.Orm.Query
             foreach (var selector in selectors)
             {
                 var compiledSelector = selector.Compile();
-                this.AddRangeFilter(
-                    this.definitionProvider.Resolve<TDataItem>().Find(selector.GetPropertyName()),
-                    compiledSelector.Invoke(baseline),
-                    compiledSelector.Invoke(boundary));
+                this.AddRangeFilter(selector, compiledSelector.Invoke(baseline), compiledSelector.Invoke(boundary));
             }
 
             return this;
@@ -630,7 +626,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var relation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var relation = new EntityRelation(EntityRelationType.InnerJoin);
             relation.Join<TItem>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
@@ -664,7 +660,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -702,7 +698,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, null, relationAlias);
             return this.AddRelation(entityRelation);
         }
@@ -730,7 +726,7 @@ namespace Startitecture.Orm.Query
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -808,7 +804,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, sourceAlias, relationAlias);
             return this.AddRelation(entityRelation);
         }
@@ -839,7 +835,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var relation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var relation = new EntityRelation(EntityRelationType.LeftJoin);
             relation.Join<TItem>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
@@ -873,7 +869,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -911,7 +907,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, null, relationAlias);
             return this.AddRelation(entityRelation);
         }
@@ -939,7 +935,7 @@ namespace Startitecture.Orm.Query
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -1017,7 +1013,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, sourceAlias, relationAlias);
             return this.AddRelation(entityRelation);
         }
@@ -1082,7 +1078,7 @@ namespace Startitecture.Orm.Query
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return string.Join(ValueSeparator, this.valueFilters.OrderBy(x => x.ItemAttribute.PropertyName));
+            return string.Join(ValueSeparator, this.valueFilters.OrderBy(x => x.PropertyName));
         }
 
         /// <summary>
@@ -1112,11 +1108,10 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(propertyNames));
             }
 
-            foreach (var selector in propertyNames)
+            foreach (var propertyName in propertyNames)
             {
-                var attributeDefinition = this.definitionProvider.Resolve<TDataItem>().Find(selector);
-                var value = example.GetPropertyValue(selector);
-                this.valueFilters.Add(new ValueFilter(attributeDefinition, FilterType.Equality, value));
+                var value = example.GetPropertyValue(propertyName);
+                this.valueFilters.Add(new ValueFilter(propertyName, FilterType.Equality, value));
             }
 
             return this;
@@ -1146,6 +1141,7 @@ namespace Startitecture.Orm.Query
             return this;
         }
 
+/*
         /// <summary>
         /// Finds the specified attribute, first using a precise search and then a name-only search.
         /// </summary>
@@ -1163,7 +1159,9 @@ namespace Startitecture.Orm.Query
             // If we can't locate the attribute precisely, fall back to using only the name.
             return Evaluate.IsDefaultValue(preciseAttribute) ? this.ItemDefinition.Find(selector.GetPropertyName()) : preciseAttribute;
         }
+*/
 
+/*
         /// <summary>
         /// Sets properties to return to the current selection.
         /// </summary>
@@ -1175,12 +1173,32 @@ namespace Startitecture.Orm.Query
             this.propertiesToReturn.Clear();
             this.propertiesToReturn.AddRange(properties);
         }
+*/
+
+/*
+        /// <summary>
+        /// Gets the returnable attributes for this selection based on the relations defined in the selection.
+        /// </summary>
+        /// <param name="itemDefinition">
+        /// The item definition.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items available for selection with the current set of
+        /// <see cref="ItemSelection{T}.Relations"/>.
+        /// </returns>
+        private IEnumerable<EntityAttributeDefinition> GetReturnableAttributes(IEntityDefinition itemDefinition)
+        {
+            return from a in itemDefinition.ReturnableAttributes
+                   join r in this.relations on a.EntityNode.Value equals r.RelationLocation
+                   select a;
+        }
+*/
 
         /// <summary>
         /// Adds a BETWEEN filter.
         /// </summary>
-        /// <param name="attribute">
-        /// The property name.
+        /// <param name="propertyExpression">
+        /// The property expression.
         /// </param>
         /// <param name="leftValue">
         /// The left value.
@@ -1188,11 +1206,11 @@ namespace Startitecture.Orm.Query
         /// <param name="rightValue">
         /// The right value.
         /// </param>
-        private void AddRangeFilter(EntityAttributeDefinition attribute, object leftValue, object rightValue)
+        private void AddRangeFilter(LambdaExpression propertyExpression, object leftValue, object rightValue)
         {
             if (Evaluate.Equals(leftValue, rightValue))
             {
-                this.valueFilters.Add(new ValueFilter(attribute, FilterType.Equality, leftValue));
+                this.valueFilters.Add(new ValueFilter(propertyExpression, FilterType.Equality, leftValue));
             }
             else
             {
@@ -1208,7 +1226,7 @@ namespace Startitecture.Orm.Query
                     rightValue = tempValue;
                 }
 
-                this.valueFilters.Add(new ValueFilter(attribute, FilterType.Between, leftValue, rightValue));
+                this.valueFilters.Add(new ValueFilter(propertyExpression, FilterType.Between, leftValue, rightValue));
             }
         }
     }

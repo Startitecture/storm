@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Sql.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
@@ -53,7 +54,7 @@ namespace Startitecture.Orm.Sql.Tests
                     row => row.ValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
 
             var statement = updateOperation.ExecutionStatement;
             var expected = new object[]
@@ -133,7 +134,7 @@ WHERE
                     row => row.ValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
 
             var statement = updateOperation.ExecutionStatement;
             var expected = new object[]
@@ -215,7 +216,7 @@ WHERE
                     row => row.OtherAliasRelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -294,7 +295,7 @@ WHERE
                     row => row.OtherAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(match);
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -361,7 +362,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -420,7 +421,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -490,7 +491,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -552,7 +553,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(selection).Set(
+            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);

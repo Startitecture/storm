@@ -12,6 +12,8 @@ namespace Startitecture.Orm.Sql
     using System.Linq.Expressions;
     using System.Reflection;
 
+    using JetBrains.Annotations;
+
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
@@ -23,86 +25,6 @@ namespace Startitecture.Orm.Sql
     /// </summary>
     public static class ExtensionMethods
     {
-        /// <summary>
-        /// The equality filter.
-        /// </summary>
-        private const string EqualityFilter = "{0} {1} @{2}";
-
-        /// <summary>
-        /// The between filter.
-        /// </summary>
-        private const string BetweenFilter = "{0} BETWEEN @{1} AND @{2}";
-
-        /// <summary>
-        /// The not null predicate.
-        /// </summary>
-        private const string NullPredicate = "{0} IS NULL";
-
-        /// <summary>
-        /// The not null predicate.
-        /// </summary>
-        private const string NotNullPredicate = "{0} IS NOT NULL";
-
-        /// <summary>
-        /// The filter separator.
-        /// </summary>
-        private const string FilterSeparator = " AND";
-
-        /// <summary>
-        /// The like operand.
-        /// </summary>
-        private const string LikeOperand = "LIKE";
-
-        /// <summary>
-        /// The equality operand.
-        /// </summary>
-        private const string EqualityOperand = "=";
-
-        /// <summary>
-        /// The less than predicate.
-        /// </summary>
-        private const string LessThanPredicate = "{0} <= @{1}";
-
-        /// <summary>
-        /// The greater than predicate.
-        /// </summary>
-        private const string GreaterThanPredicate = "{0} >= @{1}";
-
-        /// <summary>
-        /// The inclusive predicate.
-        /// </summary>
-        private const string InclusionPredicate = "{0} IN ({1})";
-
-        /// <summary>
-        /// The parameter format.
-        /// </summary>
-        private const string ParameterFormat = "@{0}";
-
-        /// <summary>
-        /// The parameter separator.
-        /// </summary>
-        private const string ParameterSeparator = ", ";
-
-        /// <summary>
-        /// The aliased relation statement format.
-        /// </summary>
-        private const string AliasedRelationStatementFormat = "{0} {1} AS [{2}] ON {3} = {4}";
-
-        /// <summary>
-        /// The relation statement format.
-        /// </summary>
-        private const string RelationStatementFormat = "{0} {1} ON {2} = {3}";
-
-        /// <summary>
-        /// The inner join clause.
-        /// </summary>
-        private const string InnerJoinClause = "INNER JOIN";
-
-        /// <summary>
-        /// The left join clause.
-        /// </summary>
-        private const string LeftJoinClause = "LEFT JOIN";
-
         /// <summary>
         /// The name selector.
         /// </summary>
@@ -134,144 +56,34 @@ namespace Startitecture.Orm.Sql
             return new SqlSelection<TItem>(example, selectors);
         }
 
-        /// <summary>
-        /// Gets an example selection for the current item.
-        /// </summary>
-        /// <param name="lowerLimit">
-        /// The item representing the lower limit.
-        /// </param>
-        /// <param name="upperLimit">
-        /// The item representing the upper limit.
-        /// </param>
-        /// <param name="selectors">
-        /// The property selectors.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to generate an example selection for.
-        /// </typeparam>
-        /// <returns>
-        /// A <see cref="T:SAF.Data.ExampleSelection`1"/> for the current item using the specified selectors.
-        /// </returns>
-        public static SqlSelection<TItem> ToRangeSelection<TItem>(
-            this TItem lowerLimit,
-            TItem upperLimit,
-            params Expression<Func<TItem, object>>[] selectors)
-            where TItem : ITransactionContext, new()
+        public static QueryContext<TItem> AsSelect<TItem>([NotNull] this ItemSelection<TItem> selection)
         {
-            return new SqlSelection<TItem>(lowerLimit, upperLimit, selectors);
-        }
-
-        /// <summary>
-        /// Creates a JOIN clause for the specified selection.
-        /// </summary>
-        /// <param name="selection">
-        /// The item selection.
-        /// </param>
-        /// <returns>
-        /// The JOIN clause as a <see cref="string"/>.
-        /// </returns>
-        public static string CreateJoinClause(this IEnumerable<IEntityRelation> selection)
-        {
-            return string.Join(Environment.NewLine, selection.Select(GenerateRelationStatement));
-        }
-
-        /// <summary>
-        /// Gets the qualified name for the specified attribute.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to evaluate.
-        /// </param>
-        /// <returns>
-        /// The qualified name as a <see cref="string"/>.
-        /// </returns>
-        public static string GetQualifiedName(this EntityAttributeDefinition attribute)
-        {
-            return GetQualifiedName(attribute, null);
-        }
-
-        /// <summary>
-        /// Gets the qualified name for the specified attribute.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute.
-        /// </param>
-        /// <returns>
-        /// The qualified name as a <see cref="string"/>.
-        /// </returns>
-        public static string GetCanonicalName(this EntityAttributeDefinition attribute)
-        {
-            return string.Concat(attribute.Entity.GetCanonicalName(), '.', '[', attribute.PhysicalName, ']');
-        }
-
-        /// <summary>
-        /// Creates a filter for the current selection.
-        /// </summary>
-        /// <param name="filters">
-        /// The filters to apply.
-        /// </param>
-        /// <param name="indexOffset">
-        /// The index offset.
-        /// </param>
-        /// <returns>
-        /// The filter clause as a <see cref="string"/>.
-        /// </returns>
-        /// <exception cref="IndexOutOfRangeException">
-        /// The number of filter values is outside the range handled by the method.
-        /// </exception>
-        public static string CreateFilter(this IEnumerable<ValueFilter> filters, int indexOffset)
-        {
-            if (filters == null)
+            if (selection == null)
             {
-                throw new ArgumentNullException(nameof(filters));
+                throw new ArgumentNullException(nameof(selection));
             }
 
-            var filterTokens = new List<string>();
-            var index = indexOffset;
+            return new QueryContext<TItem>(selection, StatementOutputType.Select, 0);
+        }
 
-            foreach (var filter in filters)
+        public static QueryContext<TItem> AsContains<TItem>([NotNull] this ItemSelection<TItem> selection)
+        {
+            if (selection == null)
             {
-                var attribute = filter.ItemAttribute;
-                var qualifiedName = attribute.GetQualifiedName();
-                var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
-
-                switch (filter.FilterType)
-                {
-                    case FilterType.Equality:
-                        filterTokens.Add(string.Format(EqualityFilter, qualifiedName, GetEqualityOperand(filter.FilterValues.First()), index++));
-                        break;
-                    case FilterType.Inequality:
-                        throw new NotImplementedException();
-                    case FilterType.LessThan:
-                        throw new NotImplementedException();
-                    case FilterType.LessThanOrEqualTo:
-                        filterTokens.Add(string.Format(LessThanPredicate, qualifiedName, index++));
-                        break;
-                    case FilterType.GreaterThan:
-                        throw new NotImplementedException();
-                    case FilterType.GreaterThanOrEqualTo:
-                        filterTokens.Add(string.Format(GreaterThanPredicate, qualifiedName, index++));
-                        break;
-                    case FilterType.Between:
-                        filterTokens.Add(string.Format(BetweenFilter, qualifiedName, index++, index++));
-                        break;
-                    case FilterType.MatchesSet:
-                        filterTokens.Add(GetInclusionFilter(qualifiedName, index, setValues));
-                        index += setValues.Count;
-                        break;
-                    case FilterType.DoesNotMatchSet:
-                        throw new NotImplementedException();
-                    case FilterType.IsSet:
-                        filterTokens.Add(string.Format(NotNullPredicate, qualifiedName));
-                        break;
-                    case FilterType.IsNotSet:
-                        filterTokens.Add(string.Format(NullPredicate, qualifiedName));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(filter.FilterType));
-                }
+                throw new ArgumentNullException(nameof(selection));
             }
 
-            return string.Join(string.Concat(FilterSeparator, Environment.NewLine), filterTokens);
+            return new QueryContext<TItem>(selection, StatementOutputType.Contains, 0);
+        }
+
+        public static QueryContext<TItem> AsDelete<TItem>([NotNull] this ItemSelection<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return new QueryContext<TItem>(selection, StatementOutputType.Delete, 0);
         }
 
         /// <summary>
@@ -332,140 +144,6 @@ namespace Startitecture.Orm.Sql
             }
 
             return values;
-        }
-
-        /// <summary>
-        /// Gets the qualified name for the specified attribute.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to evaluate.
-        /// </param>
-        /// <param name="entityAlias">
-        /// The entity alias.
-        /// </param>
-        /// <returns>
-        /// The qualified name as a <see cref="string"/>.
-        /// </returns>
-        private static string GetQualifiedName(this EntityAttributeDefinition attribute, string entityAlias)
-        {
-            var entityQualifiedName = string.IsNullOrWhiteSpace(entityAlias)
-                                          ? attribute.Entity.ReferenceName
-                                          : string.Concat('[', entityAlias, ']');
-
-            return string.Concat(entityQualifiedName, '.', '[', attribute.PhysicalName, ']');
-        }
-
-        /// <summary>
-        /// Gets an inclusion filter for the specified filter values and column.
-        /// </summary>
-        /// <param name="qualifiedName">
-        /// The qualified name of the column.
-        /// </param>
-        /// <param name="filterIndex">
-        /// The index at which the filter will be inserted.
-        /// </param>
-        /// <param name="filterValues">
-        /// The filter values.
-        /// </param>
-        /// <returns>
-        /// An inclusion predicate for the <paramref name="filterValues"/> as a <see cref="string"/>.
-        /// </returns>
-        private static string GetInclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
-        {
-            var indexTokens = filterValues.Select((o, i) => string.Format(ParameterFormat, filterIndex + i));
-            var inclusionToken = string.Format(InclusionPredicate, qualifiedName, string.Join(ParameterSeparator, indexTokens));
-            return inclusionToken;
-        }
-
-        /// <summary>
-        /// Generates a relation statement.
-        /// </summary>
-        /// <param name="entityRelation">
-        /// The entity relation to generate a statement for.
-        /// </param>
-        /// <returns>
-        /// The relation statement as a <see cref="string"/>.
-        /// </returns>
-        private static string GenerateRelationStatement(IEntityRelation entityRelation)
-        {
-            var joinType = GetJoinClause(entityRelation.RelationType);
-            var sourceName = GetQualifiedName(entityRelation.SourceAttribute, entityRelation.SourceLocation.Alias);
-            var relationEntity = entityRelation.RelationAttribute.Entity.GetCanonicalName();
-            var relationName = GetQualifiedName(entityRelation.RelationAttribute, entityRelation.RelationLocation.Alias);
-
-            if (string.IsNullOrWhiteSpace(entityRelation.RelationLocation.Alias))
-            {
-                // Use the entity names for the inner join if no alias has been requested.
-                return string.Format(RelationStatementFormat, joinType, relationEntity, sourceName, relationName);
-            }
-
-            // Use the entity names names for the inner join and alias the table.
-            return string.Format(
-                AliasedRelationStatementFormat,
-                joinType,
-                relationEntity,
-                entityRelation.RelationLocation.Alias,
-                sourceName,
-                relationName);
-        }
-
-        /// <summary>
-        /// Gets the operand for the specified value.
-        /// </summary>
-        /// <param name="value">
-        /// The value to return an operand for.
-        /// </param>
-        /// <returns>
-        /// The operand as a <see cref="string"/>.
-        /// </returns>
-        private static string GetEqualityOperand(object value)
-        {
-            return value is string ? LikeOperand : EqualityOperand;
-        }
-
-        /// <summary>
-        /// Gets the JOIN clause for the specified relation type.
-        /// </summary>
-        /// <param name="relationType">
-        /// The relation type.
-        /// </param>
-        /// <returns>
-        /// The JOIN clause as a <see cref="string"/>.
-        /// </returns>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="relationType"/> is not one of the named enumerations.
-        /// </exception>
-        private static string GetJoinClause(EntityRelationType relationType)
-        {
-            string joinType;
-
-            switch (relationType)
-            {
-                case EntityRelationType.InnerJoin:
-                    joinType = InnerJoinClause;
-                    break;
-                case EntityRelationType.LeftJoin:
-                    joinType = LeftJoinClause;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(relationType));
-            }
-
-            return joinType;
-        }
-
-        /// <summary>
-        /// Gets the canonical (un-aliased) name for the specified entity.
-        /// </summary>
-        /// <param name="location">
-        /// The location of the entity.
-        /// </param>
-        /// <returns>
-        /// The qualified name as a <see cref="string"/>.
-        /// </returns>
-        private static string GetCanonicalName(this EntityLocation location)
-        {
-            return string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
         }
     }
 }

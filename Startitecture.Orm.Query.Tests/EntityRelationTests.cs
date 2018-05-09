@@ -25,7 +25,7 @@ namespace Startitecture.Orm.Query.Tests
         public void Join_LocalAttributeToRelatedAttribute()
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
-            var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
+            var actual = new EntityRelation(EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedChildRow>(row => row.FakeComplexEntityId, row => row.FakeComplexEntity.FakeComplexEntityId);
 
             var childDefinition = definitionProvider.Resolve<FakeRaisedChildRow>();
@@ -33,16 +33,16 @@ namespace Startitecture.Orm.Query.Tests
             var childLocation = definitionProvider.GetEntityLocation(childReference);
             var childComplexIdAttribute = childDefinition.Find("FakeComplexEntityId");
 
-            Assert.AreEqual(childLocation, actual.SourceLocation);
-            Assert.AreEqual(childComplexIdAttribute, actual.SourceAttribute);
+            Assert.AreEqual(childLocation, childDefinition.Find(actual.SourceExpression).Entity);
+            Assert.AreEqual(childComplexIdAttribute, childDefinition.Find(actual.SourceExpression)); //// actual.SourceAttribute);
 
             var complexDefinition = definitionProvider.Resolve<FakeRaisedComplexRow>();
             var complexReference = new EntityReference { EntityType = typeof(FakeRaisedComplexRow) };
             var complexLocation = definitionProvider.GetEntityLocation(complexReference);
             var complexIdAttribute = complexDefinition.Find("FakeComplexEntityId");
 
-            Assert.AreEqual(complexLocation, actual.RelationLocation);
-            Assert.AreEqual(complexIdAttribute, actual.RelationAttribute);
+            Assert.AreEqual(complexLocation, complexDefinition.Find(actual.RelationExpression).Entity); //// actual.RelationLocation);
+            Assert.AreEqual(complexIdAttribute, complexDefinition.Find(actual.RelationExpression));
         }
 
         /// <summary>
@@ -52,24 +52,25 @@ namespace Startitecture.Orm.Query.Tests
         public void Join_RelatedAttributeToTransitiveRelatedAttribute()
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
-            var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
+            var actual = new EntityRelation(EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedDataRow>(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeDependencyEntityId);
 
-            var leftDefinition = definitionProvider.Resolve<FakeRelatedRow>();
+            var relatedDefinition = definitionProvider.Resolve<FakeRelatedRow>();
+            var leftDefinition = relatedDefinition;
             var leftReference = new EntityReference { EntityType = typeof(FakeRelatedRow) };
             var leftLocation = definitionProvider.GetEntityLocation(leftReference);
             var leftAttribute = leftDefinition.Find("RelatedId");
 
-            Assert.AreEqual(leftLocation, actual.SourceLocation);
-            Assert.AreEqual(leftAttribute, actual.SourceAttribute);
+            Assert.AreEqual(leftLocation, relatedDefinition.Find(actual.SourceExpression).Entity);
+            Assert.AreEqual(leftAttribute, relatedDefinition.Find(actual.SourceExpression)); //// actual.SourceAttribute);
 
             var rightDefinition = definitionProvider.Resolve<FakeDependencyRow>();
             var rightReference = new EntityReference { EntityType = typeof(FakeDependencyRow) };
             var rightLocation = definitionProvider.GetEntityLocation(rightReference);
             var rightAttribute = rightDefinition.Find("FakeDependencyEntityId");
 
-            Assert.AreEqual(rightLocation, actual.RelationLocation);
-            Assert.AreEqual(rightAttribute, actual.RelationAttribute);
+            Assert.AreEqual(rightLocation, rightDefinition.Find(actual.RelationExpression).Entity); //// actual.RelationLocation);
+            Assert.AreEqual(rightAttribute, rightDefinition.Find(actual.RelationExpression));
         }
 
         /// <summary>
@@ -79,7 +80,7 @@ namespace Startitecture.Orm.Query.Tests
         public void Join_RelatedAttributeToTransitiveRelatedAttributeWithAlias()
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
-            var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
+            var actual = new EntityRelation(EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedChildRow>(row => row.FakeComplexEntity.FakeSubEntityId, row => row.FakeComplexEntity.FakeSubEntity.FakeSubEntityId);
 
             var complexDefinition = definitionProvider.Resolve<FakeRaisedComplexRow>();
@@ -87,16 +88,16 @@ namespace Startitecture.Orm.Query.Tests
             var complexLocation = definitionProvider.GetEntityLocation(complexReference);
             var complexSubIdAttribute = complexDefinition.Find("FakeSubEntityId");
 
-            Assert.AreEqual(complexLocation, actual.SourceLocation);
-            Assert.AreEqual(complexSubIdAttribute, actual.SourceAttribute);
+            Assert.AreEqual(complexLocation, complexDefinition.Find(actual.SourceExpression).Entity);
+            Assert.AreEqual(complexSubIdAttribute, complexDefinition.Find(actual.SourceExpression)); //// actual.SourceAttribute);
 
             var subDefinition = definitionProvider.Resolve<FakeRaisedSubRow>();
             var subReference = new EntityReference { EntityType = typeof(FakeRaisedSubRow), EntityAlias = "FakeSubEntity" };
             var subLocation = definitionProvider.GetEntityLocation(subReference);
             var subIdAttribute = subDefinition.Find("FakeSubEntityId");
 
-            Assert.AreEqual(subLocation, actual.RelationLocation);
-            Assert.AreEqual(subIdAttribute, actual.RelationAttribute);
+            Assert.AreEqual(subLocation, subDefinition.Find(actual.RelationExpression).Entity);
+            Assert.AreEqual(subIdAttribute, subDefinition.Find(actual.RelationExpression));
         }
 
         /// <summary>
@@ -106,7 +107,7 @@ namespace Startitecture.Orm.Query.Tests
         public void Join_RelatedAttributeWithAliasToTransitiveRelatedAttributeWithAlias()
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
-            var actual = new EntityRelation(definitionProvider, EntityRelationType.InnerJoin);
+            var actual = new EntityRelation(EntityRelationType.InnerJoin);
             actual.Join<FakeRaisedDataRow>(row => row.RelatedAlias.RelatedId, row => row.RelatedDependency.FakeDependencyEntityId);
 
             var leftDefinition = definitionProvider.Resolve<FakeRelatedRow>();
@@ -114,16 +115,17 @@ namespace Startitecture.Orm.Query.Tests
             var leftLocation = definitionProvider.GetEntityLocation(leftReference);
             var leftAttribute = leftDefinition.Find("RelatedId");
 
-            Assert.AreEqual(leftLocation, actual.SourceLocation);
-            Assert.AreEqual(leftAttribute, actual.SourceAttribute);
+            Assert.AreEqual(leftLocation, leftDefinition.Find(actual.SourceExpression).Entity);
+            Assert.AreEqual(leftAttribute, leftDefinition.Find(actual.SourceExpression)); ////actual.SourceAttribute);
 
             var rightDefinition = definitionProvider.Resolve<FakeDependencyRow>();
             var rightReference = new EntityReference { EntityType = typeof(FakeDependencyRow), EntityAlias = "RelatedDependency" };
             var rightLocation = definitionProvider.GetEntityLocation(rightReference);
             var rightAttribute = rightDefinition.Find("FakeDependencyEntityId");
 
-            Assert.AreEqual(rightLocation, actual.RelationLocation);
-            Assert.AreEqual(rightAttribute, actual.RelationAttribute);
+            var actualRightDefinition = rightDefinition.Find(actual.RelationExpression);
+            Assert.AreEqual(rightLocation, actualRightDefinition.Entity);
+            Assert.AreEqual(rightAttribute, actualRightDefinition);
         }
     }
 }

@@ -29,23 +29,27 @@ namespace Startitecture.Orm.Query
         /// The item.
         /// </param>
         public UniqueQuery(IEntityDefinitionProvider definitionProvider, TItem item)
-            : base(definitionProvider)
         {
             var entityDefinition = definitionProvider.Resolve<TItem>();
+
             foreach (var keyAttribute in entityDefinition.PrimaryKeyAttributes)
             {
-                this.AddFilter(new ValueFilter(keyAttribute, FilterType.Equality, keyAttribute.GetValueDelegate.DynamicInvoke(item)));
+                var valueFilter = new ValueFilter(keyAttribute.PropertyName, FilterType.Equality, keyAttribute.GetValueDelegate.DynamicInvoke(item));
+                this.AddFilter(valueFilter);
             }
 
             // Use all available values if no keys are defined. Trace a warning becuase that's a problem.
-            if (this.Filters.Any() == false)
+            if (this.Filters.Any())
             {
-                Trace.TraceWarning($"{typeof(TItem).FullName} does not have any key attributes defined.");
+                return;
+            }
 
-                foreach (var attribute in entityDefinition.DirectAttributes)
-                {
-                    this.AddFilter(new ValueFilter(attribute, FilterType.Equality, attribute.GetValueDelegate.DynamicInvoke(item)));
-                }
+            Trace.TraceWarning($"{typeof(TItem).FullName} does not have any key attributes defined.");
+
+            foreach (var attribute in entityDefinition.DirectAttributes)
+            {
+                var valueFilter = new ValueFilter(attribute.PropertyName, FilterType.Equality, attribute.GetValueDelegate.DynamicInvoke(item));
+                this.AddFilter(valueFilter);
             }
         }
     }

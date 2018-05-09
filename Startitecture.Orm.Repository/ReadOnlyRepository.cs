@@ -350,7 +350,7 @@ namespace Startitecture.Orm.Repository
         /// </returns>
         protected virtual ItemSelection<TDataItem> GetUniqueItemSelection(TDataItem item)
         {
-            return item.ToExampleSelection();
+            return new UniqueQuery<TDataItem>(this.RepositoryProvider.EntityDefinitionProvider, item);
         }
 
         /// <summary>
@@ -493,7 +493,7 @@ namespace Startitecture.Orm.Repository
 
             if (usePrimaryKey || alternateKeys.Length == 0)
             {
-                selection = GetPrimaryKeySelection(item, primaryKey);
+                selection = this.GetPrimaryKeySelection(item, primaryKey);
             }
             else
             {
@@ -518,7 +518,7 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// Gets the primary key selection.
         /// </returns>
-        private static ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
+        private ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
         {
             return new SqlSelection<TDataItem>(item, new[] { primaryKey.GetPropertyName() });
         }

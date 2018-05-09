@@ -11,11 +11,12 @@ namespace Startitecture.Orm.Sql
     using System.Linq;
     using System.Linq.Expressions;
 
+    using JetBrains.Annotations;
+
     using Model;
 
     using Startitecture.Core;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Creates an update statement for a specific item in the repository.
@@ -66,12 +67,22 @@ SET
         /// <summary>
         /// The item definition.
         /// </summary>
-        private readonly IEntityDefinition itemDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TItem>();
+        private readonly IEntityDefinition itemDefinition;
 
         /// <summary>
         /// The selection.
         /// </summary>
         private readonly ItemSelection<TItem> selection;
+
+        /// <summary>
+        /// The query factory.
+        /// </summary>
+        private readonly TransactSqlQueryFactory queryFactory;
+
+        /// <summary>
+        /// The transact SQL join.
+        /// </summary>
+        private readonly TransactSqlJoin transactSqlJoin;
 
         #endregion
 
@@ -80,12 +91,28 @@ SET
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlUpdate{TItem}"/> class.
         /// </summary>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <param name="selection">
         /// The selection of items to update.
         /// </param>
-        public SqlUpdate(ItemSelection<TItem> selection)
+        public SqlUpdate([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] ItemSelection<TItem> selection)
         {
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
             this.selection = selection;
+            this.queryFactory = new TransactSqlQueryFactory(definitionProvider);
+            this.itemDefinition = definitionProvider.Resolve<TItem>();
+            this.transactSqlJoin = new TransactSqlJoin(definitionProvider);
         }
 
         #endregion
@@ -95,7 +122,7 @@ SET
         /// <summary>
         /// Gets the execution statement.
         /// </summary>
-        public string ExecutionStatement => this.CreateUpdateStatement(this);
+        public string ExecutionStatement => this.CreateUpdateStatement();
 
         /// <summary>
         /// Gets the execution parameters for the update query.
@@ -129,7 +156,7 @@ SET
         /// </returns>
         public SqlUpdate<TItem> Set(TItem item)
         {
-            return this.Set(item, this.selection.ItemDefinition.UpdateableAttributes.ToArray());
+            return this.Set(item, this.itemDefinition.UpdateableAttributes.ToArray());
         }
 
         /// <summary>
@@ -194,22 +221,22 @@ SET
         /// <summary>
         /// Creates the update statement for the current operation.
         /// </summary>
-        /// <param name="operation">
-        /// The operation to perform.
-        /// </param>
         /// <returns>
         /// The update statement as a <see cref="string"/>.
         /// </returns>
-        private string CreateUpdateStatement(SqlUpdate<TItem> operation)
+        private string CreateUpdateStatement()
         {
             var setItems = new List<string>();
             int index = 0;
 
-            foreach (var attributeInstance in operation.attributesToSet)
+            foreach (var attributeInstance in this.attributesToSet)
             {
-                setItems.Add(attributeInstance.Value == null
-                                 ? string.Format(NullParameterFormat, attributeInstance.AttributeDefinition.GetQualifiedName())
-                                 : string.Format(ParameterFormat, attributeInstance.AttributeDefinition.GetQualifiedName(), index));
+                var attributeDefinition = attributeInstance.AttributeDefinition;
+                var qualifiedName = Singleton<TransactSqlQualifier>.Instance.Qualify(attributeDefinition);
+                setItems.Add(
+                    attributeInstance.Value == null
+                        ? string.Format(NullParameterFormat, qualifiedName)
+                        : string.Format(ParameterFormat, qualifiedName, index));
 
                 if (attributeInstance.Value != null)
                 {
@@ -217,20 +244,19 @@ SET
                 }
             }
 
-            var itemSelection = operation.selection;
-
-            var entityName = operation.itemDefinition.QualifiedName;
-            string joinClause = itemSelection.Relations.Any()
+            var entityName = this.itemDefinition.QualifiedName;
+            string joinClause = this.selection.Relations.Any()
                                     ? string.Concat(
                                         Environment.NewLine,
                                         FromClause,
                                         entityName,
                                         Environment.NewLine,
-                                        itemSelection.Relations.CreateJoinClause())
+                                        this.transactSqlJoin.Create(this.selection)) ////.Relations.CreateJoinClause())
                                     : string.Empty;
 
             var setClause = string.Join(string.Concat(',', Environment.NewLine), setItems);
-            var predicateClause = itemSelection.Filters.CreateFilter(index);
+            var predicateClause = this.queryFactory.Create(new QueryContext<TItem>(this.selection, StatementOutputType.Update, index));
+
             return string.Concat(
                 string.Format(SqlUpdateClause, entityName, setClause),
                 joinClause,

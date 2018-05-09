@@ -41,7 +41,7 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(selections));
             }
 
-            return new TItem().ToExampleSelection(selections);
+            return new SqlSelection<TItem>(new TItem(), selections);
         }
     }
 }

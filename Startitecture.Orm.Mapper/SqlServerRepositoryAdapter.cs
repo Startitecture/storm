@@ -17,6 +17,7 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Sql;
     using Startitecture.Resources;
@@ -27,14 +28,14 @@ namespace Startitecture.Orm.Mapper
     public class SqlServerRepositoryAdapter : IRepositoryAdapter
     {
         /// <summary>
-        /// The statement factory.
-        /// </summary>
-        private static readonly TransactSqlQueryFactory QueryFactory = new TransactSqlQueryFactory();
-
-        /// <summary>
         /// The data context.
         /// </summary>
         private readonly IDatabaseContext dataContext;
+
+        /// <summary>
+        /// The query factory.
+        /// </summary>
+        private readonly IQueryFactory queryFactory;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlServerRepositoryAdapter"/> class.
@@ -42,14 +43,23 @@ namespace Startitecture.Orm.Mapper
         /// <param name="dataContext">
         /// The data context.
         /// </param>
-        public SqlServerRepositoryAdapter([NotNull] IDatabaseContext dataContext)
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
+        public SqlServerRepositoryAdapter([NotNull] IDatabaseContext dataContext, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (dataContext == null)
             {
                 throw new ArgumentNullException(nameof(dataContext));
             }
 
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
             this.dataContext = dataContext;
+            this.queryFactory = new TransactSqlQueryFactory(definitionProvider);
         }
 
         /// <summary>
@@ -72,7 +82,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             // Always remember to supply this method with an array of values!
-            var sql = QueryFactory.Create(selection, StatementOutputType.Contains);
+            var sql = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Contains));
             return this.dataContext.ExecuteScalar<int>(sql, selection.PropertyValues.ToArray()) > 0;
         }
 
@@ -97,7 +107,7 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                var statement = QueryFactory.Create(selection, StatementOutputType.Select);
+                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Select));
 
                 ////Trace.TraceInformation("Using unique query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
                 return this.dataContext.FirstOrDefault<TDataItem>(statement, selection.PropertyValues.ToArray());
@@ -140,7 +150,7 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                var statement = QueryFactory.Create(selection, StatementOutputType.Select);
+                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Select));
 
                 ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
                 return this.dataContext.Fetch<TDataItem>(statement, selection.PropertyValues.ToArray());
@@ -199,7 +209,7 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                var statement = QueryFactory.Create(selection, StatementOutputType.Select);
+                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Select));
 
                 ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
                 return this.dataContext.FetchPage<TDataItem>(page, pageSize, statement, selection.PropertyValues.ToArray());
@@ -307,7 +317,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
-            var transactSqlUpdate = new SqlUpdate<TDataItem>(selection);
+            var transactSqlUpdate = new SqlUpdate<TDataItem>(this.dataContext.DefinitionProvider, selection);
             var updateOperation = setExpressions.Any() ? transactSqlUpdate.Set(dataItem, setExpressions) : transactSqlUpdate.Set(dataItem);
 
             try
@@ -353,7 +363,7 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                var statement = QueryFactory.Create(selection, StatementOutputType.Delete);
+                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Delete));
                 return this.dataContext.Execute(statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)

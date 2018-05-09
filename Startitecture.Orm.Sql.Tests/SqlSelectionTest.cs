@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Sql.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
@@ -85,8 +86,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                                    20
                                };
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Select);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsSelect());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -136,8 +137,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)
 ) SELECT 1  ELSE SELECT 0";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Contains);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsContains());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -183,8 +184,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherColumn] <= @5 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Delete);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsDelete());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -237,8 +238,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherColumn] <= @5 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Select);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsSelect());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -287,8 +288,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)
 ) SELECT 1  ELSE SELECT 0";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Contains);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsContains());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -334,8 +335,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherColumn] <= @5 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Delete);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsDelete());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -395,8 +396,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [RelatedAlias].[RelatedProperty] LIKE @2 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Select);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsSelect());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -450,8 +451,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4
 ) SELECT 1  ELSE SELECT 0";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Contains);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsContains());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -502,8 +503,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [RelatedAlias].[RelatedProperty] LIKE @2 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Delete);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsDelete());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -563,8 +564,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [RelatedAlias].[RelatedProperty] LIKE @2 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Select);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsSelect());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -618,8 +619,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4
 ) SELECT 1  ELSE SELECT 0";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Contains);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsContains());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -670,8 +671,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [RelatedAlias].[RelatedProperty] LIKE @2 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Delete);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsDelete());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -810,8 +811,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 [RelatedAlias].[RelatedProperty] LIKE @12 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @13 AND @14";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Select);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsSelect());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -940,8 +941,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @13 AND @14
 ) SELECT 1  ELSE SELECT 0";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Contains);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsContains());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1037,8 +1038,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [RelatedAlias].[RelatedProperty] LIKE @2 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Delete);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsDelete());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1177,8 +1178,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 [RelatedAlias].[RelatedProperty] LIKE @12 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @13 AND @14";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Select);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsSelect());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1307,8 +1308,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @13 AND @14
 ) SELECT 1  ELSE SELECT 0";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Contains);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsContains());
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1404,8 +1405,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [RelatedAlias].[RelatedProperty] LIKE @2 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
-            var target = new TransactSqlQueryFactory();
-            var actual = target.Create(transactionSelection, StatementOutputType.Delete);
+            var target = new TransactSqlQueryFactory(new PetaPocoDefinitionProvider());
+            var actual = target.Create(transactionSelection.AsDelete());
             Assert.AreEqual(Expected, actual);
         }
 

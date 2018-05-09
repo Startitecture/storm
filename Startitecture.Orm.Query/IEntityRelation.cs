@@ -9,7 +9,7 @@
 
 namespace Startitecture.Orm.Query
 {
-    using Startitecture.Orm.Model;
+    using System.Linq.Expressions;
 
     /// <summary>
     /// Provides an interface for classes that describe a relation between two entities.
@@ -22,23 +22,23 @@ namespace Startitecture.Orm.Query
         EntityRelationType RelationType { get; }
 
         /// <summary>
-        /// Gets the source location.
+        /// Gets the source expression.
         /// </summary>
-        EntityLocation SourceLocation { get; }
+        LambdaExpression SourceExpression { get; }
 
         /// <summary>
-        /// Gets the source selector.
+        /// Gets the source entity alias.
         /// </summary>
-        EntityAttributeDefinition SourceAttribute { get; }
+        string SourceEntityAlias { get; }
 
         /// <summary>
-        /// Gets the relation location.
+        /// Gets the relation expression.
         /// </summary>
-        EntityLocation RelationLocation { get; }
+        LambdaExpression RelationExpression { get; }
 
         /// <summary>
-        /// Gets the relation selector.
+        /// Gets the relation entity alias.
         /// </summary>
-        EntityAttributeDefinition RelationAttribute { get; }
+        string RelationEntityAlias { get; }
     }
 }

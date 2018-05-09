@@ -15,8 +15,6 @@ namespace Startitecture.Orm.Query
 
     using JetBrains.Annotations;
 
-    using Startitecture.Orm.Model;
-
     /// <summary>
     /// Contains a set of entity relations.
     /// </summary>
@@ -26,11 +24,6 @@ namespace Startitecture.Orm.Query
     public class EntityRelationSet<TItem>
     {
         /// <summary>
-        /// The entity definition provider.
-        /// </summary>
-        private readonly IEntityDefinitionProvider definitionProvider;
-
-        /// <summary>
         /// The entity relations.
         /// </summary>
         private readonly List<IEntityRelation> entityRelations = new List<IEntityRelation>();
@@ -38,12 +31,8 @@ namespace Startitecture.Orm.Query
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityRelationSet{TItem}"/> class.
         /// </summary>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
-        protected EntityRelationSet(IEntityDefinitionProvider definitionProvider)
+        protected EntityRelationSet()
         {
-            this.definitionProvider = definitionProvider;
         }
 
         /// <summary>
@@ -77,7 +66,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var relation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var relation = new EntityRelation(EntityRelationType.InnerJoin);
             relation.Join<TItem>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
@@ -111,7 +100,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -149,7 +138,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, null, relationAlias);
             return this.AddRelation(entityRelation);
         }
@@ -177,7 +166,7 @@ namespace Startitecture.Orm.Query
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -255,7 +244,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.InnerJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
             entityRelation.Join(leftSelector, rightSelector, sourceAlias, relationAlias);
             return this.AddRelation(entityRelation);
         }
@@ -286,7 +275,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var relation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var relation = new EntityRelation(EntityRelationType.LeftJoin);
             relation.Join<TItem>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
@@ -320,7 +309,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -358,7 +347,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, null, relationAlias);
             return this.AddRelation(entityRelation);
         }
@@ -386,7 +375,7 @@ namespace Startitecture.Orm.Query
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, null, null);
             return this.AddRelation(entityRelation);
         }
@@ -464,7 +453,7 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(rightSelector));
             }
 
-            var entityRelation = new EntityRelation(this.definitionProvider, EntityRelationType.LeftJoin);
+            var entityRelation = new EntityRelation(EntityRelationType.LeftJoin);
             entityRelation.Join(leftSelector, rightSelector, sourceAlias, relationAlias);
             return this.AddRelation(entityRelation);
         }

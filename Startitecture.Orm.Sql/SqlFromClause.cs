@@ -9,9 +9,7 @@
 
 namespace Startitecture.Orm.Sql
 {
-    using Startitecture.Core;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// Contains the elements of a  Transact SQL FROM clause.
@@ -21,12 +19,5 @@ namespace Startitecture.Orm.Sql
     /// </typeparam>
     public class SqlFromClause<TItem> : EntityRelationSet<TItem>
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SqlFromClause{TItem}"/> class.
-        /// </summary>
-        public SqlFromClause()
-            : base(Singleton<PetaPocoDefinitionProvider>.Instance)
-        {
-        }
     }
 }

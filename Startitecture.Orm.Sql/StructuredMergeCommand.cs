@@ -63,6 +63,8 @@ namespace Startitecture.Orm.Sql
         /// </summary>
         private List<Expression<Func<TStructure, object>>> deleteConstraints;
 
+        private static readonly TransactSqlQualifier TransactSqlQualifier = Singleton<TransactSqlQualifier>.Instance;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="StructuredMergeCommand{TStructure}"/> class.
         /// </summary>
@@ -88,16 +90,8 @@ namespace Startitecture.Orm.Sql
         {
         }
 
-        /// <summary>
-        /// Gets the command text.
-        /// </summary>
-        public override string CommandText
-        {
-            get
-            {
-                return this.CompileCommandText();
-            }
-        }
+        /// <inheritdoc />
+        public override string CommandText => this.CompileCommandText();
 
         /// <summary>
         /// Merges a structured table value into the specified data item.
@@ -127,7 +121,7 @@ namespace Startitecture.Orm.Sql
             // Use the expressions provided if any.
             this.mergeMatchAttributes.AddRange(
                 mergeMatchExpressions.Any()
-                    ? mergeMatchExpressions.Select<Expression<Func<TDataItem, object>>, string>(x => x.GetPropertyName()).Select(entityDefinition.Find)
+                    ? mergeMatchExpressions.Select(x => x.GetPropertyName()).Select(entityDefinition.Find)
                     : entityDefinition.PrimaryKeyAttributes);
 
             return this;
@@ -218,10 +212,10 @@ namespace Startitecture.Orm.Sql
                     .AppendLine($"ON ({string.Join(" AND ", mergeMatchClauses)})")
                     .AppendLine("WHEN MATCHED THEN")
                     .AppendLine(
-                        $"UPDATE SET {string.Join(", ", Enumerable.Distinct(updateClauses).Select(x => $"[{x.TargetColumn}] = [Source].[{x.SourceColumn}]"))}")
+                        $"UPDATE SET {string.Join(", ", updateClauses.Distinct().Select(x => $"[{x.TargetColumn}] = [Source].[{x.SourceColumn}]"))}")
                     .AppendLine("WHEN NOT MATCHED BY TARGET THEN")
-                    .AppendLine($"INSERT ({string.Join(", ", targetColumns.Select<string, string>(x => $"[{x}]"))})")
-                    .AppendLine($"VALUES ({string.Join(", ", Enumerable.Distinct<string>(sourceColumns).Select(x => $"[Source].[{x}]"))})");
+                    .AppendLine($"INSERT ({string.Join(", ", targetColumns.Select(x => $"[{x}]"))})")
+                    .AppendLine($"VALUES ({string.Join(", ", sourceColumns.Distinct().Select(x => $"[Source].[{x}]"))})");
 
             if (this.deleteUnmatchedInSource)
             {
@@ -251,12 +245,11 @@ namespace Startitecture.Orm.Sql
 
                 // Here we use property name because the assumption is the UDTT uses aliases, not physical names.
                 var insertedColumns =
-                    Enumerable.ToList<string>(
-                        allAttributes.Join(
-                            this.directAttributes,
-                            tvp => tvp.GetQualifiedName(),
-                            i => i.GetCanonicalName(),
-                            (structure, entity) => structure).OrderBy(x => x.PhysicalName).Select(x => $"[{x.PropertyName}]"));
+                    allAttributes.Join(
+                        this.directAttributes,
+                        tvp => TransactSqlQualifier.Qualify(tvp),
+                        i => TransactSqlQualifier.GetCanonicalName(i), //// i.GetCanonicalName(),
+                        (structure, entity) => structure).OrderBy(x => x.PhysicalName).Select(x => $"[{x.PropertyName}]").ToList();
 
                 // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original
                 // table valued parameter.
@@ -265,7 +258,7 @@ namespace Startitecture.Orm.Sql
 
                 // Everything for selecting from the TVP uses property name in order to match UDTT columns.
                 var nonKeyAttributes =
-                    Enumerable.Select(allAttributes.Where(definition => definition.IsIdentityColumn == false), x => new { Column = $"tvp.[{x.PropertyName}]", Attribute = x });
+                    allAttributes.Where(definition => definition.IsIdentityColumn == false).Select(x => new { Column = $"tvp.[{x.PropertyName}]", Attribute = x });
 
                 var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.PropertyName).Select(x => x.Column);
 

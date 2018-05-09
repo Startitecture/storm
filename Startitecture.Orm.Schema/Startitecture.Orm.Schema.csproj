@@ -67,7 +67,6 @@
     <Compile Include="PrimaryKeyAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RelatedEntityAttribute.cs" />
-    <Compile Include="SelectWithAttribute.cs" />
     <Compile Include="TableInfo.cs" />
     <Compile Include="TableNameAttribute.cs" />
     <Compile Include="TableTypeAttribute.cs" />

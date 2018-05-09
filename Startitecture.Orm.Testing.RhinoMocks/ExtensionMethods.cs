@@ -1101,9 +1101,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             Expression<Func<TDataItem, TValue>> itemProperty,
             TValue value)
         {
-            var valueFilter = selection.Filters.FirstOrDefault(x => x.ItemAttribute.PropertyName == itemProperty.GetPropertyName());
+            var valueFilter = selection.Filters.FirstOrDefault(x => x.PropertyName == itemProperty.GetPropertyName());
 
-            return valueFilter != null && EqualityComparer<TValue>.Default.Equals(Enumerable.OfType<TValue>(valueFilter.FilterValues).FirstOrDefault(), value);
+            return valueFilter != null && EqualityComparer<TValue>.Default.Equals(valueFilter.FilterValues.OfType<TValue>().FirstOrDefault(), value);
         }
     }
 }
