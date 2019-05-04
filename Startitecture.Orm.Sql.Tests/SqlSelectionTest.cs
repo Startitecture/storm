@@ -249,6 +249,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void Create_ContainsStatementForDirectDataRaisedRow_MatchesExpected()
         {
+            // TODO: The IEntityRelation match is skipping our stuff :(
             var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };

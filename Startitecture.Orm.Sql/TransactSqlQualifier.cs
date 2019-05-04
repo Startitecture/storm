@@ -16,23 +16,44 @@ namespace Startitecture.Orm.Sql
         /// <inheritdoc />
         public string Qualify(EntityAttributeDefinition attribute)
         {
-            var entityQualifiedName = string.IsNullOrWhiteSpace(attribute.Alias)
-                                          ? attribute.Entity.ReferenceName
-                                          : string.Concat('[', attribute.Alias, ']');
+            return this.Qualify(attribute, attribute.Entity);
+        }
 
-            return string.Concat(entityQualifiedName, '.', '[', attribute.PhysicalName, ']');
+        /// <inheritdoc />
+        public string Qualify(EntityAttributeDefinition attribute, EntityLocation entityLocation)
+        {
+            var entityQualifiedName = string.IsNullOrWhiteSpace(entityLocation.Alias)
+                                          ? $"[{entityLocation.Container}].[{entityLocation.Name}]"
+                                          : string.Concat('[', entityLocation.Alias, ']');
+
+            return string.Concat(entityQualifiedName, '.', '[', attribute.Alias ?? attribute.PhysicalName, ']');
         }
 
         /// <inheritdoc />
         public string GetCanonicalName(EntityAttributeDefinition attribute)
         {
-            return string.Concat(this.GetCanonicalName(attribute.Entity), '.', '[', attribute.PhysicalName, ']');
+            return string.Concat(this.GetCanonicalName(attribute.Entity), '.', '[', attribute.Alias ?? attribute.PhysicalName, ']');
         }
 
         /// <inheritdoc />
         public string GetCanonicalName(EntityLocation location)
         {
             return string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
+        }
+
+        /// <inheritdoc />
+        public string GetReferenceName(EntityAttributeDefinition attribute)
+        {
+            return $"{this.GetReferenceName(attribute.Entity)}.[{attribute.PhysicalName}]";
+        }
+
+        /// <inheritdoc />
+        public string GetReferenceName(EntityLocation location)
+        {
+            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
+            return isEntityAliased
+                       ? string.Concat('[', location.Alias, ']')
+                       : string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
         }
     }
 }

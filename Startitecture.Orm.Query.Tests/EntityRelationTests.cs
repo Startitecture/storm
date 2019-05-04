@@ -73,59 +73,61 @@ namespace Startitecture.Orm.Query.Tests
             Assert.AreEqual(rightAttribute, rightDefinition.Find(actual.RelationExpression));
         }
 
-        /// <summary>
-        /// The join test.
-        /// </summary>
-        [TestMethod]
-        public void Join_RelatedAttributeToTransitiveRelatedAttributeWithAlias()
-        {
-            var definitionProvider = new PetaPocoDefinitionProvider();
-            var actual = new EntityRelation(EntityRelationType.InnerJoin);
-            actual.Join<FakeRaisedChildRow>(row => row.FakeComplexEntity.FakeSubEntityId, row => row.FakeComplexEntity.FakeSubEntity.FakeSubEntityId);
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Join_RelatedAttributeToTransitiveRelatedAttributeWithAlias()
+        ////{
+        ////    var definitionProvider = new PetaPocoDefinitionProvider();
+        ////    var actual = new EntityRelation(EntityRelationType.InnerJoin);
+        ////    actual.Join<FakeRaisedChildRow>(row => row.FakeComplexEntity.FakeSubEntityId, row => row.FakeComplexEntity.FakeSubEntity.FakeSubEntityId);
 
-            var complexDefinition = definitionProvider.Resolve<FakeRaisedComplexRow>();
-            var complexReference = new EntityReference { EntityType = typeof(FakeRaisedComplexRow) };
-            var complexLocation = definitionProvider.GetEntityLocation(complexReference);
-            var complexSubIdAttribute = complexDefinition.Find("FakeSubEntityId");
+        ////    var complexDefinition = definitionProvider.Resolve<FakeRaisedComplexRow>();
+        ////    var complexReference = new EntityReference { EntityType = typeof(FakeRaisedComplexRow) };
+        ////    var complexLocation = definitionProvider.GetEntityLocation(complexReference);
+        ////    var complexSubIdAttribute = complexDefinition.Find("FakeSubEntityId");
 
-            Assert.AreEqual(complexLocation, complexDefinition.Find(actual.SourceExpression).Entity);
-            Assert.AreEqual(complexSubIdAttribute, complexDefinition.Find(actual.SourceExpression)); //// actual.SourceAttribute);
+        ////    Assert.AreEqual(complexLocation, complexDefinition.Find(actual.SourceExpression).Entity);
+        ////    Assert.AreEqual(complexSubIdAttribute, complexDefinition.Find(actual.SourceExpression)); //// actual.SourceAttribute);
 
-            var subDefinition = definitionProvider.Resolve<FakeRaisedSubRow>();
-            var subReference = new EntityReference { EntityType = typeof(FakeRaisedSubRow), EntityAlias = "FakeSubEntity" };
-            var subLocation = definitionProvider.GetEntityLocation(subReference);
-            var subIdAttribute = subDefinition.Find("FakeSubEntityId");
+        ////    var subDefinition = definitionProvider.Resolve<FakeRaisedSubRow>();
+        ////    var subReference = new EntityReference { EntityType = typeof(FakeRaisedSubRow), EntityAlias = "FakeSubEntity" };
+        ////    var subLocation = definitionProvider.GetEntityLocation(subReference);
+        ////    var subIdAttribute = subDefinition.Find("FakeSubEntityId");
 
-            Assert.AreEqual(subLocation, subDefinition.Find(actual.RelationExpression).Entity);
-            Assert.AreEqual(subIdAttribute, subDefinition.Find(actual.RelationExpression));
-        }
+        ////    Assert.AreEqual(subLocation, subDefinition.Find(actual.RelationExpression).Entity);
+        ////    Assert.AreEqual(subIdAttribute, subDefinition.Find(actual.RelationExpression));
+        ////}
 
-        /// <summary>
-        /// The join test.
-        /// </summary>
-        [TestMethod]
-        public void Join_RelatedAttributeWithAliasToTransitiveRelatedAttributeWithAlias()
-        {
-            var definitionProvider = new PetaPocoDefinitionProvider();
-            var actual = new EntityRelation(EntityRelationType.InnerJoin);
-            actual.Join<FakeRaisedDataRow>(row => row.RelatedAlias.RelatedId, row => row.RelatedDependency.FakeDependencyEntityId);
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Join_RelatedAttributeWithAliasToTransitiveRelatedAttributeWithAlias()
+        ////{
+        ////    var definitionProvider = new PetaPocoDefinitionProvider();
+        ////    var actual = new EntityRelation(EntityRelationType.InnerJoin);
+        ////    actual.Join<FakeRaisedDataRow>(row => row.RelatedAlias.RelatedId, row => row.RelatedDependency.FakeDependencyEntityId);
 
-            var leftDefinition = definitionProvider.Resolve<FakeRelatedRow>();
-            var leftReference = new EntityReference { EntityType = typeof(FakeRelatedRow), EntityAlias = "RelatedAlias" };
-            var leftLocation = definitionProvider.GetEntityLocation(leftReference);
-            var leftAttribute = leftDefinition.Find("RelatedId");
+        ////    var leftDefinition = definitionProvider.Resolve<FakeRelatedRow>();
+        ////    var leftReference = new EntityReference { EntityType = typeof(FakeRelatedRow), EntityAlias = "RelatedAlias" };
+        ////    var leftLocation = definitionProvider.GetEntityLocation(leftReference);
+        ////    var leftAttribute = leftDefinition.Find("RelatedId");
 
-            Assert.AreEqual(leftLocation, leftDefinition.Find(actual.SourceExpression).Entity);
-            Assert.AreEqual(leftAttribute, leftDefinition.Find(actual.SourceExpression)); ////actual.SourceAttribute);
+        ////    Assert.AreEqual(leftLocation, leftDefinition.Find(actual.SourceExpression).Entity);
+        ////    Assert.AreEqual(leftAttribute, leftDefinition.Find(actual.SourceExpression)); ////actual.SourceAttribute);
 
-            var rightDefinition = definitionProvider.Resolve<FakeDependencyRow>();
-            var rightReference = new EntityReference { EntityType = typeof(FakeDependencyRow), EntityAlias = "RelatedDependency" };
-            var rightLocation = definitionProvider.GetEntityLocation(rightReference);
-            var rightAttribute = rightDefinition.Find("FakeDependencyEntityId");
+        ////    var rightDefinition = definitionProvider.Resolve<FakeDependencyRow>();
+        ////    var rightReference = new EntityReference { EntityType = typeof(FakeDependencyRow), EntityAlias = "RelatedDependency" };
+        ////    var rightLocation = definitionProvider.GetEntityLocation(rightReference);
+        ////    var rightAttribute = rightDefinition.Find("FakeDependencyEntityId");
 
-            var actualRightDefinition = rightDefinition.Find(actual.RelationExpression);
-            Assert.AreEqual(rightLocation, actualRightDefinition.Entity);
-            Assert.AreEqual(rightAttribute, actualRightDefinition);
-        }
+        ////    var actualRightDefinition = rightDefinition.Find(actual.RelationExpression);
+        ////    Assert.AreEqual(rightLocation, actualRightDefinition.Entity);
+        ////    Assert.AreEqual(rightAttribute, actualRightDefinition);
+        ////}
     }
 }

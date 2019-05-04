@@ -220,7 +220,9 @@ namespace Startitecture.Orm.Repository.Tests
             try
             {
                 var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
-                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+                var repositoryAdapterFactory = new SqlServerRepositoryAdapterFactory();
+
+                using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper, repositoryAdapterFactory))
                 {
                     provider.ChangeDatabase("DEVTEST01");
                     var expectedRow = this.entityMapper.Map<AttachmentDocumentRow>(attachmentDocument);

@@ -131,13 +131,15 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.DefinitionProvider = definitionProvider;
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
 
             // TODO: This seems to fail with SqlConnection.
             this.isConnectionUserProvided = true;
             this.Connection = connection;
             this.connectionString = connection.ConnectionString;
             this.CommonConstruct();
+
+            // TODO: Make other qualifiers based on database type
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
         }
 
         /// <summary>
@@ -176,8 +178,10 @@ namespace Startitecture.Orm.Mapper
             this.connectionString = connectionString;
             this.providerName = providerName;
             this.DefinitionProvider = definitionProvider;
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
             this.CommonConstruct();
+
+            // TODO: Make other qualifiers based on database type
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
         }
 
         /// <summary>
@@ -216,8 +220,10 @@ namespace Startitecture.Orm.Mapper
             this.connectionString = connectionString;
             this.factory = provider;
             this.DefinitionProvider = definitionProvider;
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
             this.CommonConstruct();
+
+            // TODO: Make other qualifiers based on database type
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
         }
 
         /// <summary>
@@ -245,7 +251,6 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.DefinitionProvider = definitionProvider;
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
 
             // Work out connection string and provider name
             var providerType = "System.Data.SqlClient";
@@ -267,6 +272,9 @@ namespace Startitecture.Orm.Mapper
             this.providerName = providerType;
             ////this.pocoDataFactory = new PocoDataFactory();
             this.CommonConstruct();
+
+            // TODO: Make other qualifiers based on database type
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
         }
 
         #endregion
@@ -851,7 +859,7 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         /// <remarks>
         /// The name of the table, it's primary key and whether it's an auto-allocated primary key are retrieved
-        /// from the POCO's attributes
+        /// from the POCO attributes
         /// </remarks>
         public object Insert<T>(T poco)
         {

@@ -520,7 +520,9 @@ namespace Startitecture.Orm.Repository
         /// </returns>
         private ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
         {
-            return new SqlSelection<TDataItem>(item, new[] { primaryKey.GetPropertyName() });
+            return new SqlSelection<TDataItem>(
+                item,
+                new[] { primaryKey.GetPropertyName() });
         }
 
         /// <summary>
@@ -535,7 +537,7 @@ namespace Startitecture.Orm.Repository
         private CacheResult<TEntity> QueryCache(ItemSelection<TDataItem> selection)
         {
             var key = string.Format(CacheKeyFormat, typeof(TEntity).ToRuntimeName(), selection);
-            var cacheResult = new CacheResult<TEntity>(default(TEntity), false, key);
+            var cacheResult = new CacheResult<TEntity>(default, false, key);
 
             if (this.RepositoryProvider.EnableCaching == false)
             {
@@ -544,10 +546,10 @@ namespace Startitecture.Orm.Repository
 
             var cachedItem = this.entityCache.Get(key);
 
-            if (cachedItem is TEntity)
+            if (cachedItem is TEntity item)
             {
                 ////Trace.TraceInformation("Got item '{0}' from the cache with key '{1}'.", cachedItem, key);
-                cacheResult = new CacheResult<TEntity>((TEntity)cachedItem, true, key);
+                cacheResult = new CacheResult<TEntity>(item, true, key);
             }
 
             return cacheResult;

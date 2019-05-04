@@ -250,47 +250,49 @@ namespace Startitecture.Orm.Query.Tests
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_InferredWithRelationProperty_MatchesExpected()
-        {
-            var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                    .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
-                    ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    .Relations;
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void InnerJoin_InferredWithRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations =
+        ////        new SqlFromClause<FakeRaisedDataRow>()
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    var expected = new EntityRelation(EntityRelationType.InnerJoin);
+        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
-        {
-            var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
-                    ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    .Relations;
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void InnerJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations =
+        ////        new SqlFromClause<FakeRaisedDataRow>()
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    var expected = new EntityRelation(EntityRelationType.InnerJoin);
+        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
 
         /// <summary>
         /// The inner join test.
@@ -522,46 +524,48 @@ namespace Startitecture.Orm.Query.Tests
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_InferredWithRelationProperty_MatchesExpected()
-        {
-            var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                    .LeftJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
-                    ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    .Relations;
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void LeftJoin_InferredWithRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations =
+        ////        new SqlFromClause<FakeRaisedDataRow>()
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            .LeftJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    var expected = new EntityRelation(EntityRelationType.LeftJoin);
+        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
-        {
-            var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    .LeftJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
-                    ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    .Relations;
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void LeftJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations =
+        ////        new SqlFromClause<FakeRaisedDataRow>()
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .LeftJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    var expected = new EntityRelation(EntityRelationType.LeftJoin);
+        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
     }
 }

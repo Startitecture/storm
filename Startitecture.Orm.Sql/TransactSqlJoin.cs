@@ -62,7 +62,7 @@
         /// </returns>
         public string Create<TItem>(ItemSelection<TItem> selection)
         {
-            return string.Join(Environment.NewLine, selection.Relations.Select(GenerateRelationStatement));
+            return string.Join(Environment.NewLine, selection.Relations.Select(this.GenerateRelationStatement));
         }
 
         /// <summary>
@@ -112,22 +112,24 @@
             var sourceReference = this.definitionProvider.GetEntityReference(entityRelation.SourceExpression);
             sourceReference.EntityAlias = entityRelation.SourceEntityAlias ?? sourceReference.EntityAlias;
 
+            var sourceLocation = this.definitionProvider.GetEntityLocation(sourceReference);
+
             var sourceAttribute =
                 this.definitionProvider.Resolve(sourceReference.EntityType)
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == entityRelation.SourceExpression.GetPropertyName());
 
-            var sourceName = TransactSqlQualifier.Qualify(sourceAttribute);
+            var sourceName = TransactSqlQualifier.Qualify(sourceAttribute, sourceLocation);
 
             var relationReference = this.definitionProvider.GetEntityReference(entityRelation.RelationExpression);
             relationReference.EntityAlias = entityRelation.RelationEntityAlias ?? relationReference.EntityAlias;
 
             var relationLocation = this.definitionProvider.GetEntityLocation(relationReference);
             var relationAttribute =
-                this.definitionProvider.Resolve(relationReference.EntityType)
+                this.definitionProvider.Resolve(relationLocation.EntityType)
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == entityRelation.RelationExpression.GetPropertyName());
 
             var relationEntity = TransactSqlQualifier.GetCanonicalName(relationAttribute.Entity); 
-            var relationName = TransactSqlQualifier.Qualify(relationAttribute); 
+            var relationName = TransactSqlQualifier.Qualify(relationAttribute, relationLocation); 
 
             if (string.IsNullOrWhiteSpace(relationLocation.Alias))
             {

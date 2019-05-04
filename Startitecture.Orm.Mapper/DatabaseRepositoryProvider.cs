@@ -54,11 +54,6 @@ namespace Startitecture.Orm.Mapper
         private readonly IRepositoryAdapter repositoryAdapter;
 
         /// <summary>
-        /// The data context for this repository. Required to maintain a specific Exists method signature.
-        /// </summary>
-        private readonly IDatabaseContext dataContext;
-
-        /// <summary>
         /// The item cache.
         /// </summary>
         private readonly ObjectCache itemCache;
@@ -154,9 +149,9 @@ namespace Startitecture.Orm.Mapper
 
             try
             {
-                this.dataContext = databaseFactory.Create();
-                this.EntityDefinitionProvider = this.dataContext.DefinitionProvider;
-                this.repositoryAdapter = adapterFactory.Create(this.dataContext);
+                this.DatabaseContext = databaseFactory.Create();
+                this.EntityDefinitionProvider = this.DatabaseContext.DefinitionProvider;
+                this.repositoryAdapter = adapterFactory.Create(this.DatabaseContext);
             }
             catch (InvalidOperationException ex)
             {
@@ -182,7 +177,7 @@ namespace Startitecture.Orm.Mapper
         public IEntityDefinitionProvider EntityDefinitionProvider { get; }
 
         /// <inheritdoc />
-        public IDatabaseContext DatabaseContext => this.dataContext;
+        public IDatabaseContext DatabaseContext { get; }
 
         /// <inheritdoc />
         public bool IsDisposed { get; private set; }
@@ -217,7 +212,7 @@ namespace Startitecture.Orm.Mapper
         {
             this.IsDisposed = true;
 
-            this.dataContext?.Dispose();
+            this.DatabaseContext?.Dispose();
 
             this.OnDisposed();
         }
@@ -231,8 +226,8 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            this.dataContext.OpenSharedConnection();
-            this.dataContext.Connection.ChangeDatabase(databaseName);
+            this.DatabaseContext.OpenSharedConnection();
+            this.DatabaseContext.Connection.ChangeDatabase(databaseName);
         }
 
         /// <inheritdoc />
@@ -241,7 +236,7 @@ namespace Startitecture.Orm.Mapper
             try
             {
                 this.CheckDisposed();
-                return this.dataContext.BeginTransaction();
+                return this.DatabaseContext.BeginTransaction();
             }
             catch (InvalidOperationException ex)
             {
@@ -263,7 +258,7 @@ namespace Startitecture.Orm.Mapper
             try
             {
                 this.CheckDisposed();
-                return this.dataContext.Connection.BeginTransaction(isolationLevel);
+                return this.DatabaseContext.Connection.BeginTransaction(isolationLevel);
             }
             catch (InvalidOperationException ex)
             {
@@ -284,7 +279,7 @@ namespace Startitecture.Orm.Mapper
         {
             try
             {
-                this.dataContext.CompleteTransaction();
+                this.DatabaseContext.CompleteTransaction();
             }
             catch (InvalidOperationException ex)
             {
@@ -305,7 +300,7 @@ namespace Startitecture.Orm.Mapper
         {
             try
             {
-                this.dataContext.AbortTransaction();
+                this.DatabaseContext.AbortTransaction();
             }
             catch (InvalidOperationException ex)
             {
@@ -394,7 +389,7 @@ namespace Startitecture.Orm.Mapper
         public TDataItem Save<TDataItem>(TDataItem item)
             where TDataItem : ITransactionContext
         {
-            var uniqueSelection = new UniqueQuery<TDataItem>(this.dataContext.DefinitionProvider, item);
+            var uniqueSelection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, item);
 
             // If caching is enabled, incoming items will be compared against the cache. This will catch forward changes (A1 -> A2) but 
             // will ignore reverse changes (A2 -> A1) until the cached item expires.
@@ -505,7 +500,7 @@ namespace Startitecture.Orm.Mapper
             // PetaPoco sees only one primary key. Obviously this is a problem as we do not want to update based on primary key 
             // alone. So we generate a unique selection.
             this.CheckDisposed();
-            var selection = new UniqueQuery<TDataItem>(this.dataContext.DefinitionProvider, dataItem);
+            var selection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, dataItem);
             this.repositoryAdapter.Update(dataItem, selection, setExpressions);
         }
 
@@ -551,10 +546,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.dataContext.EnableAutoSelect;
-            this.dataContext.EnableAutoSelect = false;
-            this.dataContext.Execute(executionStatement, parameterValues);
-            this.dataContext.EnableAutoSelect = autoSelect;
+            var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            this.DatabaseContext.EnableAutoSelect = false;
+            this.DatabaseContext.Execute(executionStatement, parameterValues);
+            this.DatabaseContext.EnableAutoSelect = autoSelect;
         }
 
         /// <inheritdoc />
@@ -571,10 +566,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.dataContext.EnableAutoSelect;
-            this.dataContext.EnableAutoSelect = false;
-            var result = this.dataContext.ExecuteScalar<T>(executionStatement, parameterValues);
-            this.dataContext.EnableAutoSelect = autoSelect;
+            var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            this.DatabaseContext.EnableAutoSelect = false;
+            var result = this.DatabaseContext.ExecuteScalar<T>(executionStatement, parameterValues);
+            this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -592,10 +587,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.dataContext.EnableAutoSelect;
-            this.dataContext.EnableAutoSelect = false;
-            var result = this.dataContext.Fetch<dynamic>(executionStatement, parameterValues);
-            this.dataContext.EnableAutoSelect = autoSelect;
+            var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            this.DatabaseContext.EnableAutoSelect = false;
+            var result = this.DatabaseContext.Fetch<dynamic>(executionStatement, parameterValues);
+            this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -613,10 +608,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.dataContext.EnableAutoSelect;
-            this.dataContext.EnableAutoSelect = false;
-            var result = this.dataContext.Fetch<T>(executionStatement, parameterValues);
-            this.dataContext.EnableAutoSelect = autoSelect;
+            var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            this.DatabaseContext.EnableAutoSelect = false;
+            var result = this.DatabaseContext.Fetch<T>(executionStatement, parameterValues);
+            this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -629,7 +624,7 @@ namespace Startitecture.Orm.Mapper
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return string.Format(ToStringFormat, this.dataContext?.Connection?.Database, this.InstanceIdentifier);
+            return string.Format(ToStringFormat, this.DatabaseContext?.Connection?.Database, this.InstanceIdentifier);
         }
 
         /// <summary>

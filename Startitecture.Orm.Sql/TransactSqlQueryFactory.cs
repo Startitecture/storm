@@ -254,41 +254,42 @@ namespace Startitecture.Orm.Sql
 
             foreach (var filter in filters)
             {
+                // TODO: set attribute name in filter?? It is finding the wrong attribute by property name.
                 var attribute = entityDefinition.Find(filter.PropertyName);
-                var qualifiedName = SqlQualifier.Qualify(attribute);
+                var referenceName = SqlQualifier.GetReferenceName(attribute);
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
                 switch (filter.FilterType)
                 {
                     case FilterType.Equality:
-                        filterTokens.Add(string.Format(EqualityFilter, qualifiedName, GetEqualityOperand(filter.FilterValues.First()), index++));
+                        filterTokens.Add(string.Format(EqualityFilter, referenceName, GetEqualityOperand(filter.FilterValues.First()), index++));
                         break;
                     case FilterType.Inequality:
                         throw new NotImplementedException();
                     case FilterType.LessThan:
                         throw new NotImplementedException();
                     case FilterType.LessThanOrEqualTo:
-                        filterTokens.Add(string.Format(LessThanPredicate, qualifiedName, index++));
+                        filterTokens.Add(string.Format(LessThanPredicate, referenceName, index++));
                         break;
                     case FilterType.GreaterThan:
                         throw new NotImplementedException();
                     case FilterType.GreaterThanOrEqualTo:
-                        filterTokens.Add(string.Format(GreaterThanPredicate, qualifiedName, index++));
+                        filterTokens.Add(string.Format(GreaterThanPredicate, referenceName, index++));
                         break;
                     case FilterType.Between:
-                        filterTokens.Add(string.Format(BetweenFilter, qualifiedName, index++, index++));
+                        filterTokens.Add(string.Format(BetweenFilter, referenceName, index++, index++));
                         break;
                     case FilterType.MatchesSet:
-                        filterTokens.Add(GetInclusionFilter(qualifiedName, index, setValues));
+                        filterTokens.Add(GetInclusionFilter(referenceName, index, setValues));
                         index += setValues.Count;
                         break;
                     case FilterType.DoesNotMatchSet:
                         throw new NotImplementedException();
                     case FilterType.IsSet:
-                        filterTokens.Add(string.Format(NotNullPredicate, qualifiedName));
+                        filterTokens.Add(string.Format(NotNullPredicate, referenceName));
                         break;
                     case FilterType.IsNotSet:
-                        filterTokens.Add(string.Format(NullPredicate, qualifiedName));
+                        filterTokens.Add(string.Format(NullPredicate, referenceName));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(filter.FilterType));
@@ -346,10 +347,11 @@ namespace Startitecture.Orm.Sql
         private static string GetQualifiedColumnName(EntityAttributeDefinition attribute)
         {
             var qualifiedName = SqlQualifier.Qualify(attribute);
+            var referenceName = SqlQualifier.GetReferenceName(attribute);
 
             var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
                                           ? string.Format(SelectColumnFormat, qualifiedName)
-                                          : string.Format(AliasColumnFormat, qualifiedName, attribute.Alias);
+                                          : string.Format(AliasColumnFormat, referenceName, attribute.Alias);
 
             return qualifiedColumnName;
         }

@@ -12,16 +12,12 @@ namespace Startitecture.Orm.Mapper.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using Startitecture.Orm.Common;
-    using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository;
-    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
-    using Startitecture.Orm.Testing.Model.DocumentEntities;
 
     /// <summary>
-    /// The peta poco repository provider tests.
+    /// The database repository provider tests.
     /// </summary>
     [TestClass]
     public class DatabaseRepositoryProviderTests

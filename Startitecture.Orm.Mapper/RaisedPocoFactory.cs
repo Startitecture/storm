@@ -52,22 +52,36 @@ namespace Startitecture.Orm.Mapper
         private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
+        /// The name qualifier.
+        /// </summary>
+        private readonly INameQualifier nameQualifier;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="RaisedPocoFactory"/> class.
         /// </summary>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
+        /// <param name="nameQualifier">
+        /// The name qualifier.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is not null.
         /// </exception>
-        public RaisedPocoFactory([NotNull] IEntityDefinitionProvider definitionProvider)
+        public RaisedPocoFactory([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
         {
             if (definitionProvider == null)
             {
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
+            if (nameQualifier == null)
+            {
+                throw new ArgumentNullException(nameof(nameQualifier));
+            }
+
             this.definitionProvider = definitionProvider;
+            this.nameQualifier = nameQualifier;
         }
 
         /// <inheritdoc />
@@ -114,7 +128,7 @@ namespace Startitecture.Orm.Mapper
                                                 : $"[{relationAttribute.Alias}]";
 
                 var keyDefinitions = entityDefinition.ReturnableAttributes
-                    .Where(x => x.Entity.ReferenceName == relationReferenceName && x.IsPrimaryKey).OrderBy(x => x.PhysicalName);
+                    .Where(x => this.nameQualifier.GetReferenceName(x.Entity) == relationReferenceName && x.IsPrimaryKey).OrderBy(x => x.PhysicalName);
 
                 var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions.ToList());
 
@@ -339,7 +353,7 @@ namespace Startitecture.Orm.Mapper
             EntityReference entityReference)
         {
             var relatedEntityLocation = this.definitionProvider.GetEntityLocation(entityReference);
-            var relatedQualifiedName = relatedEntityLocation.ReferenceName;
+            var relatedQualifiedName = this.nameQualifier.GetReferenceName(relatedEntityLocation);
             var relatedKey = new Tuple<string, string, int, int>(typeQualifiedName, relatedQualifiedName, 0, reader.FieldCount);
 
             // TODO: Cache attributes with their locations, or build explicitly.

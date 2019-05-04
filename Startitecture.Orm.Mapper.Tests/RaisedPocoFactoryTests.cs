@@ -15,6 +15,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
 
@@ -47,7 +48,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider))
+            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var expected = Generate.CreateFakeComplexRow();
 
@@ -83,7 +84,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider))
+            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var pocoDataRequest = Generate.CreatePocoDataRequest(Generate.CreateFakeRaisedComplexRow(true), definitionProvider);
                 var actual = target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
@@ -99,7 +100,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider))
+            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var expected = Generate.CreateFakeRaisedComplexRow(true);
 
@@ -145,7 +146,7 @@ namespace Startitecture.Orm.Mapper.Tests
         public void CreateDelegate_RaisedPocoFactoryForDomainAggregateList_SharedEntitiesHaveReferenceEquality()
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            using (var target = new RaisedPocoFactory(definitionProvider))
+            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var aggregateOptionRow =
                     new AggregateOptionRow { AggregateOptionId = 3, AggregateOptionTypeId = 4, Name = "Slim Shady", Value = 324.10m };
@@ -358,7 +359,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider))
+            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var expected = Generate.CreateFakeRaisedComplexRow(false);
 
@@ -475,7 +476,7 @@ namespace Startitecture.Orm.Mapper.Tests
             Trace.TraceInformation($"{stopwatch.Elapsed} Create data request");
             stopwatch.Reset();
 
-            using (var target = new RaisedPocoFactory(definitionProvider))
+            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 stopwatch.Start();
                 var actual = target.CreatePoco<InstanceSection>(pocoDataRequest);
@@ -521,7 +522,7 @@ namespace Startitecture.Orm.Mapper.Tests
         public void CreateDelegate_RaisedPocoFactoryForRaisedPhysicalNameOverriddenRow_DelegateSetsPocoAsExpected()
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
-            using (var target = new RaisedPocoFactory(definitionProvider))
+            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var expected = new RaisedOverriddenColumnNameRow
                                    {

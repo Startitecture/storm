@@ -123,23 +123,6 @@ namespace Startitecture.Orm.Model
         public string Name { get; }
 
         /// <summary>
-        /// Gets the qualified name of the entity location.
-        /// </summary>
-        public string QualifiedName => $"[{this.Container}].[{this.Name}]";
-
-        /// <summary>
-        /// Gets the reference name of the entity location.
-        /// </summary>
-        public string ReferenceName
-        {
-            get
-            {
-                var isEntityAliased = string.IsNullOrWhiteSpace(this.Alias) == false;
-                return isEntityAliased ? string.Concat('[', this.Alias, ']') : string.Concat('[', this.Container, ']', '.', '[', this.Name, ']');
-            }
-        }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the location is virtual. When true, this location will not be traversed for setting 
         /// physical properties.
         /// </summary>

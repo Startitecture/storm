@@ -34,10 +34,10 @@ namespace Startitecture.Orm.Query
         /// </summary>
         private const string ValueSeparator = "&";
 
-        /// <summary>
-        /// The definition provider.
-        /// </summary>
-        private readonly IEntityDefinitionProvider definitionProvider;
+        /////// <summary>
+        /////// The definition provider.
+        /////// </summary>
+        ////private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
         /// The relations.
@@ -1133,10 +1133,10 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(relation));
             }
 
-            if (this.relations.Contains(relation) == false)
-            {
-                this.relations.Add(relation);
-            }
+            ////if (this.relations.Contains(relation) == false)
+            ////{
+            this.relations.Add(relation);
+            ////}
 
             return this;
         }

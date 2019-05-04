@@ -252,49 +252,51 @@ namespace Startitecture.Orm.Query.Tests
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_InferredWithRelationProperty_MatchesExpected()
-        {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
+        // TODO: No longer valid
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void InnerJoin_InferredWithRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
 
-                ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
-                ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                .Relations;
+        ////        ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////        .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    var expected = new EntityRelation(EntityRelationType.InnerJoin);
+        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
-        {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void InnerJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
 
-                ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                .Relations;
+        ////        ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////        .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    var expected = new EntityRelation(EntityRelationType.InnerJoin);
+        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
 
         /// <summary>
         /// The inner join test.
@@ -522,49 +524,51 @@ namespace Startitecture.Orm.Query.Tests
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_InferredWithRelationProperty_MatchesExpected()
-        {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void LeftJoin_InferredWithRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                .LeftJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        .LeftJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
 
-                ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
-                ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                .Relations;
+        ////        ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////        .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    var expected = new EntityRelation(EntityRelationType.LeftJoin);
+        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
 
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
-        {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The inner join test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void LeftJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
+        ////{
+        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
-                ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                .LeftJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////        .LeftJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
 
-                ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
-                .Relations;
+        ////        ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
+        ////        .Relations;
 
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    var expected = new EntityRelation(EntityRelationType.LeftJoin);
+        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
+        ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        ////}
 
         /// <summary>
         /// The clear relations test.
@@ -578,18 +582,20 @@ namespace Startitecture.Orm.Query.Tests
             Assert.IsNull(selection.Relations.FirstOrDefault());
         }
 
-        /// <summary>
-        /// The select test.
-        /// </summary>
-        [TestMethod]
-        public void Select_DataItemWithDistinctAttributeReferences_MatchesExpected()
-        {
-            var selection = new SqlSelection<FakeRaisedChildRow>();
-            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<FakeRaisedChildRow>();
-            var expected = entityDefinition.ReturnableAttributes.ToList();
-            var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
-            CollectionAssert.AreEqual(expected, actual);
-        }
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The select test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Select_DataItemWithDistinctAttributeReferences_MatchesExpected()
+        ////{
+        ////    var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
+        ////    var selection = new SqlSelection<FakeRaisedChildRow>();
+        ////    var entityDefinition = definitionProvider.Resolve<FakeRaisedChildRow>();
+        ////    var expected = entityDefinition.ReturnableAttributes.ToList();
+        ////    var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+        ////    CollectionAssert.AreEqual(expected, actual);
+        ////}
 
         /// <summary>
         /// The select test.
@@ -616,52 +622,55 @@ namespace Startitecture.Orm.Query.Tests
             CollectionAssert.AreEqual(expected, actual);
         }
 
-        /// <summary>
-        /// The select test.
-        /// </summary>
-        [TestMethod]
-        public void Select_DataItemWithDuplicateAttributeReferences_MatchesExpected()
-        {
-            var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
-            var selection = new SqlSelection<InstanceSection>();
-            var entityDefinition = definitionProvider.Resolve<InstanceSection>();
-            var expected = entityDefinition
-                .ReturnableAttributes.Distinct(new DistinctAttributeEqualityComparer())
-                .ToList();
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The select test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Select_DataItemWithDuplicateAttributeReferences_MatchesExpected()
+        ////{
+        ////    var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
+        ////    var selection = new SqlSelection<InstanceSection>();
+        ////    var entityDefinition = definitionProvider.Resolve<InstanceSection>();
+        ////    var expected = entityDefinition
+        ////        .ReturnableAttributes.Distinct(new DistinctAttributeEqualityComparer())
+        ////        .ToList();
 
-            var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
-            CollectionAssert.AreEqual(expected, actual);
-        }
+        ////    var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+        ////    CollectionAssert.AreEqual(expected, actual);
+        ////}
 
-        /// <summary>
-        /// The select test.
-        /// </summary>
-        [TestMethod]
-        public void Select_DataItemExplicitSelectionsWithDuplicateAttributeReferences_MatchesExpected()
-        {
-            Expression<Func<InstanceSection, object>> expr1 = row => row.InstanceId;
-            Expression<Func<InstanceSection, object>> expr2 = row => row.OwnerId;
-            Expression<Func<InstanceSection, object>> expr3 = row => row.Instance.TemplateVersion.Revision;
+        // TODO: No longer valid.
+        /////// <summary>
+        /////// The select test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void Select_DataItemExplicitSelectionsWithDuplicateAttributeReferences_MatchesExpected()
+        ////{
+        ////    Expression<Func<InstanceSection, object>> expr1 = row => row.InstanceId;
+        ////    Expression<Func<InstanceSection, object>> expr2 = row => row.OwnerId;
+        ////    Expression<Func<InstanceSection, object>> expr3 = row => row.Instance.TemplateVersion.Revision;
 
-            // A duplicate of our previous expression.
-            Expression<Func<InstanceSection, object>> expr4 = row => row.TemplateSection.TemplateVersion.Revision;
+        ////    // A duplicate of our previous expression.
+        ////    Expression<Func<InstanceSection, object>> expr4 = row => row.TemplateSection.TemplateVersion.Revision;
 
-            Expression<Func<InstanceSection, object>> expr5 = row => row.InstanceExtension.Enabled;
-            Expression<Func<InstanceSection, object>> expr6 = row => row.Instance.TemplateVersion.Template.Name;
+        ////    Expression<Func<InstanceSection, object>> expr5 = row => row.InstanceExtension.Enabled;
+        ////    Expression<Func<InstanceSection, object>> expr6 = row => row.Instance.TemplateVersion.Template.Name;
 
-            var expressions = new List<Expression<Func<InstanceSection, object>>> { expr1, expr2, expr3, expr4, expr5, expr6 };
+        ////    var expressions = new List<Expression<Func<InstanceSection, object>>> { expr1, expr2, expr3, expr4, expr5, expr6 };
 
-            var selection = new SqlSelection<InstanceSection>().Select(expressions.ToArray());
+        ////    var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
+        ////    var selection = new SqlSelection<InstanceSection>().Select(expressions.ToArray());
 
-            var entityDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<InstanceSection>();
-            var expected = expressions.Select(entityDefinition.Find).Distinct(new DistinctAttributeEqualityComparer()).ToList();
+        ////    var entityDefinition = definitionProvider.Resolve<InstanceSection>();
+        ////    var expected = expressions.Select(entityDefinition.Find).Distinct(new DistinctAttributeEqualityComparer()).ToList();
 
-            var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+        ////    var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
 
-            // Just to be sure, we check that our duplicate is eliminated.
-            Assert.AreEqual(expressions.Count - 1, expected.Count);
-            CollectionAssert.AreEqual(expected, actual);
-        }
+        ////    // Just to be sure, we check that our duplicate is eliminated.
+        ////    Assert.AreEqual(expressions.Count - 1, expected.Count);
+        ////    CollectionAssert.AreEqual(expected, actual);
+        ////}
 
 
         /// <summary>

@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Sql;
     using Startitecture.Resources;
@@ -43,23 +42,15 @@ namespace Startitecture.Orm.Mapper
         /// <param name="dataContext">
         /// The data context.
         /// </param>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
-        public SqlServerRepositoryAdapter([NotNull] IDatabaseContext dataContext, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public SqlServerRepositoryAdapter([NotNull] IDatabaseContext dataContext)
         {
             if (dataContext == null)
             {
                 throw new ArgumentNullException(nameof(dataContext));
             }
 
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
             this.dataContext = dataContext;
-            this.queryFactory = new TransactSqlQueryFactory(definitionProvider);
+            this.queryFactory = new TransactSqlQueryFactory(dataContext.DefinitionProvider);
         }
 
         /// <summary>

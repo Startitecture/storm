@@ -104,16 +104,21 @@ namespace Startitecture.Orm.Query
         /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
+            // TODO: Set this when methods are called.
             var sourceProperty = this.SourceExpression?.GetProperty();
+            ////var sourceEntityName = (this.SourceExpression.GetMember().Expression as MemberExpression)?.Member.Name;
             var relationProperty = this.RelationExpression?.GetProperty();
+            ////var relationEntityName = (this.RelationExpression.GetMember().Expression as MemberExpression)?.Member.Name;
 
             return Evaluate.GenerateHashCode(
                 sourceProperty?.PropertyType,
                 sourceProperty?.Name,
                 this.SourceEntityAlias,
+                ////sourceEntityName,
                 relationProperty?.PropertyType,
                 relationProperty?.Name,
-                this.RelationEntityAlias);
+                this.RelationEntityAlias); ////,
+                ////relationEntityName);
         }
 
         /// <summary>
@@ -132,17 +137,23 @@ namespace Startitecture.Orm.Query
         public bool Equals(EntityRelation other)
         {
             var sourceProperty = this.SourceExpression?.GetProperty();
+            ////var sourceEntityName = (this.SourceExpression.GetMember().Expression as MemberExpression)?.Member.Name;
             var relationProperty = this.RelationExpression?.GetProperty();
+            ////var relationEntityName = (this.RelationExpression.GetMember().Expression as MemberExpression)?.Member.Name;
 
             var otherSourceProperty = other?.SourceExpression?.GetProperty();
+            ////var otherSourceEntityName = (other?.SourceExpression.GetMember().Expression as MemberExpression)?.Member.Name;
             var otherRelationProperty = other?.RelationExpression.GetProperty();
+            ////var otherRelationEntityName = (other?.RelationExpression.GetMember().Expression as MemberExpression)?.Member.Name;
 
-            return sourceProperty?.PropertyType == otherSourceProperty?.PropertyType && sourceProperty?.Name == otherSourceProperty?.Name
-                                                                                     && this.SourceEntityAlias == other?.SourceEntityAlias
-                                                                                     && relationProperty?.PropertyType
-                                                                                     == otherRelationProperty?.PropertyType
-                                                                                     && relationProperty?.Name == otherRelationProperty?.Name
-                                                                                     && this.RelationEntityAlias == other?.RelationEntityAlias;
+            return sourceProperty?.PropertyType == otherSourceProperty?.PropertyType 
+                   && sourceProperty?.Name == otherSourceProperty?.Name
+                   && this.SourceEntityAlias == other?.SourceEntityAlias
+                   && relationProperty?.PropertyType == otherRelationProperty?.PropertyType
+                   && relationProperty?.Name == otherRelationProperty?.Name
+                   && this.RelationEntityAlias == other?.RelationEntityAlias;
+                   ////&& sourceEntityName == otherSourceEntityName
+                   ////&& relationEntityName == otherRelationEntityName;
         }
 
         #endregion
@@ -210,6 +221,60 @@ namespace Startitecture.Orm.Query
         public void Join<TSource, TRelation>(Expression<Func<TSource, object>> sourceAttribute, Expression<Func<TRelation, object>> relationAttribute)
         {
             this.Join(sourceAttribute, relationAttribute, null, null);
+        }
+
+        /// <summary>
+        /// Applies the join attributes using the specified items.
+        /// </summary>
+        /// <typeparam name="TSource">
+        /// The type of item on the left side of the join.
+        /// </typeparam>
+        /// <param name="sourceAttribute">
+        /// The source attribute.
+        /// </param>
+        /// <param name="relationAttribute">
+        /// The relation attribute.
+        /// </param>
+        /// <param name="sourceAlias">
+        /// The source alias.
+        /// </param>
+        /// <param name="relationAlias">
+        /// The relation alias.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="sourceAttribute"/> or <paramref name="relationAttribute"/> is null.
+        /// </exception>
+        public void Join<TSource>(
+            [NotNull] Expression<Func<TSource, object>> sourceAttribute,
+            [NotNull] Expression<Func<TSource, object>> relationAttribute,
+            string sourceAlias,
+            string relationAlias)
+        {
+            if (sourceAttribute == null)
+            {
+                throw new ArgumentNullException(nameof(sourceAttribute));
+            }
+
+            if (relationAttribute == null)
+            {
+                throw new ArgumentNullException(nameof(relationAttribute));
+            }
+
+            this.SourceExpression = sourceAttribute;
+            this.SourceEntityAlias = sourceAlias;
+            this.RelationExpression = relationAttribute;
+            this.RelationEntityAlias = relationAlias;
+
+            ////var sourceReference = new EntityReference { EntityType = typeof(TSource), EntityAlias = sourceAlias };
+            ////this.SourceLocation = this.definitionProvider.GetEntityLocation(sourceReference);
+
+            ////var relationReference = new EntityReference { EntityType = typeof(TRelation), EntityAlias = relationAlias };
+            ////this.RelationLocation = this.definitionProvider.GetEntityLocation(relationReference);
+
+            ////var sourceDefinition = this.definitionProvider.Resolve<TSource>();
+            ////var relationDefinition = this.definitionProvider.Resolve<TRelation>();
+            ////this.SourceAttribute = sourceDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == sourceAttribute.GetPropertyName());
+            ////this.RelationAttribute = relationDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == relationAttribute.GetPropertyName());
         }
 
         /// <summary>
