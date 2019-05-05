@@ -34,7 +34,11 @@ namespace Startitecture.Orm.Query
 
             foreach (var keyAttribute in entityDefinition.PrimaryKeyAttributes)
             {
-                var valueFilter = new ValueFilter(keyAttribute.PropertyName, FilterType.Equality, keyAttribute.GetValueDelegate.DynamicInvoke(item));
+                // TODO: Should this be physical name?
+                var entityReference = new EntityReference { EntityAlias = keyAttribute.Entity.Alias, EntityType = keyAttribute.Entity.EntityType };
+                var attributeLocation = new AttributeLocation(keyAttribute.PropertyInfo, entityReference);
+                var valueFilter = new ValueFilter(attributeLocation, FilterType.Equality, keyAttribute.GetValueDelegate.DynamicInvoke(item));
+
                 this.AddFilter(valueFilter);
             }
 
@@ -48,7 +52,9 @@ namespace Startitecture.Orm.Query
 
             foreach (var attribute in entityDefinition.DirectAttributes)
             {
-                var valueFilter = new ValueFilter(attribute.PropertyName, FilterType.Equality, attribute.GetValueDelegate.DynamicInvoke(item));
+                var entityReference = new EntityReference { EntityAlias = attribute.Entity.Alias, EntityType = attribute.Entity.EntityType };
+                var attributeLocation = new AttributeLocation(attribute.PropertyInfo, entityReference);
+                var valueFilter = new ValueFilter(attributeLocation, FilterType.Equality, attribute.GetValueDelegate.DynamicInvoke(item));
                 this.AddFilter(valueFilter);
             }
         }

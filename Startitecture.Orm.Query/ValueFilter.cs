@@ -16,8 +16,7 @@ namespace Startitecture.Orm.Query
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
-    using Startitecture.Resources;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Contains a filter for a specific item attribute.
@@ -62,29 +61,58 @@ namespace Startitecture.Orm.Query
         /// <summary>
         /// Initializes a new instance of the <see cref="ValueFilter"/> class.
         /// </summary>
-        /// <param name="propertyName">
-        /// The property name.
+        /// <param name="attributeLocation">
+        /// The attribute location.
         /// </param>
         /// <param name="filterType">
-        /// The filter type for this value filter.
+        /// The filter type.
         /// </param>
         /// <param name="values">
         /// The values.
         /// </param>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="propertyName"/> is null or whitespace.
-        /// </exception>
-        public ValueFilter([NotNull] string propertyName, FilterType filterType, params object[] values)
+        public ValueFilter([NotNull] AttributeLocation attributeLocation, FilterType filterType, [NotNull] params object[] values)
         {
-            if (string.IsNullOrWhiteSpace(propertyName))
+            if (attributeLocation == null)
             {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(propertyName));
+                throw new ArgumentNullException(nameof(attributeLocation));
             }
 
-            this.PropertyName = propertyName;
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            this.AttributeLocation = attributeLocation;
             this.FilterType = filterType;
             this.values.AddRange(values);
         }
+
+        /////// <summary>
+        /////// Initializes a new instance of the <see cref="ValueFilter"/> class.
+        /////// </summary>
+        /////// <param name="propertyName">
+        /////// The property name.
+        /////// </param>
+        /////// <param name="filterType">
+        /////// The filter type for this value filter.
+        /////// </param>
+        /////// <param name="values">
+        /////// The values.
+        /////// </param>
+        /////// <exception cref="ArgumentException">
+        /////// <paramref name="propertyName"/> is null or whitespace.
+        /////// </exception>
+        ////public ValueFilter([NotNull] string propertyName, FilterType filterType, params object[] values)
+        ////{
+        ////    if (string.IsNullOrWhiteSpace(propertyName))
+        ////    {
+        ////        throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(propertyName));
+        ////    }
+
+        ////    this.PropertyName = propertyName;
+        ////    this.FilterType = filterType;
+        ////    this.values.AddRange(values);
+        ////}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValueFilter"/> class.
@@ -101,14 +129,20 @@ namespace Startitecture.Orm.Query
         /// <exception cref="ArgumentNullException">
         /// <paramref name="attributeExpression"/> is null.
         /// </exception>
-        public ValueFilter([NotNull] LambdaExpression attributeExpression, FilterType filterType, params object[] values)
+        public ValueFilter([NotNull] LambdaExpression attributeExpression, FilterType filterType, [NotNull] params object[] values)
         {
             if (attributeExpression == null)
             {
                 throw new ArgumentNullException(nameof(attributeExpression));
             }
 
-            this.PropertyName = attributeExpression.GetPropertyName();
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
+            ////this.PropertyName = attributeExpression.GetPropertyName();
+            this.AttributeLocation = new AttributeLocation(attributeExpression);
             this.FilterType = filterType;
             this.values.AddRange(values);
         }
@@ -118,9 +152,14 @@ namespace Startitecture.Orm.Query
         #region Public Properties
 
         /// <summary>
-        /// Gets the property name.
+        /// Gets the attribute location.
         /// </summary>
-        public string PropertyName { get; }
+        public AttributeLocation AttributeLocation { get; }
+
+        /////// <summary>
+        /////// Gets the property name.
+        /////// </summary>
+        ////public string PropertyName { get; }
 
         /// <summary>
         /// Gets the filter type for this value filter.
@@ -144,7 +183,7 @@ namespace Startitecture.Orm.Query
         /// </returns>
         public override string ToString()
         {
-            return string.Format(ToStringFormat, this.PropertyName, string.Join(ValueSeparator, this.FilterValues));
+            return string.Format(ToStringFormat, this.AttributeLocation, string.Join(ValueSeparator, this.FilterValues));
         }
 
         #endregion

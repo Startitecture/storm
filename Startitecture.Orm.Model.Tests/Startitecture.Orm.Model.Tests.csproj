@@ -52,6 +52,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttributeLocationTests.cs" />
     <Compile Include="DistinctAttributeEqualityComparerTests.cs" />
     <Compile Include="EntityDefinitionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

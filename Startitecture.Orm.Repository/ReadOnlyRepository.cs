@@ -154,9 +154,9 @@ namespace Startitecture.Orm.Repository
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext)
+            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext context)
             {
-                (candidate as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
+                context.SetTransactionProvider(this.RepositoryProvider);
             }
 
             var dataItem = candidate as TDataItem ?? this.EntityMapper.Map<TDataItem>(candidate);
@@ -188,9 +188,9 @@ namespace Startitecture.Orm.Repository
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext)
+            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext context)
             {
-                ((ITransactionContext)candidate).SetTransactionProvider(this.RepositoryProvider);
+                context.SetTransactionProvider(this.RepositoryProvider);
             }
 
             TEntity entity;
@@ -210,7 +210,7 @@ namespace Startitecture.Orm.Repository
 
                 if (Evaluate.IsNull(dataItem))
                 {
-                    return default(TEntity);
+                    return default;
                 }
 
                 dataItem.SetTransactionProvider(this.RepositoryProvider);
@@ -254,7 +254,7 @@ namespace Startitecture.Orm.Repository
 
             if (entity == null)
             {
-                return default(TEntity);
+                return default;
             }
 
             this.LoadChildren(entity, this.RepositoryProvider);
@@ -283,9 +283,9 @@ namespace Startitecture.Orm.Repository
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext)
+            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext context)
             {
-                (candidate as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
+                context.SetTransactionProvider(this.RepositoryProvider);
             }
 
             var selectionItem = candidate as TDataItem ?? this.EntityMapper.Map<TDataItem>(candidate);
@@ -493,7 +493,7 @@ namespace Startitecture.Orm.Repository
 
             if (usePrimaryKey || alternateKeys.Length == 0)
             {
-                selection = this.GetPrimaryKeySelection(item, primaryKey);
+                selection = GetPrimaryKeySelection(item, primaryKey);
             }
             else
             {
@@ -518,11 +518,9 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// Gets the primary key selection.
         /// </returns>
-        private ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
+        private static ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
         {
-            return new SqlSelection<TDataItem>(
-                item,
-                new[] { primaryKey.GetPropertyName() });
+            return new SqlSelection<TDataItem>(item, new[] { primaryKey });
         }
 
         /// <summary>

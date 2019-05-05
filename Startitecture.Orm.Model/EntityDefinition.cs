@@ -185,6 +185,24 @@ namespace Startitecture.Orm.Model
         /// </summary>
         private IEntityDefinitionProvider DefinitionProvider { get; }
 
+        /// <inheritdoc />
+        public EntityAttributeDefinition Find(AttributeLocation attributeLocation)
+        {
+            if (attributeLocation == null)
+            {
+                throw new ArgumentNullException(nameof(attributeLocation));
+            }
+
+            // TODO: Dictionary this!! Also lazy the lookup
+            var reference = this.DefinitionProvider.GetEntityReference(attributeLocation.PropertyInfo);
+            var location = this.DefinitionProvider.GetEntityLocation(reference);
+            var entityName = attributeLocation.EntityReference.EntityAlias ?? location.Alias ?? location.Name;
+            
+            return this.returnableAttributes.Value.FirstOrDefault(
+                definition => (definition.Entity.Alias ?? definition.Entity.Name) == entityName
+                              && definition.PropertyName == attributeLocation.PropertyInfo.Name);
+        }
+
         /// <summary>
         /// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name. Direct attributes are queried
         /// first.
@@ -214,40 +232,10 @@ namespace Startitecture.Orm.Model
                 throw new ArgumentNullException(nameof(propertyName));
             }
 
+            // TODO: Dictionary this!!
             return
                 this.returnableAttributes.Value.FirstOrDefault(
                     definition => (definition.Entity.Alias ?? definition.Entity.Name) == entityName && definition.PropertyName == propertyName);
-        }
-
-        /// <summary>
-        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name. Direct attributes are queried
-        /// first.
-        /// </summary>
-        /// <param name="propertyName">
-        /// The property name.
-        /// </param>
-        /// <returns>
-        /// The first <see cref="EntityAttributeDefinition"/> that matches the property name, or
-        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
-        /// </returns>
-        public EntityAttributeDefinition Find(string propertyName)
-        {
-            if (string.IsNullOrEmpty(propertyName))
-            {
-                throw new ArgumentNullException(nameof(propertyName));
-            }
-
-            bool Predicate(EntityAttributeDefinition definition) => StringComparer.OrdinalIgnoreCase.Equals(definition.PropertyName, propertyName);
-
-            var firstDirect = this.directAttributes.Value.FirstOrDefault(Predicate);
-
-            if (firstDirect != EntityAttributeDefinition.Empty)
-            {
-                return firstDirect;
-            }
-
-            var attributeDefinitions = this.allAttributes.Value;
-            return attributeDefinitions.FirstOrDefault(Predicate);
         }
 
         /// <summary>

@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AttributeLocation.cs" />
     <Compile Include="AttributeReference.cs" />
     <Compile Include="DistinctAttributeEqualityComparer.cs" />
     <Compile Include="EntityAttributeDefinition.cs" />

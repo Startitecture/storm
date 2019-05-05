@@ -22,7 +22,7 @@ namespace Startitecture.Orm.Query.Tests
         /// The join test.
         /// </summary>
         [TestMethod]
-        public void Join_LocalAttributeToRelatedAttribute()
+        public void Join_LocalAttributeToRelatedAttribute_MatchesExpected()
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
             var actual = new EntityRelation(EntityRelationType.InnerJoin);
@@ -31,7 +31,8 @@ namespace Startitecture.Orm.Query.Tests
             var childDefinition = definitionProvider.Resolve<FakeRaisedChildRow>();
             var childReference = new EntityReference { EntityType = typeof(FakeRaisedChildRow) };
             var childLocation = definitionProvider.GetEntityLocation(childReference);
-            var childComplexIdAttribute = childDefinition.Find("FakeComplexEntityId");
+            var childAttributeLocation = new AttributeLocation(typeof(FakeRaisedChildRow).GetProperty("FakeComplexEntityId"), childReference);
+            var childComplexIdAttribute = childDefinition.Find(childAttributeLocation);
 
             Assert.AreEqual(childLocation, childDefinition.Find(actual.SourceExpression).Entity);
             Assert.AreEqual(childComplexIdAttribute, childDefinition.Find(actual.SourceExpression)); //// actual.SourceAttribute);
@@ -39,7 +40,8 @@ namespace Startitecture.Orm.Query.Tests
             var complexDefinition = definitionProvider.Resolve<FakeRaisedComplexRow>();
             var complexReference = new EntityReference { EntityType = typeof(FakeRaisedComplexRow) };
             var complexLocation = definitionProvider.GetEntityLocation(complexReference);
-            var complexIdAttribute = complexDefinition.Find("FakeComplexEntityId");
+            var complexAttributeLocation = new AttributeLocation(typeof(FakeRaisedComplexRow).GetProperty("FakeComplexEntityId"), complexReference);
+            var complexIdAttribute = complexDefinition.Find(complexAttributeLocation);
 
             Assert.AreEqual(complexLocation, complexDefinition.Find(actual.RelationExpression).Entity); //// actual.RelationLocation);
             Assert.AreEqual(complexIdAttribute, complexDefinition.Find(actual.RelationExpression));
@@ -49,7 +51,7 @@ namespace Startitecture.Orm.Query.Tests
         /// The join test.
         /// </summary>
         [TestMethod]
-        public void Join_RelatedAttributeToTransitiveRelatedAttribute()
+        public void Join_RelatedAttributeToTransitiveRelatedAttribute_MatchesExpected()
         {
             var definitionProvider = new PetaPocoDefinitionProvider();
             var actual = new EntityRelation(EntityRelationType.InnerJoin);
@@ -59,7 +61,8 @@ namespace Startitecture.Orm.Query.Tests
             var leftDefinition = relatedDefinition;
             var leftReference = new EntityReference { EntityType = typeof(FakeRelatedRow) };
             var leftLocation = definitionProvider.GetEntityLocation(leftReference);
-            var leftAttribute = leftDefinition.Find("RelatedId");
+            var leftAttributeLocation = new AttributeLocation(typeof(FakeRelatedRow).GetProperty("RelatedId"), leftReference);
+            var leftAttribute = leftDefinition.Find(leftAttributeLocation);
 
             Assert.AreEqual(leftLocation, relatedDefinition.Find(actual.SourceExpression).Entity);
             Assert.AreEqual(leftAttribute, relatedDefinition.Find(actual.SourceExpression)); //// actual.SourceAttribute);
@@ -67,13 +70,14 @@ namespace Startitecture.Orm.Query.Tests
             var rightDefinition = definitionProvider.Resolve<FakeDependencyRow>();
             var rightReference = new EntityReference { EntityType = typeof(FakeDependencyRow) };
             var rightLocation = definitionProvider.GetEntityLocation(rightReference);
-            var rightAttribute = rightDefinition.Find("FakeDependencyEntityId");
+            var rightAttributeLocation = new AttributeLocation(typeof(FakeDependencyRow).GetProperty("FakeDependencyEntityId"), rightReference);
+            var rightAttribute = rightDefinition.Find(rightAttributeLocation);
 
             Assert.AreEqual(rightLocation, rightDefinition.Find(actual.RelationExpression).Entity); //// actual.RelationLocation);
             Assert.AreEqual(rightAttribute, rightDefinition.Find(actual.RelationExpression));
         }
 
-        // TODO: No longer valid.
+        // TODO: No longer valid. Attributes are not evaluated at this layer.
         /////// <summary>
         /////// The join test.
         /////// </summary>
@@ -101,7 +105,7 @@ namespace Startitecture.Orm.Query.Tests
         ////    Assert.AreEqual(subIdAttribute, subDefinition.Find(actual.RelationExpression));
         ////}
 
-        // TODO: No longer valid.
+        // TODO: No longer valid. Attributes are not evaluated at this layer.
         /////// <summary>
         /////// The join test.
         /////// </summary>

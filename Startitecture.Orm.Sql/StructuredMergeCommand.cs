@@ -121,7 +121,7 @@ namespace Startitecture.Orm.Sql
             // Use the expressions provided if any.
             this.mergeMatchAttributes.AddRange(
                 mergeMatchExpressions.Any()
-                    ? mergeMatchExpressions.Select(x => x.GetPropertyName()).Select(entityDefinition.Find)
+                    ? mergeMatchExpressions.Select(x => new AttributeLocation(x)).Select(entityDefinition.Find)
                     : entityDefinition.PrimaryKeyAttributes);
 
             return this;
@@ -164,7 +164,7 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(matchKeys));
             }
 
-            this.selectionMatchAttributes.AddRange(matchKeys.Select(x => this.itemDefinition.Find(x.GetPropertyName())));
+            this.selectionMatchAttributes.AddRange(matchKeys.Select(x => this.itemDefinition.Find(new AttributeLocation(x))));
             return this;
         }
 

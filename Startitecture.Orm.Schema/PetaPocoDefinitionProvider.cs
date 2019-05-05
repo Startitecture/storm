@@ -79,6 +79,22 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
+        public override EntityReference GetEntityReference(PropertyInfo propertyInfo)
+        {
+            var relatedEntityAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
+            var relationAttribute = propertyInfo.GetCustomAttribute<RelationAttribute>();
+
+            if (relatedEntityAttribute != null)
+            {
+                return new EntityReference { EntityType = relatedEntityAttribute.EntityType, EntityAlias = relatedEntityAttribute.EntityAlias };
+            }
+
+            return relationAttribute != null
+                       ? new EntityReference { EntityType = propertyInfo.PropertyType, EntityAlias = propertyInfo.Name }
+                       : new EntityReference { EntityType = propertyInfo.DeclaringType };
+        }
+
+        /// <inheritdoc />
         protected override string GetEntityQualifiedName(Type entityType)
         {
             var sourceTableNameAttribute = entityType.GetCustomAttributes<TableNameAttribute>(true).FirstOrDefault();
@@ -115,14 +131,6 @@ namespace Startitecture.Orm.Schema
 
             return physicalName;
         }
-
-/*
-        /// <inheritdoc />
-        protected virtual IEnumerable<PropertyInfo> GetFilteredRelationProperties(Type entityType)
-        {
-            return GetPocoFilteredEntityProperties(entityType).ToList();
-        }
-*/
 
         /// <inheritdoc />
         protected override IEnumerable<AttributeReference> GetKeyAttributes(Type entityType)

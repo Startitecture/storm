@@ -61,6 +61,30 @@ namespace Startitecture.Orm.Schema
             return new EntityReference { EntityType = declaringType, EntityAlias = relatedEntityAttribute?.EntityAlias ?? entityMember?.Member.Name };
         }
 
+        /// <summary>
+        /// Gets the entity reference for the specified <paramref name="propertyInfo"/>.
+        /// </summary>
+        /// <param name="propertyInfo">
+        /// The property info.
+        /// </param>
+        /// <returns>
+        /// An <see cref="EntityReference"/> for the <paramref name="propertyInfo"/>.
+        /// </returns>
+        public override EntityReference GetEntityReference(PropertyInfo propertyInfo)
+        {
+            var relatedEntityAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
+            var relationAttribute = propertyInfo.GetCustomAttribute<RelationAttribute>();
+
+            if (relatedEntityAttribute != null)
+            {
+                return new EntityReference { EntityType = relatedEntityAttribute.EntityType, EntityAlias = relatedEntityAttribute.EntityAlias };
+            }
+
+            return relationAttribute != null
+                       ? new EntityReference { EntityType = propertyInfo.PropertyType, EntityAlias = propertyInfo.Name }
+                       : new EntityReference { EntityType = propertyInfo.DeclaringType };
+        }
+
         /// <inheritdoc />
         protected override string GetEntityQualifiedName([NotNull] Type entityType)
         {
@@ -175,7 +199,7 @@ namespace Startitecture.Orm.Schema
 
                 yield return new AttributeReference
                                  {
-                                     EntityReference = GetEntityReference(propertyInfo),
+                                     EntityReference = this.GetEntityReference(propertyInfo),
                                      IsIdentity = isIdentity,
                                      IsPrimaryKey = propertyInfo.GetCustomAttribute<KeyAttribute>() != null,
                                      Name = propertyInfo.Name,
@@ -185,30 +209,6 @@ namespace Startitecture.Orm.Schema
                                      IsRelation = propertyInfo.GetCustomAttribute<RelationAttribute>() != null
                                  };
             }
-        }
-
-        /// <summary>
-        /// Gets the entity reference for the specified <paramref name="propertyInfo"/>.
-        /// </summary>
-        /// <param name="propertyInfo">
-        /// The property info.
-        /// </param>
-        /// <returns>
-        /// An <see cref="EntityReference"/> for the <paramref name="propertyInfo"/>.
-        /// </returns>
-        private static EntityReference GetEntityReference(PropertyInfo propertyInfo)
-        {
-            var relatedEntityAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
-            var relationAttribute = propertyInfo.GetCustomAttribute<RelationAttribute>();
-
-            if (relatedEntityAttribute != null)
-            {
-                return new EntityReference { EntityType = relatedEntityAttribute.EntityType, EntityAlias = relatedEntityAttribute.EntityAlias };
-            }
-
-            return relationAttribute != null
-                       ? new EntityReference { EntityType = propertyInfo.PropertyType, EntityAlias = propertyInfo.Name }
-                       : new EntityReference { EntityType = propertyInfo.DeclaringType };
         }
     }
 }

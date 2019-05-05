@@ -224,7 +224,6 @@ namespace Startitecture.Orm.Repository.Tests
 
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper, repositoryAdapterFactory))
                 {
-                    provider.ChangeDatabase("DEVTEST01");
                     var expectedRow = this.entityMapper.Map<AttachmentDocumentRow>(attachmentDocument);
                     expectedRow.SetTransactionProvider(provider);
                     var expected = this.entityMapper.Map<AttachmentDocument>(expectedRow);
@@ -314,14 +313,12 @@ namespace Startitecture.Orm.Repository.Tests
                 var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
                     target.Save(expected);
                 }
 
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
                     var actual = target.FirstOrDefault(expected.AttachmentDocumentId);
 
@@ -363,7 +360,6 @@ namespace Startitecture.Orm.Repository.Tests
                 var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
 
                     foreach (var attachmentDocument in expected)
@@ -374,7 +370,6 @@ namespace Startitecture.Orm.Repository.Tests
 
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    provider.ChangeDatabase("DEVTEST01");
                     var target = new AttachmentDocumentRepository(provider);
                     var actual = target.QueryAttachmentDocuments(Select.From<AttachmentDocumentRow>()).ToList();
 
@@ -416,8 +411,6 @@ namespace Startitecture.Orm.Repository.Tests
             var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
             using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                provider.ChangeDatabase("DEVTEST01");
-
                 // Delete the attachment documents based on finding their versions.
                 var versionSelection = Select.From<DocumentVersionRow>().WhereEqual(row => row.Name, "UNIT_TEST.%");
                 var versionRows = provider.GetSelection(versionSelection);

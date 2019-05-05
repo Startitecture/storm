@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Sql
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
 
@@ -242,7 +243,7 @@ namespace Startitecture.Orm.Sql
         /// <exception cref="IndexOutOfRangeException">
         /// The number of filter values is outside the range handled by the method.
         /// </exception>
-        private static string CreateFilter(IEntityDefinition entityDefinition, IEnumerable<ValueFilter> filters, int indexOffset)
+        private string CreateFilter(IEntityDefinition entityDefinition, IEnumerable<ValueFilter> filters, int indexOffset)
         {
             if (filters == null)
             {
@@ -254,8 +255,13 @@ namespace Startitecture.Orm.Sql
 
             foreach (var filter in filters)
             {
-                // TODO: set attribute name in filter?? It is finding the wrong attribute by property name.
-                var attribute = entityDefinition.Find(filter.PropertyName);
+                var entityReference = this.definitionProvider.GetEntityReference(filter.AttributeLocation.PropertyInfo);
+                var entityLocation = this.definitionProvider.GetEntityLocation(entityReference);
+
+                var attribute = entityDefinition.Find(
+                    filter.AttributeLocation.EntityReference.EntityAlias ?? entityLocation.Alias ?? entityLocation.Name,
+                    filter.AttributeLocation.PropertyInfo.Name);
+
                 var referenceName = SqlQualifier.GetReferenceName(attribute);
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
@@ -454,11 +460,19 @@ namespace Startitecture.Orm.Sql
             var entityDefinition = this.definitionProvider.Resolve<TItem>();
 
             // Contains statements do not need any columns.
+            var selectAttributes = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+
+            // Add all returnable attributes if no explicit columns are selected.
+            if (selectAttributes.Any() == false)
+            {
+                selectAttributes.AddRange(entityDefinition.ReturnableAttributes);
+            }
+
             string selectColumns = isContains
                                        ? '1'.ToString()
                                        : string.Join(
                                            string.Concat(",", Environment.NewLine),
-                                           selection.SelectExpressions.Select(entityDefinition.Find).Select(GetQualifiedColumnName));
+                                           selectAttributes.Select(GetQualifiedColumnName));
 
             ////if (selection.SelectionSource == selection.ItemDefinition.EntityName)
             ////{

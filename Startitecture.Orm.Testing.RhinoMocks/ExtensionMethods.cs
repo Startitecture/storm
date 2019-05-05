@@ -24,6 +24,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
     using Rhino.Mocks;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
@@ -1101,7 +1102,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             Expression<Func<TDataItem, TValue>> itemProperty,
             TValue value)
         {
-            var valueFilter = selection.Filters.FirstOrDefault(x => x.PropertyName == itemProperty.GetPropertyName());
+            var valueFilter = selection.Filters.FirstOrDefault(x => x.AttributeLocation == new AttributeLocation(itemProperty));
 
             return valueFilter != null && EqualityComparer<TValue>.Default.Equals(valueFilter.FilterValues.OfType<TValue>().FirstOrDefault(), value);
         }

@@ -103,6 +103,9 @@ namespace Startitecture.Orm.Schema
         /// <inheritdoc />
         public abstract EntityReference GetEntityReference(LambdaExpression attributeExpression);
 
+        /// <inheritdoc />
+        public abstract EntityReference GetEntityReference(PropertyInfo propertyInfo);
+
         /// <summary>
         /// Gets the entity location by reference.
         /// </summary>

@@ -16,8 +16,6 @@ namespace Startitecture.Orm.Query
 
     using JetBrains.Annotations;
 
-    using Model;
-
     using Startitecture.Core;
     using Startitecture.Resources;
 
@@ -34,11 +32,6 @@ namespace Startitecture.Orm.Query
         /// </summary>
         private const string ValueSeparator = "&";
 
-        /////// <summary>
-        /////// The definition provider.
-        /////// </summary>
-        ////private readonly IEntityDefinitionProvider definitionProvider;
-
         /// <summary>
         /// The relations.
         /// </summary>
@@ -53,29 +46,6 @@ namespace Startitecture.Orm.Query
         /// The selection expressions.
         /// </summary>
         private readonly List<LambdaExpression> selectExpressions = new List<LambdaExpression>();
-
-        /*
-        /// <summary>
-        /// The distinct attribute equality comparer.
-        /// </summary>
-        private readonly DistinctAttributeEqualityComparer distinctAttributeEqualityComparer = Singleton<DistinctAttributeEqualityComparer>.Instance;
-*/
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ItemSelection{TItem}"/> class.
-        /// </summary>
-        public ItemSelection()
-        {
-            ////if (definitionProvider == null)
-            ////{
-            ////    throw new ArgumentNullException(nameof(definitionProvider));
-            ////}
-
-            ////this.definitionProvider = definitionProvider;
-            ////this.ItemDefinition = definitionProvider.Resolve<TItem>();
-            ////this.SetPropertiesToReturn(this.ItemDefinition.DirectAttributes.ToArray());
-            ////.Distinct(this.distinctAttributeEqualityComparer).ToArray());
-        }
 
         /// <summary>
         /// Gets or sets the maximum number of items to return with the selection.
@@ -142,14 +112,6 @@ namespace Startitecture.Orm.Query
             }
 
             this.selectExpressions.AddRange(selectors);
-
-            // TODO: use distinct attribute definitions during rendering
-            ////var attributeDefinitions = this.manualSelection
-            ////                               ? selectors.Select(this.FindAttribute).Distinct(this.distinctAttributeEqualityComparer).ToArray()
-            ////                               : this.GetReturnableAttributes(this.ItemDefinition);
-
-            ////// Don't add already existing properties.
-            ////this.propertiesToReturn.AddRange(attributeDefinitions.Except(this.propertiesToReturn));
             return this;
         }
 
@@ -167,15 +129,6 @@ namespace Startitecture.Orm.Query
         {
             // Clear out return values and filters not covered in the 
             this.relations.Clear();
-
-            ////var filtersToRetain = this.valueFilters.Where(filter => filter.ItemAttribute.IsDirect);
-            ////this.valueFilters.Clear();
-            ////this.valueFilters.AddRange(filtersToRetain);
-
-            ////var selectionsToRetain = this.propertiesToReturn.Where(definition => definition.IsDirect);
-            ////this.propertiesToReturn.Clear();
-            ////this.propertiesToReturn.AddRange(selectionsToRetain);
-
             return this;
         }
 
@@ -1078,7 +1031,7 @@ namespace Startitecture.Orm.Query
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return string.Join(ValueSeparator, this.valueFilters.OrderBy(x => x.PropertyName));
+            return string.Join(ValueSeparator, this.valueFilters.OrderBy(x => x.AttributeLocation?.ToString()));
         }
 
         /// <summary>
@@ -1090,27 +1043,28 @@ namespace Startitecture.Orm.Query
         /// <param name="example">
         /// The example to match.
         /// </param>
-        /// <param name="propertyNames">
+        /// <param name="propertyExpressions">
         /// The property names to include in the filter.
         /// </param>
         /// <returns>
         /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
         /// </returns>
-        protected ItemSelection<TItem> Matching<TDataItem>(TDataItem example, IEnumerable<string> propertyNames)
+        protected ItemSelection<TItem> Matching<TDataItem>(TDataItem example, IEnumerable<LambdaExpression> propertyExpressions)
         {
             if (Evaluate.IsNull(example))
             {
                 throw new ArgumentNullException(nameof(example));
             }
 
-            if (propertyNames == null)
+            if (propertyExpressions == null)
             {
-                throw new ArgumentNullException(nameof(propertyNames));
+                throw new ArgumentNullException(nameof(propertyExpressions));
             }
 
-            foreach (var propertyName in propertyNames)
+            foreach (var propertyName in propertyExpressions)
             {
-                var value = example.GetPropertyValue(propertyName);
+                // Note: this will obviously cause an exception if the property expression is not valid for the TDataItem type.
+                var value = propertyName.Compile().DynamicInvoke(example); ////example.GetPropertyValue(propertyName);
                 this.valueFilters.Add(new ValueFilter(propertyName, FilterType.Equality, value));
             }
 
@@ -1141,59 +1095,6 @@ namespace Startitecture.Orm.Query
             return this;
         }
 
-/*
-        /// <summary>
-        /// Finds the specified attribute, first using a precise search and then a name-only search.
-        /// </summary>
-        /// <param name="selector">
-        /// The selector to find the attribute for.
-        /// </param>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Model.EntityAttributeDefinition"/> associated with the selector, or <see cref="Startitecture.Orm.Model.EntityAttributeDefinition.Empty"/>
-        /// if the attribute is not found.
-        /// </returns>
-        private EntityAttributeDefinition FindAttribute(LambdaExpression selector)
-        {
-            var preciseAttribute = this.ItemDefinition.Find(selector);
-
-            // If we can't locate the attribute precisely, fall back to using only the name.
-            return Evaluate.IsDefaultValue(preciseAttribute) ? this.ItemDefinition.Find(selector.GetPropertyName()) : preciseAttribute;
-        }
-*/
-
-/*
-        /// <summary>
-        /// Sets properties to return to the current selection.
-        /// </summary>
-        /// <param name="properties">
-        /// The property names.
-        /// </param>
-        private void SetPropertiesToReturn(params EntityAttributeDefinition[] properties)
-        {
-            this.propertiesToReturn.Clear();
-            this.propertiesToReturn.AddRange(properties);
-        }
-*/
-
-/*
-        /// <summary>
-        /// Gets the returnable attributes for this selection based on the relations defined in the selection.
-        /// </summary>
-        /// <param name="itemDefinition">
-        /// The item definition.
-        /// </param>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items available for selection with the current set of
-        /// <see cref="ItemSelection{T}.Relations"/>.
-        /// </returns>
-        private IEnumerable<EntityAttributeDefinition> GetReturnableAttributes(IEntityDefinition itemDefinition)
-        {
-            return from a in itemDefinition.ReturnableAttributes
-                   join r in this.relations on a.EntityNode.Value equals r.RelationLocation
-                   select a;
-        }
-*/
-
         /// <summary>
         /// Adds a BETWEEN filter.
         /// </summary>
@@ -1216,8 +1117,8 @@ namespace Startitecture.Orm.Query
             {
                 // Needed when caller can't or won't assign the values such that the lower bound property value is less than the upper 
                 // bound property value.
-                bool valuesFlipped = leftValue is IComparable comparable && rightValue is IComparable
-                                     && comparable.CompareTo((IComparable)rightValue) > 0;
+                bool valuesFlipped = leftValue is IComparable comparable && rightValue is IComparable value
+                                     && comparable.CompareTo(value) > 0;
 
                 if (valuesFlipped)
                 {

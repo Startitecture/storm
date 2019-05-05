@@ -53,13 +53,13 @@ namespace Startitecture.Orm.Sql
         /// <param name="example">
         /// The example to match.
         /// </param>
-        /// <param name="propertyNames">
+        /// <param name="propertyExpressions">
         /// The property names.
         /// </param>
-        public SqlSelection(TItem example, IEnumerable<string> propertyNames)
+        public SqlSelection(TItem example, IEnumerable<LambdaExpression> propertyExpressions)
             : this()
         {
-            this.Matching(example, propertyNames);
+            this.Matching(example, propertyExpressions);
         }
 
         /// <summary>

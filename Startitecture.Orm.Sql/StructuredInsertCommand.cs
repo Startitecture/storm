@@ -72,13 +72,7 @@ namespace Startitecture.Orm.Sql
         /// <summary>
         /// Gets the command text.
         /// </summary>
-        public override string CommandText
-        {
-            get
-            {
-                return this.commandText.Value;
-            }
-        }
+        public override string CommandText => this.commandText.Value;
 
         /// <summary>
         /// Declares the table to insert into.
@@ -108,7 +102,7 @@ namespace Startitecture.Orm.Sql
         {
             var structureDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TStructure>();
             this.selectionAttributes.Clear();
-            this.selectionAttributes.AddRange(matchProperties.Select<Expression<Func<TStructure, object>>, string>(x => x.GetPropertyName()).Select(structureDefinition.Find));
+            this.selectionAttributes.AddRange(matchProperties.Select(x => new AttributeLocation(x)).Select(structureDefinition.Find));
             return this;
         }
 
@@ -140,9 +134,9 @@ namespace Startitecture.Orm.Sql
 
             var statementTerminator = terminateStatement ? ";" : string.Empty;
 
-            var insertedColumns = Enumerable.ToList<string>(outputAttributes.OrderBy(x => x.PhysicalName).Select(x => x.PropertyName));
+            var insertedColumns = outputAttributes.OrderBy(x => x.PhysicalName).Select(x => x.PropertyName).ToList();
             var outputColumns = directAttributes.OrderBy(x => x.PhysicalName).Select(x => $"INSERTED.{x.PhysicalName}");
-            commandBuilder.AppendLine($"OUTPUT {string.Join((string)",", (IEnumerable<string>)outputColumns)}")
+            commandBuilder.AppendLine($"OUTPUT {string.Join(",", outputColumns)}")
                 .AppendLine($"INTO @inserted ({string.Join(", ", insertedColumns)}){statementTerminator}");
         }
 
@@ -179,7 +173,7 @@ namespace Startitecture.Orm.Sql
             }
 
             commandBuilder.AppendLine($"INSERT INTO [{this.itemDefinition.EntityContainer}].[{this.itemDefinition.EntityName}]")
-                .AppendLine($"({string.Join((string)", ", (IEnumerable<string>)targetColumns)})");
+                .AppendLine($"({string.Join(", ", targetColumns)})");
 
             if (selectResults)
             {
@@ -187,7 +181,7 @@ namespace Startitecture.Orm.Sql
                 CreateOutput(structureDefinition, directAttributes, commandBuilder, false);
             }
 
-            commandBuilder.AppendLine($"SELECT {string.Join((string)", ", (IEnumerable<string>)sourceColumns)} FROM {this.Parameter} AS tvp;");
+            commandBuilder.AppendLine($"SELECT {string.Join(", ", sourceColumns)} FROM {this.Parameter} AS tvp;");
 
             if (selectResults)
             {
@@ -209,10 +203,9 @@ namespace Startitecture.Orm.Sql
         /// </param>
         private void SelectOutput(IEntityDefinition structureDefinition, StringBuilder commandBuilder)
         {
-            var keyAttributes = Enumerable.ToList(
-                (from key in this.itemDefinition.AllAttributes.Where(x => x.IsPrimaryKey)
-                 join fk in structureDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
-                 select new { TargetKey = key, SourceKey = fk }));
+            var keyAttributes = (from key in this.itemDefinition.AllAttributes.Where(x => x.IsPrimaryKey)
+                                 join fk in structureDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
+                                 select new { TargetKey = key, SourceKey = fk }).ToList();
 
             var matchAttributes = (from key in this.selectionAttributes
                                    join fk in structureDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
@@ -228,8 +221,13 @@ namespace Startitecture.Orm.Sql
                 keyAttributes.Select(x => new { Column = $"i.[{x.SourceKey.PropertyName}]", Attribute = x.SourceKey }).ToList();
 
             // Everything for selecting from the TVP uses property name in order to match UDTT columns.
-            var nonKeyAttributes =
-                Enumerable.Select(structureDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute)), x => new { Column = $"tvp.[{x.PropertyName}]", Attribute = x });
+            var nonKeyAttributes = structureDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute))
+                .Select(
+                    x => new
+                             {
+                                 Column = $"tvp.[{x.PropertyName}]",
+                                 Attribute = x
+                             });
 
             var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.PropertyName).Select(x => x.Column);
 

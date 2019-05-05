@@ -65,20 +65,32 @@ namespace Startitecture.Orm.Model
         /// </summary>
         string QualifiedName { get; }
 
-        /// <summary>
-        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name.
-        /// </summary>
-        /// <param name="propertyName">
-        /// The property name.
-        /// </param>
-        /// <returns>
-        /// The <see cref="EntityAttributeDefinition"/> that matches the property name, or 
-        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
-        /// </returns>
-        EntityAttributeDefinition Find([NotNull] string propertyName);
+        /////// <summary>
+        /////// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name.
+        /////// </summary>
+        /////// <param name="propertyName">
+        /////// The property name.
+        /////// </param>
+        /////// <returns>
+        /////// The <see cref="EntityAttributeDefinition"/> that matches the property name, or 
+        /////// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
+        /////// </returns>
+        ////EntityAttributeDefinition Find([NotNull] string propertyName);
 
         /// <summary>
-        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name. Direct attributes are queried first.
+        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the <paramref name="attributeLocation"/>.
+        /// </summary>
+        /// <param name="attributeLocation">
+        /// The attribute location.
+        /// </param>
+        /// <returns>
+        /// The first <see cref="EntityAttributeDefinition"/> that matches the attribute location, or
+        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
+        /// </returns>
+        EntityAttributeDefinition Find([NotNull] AttributeLocation attributeLocation);
+
+        /// <summary>
+        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the entity and property name. Direct attributes are queried first.
         /// </summary>
         /// <param name="entityName">
         /// The entity Name.
@@ -96,13 +108,13 @@ namespace Startitecture.Orm.Model
         EntityAttributeDefinition Find([NotNull] string entityName, [NotNull] string propertyName);
 
         /// <summary>
-        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the attribute expression
+        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the attribute expression.
         /// </summary>
         /// <param name="attributeExpression">
         /// The attribute expression to find.
         /// </param>
         /// <returns>
-        /// The first <see cref="EntityAttributeDefinition"/> that matches the property name, or
+        /// The first <see cref="EntityAttributeDefinition"/> that matches the attribute expression, or
         /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
         /// </returns>
         /// <remarks>
