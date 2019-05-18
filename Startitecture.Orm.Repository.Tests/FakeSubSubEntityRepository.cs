@@ -21,8 +21,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public FakeSubSubEntityRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, entity => entity.FakeSubSubEntityId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public FakeSubSubEntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, entity => entity.FakeSubSubEntityId)
         {
         }
 

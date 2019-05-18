@@ -22,8 +22,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public AttachmentRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, attachment => attachment.AttachmentId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public AttachmentRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, attachment => attachment.AttachmentId)
         {
         }
 

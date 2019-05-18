@@ -73,7 +73,7 @@ namespace Startitecture.Orm.Sql.Tests
 
                     expected.RefreshValues();
 
-                    var valueDataTable = valueTableLoader.Load(expected.FormSubmissionValues, provider.EntityMapper);
+                    var valueDataTable = valueTableLoader.Load(expected.FormSubmissionValues, this.entityMapper);
 
                     // First save the unified field values and apply the output to source values. We don't delete unmatched as this 
                     // would also delete current values in ProcessWorkflowFieldValue. We are going to match our return selection on 
@@ -97,12 +97,12 @@ namespace Startitecture.Orm.Sql.Tests
 
                             // Find the entity and map to that. Mapping to the row will not work because the ID is ignored by default.
                             var formSubmissionValue = expected.FormSubmissionValues.First(x => x.UnifiedFieldId == unifiedFieldId);
-                            provider.EntityMapper.MapTo(unifiedFieldValueId, formSubmissionValue);
+                            this.entityMapper.MapTo(unifiedFieldValueId, formSubmissionValue);
                         }
                     }
 
                     // We need to refresh the data table now to merge in the FormSubmissionValues. 
-                    valueTableLoader.Refresh(expected.FormSubmissionValues, valueDataTable, provider.EntityMapper);
+                    valueTableLoader.Refresh(expected.FormSubmissionValues, valueDataTable, this.entityMapper);
 
                     // Now, we need to create another command in order to merge the form submission values. In this case we don't need
                     // to get the values back as we already have the IDs we need.

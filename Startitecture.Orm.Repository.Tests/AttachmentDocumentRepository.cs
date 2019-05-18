@@ -30,8 +30,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public AttachmentDocumentRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, document => document.AttachmentDocumentId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public AttachmentDocumentRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, document => document.AttachmentDocumentId)
         {
         }
 
@@ -85,10 +88,10 @@ namespace Startitecture.Orm.Repository.Tests
         /// </remarks>
         protected override void SaveDependencies(AttachmentDocument entity, IRepositoryProvider provider, AttachmentDocumentRow dataItem)
         {
-            var documentVersionRepo = new DocumentVersionRepository(provider);
+            var documentVersionRepo = new DocumentVersionRepository(provider, this.EntityMapper);
             documentVersionRepo.Save(entity.DocumentVersion);
 
-            var attachmentRepo = new AttachmentRepository(provider);
+            var attachmentRepo = new AttachmentRepository(provider, this.EntityMapper);
             attachmentRepo.Save(entity);
         }
     }

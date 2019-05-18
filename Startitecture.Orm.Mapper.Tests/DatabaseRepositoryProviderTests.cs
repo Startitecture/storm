@@ -370,15 +370,6 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 target.Save(template23);
 
-                var aggregateOption1 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 2,
-                                               Value = 439034.0332m
-                                           };
-
-                target.Save(aggregateOption1);
-
                 expected = new DomainAggregateRow
                                {
                                    CategoryAttribute = categoryAttribute20,
@@ -398,6 +389,16 @@ namespace Startitecture.Orm.Mapper.Tests
                                };
 
                 target.Save(expected);
+
+                ////var aggregateOption1 = new AggregateOptionRow
+                ////                           {
+                ////                               AggregateOptionId = expected.DomainAggregateId,
+                ////                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                ////                               AggregateOptionTypeId = 2,
+                ////                               Value = 439034.0332m
+                ////                           };
+
+                ////target.Save(aggregateOption1);
             }
 
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
@@ -633,12 +634,12 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
                 // Delete the attachment documents based on finding their versions.
+                provider.DeleteItems(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<OtherAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
                 provider.DeleteItems(Select.From<DomainAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
                 provider.DeleteItems(Select.From<SubContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
                 provider.DeleteItems(Select.From<TopContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<OtherAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
                 provider.DeleteItems(Select.From<CategoryAttributeRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
                 provider.DeleteItems(Select.From<TemplateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
                 provider.DeleteItems(Select.From<DomainIdentityRow>().WhereEqual(row => row.UniqueIdentifier, "UNIT_TEST:%"));
             }

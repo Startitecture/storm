@@ -43,6 +43,9 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="structuredCommandProvider">
         /// The structured command provider.
         /// </param>
@@ -51,13 +54,19 @@ namespace Startitecture.Orm.Repository.Tests
         /// </param>
         public FormLayoutRepository(
             [NotNull] IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
             [NotNull] IStructuredCommandProvider structuredCommandProvider,
             [NotNull] ILayoutPageSectionService pageSectionService)
-            : base(repositoryProvider, layout => layout.FormLayoutId)
+            : base(repositoryProvider, entityMapper, layout => layout.FormLayoutId)
         {
             if (repositoryProvider == null)
             {
                 throw new ArgumentNullException(nameof(repositoryProvider));
+            }
+
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
             }
 
             if (structuredCommandProvider == null)
@@ -189,7 +198,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             Singleton<FormLayoutValidator>.Instance.ThrowOnValidationFailure(entity);
 
-            var layoutPageRepository = new LayoutPageRepository(provider, this.pageSectionService, this.structuredCommandProvider);
+            var layoutPageRepository = new LayoutPageRepository(provider, this.EntityMapper, this.pageSectionService, this.structuredCommandProvider);
 
             foreach (var layoutPage in entity.LayoutPages)
             {

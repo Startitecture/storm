@@ -58,7 +58,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
                 var fakeSubEntity = new FakeSubEntity("SubUniqueName", 234, fakeSubSubEntity);
                 var fakeCreatedBy = new FakeCreatedBy("CreateUniqueName");
@@ -97,7 +97,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
                 var fakeSubEntity = new FakeSubEntity("SubUniqueName", 234, fakeSubSubEntity);
                 var fakeCreatedBy = new FakeCreatedBy("CreateUniqueName");
@@ -136,7 +136,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
                 var fakeSubEntity = new FakeSubEntity("SubUniqueName", 234, fakeSubSubEntity);
                 var fakeCreatedBy = new FakeCreatedBy("CreateUniqueName");
@@ -175,7 +175,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
                 var fakeSubEntity = new FakeSubEntity("SubUniqueName", 234, fakeSubSubEntity);
                 var fakeCreatedBy = new FakeCreatedBy("CreateUniqueName");
@@ -248,7 +248,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Description = "UpdatedEntity";
                 expected.ModifiedBy = newModifiedBy;
@@ -319,7 +319,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Description = "UpdatedEntity";
                 expected.ModifiedBy = newModifiedBy;
@@ -399,7 +399,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Description = "UpdatedEntity";
                 expected.ModifiedBy = newModifiedBy;
@@ -476,7 +476,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Description = "UpdatedEntity";
                 expected.ModifiedBy = newModifiedBy;
@@ -521,7 +521,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
                 var fakeSubEntity = new FakeSubEntity("SubUniqueName", 234, fakeSubSubEntity);
                 var fakeCreatedBy = new FakeCreatedBy("CreateUniqueName");
@@ -614,7 +614,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var actual = target.FirstOrDefault(existing);
                 Assert.AreEqual(
                     expected.FakeSubSubEntity, 
@@ -749,7 +749,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName");
                 var fakeSubEntity = new FakeSubEntity("SubUniqueName", 234, fakeSubSubEntity);
                 var fakeCreatedBy = new FakeCreatedBy("CreateUniqueName");
@@ -763,7 +763,7 @@ namespace Startitecture.Orm.Repository.Tests
                 var expected = new FakeChildEntity(fakeComplexEntity) { Name = "Foo", SomeValue = 4492 };
 
                 // Save this first because child doesn't save its parent.
-                var fakeComplexRepo = new FakeComplexEntityRepository(provider);
+                var fakeComplexRepo = new FakeComplexEntityRepository(provider, this.entityMapper);
                 fakeComplexRepo.Save(fakeComplexEntity);
 
                 var actual = target.Save(expected);
@@ -796,7 +796,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var fakeSubSubEntity = new FakeSubSubEntity("SubSubUniqueName") { Description = "Mah sub sub entity" };
                 var fakeSubEntity = new FakeSubEntity("SubUniqueName", 234, fakeSubSubEntity) { Description = "Mah sub entity" };
                 var fakeCreatedBy = new FakeCreatedBy("CreateUniqueName") { Description = "Creator" };
@@ -811,7 +811,7 @@ namespace Startitecture.Orm.Repository.Tests
                 expected.FakeComplexEntity.SetDependentEntity(33, DateTimeOffset.Now);
 
                 // Save this first because child doesn't save its parent.
-                var fakeComplexRepo = new FakeComplexEntityRepository(provider);
+                var fakeComplexRepo = new FakeComplexEntityRepository(provider, this.entityMapper);
                 fakeComplexRepo.Save(fakeComplexEntity);
 
                 var actual = target.Save(expected);
@@ -864,7 +864,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Name = "NewName";
                 expected.SomeValue = 242;
@@ -927,7 +927,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Name = "NewName";
                 expected.SomeValue = 242;
@@ -1007,7 +1007,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Name = "NewName";
                 expected.SomeValue = 242;
@@ -1083,7 +1083,7 @@ namespace Startitecture.Orm.Repository.Tests
             {
                 var newModifiedBy = new FakeModifiedBy("ModifiedBy", 433) { Description = "UpdatedModifiedBy" };
 
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Name = "NewName";
                 expected.SomeValue = 242;
@@ -1151,7 +1151,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var actual = target.FirstOrDefault(existing);
                 Assert.AreEqual(
                     expected.FakeSubSubEntity, 
@@ -1216,7 +1216,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeChildEntityRepository(provider);
+                var target = new FakeChildEntityRepository(provider, this.entityMapper);
                 var actual = target.FirstOrDefault(existing);
                 Assert.IsNotNull(expected.FakeDependentEntity);
                 Assert.IsNotNull(expected.FakeDependentEntityId);
@@ -1410,7 +1410,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = new DatabaseRepositoryProvider(GenericDatabaseFactory<FakeDataContext>.Default, this.entityMapper, repositoryAdapterFactory))
             {
-                var target = new FakeComplexEntityRepository(provider);
+                var target = new FakeComplexEntityRepository(provider, this.entityMapper);
                 var actual = target.FirstOrDefaultWithChildren(99291);
                 Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
                 FakeChildEntity selectedParent1 = null;
@@ -1748,8 +1748,11 @@ namespace Startitecture.Orm.Repository.Tests
             /// <param name="repositoryProvider">
             /// The repository provider.
             /// </param>
-            public ConstructedFakeComplexEntityRepository(IRepositoryProvider repositoryProvider)
-                : base(repositoryProvider, entity => entity.FakeComplexEntityId)
+            /// <param name="entityMapper">
+            /// The entity mapper.
+            /// </param>
+            public ConstructedFakeComplexEntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+                : base(repositoryProvider, entityMapper, entity => entity.FakeComplexEntityId)
             {
             }
 
@@ -1767,21 +1770,10 @@ namespace Startitecture.Orm.Repository.Tests
                 return this.GetKeySelection(item, row => row.FakeComplexEntityId, row => row.UniqueName);
             }
 
-            /// <summary>
-            /// Constructs the entity for the specified data item.
-            /// </summary>
-            /// <param name="dataItem">
-            /// The data item to construct an entity for.
-            /// </param>
-            /// <param name="repositoryProvider">
-            /// The repository provider.
-            /// </param>
-            /// <returns>
-            /// A new instance of the entity.
-            /// </returns>
+            /// <inheritdoc />
             protected override FakeComplexEntity ConstructEntity(FakeComplexRow dataItem, IRepositoryProvider repositoryProvider)
             {
-                var fakeSubEntity = repositoryProvider.EntityMapper.Map<FakeSubEntity>(dataItem);
+                var fakeSubEntity = this.EntityMapper.Map<FakeSubEntity>(dataItem);
                 var fakeCreatedBy = new FakeCreatedBy(dataItem.CreatedByUniqueName, dataItem.CreatedByFakeMultiReferenceEntityId)
                                         {
                                             Description = dataItem.CreatedByDescription

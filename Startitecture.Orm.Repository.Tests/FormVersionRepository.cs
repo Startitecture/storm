@@ -35,11 +35,17 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="layoutService">
         /// The layout service.
         /// </param>
-        public FormVersionRepository([NotNull] IRepositoryProvider repositoryProvider, [NotNull] IFormLayoutService layoutService)
-            : base(repositoryProvider, version => version.FormVersionId)
+        public FormVersionRepository(
+            [NotNull] IRepositoryProvider repositoryProvider,
+            IEntityMapper entityMapper,
+            [NotNull] IFormLayoutService layoutService)
+            : base(repositoryProvider, entityMapper, version => version.FormVersionId)
         {
             if (repositoryProvider == null)
             {
@@ -70,7 +76,7 @@ namespace Startitecture.Orm.Repository.Tests
                 throw new ArgumentNullException(nameof(form));
             }
 
-            return this.SelectEntities(this.Select<FormVersion, FormVersionRow>().WhereEqual(row => row.FormId, form.FormId.GetValueOrDefault()));
+            return this.SelectEntities(this.Select().WhereEqual(row => row.FormId, form.FormId.GetValueOrDefault()));
         }
 
         /// <summary>

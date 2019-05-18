@@ -38,15 +38,26 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="commandProvider">
         /// The command provider.
         /// </param>
-        public UnifiedFieldRepository([NotNull] IRepositoryProvider repositoryProvider, [NotNull] IStructuredCommandProvider commandProvider)
-            : base(repositoryProvider, field => field.UnifiedFieldId)
+        public UnifiedFieldRepository(
+            [NotNull] IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
+            [NotNull] IStructuredCommandProvider commandProvider)
+            : base(repositoryProvider, entityMapper, field => field.UnifiedFieldId)
         {
             if (repositoryProvider == null)
             {
                 throw new ArgumentNullException(nameof(repositoryProvider));
+            }
+
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
             }
 
             if (commandProvider == null)

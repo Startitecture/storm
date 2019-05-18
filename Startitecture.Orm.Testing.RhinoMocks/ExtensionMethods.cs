@@ -48,6 +48,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="repositoryProvider">
         /// The repository provider to stub. 
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="entity">
         /// The existing entity. 
         /// </param>
@@ -59,6 +62,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// </returns>
         public static IRepositoryProvider StubForExistingItem<TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
             [NotNull] object entity)
             where TDataItem : class, ITransactionContext
         {
@@ -67,17 +71,17 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                 throw new ArgumentNullException(nameof(repositoryProvider));
             }
 
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
+            }
+
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            if (repositoryProvider.EntityMapper == null)
-            {
-                throw new InvalidOperationException("The entity mapper must be set on the repository provider.");
-            }
-
-            var dataItem = repositoryProvider.EntityMapper.Map<TDataItem>(entity);
+            var dataItem = entityMapper.Map<TDataItem>(entity);
 
             repositoryProvider.Stub(provider => provider.Contains(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(true);
             repositoryProvider.Stub(provider => provider.GetFirstOrDefault(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(dataItem);
@@ -208,6 +212,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="source">
         /// The source of the items.
         /// </param>
@@ -225,11 +232,12 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// </returns>
         public static IRepositoryProvider StubForList<TEntity, TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
             [NotNull] IEnumerable<TEntity> source,
             [NotNull] List<TDataItem> target)
             where TDataItem : ITransactionContext
         {
-            return StubForList(repositoryProvider, source, target, null);
+            return StubForList(repositoryProvider, entityMapper, source, target, null);
         }
 
         /// <summary>
@@ -237,6 +245,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider.
+        /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
         /// </param>
         /// <param name="source">
         /// The source of the items.
@@ -258,6 +269,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// </returns>
         public static IRepositoryProvider StubForList<TEntity, TDataItem>(
             [NotNull] this IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
             [NotNull] IEnumerable<TEntity> source,
             [NotNull] List<TDataItem> target,
             Expression<Func<TDataItem, object>> primaryKey)
@@ -266,6 +278,11 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             if (repositoryProvider == null)
             {
                 throw new ArgumentNullException(nameof(repositoryProvider));
+            }
+
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
             }
 
             if (source == null)
@@ -278,13 +295,8 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                 throw new ArgumentNullException(nameof(target));
             }
 
-            if (repositoryProvider.EntityMapper == null)
-            {
-                throw new InvalidOperationException("The entity mapper must be set on the repository provider.");
-            }
-
             target.Clear();
-            var items = repositoryProvider.EntityMapper.Map<List<TDataItem>>(source);
+            var items = entityMapper.Map<List<TDataItem>>(source);
             target.AddRange(items);
 
             if (primaryKey != null)

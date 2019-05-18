@@ -38,11 +38,14 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="key">
         /// The key property for the <typeparamref name="TEntity"/>.
         /// </param>
-        public EntityRepository(IRepositoryProvider repositoryProvider, Expression<Func<TEntity, object>> key)
-            : this(repositoryProvider, key, null)
+        public EntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper, Expression<Func<TEntity, object>> key)
+            : this(repositoryProvider, entityMapper, key, null)
         {
         }
 
@@ -52,14 +55,21 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="key">
         /// The key property for the <typeparamref name="TEntity"/>.
         /// </param>
         /// <param name="selectionComparer">
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
-        public EntityRepository(IRepositoryProvider repositoryProvider, Expression<Func<TEntity, object>> key, IComparer<TDataItem> selectionComparer)
-            : base(repositoryProvider, key, selectionComparer)
+        public EntityRepository(
+            IRepositoryProvider repositoryProvider,
+            IEntityMapper entityMapper,
+            Expression<Func<TEntity, object>> key,
+            IComparer<TDataItem> selectionComparer)
+            : base(repositoryProvider, entityMapper, key, selectionComparer)
         {
         }
 

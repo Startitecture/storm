@@ -72,7 +72,7 @@ namespace Startitecture.Orm.Repository.Tests
                 expectedRow.SetTransactionProvider(provider);
                 var expected = this.entityMapper.Map<AttachmentDocument>(expectedRow);
 
-                var target = new AttachmentDocumentRepository(provider);
+                var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                 var actual = target.Save(attachmentDocument);
 
                 Assert.AreEqual(1, actual.DocumentType.DocumentTypeId);
@@ -112,7 +112,7 @@ namespace Startitecture.Orm.Repository.Tests
                 expectedRow.SetTransactionProvider(provider);
                 var expected = this.entityMapper.Map<AttachmentDocument>(expectedRow);
 
-                var target = new AttachmentDocumentRepository(provider);
+                var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                 var actual = target.Save(attachmentDocument);
 
                 Assert.AreEqual(1, actual.DocumentType.DocumentTypeId);
@@ -141,7 +141,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = RepositoryMockFactory.CreateConcreteProvider<TestDb>(this.entityMapper, adapter))
             {
-                var target = new AttachmentDocumentRepository(provider);
+                var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                 var actual = target.FirstOrDefault(expected.AttachmentDocumentId);
 
                 Assert.AreEqual(1, actual.DocumentType.DocumentTypeId);
@@ -176,7 +176,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var provider = RepositoryMockFactory.CreateConcreteProvider<TestDb>(this.entityMapper, adapter))
             {
-                var target = new AttachmentDocumentRepository(provider);
+                var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                 var actual = target.QueryAttachmentDocuments(Select.From<AttachmentDocumentRow>()).ToList();
 
                 CollectionAssert.AreEqual(expected, actual);
@@ -228,7 +228,7 @@ namespace Startitecture.Orm.Repository.Tests
                     expectedRow.SetTransactionProvider(provider);
                     var expected = this.entityMapper.Map<AttachmentDocument>(expectedRow);
 
-                    var target = new AttachmentDocumentRepository(provider);
+                    var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                     var actual = target.Save(attachmentDocument);
 
                     Assert.AreEqual(1, actual.DocumentType.DocumentTypeId);
@@ -264,7 +264,7 @@ namespace Startitecture.Orm.Repository.Tests
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
                     provider.ChangeDatabase("DEVTEST01");
-                    var target = new AttachmentDocumentRepository(provider);
+                    var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                     target.Save(attachmentDocument);
                 }
 
@@ -279,7 +279,7 @@ namespace Startitecture.Orm.Repository.Tests
                     expectedRow.SetTransactionProvider(provider);
                     var expected = this.entityMapper.Map<AttachmentDocument>(expectedRow);
 
-                    var target = new AttachmentDocumentRepository(provider);
+                    var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                     var actual = target.Save(attachmentDocument);
 
                     Assert.AreEqual(1, actual.DocumentType.DocumentTypeId);
@@ -313,13 +313,13 @@ namespace Startitecture.Orm.Repository.Tests
                 var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    var target = new AttachmentDocumentRepository(provider);
+                    var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                     target.Save(expected);
                 }
 
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    var target = new AttachmentDocumentRepository(provider);
+                    var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                     var actual = target.FirstOrDefault(expected.AttachmentDocumentId);
 
                     Assert.AreEqual(1, actual.DocumentType.DocumentTypeId);
@@ -360,7 +360,7 @@ namespace Startitecture.Orm.Repository.Tests
                 var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    var target = new AttachmentDocumentRepository(provider);
+                    var target = new AttachmentDocumentRepository(provider, this.entityMapper);
 
                     foreach (var attachmentDocument in expected)
                     {
@@ -370,7 +370,7 @@ namespace Startitecture.Orm.Repository.Tests
 
                 using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
                 {
-                    var target = new AttachmentDocumentRepository(provider);
+                    var target = new AttachmentDocumentRepository(provider, this.entityMapper);
                     var actual = target.QueryAttachmentDocuments(Select.From<AttachmentDocumentRow>()).ToList();
 
                     CollectionAssert.AreEqual(expected, actual);

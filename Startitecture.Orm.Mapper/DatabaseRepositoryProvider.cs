@@ -25,7 +25,6 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
     /// <summary>
@@ -389,7 +388,16 @@ namespace Startitecture.Orm.Mapper
         public TDataItem Save<TDataItem>(TDataItem item)
             where TDataItem : ITransactionContext
         {
-            var uniqueSelection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, item);
+            // Only review the direct attributes of the object for save comparison.
+            var entityDefinition = this.EntityDefinitionProvider.Resolve<TDataItem>();
+            var attributeDefinitions = entityDefinition.DirectAttributes.ToList();
+            var selectExpressions = (from a in attributeDefinitions
+                                     let parameter = Expression.Parameter(typeof(TDataItem))
+                                     let property = Expression.Property(parameter, a.PropertyInfo)
+                                     let conversion = Expression.Convert(property, typeof(object))
+                                     select Expression.Lambda<Func<TDataItem, object>>(conversion, parameter)).ToArray();
+
+            var uniqueSelection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, item).Select(selectExpressions);
 
             // If caching is enabled, incoming items will be compared against the cache. This will catch forward changes (A1 -> A2) but 
             // will ignore reverse changes (A2 -> A1) until the cached item expires.
@@ -400,30 +408,45 @@ namespace Startitecture.Orm.Mapper
             if (Evaluate.IsSet(existingItem))
             {
                 // This needs to be done prior to the mapping so we know what is in the database.
-                var existingValues = existingItem.ToValueCollection();
+                var existingValues = from a in attributeDefinitions
+                                     select a.GetValueDelegate.DynamicInvoke(existingItem);
+                ////existingItem.ToValueCollection();
 
-                // When the item already exists, we use the data item mapping to merge fields. The data item mapping should ensure that
-                // primary keys are ignored so that the merged item contains the primary key from the existing entity.
-                // TODO: To eliminate mapping at this layer, eliminate write-once and use an internal mapper.
-                var mergedItem = this.EntityMapper.MapTo(item, existingItem);
-                var mergedValues = mergedItem.ToValueCollection();
+                // Now apply the auto-number key from the existing item to the incoming item if necessary. This is for cases when the 
+                // unique key is used rather than an auto-number ID. 
+                var primaryKey = entityDefinition.AutoNumberPrimaryKey;
+                var keyCompare = new Lazy<bool>(
+                    () => primaryKey?.GetValueDelegate.DynamicInvoke(item) == primaryKey?.GetValueDelegate.DynamicInvoke(existingItem));
 
-                // Do not update unless needed.
+                if (primaryKey != null && keyCompare.Value == false)
+                {
+                    var existingKey = primaryKey.Value.GetValueDelegate.DynamicInvoke(existingItem);
+                    primaryKey.Value.SetValueDelegate.DynamicInvoke(item, existingKey);
+                }
+
+                ////// When the item already exists, we use the data item mapping to merge fields. The data item mapping should ensure that
+                ////// primary keys are ignored so that the merged item contains the primary key from the existing entity.
+                ////// TODO: To eliminate mapping at this layer, eliminate write-once and use an internal mapper.
+                ////var mergedItem = this.EntityMapper.MapTo(item, existingItem);
+                var mergedValues = from a in attributeDefinitions
+                                   select a.GetValueDelegate.DynamicInvoke(item);
+
+                // Do not update unless needed. // TODO: Is this wise?
                 if (existingValues.SequenceEqual(mergedValues))
                 {
                     if (this.EnableCaching)
                     {
                         lock (this.itemLock)
                         {
-                            this.itemCache.Set(CreateCacheKey(uniqueSelection), mergedItem, savePolicy);
+                            this.itemCache.Set(CreateCacheKey(uniqueSelection), item, savePolicy);
                         }
                     }
 
-                    mergedItem.SetTransactionProvider(this);
-                    return mergedItem;
+                    item.SetTransactionProvider(this);
+                    return item;
                 }
 
-                this.Update(mergedItem, uniqueSelection);
+                this.Update(item, uniqueSelection);
 
                 // According to http://stackoverflow.com/questions/7477431/executenonquery-returning-a-value-of-2-when-only-1-record-was-updated,
                 // if an update causes a trigger to fire then it's possible to get a 2 or higher with the rows affected, making this
@@ -434,12 +457,12 @@ namespace Startitecture.Orm.Mapper
                 {
                     lock (this.itemLock)
                     {
-                        this.itemCache.Set(CreateCacheKey(uniqueSelection), mergedItem, savePolicy);
+                        this.itemCache.Set(CreateCacheKey(uniqueSelection), item, savePolicy);
                     }
                 }
 
-                mergedItem.SetTransactionProvider(this);
-                return mergedItem;
+                item.SetTransactionProvider(this);
+                return item;
             }
 
             var savedItem = this.InsertItem(item);

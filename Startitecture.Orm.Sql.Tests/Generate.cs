@@ -179,6 +179,9 @@ namespace Startitecture.Orm.Sql.Tests
         /// <param name="provider">
         /// The provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="person">
         /// The person.
         /// </param>
@@ -188,9 +191,9 @@ namespace Startitecture.Orm.Sql.Tests
         /// <exception cref="ArgumentOutOfRangeException">
         /// The value type enumeration is not labeled.
         /// </exception>
-        public static IEnumerable<FormSubmissionValue> GetFormSubmissionValues(IRepositoryProvider provider, Person person)
+        public static IEnumerable<FormSubmissionValue> GetFormSubmissionValues(IRepositoryProvider provider, IEntityMapper entityMapper, Person person)
         {
-            var unifiedFieldRepository = new UnifiedFieldRepository(provider);
+            var unifiedFieldRepository = new UnifiedFieldRepository(provider, entityMapper);
             var unifiedFields = unifiedFieldRepository.SelectAll().ToList();
 
             foreach (var unifiedField in unifiedFields)
@@ -279,10 +282,10 @@ namespace Startitecture.Orm.Sql.Tests
         /// </returns>
         public static FormSubmission CreateFormSubmission(IEntityMapper entityMapper, IRepositoryProvider provider)
         {
-            var person = GetPerson(provider);
+            var person = GetPerson(provider, entityMapper);
             var expected = CreateFormSubmission(person, entityMapper, provider);
 
-            var formSubmissionValues = GetFormSubmissionValues(provider, person).ToList();
+            var formSubmissionValues = GetFormSubmissionValues(provider, entityMapper, person).ToList();
 
             expected.SaveDraft(person, formSubmissionValues.ToArray());
             return expected;
@@ -335,12 +338,15 @@ namespace Startitecture.Orm.Sql.Tests
         /// <param name="provider">
         /// The provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <returns>
         /// The <see cref="Startitecture.Orm.Testing.Model.PM.Person"/>.
         /// </returns>
-        private static Person GetPerson(IRepositoryProvider provider)
+        private static Person GetPerson(IRepositoryProvider provider, IEntityMapper entityMapper)
         {
-            var personRepository = new PersonRepository(provider);
+            var personRepository = new PersonRepository(provider, entityMapper);
             var selection = Select.From<ActionPrincipalRow>();
             selection.Limit = 1;
             var person = personRepository.SelectPeople(selection).First();

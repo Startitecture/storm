@@ -71,11 +71,14 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="key">
         /// The key property for the <typeparamref name="TEntity"/>.
         /// </param>
-        protected ReadOnlyRepository(IRepositoryProvider repositoryProvider, Expression<Func<TEntity, object>> key)
-            : this(repositoryProvider, key, null)
+        protected ReadOnlyRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper, Expression<Func<TEntity, object>> key)
+            : this(repositoryProvider, entityMapper, key, null)
         {
         }
 
@@ -85,6 +88,9 @@ namespace Startitecture.Orm.Repository
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="key">
         /// The key property for the <typeparamref name="TEntity"/>.
         /// </param>
@@ -93,6 +99,7 @@ namespace Startitecture.Orm.Repository
         /// </param>
         protected ReadOnlyRepository(
             IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
             Expression<Func<TEntity, object>> key,
             IComparer<TDataItem> selectionComparer)
         {
@@ -101,10 +108,13 @@ namespace Startitecture.Orm.Repository
                 throw new ArgumentNullException(nameof(repositoryProvider));
             }
 
-            this.PrimaryKeyExpression = key;
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
+            }
 
-            repositoryProvider.ThrowOnDependencyFailure(provider => provider.EntityMapper);
-            this.EntityMapper = repositoryProvider.EntityMapper;
+            this.PrimaryKeyExpression = key;
+            this.EntityMapper = entityMapper;
             this.RepositoryProvider = repositoryProvider;
             this.selectionComparer = selectionComparer;
         }
@@ -385,7 +395,7 @@ namespace Startitecture.Orm.Repository
                 throw new ArgumentNullException(nameof(repositoryProvider));
             }
 
-            return repositoryProvider.EntityMapper.Map<TEntity>(dataItem);
+            return this.EntityMapper.Map<TEntity>(dataItem);
         }
 
         /// <summary>

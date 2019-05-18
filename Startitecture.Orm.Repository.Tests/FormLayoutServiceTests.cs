@@ -272,7 +272,7 @@ namespace Startitecture.Orm.Repository.Tests
             var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
             using (var provider = new DatabaseRepositoryProvider(databaseFactory, entityMapper))
             {
-                var userRepo = new UserRepository(provider);
+                var userRepo = new UserRepository(provider, entityMapper);
                 userRepo.Save(creator);
                 userRepo.Save(editor);
 
@@ -280,18 +280,18 @@ namespace Startitecture.Orm.Repository.Tests
                 actionContext.Stub(context => context.CurrentPerson).Return(editor);
 
                 var commandProvider = new StructuredSqlCommandProvider(provider);
-                var placementRepository = new FieldPlacementRepository(provider);
+                var placementRepository = new FieldPlacementRepository(provider, entityMapper);
                 var placementService = new FieldPlacementService(placementRepository);
-                var pageSectionRepository = new LayoutPageSectionRepository(provider, placementService);
+                var pageSectionRepository = new LayoutPageSectionRepository(provider, entityMapper, placementService);
                 var pageSectionService = new LayoutPageSectionService(pageSectionRepository);
-                var layoutRepository = new FormLayoutRepository(provider, commandProvider, pageSectionService);
+                var layoutRepository = new FormLayoutRepository(provider, entityMapper, commandProvider, pageSectionService);
                 var layoutService = new FormLayoutService(layoutRepository);
-                var versionRepository = new FormVersionRepository(provider, layoutService);
+                var versionRepository = new FormVersionRepository(provider, entityMapper, layoutService);
                 var formVersionService = new FormVersionService(actionContext, versionRepository, layoutService);
-                var formRepository = new FormRepository(provider, formVersionService);
+                var formRepository = new FormRepository(provider, entityMapper, formVersionService);
                 var formService = new FormService(actionContext, formRepository, formVersionService);
 
-                var fieldRepository = new UnifiedFieldRepository(provider, commandProvider);
+                var fieldRepository = new UnifiedFieldRepository(provider, entityMapper, commandProvider);
                 var fieldService = new UnifiedFieldService(fieldRepository);
                 var unifiedFields = fieldService.SelectAllFields().ToList();
 
@@ -333,7 +333,7 @@ namespace Startitecture.Orm.Repository.Tests
                     section.CssStyle = "placement-css";
                 }
 
-                var sectionRepository = new LayoutSectionRepository(provider, commandProvider, placementService);
+                var sectionRepository = new LayoutSectionRepository(provider, entityMapper, commandProvider, placementService);
                 var sectionService = new LayoutSectionService(sectionRepository);
                 var stopwatch = new Stopwatch();
 
@@ -396,11 +396,11 @@ namespace Startitecture.Orm.Repository.Tests
             using (var provider = new DatabaseRepositoryProvider(databaseFactory, entityMapper))
             {
                 var commandProvider = new StructuredSqlCommandProvider(provider);
-                var placementRepository = new FieldPlacementRepository(provider);
+                var placementRepository = new FieldPlacementRepository(provider, entityMapper);
                 var placementService = new FieldPlacementService(placementRepository);
-                var pageSectionRepository = new LayoutPageSectionRepository(provider, placementService);
+                var pageSectionRepository = new LayoutPageSectionRepository(provider, entityMapper, placementService);
                 var pageSectionService = new LayoutPageSectionService(pageSectionRepository);
-                var layoutRepository = new FormLayoutRepository(provider, commandProvider, pageSectionService);
+                var layoutRepository = new FormLayoutRepository(provider, entityMapper, commandProvider, pageSectionService);
                 var layoutService = new FormLayoutService(layoutRepository);
 
                 var stopwatch = Stopwatch.StartNew();

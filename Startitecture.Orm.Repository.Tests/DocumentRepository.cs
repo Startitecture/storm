@@ -27,8 +27,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public DocumentRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, document => document.DocumentId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public DocumentRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, document => document.DocumentId)
         {
         }
 
@@ -50,7 +53,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             this.RepositoryProvider.DependencyContainer.SetDependency(document.DocumentId, document);
 
-            var documentVersionRepository = new DocumentVersionRepository(this.RepositoryProvider);
+            var documentVersionRepository = new DocumentVersionRepository(this.RepositoryProvider, this.EntityMapper);
             return documentVersionRepository.SelectDocumentVersions(document.DocumentId.GetValueOrDefault());
         }
 

@@ -25,8 +25,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public PersonRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, person => person.PersonId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public PersonRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, person => person.PersonId)
         {
         }
 

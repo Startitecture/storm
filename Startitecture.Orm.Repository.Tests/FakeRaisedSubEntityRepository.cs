@@ -21,8 +21,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public FakeRaisedSubEntityRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, entity => entity.FakeSubEntityId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public FakeRaisedSubEntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, entity => entity.FakeSubEntityId)
         {
         }
 
@@ -57,7 +60,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </remarks>
         protected override void SaveDependencies(FakeSubEntity entity, IRepositoryProvider provider, FakeRaisedSubRow dataItem)
         {
-            var subSubEntityRepo = new FakeSubSubEntityRepository(provider);
+            var subSubEntityRepo = new FakeSubSubEntityRepository(provider, this.EntityMapper);
             subSubEntityRepo.Save(entity.FakeSubSubEntity);
             ////dataItem.FakeSubSubEntityId = entity.FakeSubSubEntity.FakeSubSubEntityId.GetValueOrDefault();
         }

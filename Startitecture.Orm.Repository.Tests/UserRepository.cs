@@ -25,8 +25,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public UserRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, user => user.UserId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public UserRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, user => user.UserId)
         {
         }
 
@@ -61,7 +64,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </remarks>
         protected override void SaveDependencies(User entity, IRepositoryProvider provider, UserRow dataItem)
         {
-            var personRepo = new PersonRepository(provider);
+            var personRepo = new PersonRepository(provider, this.EntityMapper);
             personRepo.Save(entity);
         }
     }

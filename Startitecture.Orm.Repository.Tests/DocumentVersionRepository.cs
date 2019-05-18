@@ -28,8 +28,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public DocumentVersionRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, version => version.DocumentVersionId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public DocumentVersionRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, version => version.DocumentVersionId)
         {
         }
 
@@ -100,7 +103,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </remarks>
         protected override void SaveDependencies(DocumentVersion entity, IRepositoryProvider provider, DocumentVersionRow dataItem)
         {
-            var documentRepo = new DocumentRepository(provider);
+            var documentRepo = new DocumentRepository(provider, this.EntityMapper);
             documentRepo.Save(entity.Document);
         }
     }

@@ -24,10 +24,12 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public FakeRaisedComplexEntityRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, entity => entity.FakeComplexEntityId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public FakeRaisedComplexEntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, entity => entity.FakeComplexEntityId)
         {
-            Expression<Func<FakeComplexEntity, object>> expression = key => key.FakeComplexEntityId;
         }
 
         /// <inheritdoc />
@@ -50,7 +52,7 @@ namespace Startitecture.Orm.Repository.Tests
             provider.DependencyContainer.SetDependency(entity.FakeComplexEntityId, entity);
 
             // Load the children of the entity using their repository.
-            var childRepo = new FakeRaisedChildEntityRepository(provider);
+            var childRepo = new FakeRaisedChildEntityRepository(provider, this.EntityMapper);
 
             // In this case, when the fake child entity is created, it is automatically added to the entity's list of children. Some 
             // other method could also be used if the child constructor does not do this.
@@ -61,10 +63,10 @@ namespace Startitecture.Orm.Repository.Tests
         /// <inheritdoc />
         protected override void SaveDependencies(FakeComplexEntity entity, IRepositoryProvider provider, FakeRaisedComplexRow dataItem)
         {
-            var subEntityRepo = new FakeRaisedSubEntityRepository(provider);
+            var subEntityRepo = new FakeRaisedSubEntityRepository(provider, this.EntityMapper);
             subEntityRepo.Save(entity.FakeSubEntity);
 
-            var subMultiReferenceEntityRepo = new FakeMultiReferenceEntityRepository(provider);
+            var subMultiReferenceEntityRepo = new FakeMultiReferenceEntityRepository(provider, this.EntityMapper);
             subMultiReferenceEntityRepo.Save(entity.CreatedBy);
             subMultiReferenceEntityRepo.Save(entity.ModifiedBy);
 
@@ -88,7 +90,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </remarks>
         protected override void SaveDependents(FakeComplexEntity entity, IRepositoryProvider provider, FakeRaisedComplexRow dataItem)
         {
-            var fakeDependentEntityRepo = new FakeDependentEntityRepository(provider);
+            var fakeDependentEntityRepo = new FakeDependentEntityRepository(provider, this.EntityMapper);
             this.SaveDependentItem(entity, complexEntity => complexEntity.FakeDependentEntity, fakeDependentEntityRepo, dataItem);
         }
 
@@ -103,7 +105,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </param>
         protected override void SaveChildren(FakeComplexEntity entity, IRepositoryProvider provider)
         {
-            var childRepo = new FakeRaisedChildEntityRepository(provider);
+            var childRepo = new FakeRaisedChildEntityRepository(provider, this.EntityMapper);
 
             foreach (var childEntity in entity.ChildEntities)
             {

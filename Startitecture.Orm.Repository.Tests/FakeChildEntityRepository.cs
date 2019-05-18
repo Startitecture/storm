@@ -11,12 +11,9 @@ namespace Startitecture.Orm.Repository.Tests
 {
     using System.Collections.Generic;
 
-    using Startitecture.Orm.Model;
-
     using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Repository.Tests.Models;
     using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Model;
 
@@ -31,8 +28,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public FakeChildEntityRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, entity => entity.FakeChildEntityId, SelectionComparer.SomeValue)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public FakeChildEntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, entity => entity.FakeChildEntityId, SelectionComparer.SomeValue)
         {
         }
 

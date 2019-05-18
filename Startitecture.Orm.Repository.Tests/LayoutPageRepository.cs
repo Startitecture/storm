@@ -43,6 +43,9 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="layoutPageSectionService">
         /// The layout page section service.
         /// </param>
@@ -51,13 +54,19 @@ namespace Startitecture.Orm.Repository.Tests
         /// </param>
         public LayoutPageRepository(
             [NotNull] IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
             [NotNull] ILayoutPageSectionService layoutPageSectionService,
             [NotNull] IStructuredCommandProvider structuredCommandProvider)
-            : base(repositoryProvider, page => page.LayoutPageId)
+            : base(repositoryProvider, entityMapper, page => page.LayoutPageId)
         {
             if (repositoryProvider == null)
             {
                 throw new ArgumentNullException(nameof(repositoryProvider));
+            }
+
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
             }
 
             if (layoutPageSectionService == null)
@@ -173,7 +182,7 @@ namespace Startitecture.Orm.Repository.Tests
             var transaction = provider.StartTransaction();
 
             var tableLoader = Singleton<DataTableLoader<LayoutPageSectionRow>>.Instance;
-            var dataTable = tableLoader.Load(entity.LayoutPageSections, provider.EntityMapper);
+            var dataTable = tableLoader.Load(entity.LayoutPageSections, this.EntityMapper);
 
             var mergeCommand =
                 new StructuredMergeCommand<LayoutPageSectionRow>(this.structuredCommandProvider, transaction)

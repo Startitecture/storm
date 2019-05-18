@@ -31,8 +31,11 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public FieldPlacementRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, placement => placement.FieldPlacementId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public FieldPlacementRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, placement => placement.FieldPlacementId)
         {
         }
 

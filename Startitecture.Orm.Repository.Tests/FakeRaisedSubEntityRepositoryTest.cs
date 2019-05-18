@@ -46,7 +46,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedSubEntityRepository(repositoryProvider);
+                var target = new FakeRaisedSubEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.FirstOrDefault(expected.FakeSubEntityId.GetValueOrDefault());
 
                 Assert.AreEqual(expected.FakeSubEntityId, actual.FakeSubEntityId);
@@ -70,7 +70,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedSubEntityRepository(repositoryProvider);
+                var target = new FakeRaisedSubEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.Save(expected);
 
                 Assert.IsTrue(actual.FakeSubEntityId > 0);
@@ -94,7 +94,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedSubEntityRepository(repositoryProvider);
+                var target = new FakeRaisedSubEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.Save(expected);
 
                 Assert.AreEqual(874359, actual.FakeSubEntityId);
@@ -123,7 +123,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedSubEntityRepository(repositoryProvider);
+                var target = new FakeRaisedSubEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.SelectAll().ToList();
 
                 CollectionAssert.AreEqual(expected, actual);

@@ -72,7 +72,7 @@ namespace Startitecture.Orm.Repository.Tests
             using (var repositoryProvider = MockRepository.GenerateMock<IRepositoryProvider>())
             {
                 var dependencyContainer = new DependencyContainer();
-                repositoryProvider.Stub(provider => provider.EntityMapper).Return(mapper);
+                ////repositoryProvider.Stub(provider => provider.EntityMapper).Return(mapper);
                 repositoryProvider.Stub(provider => provider.DependencyContainer).Return(dependencyContainer);
 
                 // Prime the dependency container with the parent object.

@@ -42,6 +42,9 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="structuredCommandProvider">
         /// The structured command provider.
         /// </param>
@@ -50,13 +53,19 @@ namespace Startitecture.Orm.Repository.Tests
         /// </param>
         public LayoutSectionRepository(
             [NotNull] IRepositoryProvider repositoryProvider,
+            [NotNull] IEntityMapper entityMapper,
             [NotNull] IStructuredCommandProvider structuredCommandProvider,
             [NotNull] IFieldPlacementService placementService)
-            : base(repositoryProvider, section => section.LayoutSectionId)
+            : base(repositoryProvider, entityMapper, section => section.LayoutSectionId)
         {
             if (repositoryProvider == null)
             {
                 throw new ArgumentNullException(nameof(repositoryProvider));
+            }
+
+            if (entityMapper == null)
+            {
+                throw new ArgumentNullException(nameof(entityMapper));
             }
 
             if (structuredCommandProvider == null)
@@ -198,7 +207,7 @@ namespace Startitecture.Orm.Repository.Tests
             var transaction = provider.StartTransaction();
 
             var fieldPlacementTableLoader = Singleton<DataTableLoader<FieldPlacementTableType>>.Instance;
-            var fieldPlacementDataTable = fieldPlacementTableLoader.Load(entity.FieldPlacements, provider.EntityMapper);
+            var fieldPlacementDataTable = fieldPlacementTableLoader.Load(entity.FieldPlacements, this.EntityMapper);
 
             var mergeFieldPlacementCommand =
                 new StructuredMergeCommand<FieldPlacementTableType>(this.structuredCommandProvider, transaction)
@@ -226,7 +235,7 @@ namespace Startitecture.Orm.Repository.Tests
 
                     // Find the entity and map to that. Mapping to the row will not work because the ID is ignored by default.
                     var fieldPlacement = entity.FieldPlacements.First(x => x.LayoutSectionId == layoutSectionId && x.Order == order);
-                    provider.EntityMapper.MapTo(fieldPlacementId, fieldPlacement);
+                    this.EntityMapper.MapTo(fieldPlacementId, fieldPlacement);
                 }
             }
 

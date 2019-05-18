@@ -63,7 +63,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.FirstOrDefault(expected.FakeComplexEntityId.GetValueOrDefault());
 
                 Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
@@ -101,7 +101,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.FirstOrDefault(expected.FakeComplexEntityId.GetValueOrDefault());
 
                 Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
@@ -148,7 +148,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.FirstOrDefaultWithChildren(expected.FakeComplexEntityId.GetValueOrDefault());
 
                 Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
@@ -226,7 +226,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.Save(expected);
 
                 Assert.IsTrue(actual.FakeComplexEntityId > 0);
@@ -268,7 +268,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.Save(expected);
 
                 Assert.IsTrue(actual.FakeComplexEntityId > 0);
@@ -322,7 +322,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.Save(expected);
 
                 Assert.AreEqual(47958, actual.FakeComplexEntityId);
@@ -378,7 +378,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.Save(expected);
 
                 Assert.AreEqual(47958, actual.FakeComplexEntityId);
@@ -459,7 +459,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.SaveWithChildren(expected);
 
                 Assert.AreEqual(47958, actual.FakeComplexEntityId);
@@ -516,7 +516,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             using (var repositoryProvider = RepositoryMockFactory.CreateConcreteProvider<FakeDataContext>(this.entityMapper, repositoryAdapter))
             {
-                var target = new FakeRaisedComplexEntityRepository(repositoryProvider);
+                var target = new FakeRaisedComplexEntityRepository(repositoryProvider, this.entityMapper);
                 var actual = target.SaveWithChildren(expected);
 
                 Assert.IsTrue(actual.FakeComplexEntityId > 0);

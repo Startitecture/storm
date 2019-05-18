@@ -37,11 +37,17 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
         /// <param name="placementService">
         /// The placement service.
         /// </param>
-        public LayoutPageSectionRepository(IRepositoryProvider repositoryProvider, [NotNull] IFieldPlacementService placementService)
-            : base(repositoryProvider, section => section.LayoutSectionId)
+        public LayoutPageSectionRepository(
+            IRepositoryProvider repositoryProvider,
+            IEntityMapper entityMapper,
+            [NotNull] IFieldPlacementService placementService)
+            : base(repositoryProvider, entityMapper, section => section.LayoutSectionId)
         {
             if (placementService == null)
             {

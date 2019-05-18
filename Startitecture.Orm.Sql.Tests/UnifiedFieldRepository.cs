@@ -25,8 +25,11 @@ namespace Startitecture.Orm.Sql.Tests
         /// <param name="repositoryProvider">
         /// The repository provider.
         /// </param>
-        public UnifiedFieldRepository(IRepositoryProvider repositoryProvider)
-            : base(repositoryProvider, field => field.UnifiedFieldId)
+        /// <param name="entityMapper">
+        /// The entity mapper.
+        /// </param>
+        public UnifiedFieldRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper, field => field.UnifiedFieldId)
         {
         }
 
