@@ -8,6 +8,8 @@ namespace Startitecture.Orm.Query
 {
     using System.Collections.Generic;
 
+    using Startitecture.Orm.Model;
+
     /// <summary>
     /// Provides an interface for entities that contain their own entity relations.
     /// </summary>

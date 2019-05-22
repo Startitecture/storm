@@ -109,6 +109,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void GetSelection_ExistingDomainAggregates_MatchesExpected()
         {
+            // TODO: Add IEquatable to all rows uugghh
             List<DomainAggregateRow> expected;
 
             var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
@@ -179,16 +180,12 @@ namespace Startitecture.Orm.Mapper.Tests
                                                Value = 439034.0332m
                                            };
 
-                target.Save(aggregateOption1);
-
                 var aggregateOption2 = new AggregateOptionRow
                                            {
                                                Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
                                                AggregateOptionTypeId = 4,
                                                Value = 32453253
                                            };
-
-                target.Save(aggregateOption2);
 
                 var domainAggregate1 = new DomainAggregateRow
                                            {
@@ -203,7 +200,6 @@ namespace Startitecture.Orm.Mapper.Tests
                                                LastModifiedBy = fooBarIdentity,
                                                LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
                                                LastModifiedTime = DateTimeOffset.Now,
-                                               OtherAggregate = otherAggregate10,
                                                SubContainer = subContainerA,
                                                SubContainerId = subContainerA.SubContainerId,
                                                Template = template23,
@@ -214,7 +210,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 var domainAggregate2 = new DomainAggregateRow
                                            {
-                                               AggregateOption = aggregateOption1,
+                                               AggregateOption = aggregateOption2,
                                                CategoryAttribute = categoryAttribute20,
                                                CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
                                                Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
@@ -254,6 +250,20 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 target.Save(domainAggregate3);
 
+                aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
+                target.Save(aggregateOption1);
+
+                aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
+                target.Save(aggregateOption2);
+
+                var associationRow = new AssociationRow
+                                         {
+                                             DomainAggregateId = domainAggregate1.DomainAggregateId,
+                                             OtherAggregateId = otherAggregate10.OtherAggregateId
+                                         };
+
+                target.Save(associationRow);
+
                 expected = new List<DomainAggregateRow>
                                {
                                    domainAggregate1,
@@ -264,7 +274,18 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var itemSelection = Select.From<DomainAggregateRow>().WhereEqual(row => row.SubContainerId, expected.First().SubContainerId);
+                var itemSelection = Select.From<DomainAggregateRow>()
+                    .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
+                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
+
                 var actual = target.GetSelection(itemSelection).ToList();
                 CollectionAssert.AreEquivalent(expected, actual);
             }
@@ -403,7 +424,18 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var itemSelection = Select.From<DomainAggregateRow>().WhereEqual(row => row.DomainAggregateId, expected.DomainAggregateId);
+                var itemSelection = Select.From<DomainAggregateRow>()
+                    .WhereEqual(row => row.DomainAggregateId, expected.DomainAggregateId)
+                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
+
                 var actual = target.GetFirstOrDefault(itemSelection);
 
                 Assert.IsNotNull(actual);

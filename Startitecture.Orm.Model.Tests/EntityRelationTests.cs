@@ -4,11 +4,10 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Query.Tests
+namespace Startitecture.Orm.Model.Tests
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Model;
 

@@ -6,7 +6,7 @@
 //   The base class for defining relations between two entities.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace Startitecture.Orm.Query
+namespace Startitecture.Orm.Model
 {
     using System;
     using System.Collections.Generic;

@@ -4,13 +4,12 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Query.Tests
+namespace Startitecture.Orm.Model.Tests
 {
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
@@ -25,7 +24,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -73,7 +72,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 .InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -120,7 +119,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -167,7 +166,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -215,7 +214,7 @@ namespace Startitecture.Orm.Query.Tests
         public void InnerJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
             var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
+                new EntityRelationSet<FakeRaisedDataRow>()
                     .InnerJoin(row => row.FakeDataId, row => row.FakeRelated.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -236,7 +235,7 @@ namespace Startitecture.Orm.Query.Tests
         public void InnerJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
             var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
+                new EntityRelationSet<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     .InnerJoin(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -300,7 +299,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -347,7 +346,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 .LeftJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -394,7 +393,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -441,7 +440,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new SqlFromClause<FakeFlatDataRow>()
+            var relations = new EntityRelationSet<FakeFlatDataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
@@ -489,7 +488,7 @@ namespace Startitecture.Orm.Query.Tests
         public void LeftJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
             var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
+                new EntityRelationSet<FakeRaisedDataRow>()
                     .LeftJoin(row => row.FakeDataId, row => row.FakeRelated.FakeDataId)
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
@@ -510,7 +509,7 @@ namespace Startitecture.Orm.Query.Tests
         public void LeftJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
             var relations =
-                new SqlFromClause<FakeRaisedDataRow>()
+                new EntityRelationSet<FakeRaisedDataRow>()
                     ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
                     .LeftJoin(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)

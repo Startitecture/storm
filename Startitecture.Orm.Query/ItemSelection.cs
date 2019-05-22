@@ -17,6 +17,7 @@ namespace Startitecture.Orm.Query
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>

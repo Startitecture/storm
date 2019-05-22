@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Query
+namespace Startitecture.Orm.Model
 {
     /// <summary>
     /// An enumeration of the relation types between two entities.

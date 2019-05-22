@@ -52,8 +52,6 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntityRelationSetTests.cs" />
-    <Compile Include="EntityRelationTests.cs" />
     <Compile Include="ItemSelectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

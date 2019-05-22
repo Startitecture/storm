@@ -90,7 +90,7 @@ namespace Startitecture.Orm.Testing.Model
         /// Relates the entities of the current composite entity.
         /// </summary>
         /// <returns>
-        /// A collection of <see cref="Startitecture.Orm.Query.IEntityRelation"/> elements for a composite entity.
+        /// A collection of <see cref="IEntityRelation"/> elements for a composite entity.
         /// </returns>
         private static IEnumerable<IEntityRelation> RelateEntities()
         {

@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Query
+namespace Startitecture.Orm.Model
 {
     using System.Linq.Expressions;
 

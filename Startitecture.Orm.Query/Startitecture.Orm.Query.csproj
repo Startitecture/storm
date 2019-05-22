@@ -55,12 +55,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntityRelation.cs" />
-    <Compile Include="EntityRelationSet.cs" />
-    <Compile Include="EntityRelationType.cs" />
     <Compile Include="FilterType.cs" />
     <Compile Include="ICompositeEntity.cs" />
-    <Compile Include="IEntityRelation.cs" />
     <Compile Include="IQueryFactory.cs" />
     <Compile Include="ItemSelection.cs" />
     <Compile Include="LinkedSelection.cs" />

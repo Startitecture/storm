@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Query
+namespace Startitecture.Orm.Model
 {
     using System;
     using System.Collections.Generic;
@@ -27,13 +27,6 @@ namespace Startitecture.Orm.Query
         /// The entity relations.
         /// </summary>
         private readonly List<IEntityRelation> entityRelations = new List<IEntityRelation>();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityRelationSet{TItem}"/> class.
-        /// </summary>
-        protected EntityRelationSet()
-        {
-        }
 
         /// <summary>
         /// Gets the entity relations of the current set.

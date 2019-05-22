@@ -9,6 +9,7 @@
 
 namespace Startitecture.Orm.Sql
 {
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
 
     /// <summary>
