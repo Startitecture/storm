@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
@@ -109,7 +110,6 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void GetSelection_ExistingDomainAggregates_MatchesExpected()
         {
-            // TODO: Add IEquatable to all rows uugghh
             List<DomainAggregateRow> expected;
 
             var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
@@ -258,7 +258,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 var associationRow = new AssociationRow
                                          {
-                                             DomainAggregateId = domainAggregate1.DomainAggregateId,
+                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
                                              OtherAggregateId = otherAggregate10.OtherAggregateId
                                          };
 
@@ -286,8 +286,13 @@ namespace Startitecture.Orm.Mapper.Tests
                     .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
                     .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
 
-                var actual = target.GetSelection(itemSelection).ToList();
-                CollectionAssert.AreEquivalent(expected, actual);
+                var actual = target.GetSelection(itemSelection).OrderBy(x => x.Name).ToList();
+                Assert.AreEqual(
+                    expected.First(),
+                    actual.First(),
+                    string.Join(Environment.NewLine, expected.First().GetDifferences(actual.First())));
+
+                CollectionAssert.AreEqual(expected, actual);
             }
         }
 

@@ -27,8 +27,8 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The POCO factories.
         /// </summary>
-        private static readonly Cache<Tuple<string, string, int, int>, Delegate> PocoFactories =
-            new Cache<Tuple<string, string, int, int>, Delegate>();
+        private static readonly Cache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo> PocoFactories =
+            new Cache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo>();
 
         /// <summary>
         /// The direct factory.
@@ -230,11 +230,23 @@ namespace Startitecture.Orm.Mapper
             IEntityDefinition entityDefinition,
             IDataRecord record)
         {
-            var baseKey = new Tuple<string, string, int, int>(typeQualifiedName, entityDefinition.EntityName, 0, record.FieldCount);
-
+            var baseKey = new Tuple<string, string, PocoDataRequest>(typeQualifiedName, entityDefinition.EntityName, dataRequest);
             var baseDirectAttributes = entityDefinition.ReturnableAttributes.Where(x => x.IsReferencedDirect).ToList();
             var basePocoDelegate = PocoFactories.Get(baseKey, () => DirectFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
-            var poco = (T)basePocoDelegate.DynamicInvoke(record);
+
+            T poco;
+#if DEBUG
+            try
+            {
+#endif
+                poco = (T)basePocoDelegate.MappingDelegate.DynamicInvoke(record);
+#if DEBUG
+            }
+            catch (TargetInvocationException ex)
+            {
+                throw new OperationException(basePocoDelegate, $"Error creating a POCO for type {typeof(T)}: {ex.Message}", ex);
+            }
+#endif
             return poco;
         }
 
@@ -354,7 +366,7 @@ namespace Startitecture.Orm.Mapper
         {
             var relatedEntityLocation = this.definitionProvider.GetEntityLocation(entityReference);
             var relatedQualifiedName = this.nameQualifier.GetReferenceName(relatedEntityLocation);
-            var relatedKey = new Tuple<string, string, int, int>(typeQualifiedName, relatedQualifiedName, 0, reader.FieldCount);
+            var relatedKey = new Tuple<string, string, PocoDataRequest>(typeQualifiedName, relatedQualifiedName, dataRequest);
 
             // TODO: Cache attributes with their locations, or build explicitly.
             var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
@@ -362,7 +374,19 @@ namespace Startitecture.Orm.Mapper
 
             var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
 
-            var relatedEntity = relatedPocoDelegate.DynamicInvoke(reader);
+            object relatedEntity;
+#if DEBUG
+            try
+            {
+#endif
+                relatedEntity = relatedPocoDelegate.MappingDelegate.DynamicInvoke(reader);
+#if DEBUG
+            }
+            catch (TargetInvocationException ex)
+            {
+                throw new OperationException(relatedPocoDelegate, $"Error creating a POCO for type {relatedType}: {ex.Message}", ex);
+            }
+#endif
             return relatedEntity;
         }
     }

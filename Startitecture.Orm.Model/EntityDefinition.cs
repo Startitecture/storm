@@ -17,13 +17,14 @@ namespace Startitecture.Orm.Model
 
     /// <summary>
     /// Contains metadata for a data entity.
+    /// TODO: Do sorted set by column ordinals
     /// </summary>
     public class EntityDefinition : IEntityDefinition
     {
         /// <summary>
         /// The definition collection.
         /// </summary>
-        private readonly Lazy<List<EntityAttributeDefinition>> allAttributes;
+        private readonly Lazy<SortedSet<EntityAttributeDefinition>> allAttributes;
 
         /// <summary>
         /// The returnable attributes.
@@ -78,7 +79,8 @@ namespace Startitecture.Orm.Model
 
             var entityReference = new EntityReference { EntityType = type };
             this.DefinitionProvider = definitionProvider;
-            this.allAttributes = new Lazy<List<EntityAttributeDefinition>>(() => this.DefinitionProvider.ResolveDefinitions(type).ToList());
+            this.allAttributes = new Lazy<SortedSet<EntityAttributeDefinition>>(
+                () => new SortedSet<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(type)));
 
             // Do not include mapped attributes.
             this.returnableAttributes =
@@ -118,8 +120,8 @@ namespace Startitecture.Orm.Model
             }
 
             this.DefinitionProvider = definitionProvider;
-            this.allAttributes =
-                new Lazy<List<EntityAttributeDefinition>>(() => this.DefinitionProvider.ResolveDefinitions(entityReference.EntityType).ToList());
+            this.allAttributes = new Lazy<SortedSet<EntityAttributeDefinition>>(
+                () => new SortedSet<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(entityReference.EntityType)));
 
             // Do not include mapped attributes.
             this.returnableAttributes =
@@ -163,6 +165,7 @@ namespace Startitecture.Orm.Model
         public EntityAttributeDefinition? AutoNumberPrimaryKey => this.autoNumberPrimaryKey.Value;
 
         /// <inheritdoc />
+        /// TODO: Use a more generic representation
         public string QualifiedName => $"[{this.EntityContainer}].[{this.EntityName}]";
 
         /// <summary>

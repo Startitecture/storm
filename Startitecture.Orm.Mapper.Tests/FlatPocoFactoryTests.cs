@@ -46,7 +46,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new PetaPocoDefinitionProvider());
 
             var stopwatch = Stopwatch.StartNew();
-            var pocoDelegate = target.CreateDelegate<FakeComplexRow>(pocoDataRequest) as Func<IDataReader, FakeComplexRow>;
+            var pocoDelegate = target.CreateDelegate<FakeComplexRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, FakeComplexRow>;
             Trace.TraceInformation($"{stopwatch.Elapsed} Create delegate");
             stopwatch.Reset();
 
@@ -93,7 +93,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new PetaPocoDefinitionProvider());
 
             var stopwatch = Stopwatch.StartNew();
-            var pocoDelegate = target.CreateDelegate<OverriddenColumnNameRow>(pocoDataRequest) as Func<IDataReader, OverriddenColumnNameRow>;
+            var pocoDelegate = target.CreateDelegate<OverriddenColumnNameRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, OverriddenColumnNameRow>;
             Trace.TraceInformation($"{stopwatch.Elapsed} Create delegate");
             stopwatch.Reset();
 

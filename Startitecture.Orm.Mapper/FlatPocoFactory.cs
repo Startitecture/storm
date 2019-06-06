@@ -106,7 +106,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="Delegate"/> that creates a POCO from the reader.
         /// </returns>
-        public Delegate CreateDelegate<T>([NotNull] PocoDataRequest dataRequest)
+        public PocoDelegateInfo CreateDelegate<T>([NotNull] PocoDataRequest dataRequest)
         {
             if (dataRequest == null)
             {
@@ -128,7 +128,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="Delegate"/> that creates a POCO from the reader.
         /// </returns>
-        public Delegate CreateDelegate([NotNull] PocoDataRequest dataRequest, [NotNull] Type type)
+        public PocoDelegateInfo CreateDelegate([NotNull] PocoDataRequest dataRequest, [NotNull] Type type)
         {
             if (dataRequest == null)
             {
@@ -158,7 +158,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="Delegate"/> that creates a POCO from the reader.
         /// </returns>
-        public Delegate CreateDelegate(
+        public PocoDelegateInfo CreateDelegate(
             [NotNull] PocoDataRequest dataRequest,
             [NotNull] Type type,
             [NotNull] IList<EntityAttributeDefinition> attributeDefinitions)
@@ -178,16 +178,17 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(attributeDefinitions));
             }
 
-            var pocoDataType = type;
-
             // Create the method
-            var name = "petapoco_factory_" + Guid.NewGuid(); ////+ this.pocoFactories.Count;
-            var method = new DynamicMethod(name, pocoDataType, new[] { typeof(IDataReader) }, true);
+            var name = $"poco_factory_{Guid.NewGuid()}";
+
+            var delegateInfo = new PocoDelegateInfo(name, type, attributeDefinitions);
+
+            var method = new DynamicMethod(name, type, new[] { typeof(IDataReader) }, true);
             var generator = method.GetILGenerator();
             var mapper = Mappers.GetMapper(type);
             var reader = dataRequest.DataReader;
             
-            if (pocoDataType == typeof(object))
+            if (type == typeof(object))
             {
                 // var poco=new T()
                 var constructorInfo = typeof(ExpandoObject).GetConstructor(Type.EmptyTypes);
@@ -256,11 +257,11 @@ namespace Startitecture.Orm.Mapper
 
                 generator.Emit(OpCodes.Ret);
             }
-            else if (pocoDataType.IsValueType || pocoDataType == typeof(string) || pocoDataType == typeof(byte[]))
+            else if (type.IsValueType || type == typeof(string) || type == typeof(byte[]))
             {
                 // Do we need to install a converter?
                 var sourceType = reader.GetFieldType(0);
-                var converter = GetConverter(mapper, null, sourceType, pocoDataType);
+                var converter = GetConverter(mapper, null, sourceType, type);
 
                 // "if (!rdr.IsDBNull(i))"
                 generator.Emit(OpCodes.Ldarg_0); // rdr
@@ -288,7 +289,7 @@ namespace Startitecture.Orm.Mapper
                 }
 
                 generator.MarkLabel(finishLabel);
-                generator.Emit(OpCodes.Unbox_Any, pocoDataType); // value converted
+                generator.Emit(OpCodes.Unbox_Any, type); // value converted
                 generator.Emit(OpCodes.Ret);
             }
             else
@@ -300,7 +301,9 @@ namespace Startitecture.Orm.Mapper
 
                 // var poco=new T()
                 const BindingFlags InstanceConstructors = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-                generator.Emit(OpCodes.Newobj, pocoDataType.GetConstructor(InstanceConstructors, null, new Type[0], null));
+                generator.Emit(OpCodes.Newobj, type.GetConstructor(InstanceConstructors, null, new Type[0], null));
+
+                int columnsMapped = attributeDefinitions.Count;
 
                 // Enumerate all fields generating a set assignment for the column
                 for (var i = dataRequest.FirstColumn; i < dataRequest.FirstColumn + dataRequest.FieldCount; i++)
@@ -316,6 +319,8 @@ namespace Startitecture.Orm.Mapper
                     {
                         continue;
                     }
+
+                    delegateInfo.MapDefinition(attribute);
 
                     // Get the source type for this column
                     var sourceType = reader.GetFieldType(i);
@@ -371,10 +376,10 @@ namespace Startitecture.Orm.Mapper
                                     throw new InvalidOperationException(string.Format(ErrorMessages.ConstructorInfoDoesNotExist, nullableType));
                                 }
 
-                                generator.Emit(OpCodes.Newobj, (ConstructorInfo)constructorInfo);
+                                generator.Emit(OpCodes.Newobj, constructorInfo);
                             }
 
-                            generator.Emit(OpCodes.Callvirt, (MethodInfo)attribute.PropertyInfo.GetSetMethod(true)); // poco
+                            generator.Emit(OpCodes.Callvirt, attribute.PropertyInfo.GetSetMethod(true)); // poco
                             handled = true;
                         }
                     }
@@ -397,14 +402,22 @@ namespace Startitecture.Orm.Mapper
                         }
 
                         // Assign it
-                        generator.Emit(OpCodes.Unbox_Any, (Type)attribute.PropertyInfo.PropertyType); // poco,poco,value
-                        generator.Emit(OpCodes.Callvirt, (MethodInfo)attribute.SetValueMethod); // poco
+                        generator.Emit(OpCodes.Unbox_Any, attribute.PropertyInfo.PropertyType); // poco,poco,value
+                        generator.Emit(OpCodes.Callvirt, attribute.SetValueMethod); // poco
                     }
 
+                    columnsMapped--;
                     generator.MarkLabel(nextLabel);
                 }
 
-                var onLoadedMethod = RecurseInheritedTypes(pocoDataType, x => x.GetMethod("OnLoaded", InstanceConstructors, null, new Type[0], null));
+                if (columnsMapped != 0)
+                {
+                    throw new OperationException(
+                        delegateInfo,
+                        $"Expected {dataRequest.FieldCount} columns, {columnsMapped} columns were not mapped.");
+                }
+
+                var onLoadedMethod = RecurseInheritedTypes(type, x => x.GetMethod("OnLoaded", InstanceConstructors, null, new Type[0], null));
 
                 if (onLoadedMethod != null)
                 {
@@ -429,7 +442,9 @@ namespace Startitecture.Orm.Mapper
             }
 
             // Cache it, return it
-            return method.CreateDelegate(Expression.GetFuncType(typeof(IDataReader), pocoDataType));
+            var mappingDelegate = method.CreateDelegate(Expression.GetFuncType(typeof(IDataReader), type));
+            delegateInfo.SetDelegate(mappingDelegate);
+            return delegateInfo;
         }
 
         /// <summary>

@@ -10,13 +10,14 @@
 namespace Startitecture.Orm.Model
 {
     using System;
+    using System.Collections.Generic;
 
     using Startitecture.Core;
 
     /// <summary>
     /// Contains the location for a data entity.
     /// </summary>
-    public struct EntityLocation : IEquatable<EntityLocation>
+    public struct EntityLocation : IEquatable<EntityLocation>, IComparable, IComparable<EntityLocation>
     {
         /// <summary>
         /// The to string format.
@@ -165,6 +166,86 @@ namespace Startitecture.Orm.Model
         public static bool operator !=(EntityLocation valueA, EntityLocation valueB)
         {
             return !(valueA == valueB);
+        }
+
+        /// <summary>
+        /// Determines if the first value is less than the second value.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the first value is less than the second value; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator <(EntityLocation valueA, EntityLocation valueB)
+        {
+            return Comparer<EntityLocation>.Default.Compare(valueA, valueB) < 0;
+        }
+
+        /// <summary>
+        /// Determines if the first value is greater than the second value.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the first value is greater than the second value; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator >(EntityLocation valueA, EntityLocation valueB)
+        {
+            return Comparer<EntityLocation>.Default.Compare(valueA, valueB) > 0;
+        }
+
+        /// <summary>
+        /// Compares the current instance with another object of the same type and returns an integer that indicates
+        /// whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+        /// </summary>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. The return value has these meanings:
+        /// Value Meaning Less than zero This instance precedes <paramref name="obj"/> in the sort order. Zero This instance
+        /// occurs in the same position in the sort order as <paramref name="obj"/>. Greater than zero This instance follows
+        /// <paramref name="obj"/> in the sort order.
+        /// </returns>
+        /// <param name="obj">
+        /// An object to compare with this instance.
+        /// </param>
+        /// <exception cref="T:System.ArgumentException">
+        /// <paramref name="obj"/> is not the same type as this instance.
+        /// </exception>
+        /// <filterpriority>2</filterpriority>
+        public int CompareTo(object obj)
+        {
+            return Evaluate.Compare(this, obj);
+        }
+
+        /// <summary>
+        /// Compares the current object with another object of the same type.
+        /// </summary>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. The return value has the following
+        /// meanings: Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.Zero This
+        /// object is equal to <paramref name="other"/>. Greater than zero This object is greater than <paramref name="other"/>.
+        /// </returns>
+        /// <param name="other">
+        /// An object to compare with this object.
+        /// </param>
+        public int CompareTo(EntityLocation other)
+        {
+            return Evaluate.Compare(
+                this,
+                other,
+                location => location.EntityType.FullName,
+                location => location.EntityType.AssemblyQualifiedName,
+                location => location.Container,
+                location => location.Name,
+                location => location.Alias,
+                location => location.IsVirtual);
         }
 
         /// <summary>

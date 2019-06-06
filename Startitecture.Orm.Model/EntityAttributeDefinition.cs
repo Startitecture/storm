@@ -21,7 +21,7 @@ namespace Startitecture.Orm.Model
     /// <summary>
     /// Contains the definition of an entity attribute.
     /// </summary>
-    public struct EntityAttributeDefinition : IEquatable<EntityAttributeDefinition>
+    public struct EntityAttributeDefinition : IEquatable<EntityAttributeDefinition>, IComparable, IComparable<EntityAttributeDefinition>
     {
         /// <summary>
         /// Represents an empty entity attribute.
@@ -48,11 +48,12 @@ namespace Startitecture.Orm.Model
         /// </summary>
         private static readonly Func<EntityAttributeDefinition, object>[] ComparisonProperties =
             {
+                item => item.Entity, 
+                item => item.ReferenceNode?.Value,
                 item => item.PropertyName,
                 item => item.PhysicalName, 
-                item => item.Entity, 
-                item => item.AttributeTypes, 
-                item => item.Alias
+                item => item.Alias,
+                item => item.AttributeTypes
             };
 
         /// <summary>
@@ -195,7 +196,7 @@ namespace Startitecture.Orm.Model
         {
             get
             {
-                var referenceNode = this.entityPath.Last;
+                var referenceNode = this.entityPath?.Last;
 
                 if (referenceNode == null)
                 {
@@ -325,6 +326,78 @@ namespace Startitecture.Orm.Model
         public static bool operator !=(EntityAttributeDefinition valueA, EntityAttributeDefinition valueB)
         {
             return !(valueA == valueB);
+        }
+
+        /// <summary>
+        /// Determines if the first value is less than the second value.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the first value is less than the second value; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator <(EntityAttributeDefinition valueA, EntityAttributeDefinition valueB)
+        {
+            return Comparer<EntityAttributeDefinition>.Default.Compare(valueA, valueB) < 0;
+        }
+
+        /// <summary>
+        /// Determines if the first value is greater than the second value.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the first value is greater than the second value; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator >(EntityAttributeDefinition valueA, EntityAttributeDefinition valueB)
+        {
+            return Comparer<EntityAttributeDefinition>.Default.Compare(valueA, valueB) > 0;
+        }
+
+        /// <summary>
+        /// Compares the current instance with another object of the same type and returns an integer that indicates
+        /// whether the current instance precedes, follows, or occurs in the same position in the sort order as the other object.
+        /// </summary>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. The return value has these meanings:
+        /// Value Meaning Less than zero This instance precedes <paramref name="obj"/> in the sort order. Zero This instance
+        /// occurs in the same position in the sort order as <paramref name="obj"/>. Greater than zero This instance follows
+        /// <paramref name="obj"/> in the sort order.
+        /// </returns>
+        /// <param name="obj">
+        /// An object to compare with this instance.
+        /// </param>
+        /// <exception cref="T:System.ArgumentException">
+        /// <paramref name="obj"/> is not the same type as this instance.
+        /// </exception>
+        /// <filterpriority>2</filterpriority>
+        public int CompareTo(object obj)
+        {
+            return Evaluate.Compare(this, obj);
+        }
+
+        /// <summary>
+        /// Compares the current object with another object of the same type.
+        /// </summary>
+        /// <returns>
+        /// A value that indicates the relative order of the objects being compared. The return value has the following
+        /// meanings: Value Meaning Less than zero This object is less than the <paramref name="other"/> parameter.Zero This
+        /// object is equal to <paramref name="other"/>. Greater than zero This object is greater than <paramref name="other"/>.
+        /// </returns>
+        /// <param name="other">
+        /// An object to compare with this object.
+        /// </param>
+        public int CompareTo(EntityAttributeDefinition other)
+        {
+            return Evaluate.Compare(this, other, ComparisonProperties);
         }
 
         /// <summary>

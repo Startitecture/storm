@@ -36,7 +36,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the DomainIdentityId (Primary key)
         /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column(@"DomainIdentityId", Order = 1, TypeName = "int")]
         [Index(@"PK_DomainIdentity", 1, IsUnique = true, IsClustered = true)]
         [Required]
