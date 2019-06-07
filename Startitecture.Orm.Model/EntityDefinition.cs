@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The definition collection.
         /// </summary>
-        private readonly Lazy<SortedSet<EntityAttributeDefinition>> allAttributes;
+        private readonly Lazy<List<EntityAttributeDefinition>> allAttributes;
 
         /// <summary>
         /// The returnable attributes.
@@ -79,8 +79,8 @@ namespace Startitecture.Orm.Model
 
             var entityReference = new EntityReference { EntityType = type };
             this.DefinitionProvider = definitionProvider;
-            this.allAttributes = new Lazy<SortedSet<EntityAttributeDefinition>>(
-                () => new SortedSet<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(type)));
+            this.allAttributes = new Lazy<List<EntityAttributeDefinition>>(
+                () => new List<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(type)));
 
             // Do not include mapped attributes.
             this.returnableAttributes =
@@ -120,8 +120,8 @@ namespace Startitecture.Orm.Model
             }
 
             this.DefinitionProvider = definitionProvider;
-            this.allAttributes = new Lazy<SortedSet<EntityAttributeDefinition>>(
-                () => new SortedSet<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(entityReference.EntityType)));
+            this.allAttributes = new Lazy<List<EntityAttributeDefinition>>(
+                () => new List<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(entityReference.EntityType)));
 
             // Do not include mapped attributes.
             this.returnableAttributes =

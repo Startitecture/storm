@@ -194,6 +194,12 @@ namespace Startitecture.Orm.Schema
                     continue;
                 }
 
+                // Ignore collections and interfaces. 
+                if (propertyInfo.PropertyType.IsInterface || propertyInfo.PropertyType.IsSubclassOf(typeof(IEnumerable<>)))
+                {
+                    continue;
+                }
+
                 var isIdentity = propertyInfo.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption
                                  == DatabaseGeneratedOption.Identity;
 

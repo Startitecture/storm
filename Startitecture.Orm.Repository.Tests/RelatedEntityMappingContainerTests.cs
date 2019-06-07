@@ -48,7 +48,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             // Apply the parent back to the recursive child, because this would not have done it.
             actual.Recursive.Parent = parent;
-            Assert.AreEqual<Child>(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
+            Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
 
         /// <summary>
@@ -72,18 +72,19 @@ namespace Startitecture.Orm.Repository.Tests
             using (var repositoryProvider = MockRepository.GenerateMock<IRepositoryProvider>())
             {
                 var dependencyContainer = new DependencyContainer();
+
                 ////repositoryProvider.Stub(provider => provider.EntityMapper).Return(mapper);
                 repositoryProvider.Stub(provider => provider.DependencyContainer).Return(dependencyContainer);
 
                 // Prime the dependency container with the parent object.
                 dependencyContainer.SetDependency(parent.RecursiveId, parent);
-                
+
                 var row = mapper.Map<ChildRow>(expected);
                 row.SetTransactionProvider(repositoryProvider);
                 var actual = mapper.Map<Child>(row);
 
                 Assert.IsNotNull(actual.Parent);
-                Assert.AreEqual<Child>(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
+                Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
             }
         }
 
@@ -111,7 +112,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             // Apply the parent back to the recursive child, because this would not have done it.
             actual.Recursive.Parent = parent;
-            Assert.AreEqual<Child>(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
+            Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
 
         /// <summary>
