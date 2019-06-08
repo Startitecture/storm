@@ -303,7 +303,7 @@ namespace Startitecture.Orm.Mapper
                 const BindingFlags InstanceConstructors = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
                 generator.Emit(OpCodes.Newobj, type.GetConstructor(InstanceConstructors, null, new Type[0], null));
 
-                int columnsMapped = attributeDefinitions.Count;
+                ////int columnsMapped = attributeDefinitions.Count;
 
                 // Enumerate all fields generating a set assignment for the column
                 for (var i = dataRequest.FirstColumn; i < dataRequest.FirstColumn + dataRequest.FieldCount; i++)
@@ -406,16 +406,16 @@ namespace Startitecture.Orm.Mapper
                         generator.Emit(OpCodes.Callvirt, attribute.SetValueMethod); // poco
                     }
 
-                    columnsMapped--;
+                    ////columnsMapped--;
                     generator.MarkLabel(nextLabel);
                 }
 
-                if (columnsMapped != 0)
-                {
-                    throw new OperationException(
-                        delegateInfo,
-                        $"Expected {dataRequest.FieldCount} columns, {columnsMapped} columns were not mapped.");
-                }
+                ////if (columnsMapped != 0)
+                ////{
+                ////    throw new OperationException(
+                ////        delegateInfo,
+                ////        $"Expected {dataRequest.FieldCount} columns, {columnsMapped} columns were not mapped.");
+                ////}
 
                 var onLoadedMethod = RecurseInheritedTypes(type, x => x.GetMethod("OnLoaded", InstanceConstructors, null, new Type[0], null));
 
