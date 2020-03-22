@@ -106,12 +106,12 @@ namespace Startitecture.Orm.Testing.Model
         {
             if (entity == null)
             {
-                throw new ArgumentNullException("entity");
+                throw new ArgumentNullException(nameof(entity));
             }
 
             if (entity.FakeComplexEntityId.HasValue == false)
             {
-                throw new BusinessException(entity, String.Format(ValidationMessages.PropertyMustBeSet, "FakeComplexEntityId"));
+                throw new BusinessException(entity, string.Format(ValidationMessages.PropertyMustBeSet, "FakeComplexEntityId"));
             }
 
             this.FakeComplexEntityId = entity.FakeComplexEntityId;

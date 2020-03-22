@@ -56,6 +56,21 @@ namespace Startitecture.Orm.Sql
             return new SqlSelection<TItem>(example, selectors);
         }
 
+        /// <summary>
+        /// Gets a <see cref="QueryContext{TItem}"/> as a SELECT statement.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to use to create the context.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item being queried.
+        /// </typeparam>
+        /// <returns>
+        /// A new <see cref="QueryContext{TItem}"/> for the specified <paramref name="selection"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
         public static QueryContext<TItem> AsSelect<TItem>([NotNull] this ItemSelection<TItem> selection)
         {
             if (selection == null)
@@ -66,6 +81,21 @@ namespace Startitecture.Orm.Sql
             return new QueryContext<TItem>(selection, StatementOutputType.Select, 0);
         }
 
+        /// <summary>
+        /// Gets a <see cref="QueryContext{TItem}"/> as a CONTAINS statement.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to use to create the context.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item being queried.
+        /// </typeparam>
+        /// <returns>
+        /// A new <see cref="QueryContext{TItem}"/> for the specified <paramref name="selection"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
         public static QueryContext<TItem> AsContains<TItem>([NotNull] this ItemSelection<TItem> selection)
         {
             if (selection == null)
@@ -76,6 +106,21 @@ namespace Startitecture.Orm.Sql
             return new QueryContext<TItem>(selection, StatementOutputType.Contains, 0);
         }
 
+        /// <summary>
+        /// Gets a <see cref="QueryContext{TItem}"/> as a DELETE statement.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to use to create the context.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item being deleted.
+        /// </typeparam>
+        /// <returns>
+        /// A new <see cref="QueryContext{TItem}"/> for the specified <paramref name="selection"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
         public static QueryContext<TItem> AsDelete<TItem>([NotNull] this ItemSelection<TItem> selection)
         {
             if (selection == null)

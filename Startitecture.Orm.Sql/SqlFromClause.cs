@@ -10,7 +10,6 @@
 namespace Startitecture.Orm.Sql
 {
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Contains the elements of a  Transact SQL FROM clause.

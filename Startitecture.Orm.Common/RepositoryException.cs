@@ -13,7 +13,6 @@ namespace Startitecture.Orm.Common
     using System.Security.Permissions;
 
     using Core;
-    using Core;
 
     /// <summary>
     /// Thrown when there is an error accessing a data repository.

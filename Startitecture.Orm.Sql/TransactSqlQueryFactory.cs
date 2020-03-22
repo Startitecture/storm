@@ -9,7 +9,6 @@ namespace Startitecture.Orm.Sql
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Runtime.CompilerServices;
 
     using JetBrains.Annotations;
 
@@ -195,14 +194,14 @@ namespace Startitecture.Orm.Sql
                 case StatementOutputType.Contains:
                     return string.Format(IfExistsClause, this.CreateCompleteStatement(queryContext, true));
                 case StatementOutputType.Update:
-                    return CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset);
+                    return this.CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset);
                 case StatementOutputType.Delete:
                     // Rely on the underlying entity definition for delimiters.
                     var primaryTableName = entityDefinition.QualifiedName;
                     var filter = selection.Filters.Any()
                                      ? string.Concat(
                                          Environment.NewLine,
-                                         string.Format(SqlWhereClause, CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset)))
+                                         string.Format(SqlWhereClause, this.CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset)))
                                      : string.Empty;
 
                     if (selection.Relations.Any() == false)
@@ -223,86 +222,6 @@ namespace Startitecture.Orm.Sql
                 default:
                     throw new ArgumentOutOfRangeException();
             }
-        }
-
-        /// <summary>
-        /// Creates a filter for the current selection.
-        /// </summary>
-        /// <param name="entityDefinition">
-        /// The entity definition.
-        /// </param>
-        /// <param name="filters">
-        /// The filters to apply.
-        /// </param>
-        /// <param name="indexOffset">
-        /// The index offset.
-        /// </param>
-        /// <returns>
-        /// The filter clause as a <see cref="string"/>.
-        /// </returns>
-        /// <exception cref="IndexOutOfRangeException">
-        /// The number of filter values is outside the range handled by the method.
-        /// </exception>
-        private string CreateFilter(IEntityDefinition entityDefinition, IEnumerable<ValueFilter> filters, int indexOffset)
-        {
-            if (filters == null)
-            {
-                throw new ArgumentNullException(nameof(filters));
-            }
-
-            var filterTokens = new List<string>();
-            var index = indexOffset;
-
-            foreach (var filter in filters)
-            {
-                var entityReference = this.definitionProvider.GetEntityReference(filter.AttributeLocation.PropertyInfo);
-                var entityLocation = this.definitionProvider.GetEntityLocation(entityReference);
-
-                var attribute = entityDefinition.Find(
-                    filter.AttributeLocation.EntityReference.EntityAlias ?? entityLocation.Alias ?? entityLocation.Name,
-                    filter.AttributeLocation.PropertyInfo.Name);
-
-                var referenceName = SqlQualifier.GetReferenceName(attribute);
-                var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
-
-                switch (filter.FilterType)
-                {
-                    case FilterType.Equality:
-                        filterTokens.Add(string.Format(EqualityFilter, referenceName, GetEqualityOperand(filter.FilterValues.First()), index++));
-                        break;
-                    case FilterType.Inequality:
-                        throw new NotImplementedException();
-                    case FilterType.LessThan:
-                        throw new NotImplementedException();
-                    case FilterType.LessThanOrEqualTo:
-                        filterTokens.Add(string.Format(LessThanPredicate, referenceName, index++));
-                        break;
-                    case FilterType.GreaterThan:
-                        throw new NotImplementedException();
-                    case FilterType.GreaterThanOrEqualTo:
-                        filterTokens.Add(string.Format(GreaterThanPredicate, referenceName, index++));
-                        break;
-                    case FilterType.Between:
-                        filterTokens.Add(string.Format(BetweenFilter, referenceName, index++, index++));
-                        break;
-                    case FilterType.MatchesSet:
-                        filterTokens.Add(GetInclusionFilter(referenceName, index, setValues));
-                        index += setValues.Count;
-                        break;
-                    case FilterType.DoesNotMatchSet:
-                        throw new NotImplementedException();
-                    case FilterType.IsSet:
-                        filterTokens.Add(string.Format(NotNullPredicate, referenceName));
-                        break;
-                    case FilterType.IsNotSet:
-                        filterTokens.Add(string.Format(NullPredicate, referenceName));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(filter.FilterType));
-                }
-            }
-
-            return string.Join(string.Concat(FilterSeparator, Environment.NewLine), filterTokens);
         }
 
         /// <summary>
@@ -397,6 +316,86 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
+        /// Creates a filter for the current selection.
+        /// </summary>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="filters">
+        /// The filters to apply.
+        /// </param>
+        /// <param name="indexOffset">
+        /// The index offset.
+        /// </param>
+        /// <returns>
+        /// The filter clause as a <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="IndexOutOfRangeException">
+        /// The number of filter values is outside the range handled by the method.
+        /// </exception>
+        private string CreateFilter(IEntityDefinition entityDefinition, IEnumerable<ValueFilter> filters, int indexOffset)
+        {
+            if (filters == null)
+            {
+                throw new ArgumentNullException(nameof(filters));
+            }
+
+            var filterTokens = new List<string>();
+            var index = indexOffset;
+
+            foreach (var filter in filters)
+            {
+                var entityReference = this.definitionProvider.GetEntityReference(filter.AttributeLocation.PropertyInfo);
+                var entityLocation = this.definitionProvider.GetEntityLocation(entityReference);
+
+                var attribute = entityDefinition.Find(
+                    filter.AttributeLocation.EntityReference.EntityAlias ?? entityLocation.Alias ?? entityLocation.Name,
+                    filter.AttributeLocation.PropertyInfo.Name);
+
+                var referenceName = SqlQualifier.GetReferenceName(attribute);
+                var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
+
+                switch (filter.FilterType)
+                {
+                    case FilterType.Equality:
+                        filterTokens.Add(string.Format(EqualityFilter, referenceName, GetEqualityOperand(filter.FilterValues.First()), index++));
+                        break;
+                    case FilterType.Inequality:
+                        throw new NotImplementedException();
+                    case FilterType.LessThan:
+                        throw new NotImplementedException();
+                    case FilterType.LessThanOrEqualTo:
+                        filterTokens.Add(string.Format(LessThanPredicate, referenceName, index++));
+                        break;
+                    case FilterType.GreaterThan:
+                        throw new NotImplementedException();
+                    case FilterType.GreaterThanOrEqualTo:
+                        filterTokens.Add(string.Format(GreaterThanPredicate, referenceName, index++));
+                        break;
+                    case FilterType.Between:
+                        filterTokens.Add(string.Format(BetweenFilter, referenceName, index++, index++));
+                        break;
+                    case FilterType.MatchesSet:
+                        filterTokens.Add(GetInclusionFilter(referenceName, index, setValues));
+                        index += setValues.Count;
+                        break;
+                    case FilterType.DoesNotMatchSet:
+                        throw new NotImplementedException();
+                    case FilterType.IsSet:
+                        filterTokens.Add(string.Format(NotNullPredicate, referenceName));
+                        break;
+                    case FilterType.IsNotSet:
+                        filterTokens.Add(string.Format(NullPredicate, referenceName));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(filter.FilterType));
+                }
+            }
+
+            return string.Join(string.Concat(FilterSeparator, Environment.NewLine), filterTokens);
+        }
+
+        /// <summary>
         /// Creates a complete selection statement.
         /// </summary>
         /// <typeparam name="TItem">
@@ -470,14 +469,13 @@ namespace Startitecture.Orm.Sql
 
             string selectColumns = isContains
                                        ? '1'.ToString()
-                                       : string.Join(
-                                           string.Concat(",", Environment.NewLine),
-                                           selectAttributes.Select(GetQualifiedColumnName));
+                                       : string.Join(string.Concat(",", Environment.NewLine), selectAttributes.Select(GetQualifiedColumnName));
 
             ////if (selection.SelectionSource == selection.ItemDefinition.EntityName)
             ////{
-                // Select as we normally would. Do not add delimiters for tables.
+            // Select as we normally would. Do not add delimiters for tables.
             var fromClause = string.Concat(FromStatement, entityDefinition.QualifiedName);
+
             ////}
             ////else
             ////{
@@ -487,12 +485,11 @@ namespace Startitecture.Orm.Sql
             ////        Environment.NewLine,
             ////        string.Format(DerivedTableStatement, selection.SelectionSource, selection.ItemDefinition.EntityName));
             ////}
-
             var joinClause = this.transactSqlJoin.Create(selection); //// selection.Relations.CreateJoinClause();
             var filter = selection.Filters.Any()
                              ? string.Concat(
                                  Environment.NewLine,
-                                 string.Format(SqlWhereClause, CreateFilter(entityDefinition, selection.Filters, indexOffset)))
+                                 string.Format(SqlWhereClause, this.CreateFilter(entityDefinition, selection.Filters, indexOffset)))
                              : string.Empty;
 
             return string.Concat(

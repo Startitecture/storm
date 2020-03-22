@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Repository.Tests
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -91,7 +92,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             var result = validator.Validate(model);
             return from e in result.Errors
-                   select String.Format(ValidationMessages.ItemValidationFailed, e.PropertyName, e.AttemptedValue, e.ErrorMessage);
+                   select string.Format(CultureInfo.CurrentCulture, ValidationMessages.ItemValidationFailed, e.PropertyName, e.AttemptedValue, e.ErrorMessage);
         }
     }
 }

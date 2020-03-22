@@ -10,6 +10,8 @@ namespace Startitecture.Orm.Testing.Model.PM
     using System.Collections.Generic;
     using System.Linq;
 
+    using JetBrains.Annotations;
+
     using Startitecture.Core;
 
     /// <summary>
@@ -220,7 +222,7 @@ namespace Startitecture.Orm.Testing.Model.PM
         /// </param>
         public bool Equals(UnifiedFieldValue other)
         {
-            return Evaluate.Equals(this, other, ComparisonProperties) && this.FieldValues.SequenceEqual(other.FieldValues);
+            return Evaluate.Equals(this, other, ComparisonProperties) && this.FieldValues.SequenceEqual(other?.FieldValues ?? new List<object>());
         }
 
         /// <summary>
@@ -244,8 +246,18 @@ namespace Startitecture.Orm.Testing.Model.PM
         /// <param name="values">
         /// The values to set.
         /// </param>
-        public void SetValues(Person person, params object[] values)
+        public void SetValues([NotNull] Person person, [NotNull] params object[] values)
         {
+            if (person == null)
+            {
+                throw new ArgumentNullException(nameof(person));
+            }
+
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
             var filteredValues = new List<object>();
             var valueType = this.UnifiedField.UnifiedValueType;
             this.LastModifiedPerson = person;
@@ -415,7 +427,7 @@ namespace Startitecture.Orm.Testing.Model.PM
 
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(nameof(valueType));
             }
         }
     }

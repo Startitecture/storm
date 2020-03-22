@@ -15,6 +15,7 @@ namespace Startitecture.Orm.Repository.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Repository.Tests.Models;
     using Startitecture.Orm.Testing.Model;
     using Startitecture.Orm.Testing.RhinoMocks;
@@ -432,7 +433,8 @@ namespace Startitecture.Orm.Repository.Tests
 
             var expected = new List<FakeComplexEntity> { entity1, entity2, entity3 };
 
-            using (var repositoryProvider = RepositoryMockFactory.CreateProvider(mapper))
+            using (var dependencyContainer = new DependencyContainer())
+            using (var repositoryProvider = RepositoryMockFactory.CreateProvider(mapper, dependencyContainer))
             {
                 var rows = mapper.Map<List<FakeRaisedComplexRow>>(expected);
 

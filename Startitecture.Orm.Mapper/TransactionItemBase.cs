@@ -34,7 +34,7 @@ namespace Startitecture.Orm.Mapper
         /// <param name="repositoryProvider">
         /// The repository provider to use for the transaction context.
         /// </param>
-        public void SetTransactionProvider([NotNull] IRepositoryProvider repositoryProvider)
+        public void SetTransactionProvider([JetBrains.Annotations.NotNull] IRepositoryProvider repositoryProvider)
         {
             if (repositoryProvider == null)
             {

@@ -150,7 +150,7 @@ namespace Startitecture.Orm.Testing.Model.PM
         /// </param>
         public bool Equals(FormSubmissionValue other)
         {
-            return Evaluate.Equals(this, other, ComparisonProperties) && this.FieldValues.SequenceEqual(other.FieldValues);
+            return Evaluate.Equals(this, other, ComparisonProperties) && this.FieldValues.SequenceEqual(other?.FieldValues ?? new List<object>());
         }
 
         /// <summary>

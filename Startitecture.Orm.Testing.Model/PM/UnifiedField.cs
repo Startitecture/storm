@@ -10,6 +10,8 @@ namespace Startitecture.Orm.Testing.Model.PM
     using System.Collections.Generic;
     using System.Linq;
 
+    using JetBrains.Annotations;
+
     using Startitecture.Core;
 
     /// <summary>
@@ -240,7 +242,7 @@ namespace Startitecture.Orm.Testing.Model.PM
         /// <param name="obj">
         /// An object to compare with this instance.
         /// </param>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
         /// <filterpriority>2</filterpriority>
@@ -328,8 +330,13 @@ namespace Startitecture.Orm.Testing.Model.PM
         /// The <see cref="UnifiedFieldSource.SourceType"/> of <paramref name="fieldSource"/> is not
         /// <see cref="UnifiedFieldSourceType.SystemField"/> or <see cref="UnifiedFieldSourceType.CustomField"/>.
         /// </exception>
-        public void SourceFrom(UnifiedFieldSource fieldSource)
+        public void SourceFrom([NotNull] UnifiedFieldSource fieldSource)
         {
+            if (fieldSource == null)
+            {
+                throw new ArgumentNullException(nameof(fieldSource));
+            }
+
             switch (fieldSource.SourceType)
             {
                 case UnifiedFieldSourceType.SystemField:

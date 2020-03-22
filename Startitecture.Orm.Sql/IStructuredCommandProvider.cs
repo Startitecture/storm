@@ -10,7 +10,6 @@
 namespace Startitecture.Orm.Sql
 {
     using System.Data;
-    using System.Data.SqlClient;
 
     /// <summary>
     /// The StructuredCommandProvider interface.
@@ -32,9 +31,6 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// An <see cref="IDbCommand"/> that will execute the structured command.
         /// </returns>
-        /// <exception cref="Startitecture.Core.OperationException">
-        /// The underlying <see cref="SAF.Data.Providers.IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
-        /// </exception>
         IDbCommand CreateCommand(IStructuredCommand structuredCommand, DataTable dataTable, IDbTransaction transaction);
     }
 }

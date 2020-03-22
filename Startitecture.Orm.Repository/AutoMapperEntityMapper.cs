@@ -17,7 +17,7 @@ namespace Startitecture.Orm.Repository
     using Startitecture.Orm.Common;
 
     /// <summary>
-    /// Implements <see cref="Startitecture.Orm.Common.IEntityMapper"/> using AutoMapper.
+    /// Implements <see cref="IEntityMapper"/> using AutoMapper.
     /// </summary>
     public sealed class AutoMapperEntityMapper : IEntityMapper
     {
@@ -126,7 +126,10 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The mapped object as a <typeparamref name="TOutput"/>.
         /// </returns>
-        /// <exception cref="ApplicationConfigurationException">
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="input"/> is null.
+        /// </exception>
+        /// <exception cref="OperationException">
         /// The mapping could not be performed because a supported mapping has not been configured.
         /// </exception>
         public TOutput MapTo<TInput, TOutput>(TInput input, TOutput output)

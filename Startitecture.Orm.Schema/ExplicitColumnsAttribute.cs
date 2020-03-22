@@ -10,6 +10,7 @@
 namespace Startitecture.Orm.Schema
 {
     using System;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     /// <summary>
     /// Declares classes that require all column properties to be marked with the <see cref="ColumnAttribute"/> attribute.

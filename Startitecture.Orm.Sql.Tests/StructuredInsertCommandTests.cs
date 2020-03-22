@@ -14,6 +14,9 @@
     using FormSubmissionValueRow = Startitecture.Orm.Testing.Model.DocumentEntities.FormSubmissionValueRow;
     using UnifiedFieldValueRow = Startitecture.Orm.Testing.Model.FieldEntities.UnifiedFieldValueRow;
 
+    /// <summary>
+    /// The structured insert command tests
+    /// </summary>
     [TestClass]
     public class StructuredInsertCommandTests
     {

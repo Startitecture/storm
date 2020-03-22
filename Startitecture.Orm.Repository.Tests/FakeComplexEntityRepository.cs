@@ -9,6 +9,10 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
+    using System;
+
+    using JetBrains.Annotations;
+
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Testing.Model;
@@ -39,7 +43,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The item to create the selection for.
         /// </param>
         /// <returns>
-        /// A <see cref="T:SAF.Data.ItemSelection`1"/> for the specified item.
+        /// A <see cref="ItemSelection{T}"/> for the specified item.
         /// </returns>
         protected override ItemSelection<FakeComplexRow> GetUniqueItemSelection(FakeComplexRow item)
         {
@@ -81,8 +85,18 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="provider">
         /// The repository provider.
         /// </param>
-        protected override void LoadChildren(FakeComplexEntity entity, IRepositoryProvider provider)
+        protected override void LoadChildren([NotNull] FakeComplexEntity entity, [NotNull] IRepositoryProvider provider)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
             provider.DependencyContainer.SetDependency(entity.FakeComplexEntityId, entity);
 
             // Load the children of the entity using their repository.
@@ -109,8 +123,23 @@ namespace Startitecture.Orm.Repository.Tests
         /// <remarks>
         /// Use repositories with the entity to save dependencies and apply the results to the <paramref name="dataItem"/>.
         /// </remarks>
-        protected override void SaveDependencies(FakeComplexEntity entity, IRepositoryProvider provider, FakeComplexRow dataItem)
+        protected override void SaveDependencies([NotNull] FakeComplexEntity entity, [NotNull] IRepositoryProvider provider, [NotNull] FakeComplexRow dataItem)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            if (dataItem == null)
+            {
+                throw new ArgumentNullException(nameof(dataItem));
+            }
+
             var subEntityRepo = new FakeSubEntityRepository(provider, this.EntityMapper);
             subEntityRepo.Save(entity.FakeSubEntity);
 
@@ -157,8 +186,18 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="provider">
         /// The repository provider for the current operation.
         /// </param>
-        protected override void SaveChildren(FakeComplexEntity entity, IRepositoryProvider provider)
+        protected override void SaveChildren([NotNull] FakeComplexEntity entity, [NotNull] IRepositoryProvider provider)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
             var childRepo = new FakeChildEntityRepository(provider, this.EntityMapper);
 
             foreach (var childEntity in entity.ChildEntities)

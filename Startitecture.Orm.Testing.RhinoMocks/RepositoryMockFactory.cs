@@ -48,13 +48,16 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="entityMapper">
         /// The entity mapper to use in the repository provider.
         /// </param>
+        /// <param name="container">
+        /// The container for the provider.
+        /// </param>
         /// <returns>
         /// A mocked <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with entity mapper and dependency container set.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="entityMapper"/> is null.
         /// </exception>
-        public static IRepositoryProvider CreateProvider([NotNull] IEntityMapper entityMapper)
+        public static IRepositoryProvider CreateProvider([NotNull] IEntityMapper entityMapper, [NotNull] DependencyContainer container)
         {
             if (entityMapper == null)
             {
@@ -63,8 +66,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
             var repositoryProvider = MockRepository.GenerateMock<IRepositoryProvider>();
             repositoryProvider.Stub(provider => provider.EntityMapper).Return(entityMapper);
-            var dependencyContainer = new DependencyContainer();
-            repositoryProvider.Stub(provider => provider.DependencyContainer).Return(dependencyContainer);
+            repositoryProvider.Stub(provider => provider.DependencyContainer).Return(container);
             return repositoryProvider;
         }
 

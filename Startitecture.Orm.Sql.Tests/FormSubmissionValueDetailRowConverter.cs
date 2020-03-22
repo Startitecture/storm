@@ -8,7 +8,10 @@ namespace Startitecture.Orm.Sql.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
+
+    using JetBrains.Annotations;
 
     using Startitecture.Orm.Testing.Model;
     using Startitecture.Orm.Testing.Model.DocumentEntities;
@@ -31,8 +34,13 @@ namespace Startitecture.Orm.Sql.Tests
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of <see cref="FormSubmissionValueDetailRow"/> items.
         /// </returns>
-        public IEnumerable<FormSubmissionValueDetailRow> Convert(IEnumerable<FormSubmissionValue> values)
+        public IEnumerable<FormSubmissionValueDetailRow> Convert([NotNull] IEnumerable<FormSubmissionValue> values)
         {
+            if (values == null)
+            {
+                throw new ArgumentNullException(nameof(values));
+            }
+
             foreach (var value in values)
             {
                 if (value.FieldValues.Any())
@@ -63,11 +71,11 @@ namespace Startitecture.Orm.Sql.Tests
                                     IntegerValue = enumeratedValue?.EnumeratedValueId,
                                     NumericValue =
                                         value.UnifiedField.IsUserSourcedField && value.UnifiedField.IsNumericValueType
-                                            ? System.Convert.ToDouble(fieldValue)
+                                            ? System.Convert.ToDouble(fieldValue, CultureInfo.CurrentCulture)
                                             : (double?)null,
                                     StringValue =
                                         value.UnifiedField.IsUserSourcedField && value.UnifiedField.IsTextValueType
-                                            ? System.Convert.ToString(fieldValue)
+                                            ? System.Convert.ToString(fieldValue, CultureInfo.CurrentCulture)
                                             : null,
                                     EnumeratedValueName = enumeratedValue?.Name,
                                     EnumeratedValueSortOrder = enumeratedValue?.SortOrder

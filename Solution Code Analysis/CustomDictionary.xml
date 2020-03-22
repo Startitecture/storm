@@ -15,6 +15,8 @@
       <Word>Nds</Word>
       <Word>dbo</Word>
       <Word>Postgre</Word>
+      <Word>Orm</Word>
+      <Word>Startitecture</Word>
       <!--<Word>Oig</Word>-->
     </Recognized>
     <Deprecated>

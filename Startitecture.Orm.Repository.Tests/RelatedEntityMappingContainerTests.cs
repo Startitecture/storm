@@ -69,10 +69,9 @@ namespace Startitecture.Orm.Repository.Tests
             var expected = new Child(recursive, 45873);
 
             // Using the repository provider, we have a dependency container that we can use to get the parent.
+            using (var dependencyContainer = new DependencyContainer())
             using (var repositoryProvider = MockRepository.GenerateMock<IRepositoryProvider>())
             {
-                var dependencyContainer = new DependencyContainer();
-
                 ////repositoryProvider.Stub(provider => provider.EntityMapper).Return(mapper);
                 repositoryProvider.Stub(provider => provider.DependencyContainer).Return(dependencyContainer);
 

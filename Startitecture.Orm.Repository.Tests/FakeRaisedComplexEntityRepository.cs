@@ -9,6 +9,8 @@ namespace Startitecture.Orm.Repository.Tests
     using System;
     using System.Linq.Expressions;
 
+    using JetBrains.Annotations;
+
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Testing.Model;
@@ -47,8 +49,18 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="provider">
         /// The repository provider.
         /// </param>
-        protected override void LoadChildren(FakeComplexEntity entity, IRepositoryProvider provider)
+        protected override void LoadChildren([NotNull] FakeComplexEntity entity, [NotNull] IRepositoryProvider provider)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
             provider.DependencyContainer.SetDependency(entity.FakeComplexEntityId, entity);
 
             // Load the children of the entity using their repository.
@@ -61,8 +73,24 @@ namespace Startitecture.Orm.Repository.Tests
         }
 
         /// <inheritdoc />
-        protected override void SaveDependencies(FakeComplexEntity entity, IRepositoryProvider provider, FakeRaisedComplexRow dataItem)
+        protected override void SaveDependencies([NotNull] FakeComplexEntity entity, [NotNull] IRepositoryProvider provider,
+                                                 [NotNull] FakeRaisedComplexRow dataItem)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            if (dataItem == null)
+            {
+                throw new ArgumentNullException(nameof(dataItem));
+            }
+
             var subEntityRepo = new FakeRaisedSubEntityRepository(provider, this.EntityMapper);
             subEntityRepo.Save(entity.FakeSubEntity);
 
@@ -103,8 +131,18 @@ namespace Startitecture.Orm.Repository.Tests
         /// <param name="provider">
         /// The repository provider for the current operation.
         /// </param>
-        protected override void SaveChildren(FakeComplexEntity entity, IRepositoryProvider provider)
+        protected override void SaveChildren([NotNull] FakeComplexEntity entity, [NotNull] IRepositoryProvider provider)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
             var childRepo = new FakeRaisedChildEntityRepository(provider, this.EntityMapper);
 
             foreach (var childEntity in entity.ChildEntities)

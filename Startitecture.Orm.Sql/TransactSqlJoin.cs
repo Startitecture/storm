@@ -1,10 +1,16 @@
-﻿namespace Startitecture.Orm.Sql
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="TransactSqlJoin.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
+// </copyright>
+// <summary>
+//   Represents a Transact-SQL join.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Orm.Sql
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -12,6 +18,9 @@
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
 
+    /// <summary>
+    /// Represents a Transact-SQL join.
+    /// </summary>
     public class TransactSqlJoin
     {
         /// <summary>

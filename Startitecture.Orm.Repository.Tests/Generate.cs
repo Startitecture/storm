@@ -136,6 +136,7 @@ namespace Startitecture.Orm.Repository.Tests
             return submission;
         }
 
+/*
         /// <summary>
         /// Creates form submission values.
         /// </summary>
@@ -269,6 +270,7 @@ namespace Startitecture.Orm.Repository.Tests
 
             return new List<UnifiedFieldValue> { dateValue, identifierValue, enumerationValue, integerValue, currencyValue, numericValue, textValue };
         }
+*/
 
         /// <summary>
         /// Creates form submission values.
@@ -526,7 +528,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The property type to get the field type for.
         /// </param>
         /// <returns>
-        /// The <see cref="UnifiedFieldType"/> for the <see cref="propertyType"/>.
+        /// The <see cref="UnifiedFieldType"/> for the <paramref name="propertyType"/>.
         /// </returns>
         /// <exception cref="BusinessException">
         /// <paramref name="propertyType"/> is not supported.

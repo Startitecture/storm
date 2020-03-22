@@ -8,6 +8,7 @@ namespace Startitecture.Orm.Schema.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
 
     using Startitecture.Core;
 
@@ -103,7 +104,7 @@ namespace Startitecture.Orm.Schema.Tests
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return this.DependentIntegerValue.ToString();
+            return this.DependentIntegerValue.ToString(CultureInfo.CurrentCulture);
         }
 
         /// <summary>

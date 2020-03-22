@@ -199,7 +199,7 @@ namespace Startitecture.Orm.Testing.Model.PM
         {
             // Here, order of values isn't important and will likely not remain the same.
             return Evaluate.Equals(this, other, ComparisonProperties)
-                   && Evaluate.CollectionEquals(this.FormSubmissionValues, other.FormSubmissionValues);
+                   && Evaluate.CollectionEquals(this.FormSubmissionValues, other?.FormSubmissionValues);
         }
 
         /// <summary>

@@ -6,6 +6,10 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
+    using System;
+
+    using JetBrains.Annotations;
+
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Testing.Model;
@@ -36,7 +40,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// The item to create the selection for.
         /// </param>
         /// <returns>
-        /// A <see cref="T:SAF.Data.ItemSelection`1"/> for the specified item.
+        /// A <see cref="ItemSelection{T}"/> for the specified item.
         /// </returns>
         protected override ItemSelection<FakeFlatSubRow> GetUniqueItemSelection(FakeFlatSubRow item)
         {
@@ -62,8 +66,23 @@ namespace Startitecture.Orm.Repository.Tests
         /// <remarks>
         /// Use repositories with the entity to save dependencies and apply the results to the <paramref name="dataItem"/>.
         /// </remarks>
-        protected override void SaveDependencies(FakeSubEntity entity, IRepositoryProvider provider, FakeFlatSubRow dataItem)
+        protected override void SaveDependencies([NotNull] FakeSubEntity entity, [NotNull] IRepositoryProvider provider, [NotNull] FakeFlatSubRow dataItem)
         {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (provider == null)
+            {
+                throw new ArgumentNullException(nameof(provider));
+            }
+
+            if (dataItem == null)
+            {
+                throw new ArgumentNullException(nameof(dataItem));
+            }
+
             var subSubEntityRepo = new FakeSubSubEntityRepository(provider, this.EntityMapper);
             subSubEntityRepo.Save(entity.FakeSubSubEntity);
             ////dataItem.FakeSubSubEntityId = entity.FakeSubSubEntity.FakeSubSubEntityId.GetValueOrDefault();

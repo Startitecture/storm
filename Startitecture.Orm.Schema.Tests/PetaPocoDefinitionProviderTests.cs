@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Schema.Tests
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Globalization;
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -293,11 +294,11 @@ namespace Startitecture.Orm.Schema.Tests
                                       topContainerNameDefinition
                                   };
 
-            Assert.AreEqual<int>(definitions.Count, actual.AllAttributes.Count());
+            Assert.AreEqual(definitions.Count, actual.AllAttributes.Count());
 
             foreach (var definition in definitions)
             {
-                Assert.IsTrue(actual.AllAttributes.Contains(definition), Convert.ToString(definition));
+                Assert.IsTrue(actual.AllAttributes.Contains(definition), Convert.ToString(definition, CultureInfo.CurrentCulture));
             }
         }
 

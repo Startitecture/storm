@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Repository.Tests
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
 
     /// <summary>
     /// A fake entity for tests.
@@ -46,35 +47,37 @@ namespace Startitecture.Orm.Repository.Tests
         #region Public Methods and Operators
 
         /// <summary>
-        /// The ==.
+        /// Determines if one value is equal to the other.
         /// </summary>
         /// <param name="left">
-        /// The left.
+        /// The left value.
         /// </param>
         /// <param name="right">
-        /// The right.
+        /// The right value.
         /// </param>
         /// <returns>
+        /// True if the values are equal; otherwise false.
         /// </returns>
         public static bool operator ==(FakeEntity left, FakeEntity right)
         {
-            return Equals(left, right);
+            return EqualityComparer<FakeEntity>.Default.Equals(left, right);
         }
 
         /// <summary>
-        /// The !=.
+        /// Determines if one value is not equal to the other.
         /// </summary>
         /// <param name="left">
-        /// The left.
+        /// The left value.
         /// </param>
         /// <param name="right">
-        /// The right.
+        /// The right value.
         /// </param>
         /// <returns>
+        /// True if the values are not equal; otherwise false.
         /// </returns>
         public static bool operator !=(FakeEntity left, FakeEntity right)
         {
-            return !Equals(left, right);
+            return EqualityComparer<FakeEntity>.Default.Equals(left, right) == false;
         }
 
         /// <summary>
@@ -98,7 +101,7 @@ namespace Startitecture.Orm.Repository.Tests
                 return true;
             }
 
-            return this.FakeEntityId == other.FakeEntityId && string.Equals(this.Name, other.Name)
+            return this.FakeEntityId == other.FakeEntityId && string.Equals(this.Name, other.Name, StringComparison.CurrentCulture)
                    && string.Equals(this.Description, other.Description, StringComparison.OrdinalIgnoreCase)
                    && this.DateValue.Equals(other.DateValue);
         }
@@ -154,22 +157,22 @@ namespace Startitecture.Orm.Repository.Tests
         }
 
         /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// A <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return String.Format("[{0}] {1}: {2}", this.FakeEntityId, this.Name, this.Description);
+            return $"[{this.FakeEntityId}] {this.Name}: {this.Description}";
         }
 
         /// <summary>
         /// The validate.
         /// </summary>
         /// <returns>
-        /// The <see cref="IEnumerable"/>.
+        /// The <see cref="IEnumerable{T}"/>.
         /// </returns>
         public IEnumerable<string> Validate()
         {

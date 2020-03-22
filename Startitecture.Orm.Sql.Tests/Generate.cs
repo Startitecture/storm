@@ -264,7 +264,9 @@ namespace Startitecture.Orm.Sql.Tests
                 case UnifiedValueType.Attachment:
                     return null;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(
+                        nameof(unifiedField),
+                        $@"{nameof(unifiedField)} property {nameof(unifiedField.UnifiedValueType)} value '{unifiedField.UnifiedValueType}' is out of range.");
             }
         }
 

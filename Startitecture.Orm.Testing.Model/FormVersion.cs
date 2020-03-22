@@ -266,7 +266,7 @@ namespace Startitecture.Orm.Testing.Model
         /// <param name="obj">
         /// An object to compare with this instance.
         /// </param>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
         /// <filterpriority>2</filterpriority>

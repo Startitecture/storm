@@ -120,7 +120,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// </returns>
         public override string ToString()
         {
-            return String.Format("DTO [{0}] {1}: {2}", this.FakeEntityId, this.Name, this.Description);
+            return $"DTO [{this.FakeEntityId}] {this.Name}: {this.Description}";
         }
 
         /// <summary>

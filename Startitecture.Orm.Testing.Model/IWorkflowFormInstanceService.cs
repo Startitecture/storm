@@ -1,3 +1,12 @@
+// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="IWorkflowFormInstanceService.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
+// </copyright>
+// <summary>
+//   The WorkflowFormInstanceService interface.
+// </summary>
+// --------------------------------------------------------------------------------------------------------------------
+
 namespace Startitecture.Orm.Testing.Model
 {
     using System;
@@ -15,7 +24,7 @@ namespace Startitecture.Orm.Testing.Model
         /// The workflow instance to get form instances for.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="SAF.Data.Providers.Tests.FieldsModel.WorkflowFormInstance"/> items.
+        /// An <see cref="IEnumerable{T}"/> of <see cref="WorkflowFormInstance"/> items.
         /// </returns>
         IEnumerable<WorkflowFormInstance> GetInstances(WorkflowInstance workflowInstance);
 
@@ -26,18 +35,18 @@ namespace Startitecture.Orm.Testing.Model
         /// The form instance to save.
         /// </param>
         /// <returns>
-        /// The saved <see cref="SAF.Data.Providers.Tests.FieldsModel.WorkflowFormInstance"/>.
+        /// The saved <see cref="WorkflowFormInstance"/>.
         /// </returns>
         WorkflowFormInstance SaveInstance(WorkflowFormInstance formInstance);
 
         /// <summary>
-        /// Gets the <see cref="SAF.Data.Providers.Tests.FieldsModel.WorkflowFormInstance"/> associated with the specified <paramref name="id"/>.
+        /// Gets the <see cref="WorkflowFormInstance"/> associated with the specified <paramref name="id"/>.
         /// </summary>
         /// <param name="id">
         /// The ID of the instance to get.
         /// </param>
         /// <returns>
-        /// The <see cref="SAF.Data.Providers.Tests.FieldsModel.WorkflowFormInstance"/> associated with the specified <paramref name="id"/>, or null if no instance is found.
+        /// The <see cref="WorkflowFormInstance"/> associated with the specified <paramref name="id"/>, or null if no instance is found.
         /// </returns>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="id"/> is less than 1.
@@ -54,7 +63,7 @@ namespace Startitecture.Orm.Testing.Model
         /// The layout to add.
         /// </param>
         /// <returns>
-        /// The newly created <see cref="SAF.Data.Providers.Tests.FieldsModel.WorkflowFormInstance"/>.
+        /// The newly created <see cref="WorkflowFormInstance"/>.
         /// </returns>
         WorkflowFormInstance AddInstance(WorkflowInstance instance, FormLayout layout);
     }

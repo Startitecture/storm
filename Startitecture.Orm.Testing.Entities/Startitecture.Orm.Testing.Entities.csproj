@@ -1,143 +1,101 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Startitecture.Orm.Testing.Entities</RootNamespace>
-    <AssemblyName>Startitecture.Orm.Testing.Entities</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
-    <FileAlignment>512</FileAlignment>
+    <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <DocumentationFile>bin\Debug\Startitecture.Orm.Testing.Entities.xml</DocumentationFile>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <RunCodeAnalysis>true</RunCodeAnalysis>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
     <DocumentationFile>bin\Release\Startitecture.Orm.Testing.Entities.xml</DocumentationFile>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
-    <Reference Include="System.Xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="AggregateOptionRow.cs" />
-    <Compile Include="CategoryAttributeRow.cs" />
-    <Compile Include="DomainAggregateRow.cs" />
-    <Compile Include="DomainIdentityRow.cs" />
-    <Compile Include="FieldRow.cs" />
-    <Compile Include="Generated\AggregateEventCompletionRow.cs">
+    <Compile Update="Generated\AggregateEventCompletionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\AggregateEventStartRow.cs">
+    <Compile Update="Generated\AggregateEventStartRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\AggregateOptionRow.cs">
+    <Compile Update="Generated\AggregateOptionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\AggregateOptionTypeRow.cs">
+    <Compile Update="Generated\AggregateOptionTypeRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\AggregateSubmissionRow.cs">
+    <Compile Update="Generated\AggregateSubmissionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\AssociationRow.cs">
+    <Compile Update="Generated\AssociationRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\CategoryAttributeRow.cs">
+    <Compile Update="Generated\CategoryAttributeRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\ChildRow.cs">
+    <Compile Update="Generated\ChildRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\CurrentAggregateSubmissionRow.cs">
+    <Compile Update="Generated\CurrentAggregateSubmissionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\DateElementRow.cs">
+    <Compile Update="Generated\DateElementRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\DomainAggregateRow.cs">
+    <Compile Update="Generated\DomainAggregateRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\DomainIdentityRow.cs">
+    <Compile Update="Generated\DomainIdentityRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\FieldRow.cs">
+    <Compile Update="Generated\FieldRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\FieldValueElementRow.cs">
+    <Compile Update="Generated\FieldValueElementRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\FieldValueRow.cs">
+    <Compile Update="Generated\FieldValueRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\FlagAttributeRow.cs">
+    <Compile Update="Generated\FlagAttributeRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\FloatElementRow.cs">
+    <Compile Update="Generated\FloatElementRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\GenericSubmissionRow.cs">
+    <Compile Update="Generated\GenericSubmissionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\GenericSubmissionValueRow.cs">
+    <Compile Update="Generated\GenericSubmissionValueRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\IntegerElementRow.cs">
+    <Compile Update="Generated\IntegerElementRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\MoneyElementRow.cs">
+    <Compile Update="Generated\MoneyElementRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\OtherAggregateRow.cs">
+    <Compile Update="Generated\OtherAggregateRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\RefactorLogRow.cs">
+    <Compile Update="Generated\RefactorLogRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\SubContainerRow.cs">
+    <Compile Update="Generated\SubContainerRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\TemplateRow.cs">
+    <Compile Update="Generated\TemplateRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="Generated\TestDatabase-dbo.cs">
+    <Compile Update="Generated\TestDatabase-dbo.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
     </Compile>
-    <Compile Include="OtherAggregateRow.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Generated\TopContainerRow.cs">
+    <Compile Update="Generated\TopContainerRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
-    <Compile Include="SubContainerRow.cs" />
-    <Compile Include="TemplateRow.cs" />
-    <Compile Include="TopContainerRow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Generated\TestDatabase-dbo.tt">
@@ -146,34 +104,26 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
-    <None Include="Generated\EF.Reverse.POCO.Core.ttinclude" />
-    <None Include="Generated\EF.Reverse.POCO.ttinclude" />
+    <EditorConfigFiles Include="..\Solution Code Analysis\TestProjectCodeAnalysis.editorconfig" Link="TestProjectCodeAnalysis.editorconfig" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
-      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
-      <Name>Startitecture.Core</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
-      <Project>{5643589d-8d46-4717-ae66-994173f3d671}</Project>
-      <Name>Startitecture.Orm.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj">
-      <Project>{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}</Project>
-      <Name>Startitecture.Orm.Mapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
-      <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
-      <Name>Startitecture.Orm.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
-      <Project>{9d984c1f-1486-4718-9d52-0a36b1c06db3}</Project>
-      <Name>Startitecture.Orm.Schema</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
   </ItemGroup>
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
+      <Version>2.9.8</Version>
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
+    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
 </Project>

@@ -25,6 +25,7 @@ namespace Startitecture.Orm.Common
     /// </summary>
     public static class ExtensionMethods
     {
+/*
         /// <summary>
         /// Gets a connection for the specified connection name.
         /// </summary>
@@ -101,6 +102,7 @@ namespace Startitecture.Orm.Common
                 throw;
             }
         }
+*/
 
         /// <summary>
         /// The not indexed property selector.

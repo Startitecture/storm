@@ -11,9 +11,6 @@ namespace Startitecture.Orm.Common
 {
     using System;
 
-    using Core;
-    using Core;
-
     /// <summary>
     /// Provides an interface to an entity mapper.
     /// </summary>

@@ -1763,7 +1763,7 @@ namespace Startitecture.Orm.Repository.Tests
             /// The item to create the selection for.
             /// </param>
             /// <returns>
-            /// A <see cref="T:SAF.Data.ItemSelection`1"/> for the specified item.
+            /// A <see cref="ItemSelection{T}"/> for the specified item.
             /// </returns>
             protected override ItemSelection<FakeComplexRow> GetUniqueItemSelection(FakeComplexRow item)
             {

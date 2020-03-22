@@ -1,0 +1,273 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.3\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.3\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" />
+  <Import Project="..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props" Condition="Exists('..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props" Condition="Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props')" />
+  <Import Project="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props" Condition="Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" />
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{2541775F-1B34-4E5A-95BB-B8961633114A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Startitecture.Orm.Testing.Model</RootNamespace>
+    <AssemblyName>Startitecture.Orm.Testing.Model</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <DocumentationFile>bin\Debug\Startitecture.Orm.Testing.Model.xml</DocumentationFile>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+    <CodeAnalysisRuleSet>Startitecture.Orm.Testing.Model.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <RunCodeAnalysis>false</RunCodeAnalysis>
+    <DocumentationFile>bin\Release\Startitecture.Orm.Testing.Model.xml</DocumentationFile>
+    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
+    <CodeAnalysisRuleSet>Startitecture.Orm.Testing.Model.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="JetBrains.Annotations, Version=11.1.0.0, Culture=neutral, PublicKeyToken=1010a0d8d6380325, processorArchitecture=MSIL">
+      <HintPath>..\packages\JetBrains.Annotations.11.1.0\lib\net20\JetBrains.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ActionPrincipal.cs" />
+    <Compile Include="Contract.cs" />
+    <Compile Include="ContractCategory.cs" />
+    <Compile Include="ContractingEntity.cs" />
+    <Compile Include="ContractType.cs" />
+    <Compile Include="Department.cs" />
+    <Compile Include="DocumentEntities\ActionPrincipalRow.cs" />
+    <Compile Include="Attachment.cs" />
+    <Compile Include="AttachmentDocument.cs" />
+    <Compile Include="DocumentEntities\AttachmentDocumentRow.cs" />
+    <Compile Include="AttachmentNote.cs" />
+    <Compile Include="DocumentEntities\AttachmentRow.cs" />
+    <Compile Include="Document.cs" />
+    <Compile Include="DocumentEntities\Generated\DocumentsDatabase.cs" />
+    <Compile Include="DocumentType.cs" />
+    <Compile Include="DocumentEntities\DocumentTypeRow.cs" />
+    <Compile Include="DocumentVersion.cs" />
+    <Compile Include="DocumentEntities\DocumentVersionRow.cs" />
+    <Compile Include="EnumeratedValue.cs" />
+    <Compile Include="ExternalEntity.cs" />
+    <Compile Include="FakeChildEntity.cs" />
+    <Compile Include="FakeChildRow.cs" />
+    <Compile Include="FakeComplexEntity.cs" />
+    <Compile Include="FakeComplexRow.cs" />
+    <Compile Include="FakeCreatedBy.cs" />
+    <Compile Include="FakeDataRowBase.cs" />
+    <Compile Include="FakeDependencyEntity.cs" />
+    <Compile Include="FakeDependencyRow.cs" />
+    <Compile Include="FakeDependentEntity.cs" />
+    <Compile Include="FakeDependentRow.cs" />
+    <Compile Include="FakeEnumeration.cs" />
+    <Compile Include="FakeFlatDataRow.cs" />
+    <Compile Include="FakeFlatSubRow.cs" />
+    <Compile Include="FakeModifiedBy.cs" />
+    <Compile Include="FakeMultiReferenceEntity.cs" />
+    <Compile Include="FakeMultiReferenceRow.cs" />
+    <Compile Include="FakeOtherEnumeration.cs" />
+    <Compile Include="FakeRaisedChildRow.cs" />
+    <Compile Include="FakeRaisedComplexRow.cs" />
+    <Compile Include="FakeRaisedDataRow.cs" />
+    <Compile Include="FakeRaisedSubRow.cs" />
+    <Compile Include="FakeRelatedRow.cs" />
+    <Compile Include="FakeSubChildRow.cs" />
+    <Compile Include="FakeSubDataRow.cs" />
+    <Compile Include="FakeSubEntity.cs" />
+    <Compile Include="FakeSubRow.cs" />
+    <Compile Include="FakeSubSubEntity.cs" />
+    <Compile Include="FakeSubSubRow.cs" />
+    <Compile Include="FakeTestItem.cs" />
+    <Compile Include="DocumentEntities\FormSubmissionRow.cs" />
+    <Compile Include="DocumentEntities\FormSubmissionValueDetailRow.cs" />
+    <Compile Include="DocumentEntities\FormSubmissionValueRow.cs" />
+    <Compile Include="DocumentEntities\UnifiedFieldRow.cs" />
+    <Compile Include="FieldEntities\Generated\FieldsDatabase.cs" />
+    <Compile Include="FieldPlacement.cs" />
+    <Compile Include="FieldEntities\FieldPlacementRow.cs" />
+    <Compile Include="FieldEntities\FieldPlacementTableType.cs" />
+    <Compile Include="FieldsMessages.Designer.cs">
+      <DependentUpon>FieldsMessages.resx</DependentUpon>
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Compile Include="Form.cs" />
+    <Compile Include="FormLayout.cs" />
+    <Compile Include="FormSearchResult.cs" />
+    <Compile Include="FormSubmission.cs" />
+    <Compile Include="FormSubmissionValue.cs" />
+    <Compile Include="Person.cs" />
+    <Compile Include="PM\FormSubmission.cs" />
+    <Compile Include="PM\FormSubmissionValue.cs" />
+    <Compile Include="FormVersion.cs" />
+    <Compile Include="FieldEntities\FormVersionRow.cs" />
+    <Compile Include="IActionContext.cs" />
+    <Compile Include="IDocumentVersionService.cs" />
+    <Compile Include="IFieldPlacementRepository.cs" />
+    <Compile Include="IFieldPlacementService.cs" />
+    <Compile Include="IFormLayoutRepository.cs" />
+    <Compile Include="IFormLayoutService.cs" />
+    <Compile Include="IFormRepository.cs" />
+    <Compile Include="IFormSubmissionValueService.cs" />
+    <Compile Include="IFormVersionRepository.cs" />
+    <Compile Include="IFormVersionService.cs" />
+    <Compile Include="ILayoutPageRepository.cs" />
+    <Compile Include="ILayoutPageSectionRepository.cs" />
+    <Compile Include="ILayoutPageSectionService.cs" />
+    <Compile Include="ILayoutPageService.cs" />
+    <Compile Include="ILayoutSectionRepository.cs" />
+    <Compile Include="ILayoutSectionService.cs" />
+    <Compile Include="Instance.cs" />
+    <Compile Include="InstanceExtension.cs" />
+    <Compile Include="InstanceSection.cs" />
+    <Compile Include="IOrderedElement.cs" />
+    <Compile Include="IOrderedElementSearcher.cs" />
+    <Compile Include="ITrackChanges.cs" />
+    <Compile Include="IUnifiedFieldRepository.cs" />
+    <Compile Include="IWorkflowFormInstanceService.cs" />
+    <Compile Include="LayoutPage.cs" />
+    <Compile Include="FieldEntities\LayoutPageRow.cs" />
+    <Compile Include="LayoutPageSection.cs" />
+    <Compile Include="FieldEntities\LayoutPageSectionRow.cs" />
+    <Compile Include="LayoutPageSectionTableType.cs" />
+    <Compile Include="LayoutSection.cs" />
+    <Compile Include="Market.cs" />
+    <Compile Include="OrderedElementComparer.cs" />
+    <Compile Include="OrderedElementSearcher.cs" />
+    <Compile Include="OverriddenColumnNameRow.cs" />
+    <Compile Include="PM\Person.cs" />
+    <Compile Include="DocumentEntities\PM\PhaseActionDeadlineRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessFormSubmissionRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessPhaseRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessRow.cs" />
+    <Compile Include="DocumentEntities\PM\ProcessVersionRow.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RaisedOverriddenColumnNameRow.cs" />
+    <Compile Include="RelatedRow.cs" />
+    <Compile Include="DocumentEntities\PM\SignatureOptionRow.cs" />
+    <Compile Include="Site.cs" />
+    <Compile Include="Template.cs" />
+    <Compile Include="TemplateSection.cs" />
+    <Compile Include="TemplateVersion.cs" />
+    <Compile Include="DocumentEntities\UserRow.cs" />
+    <Compile Include="DocumentEntities\PM\WorkflowPhaseRow.cs" />
+    <Compile Include="DocumentEntities\PM\WorkflowRow.cs" />
+    <Compile Include="DocumentEntities\PM\WorkflowSignatureOptionRow.cs" />
+    <Compile Include="PM\UnifiedField.cs" />
+    <Compile Include="PM\UnifiedFieldSource.cs" />
+    <Compile Include="PM\UnifiedFieldSourceType.cs" />
+    <Compile Include="PM\UnifiedFieldType.cs" />
+    <Compile Include="PM\UnifiedFieldValue.cs" />
+    <Compile Include="PM\UnifiedValueType.cs" />
+    <Compile Include="UnifiedField.cs" />
+    <Compile Include="UnifiedFieldType.cs" />
+    <Compile Include="UnifiedFieldValue.cs" />
+    <Compile Include="UnifiedSourceValue.cs" />
+    <Compile Include="UnifiedValueType.cs" />
+    <Compile Include="User.cs" />
+    <Compile Include="FieldEntities\UserRow.cs" />
+    <Compile Include="WorkflowFormInstance.cs" />
+    <Compile Include="WorkflowInstance.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="Startitecture.Orm.Testing.Model.ruleset" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
+      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
+      <Name>Startitecture.Core</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
+      <Project>{5643589D-8D46-4717-AE66-994173F3D671}</Project>
+      <Name>Startitecture.Orm.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj">
+      <Project>{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}</Project>
+      <Name>Startitecture.Orm.Mapper</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
+      <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
+      <Name>Startitecture.Orm.Model</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
+      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
+      <Name>Startitecture.Orm.Query</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
+      <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
+      <Name>Startitecture.Orm.Schema</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj">
+      <Project>{1F629078-CE41-48E5-8160-C13D46121252}</Project>
+      <Name>Startitecture.Orm.Sql</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj">
+      <Project>{199411AA-992F-48AB-B8A3-E1E5506F72F5}</Project>
+      <Name>Startitecture.Resources</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="FieldsMessages.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>FieldsMessages.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\analyzers\dotnet\Microsoft.CodeAnalysis.VersionCheckAnalyzer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\analyzers\dotnet\cs\Humanizer.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.CodeQuality.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.CodeQuality.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetCore.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetCore.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetCore.CSharp.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetFramework.Analyzers.dll" />
+    <Analyzer Include="..\packages\Microsoft.NetFramework.Analyzers.2.9.3\analyzers\dotnet\cs\Microsoft.NetFramework.CSharp.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.2.9.3\build\Microsoft.CodeAnalysis.VersionCheckAnalyzer.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeQuality.Analyzers.2.9.3\build\Microsoft.CodeQuality.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NetCore.Analyzers.2.9.3\build\Microsoft.NetCore.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.NetFramework.Analyzers.2.9.3\build\Microsoft.NetFramework.Analyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.3\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.CodeAnalysis.FxCopAnalyzers.2.9.3\build\Microsoft.CodeAnalysis.FxCopAnalyzers.props'))" />
+    <Error Condition="!Exists('..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.2.12-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.2.12-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets'))" />
+  </Target>
+  <Import Project="..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.2.12-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets" Condition="Exists('..\packages\Microsoft.DotNet.Analyzers.Compatibility.0.2.12-alpha\build\Microsoft.DotNet.Analyzers.Compatibility.targets')" />
+</Project>

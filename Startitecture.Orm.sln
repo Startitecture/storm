@@ -1,10 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2036
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29911.84
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{1D49E474-547C-45FE-B0D6-DE51287A93D5}"
 	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
 		.gitignore = .gitignore
 		Startitecture.Orm.vsmdi = Startitecture.Orm.vsmdi
 	EndProjectSection
@@ -13,6 +14,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Code Analysis", "S
 	ProjectSection(SolutionItems) = preProject
 		Solution Code Analysis\CustomDictionary.xml = Solution Code Analysis\CustomDictionary.xml
 		Settings.StyleCop = Settings.StyleCop
+		Solution Code Analysis\TestProjectCodeAnalysis.editorconfig = Solution Code Analysis\TestProjectCodeAnalysis.editorconfig
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildUtilities", "BuildUtilities", "{738BD095-1E36-47AA-822B-1D085BD3247A}"
@@ -26,25 +28,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Certificates", "Certificate
 		Certificates\Startitecture.Orm.snk = Certificates\Startitecture.Orm.snk
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Common", "Startitecture.Orm.Common\Startitecture.Orm.Common.csproj", "{5643589D-8D46-4717-AE66-994173F3D671}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Common", "Startitecture.Orm.Common\Startitecture.Orm.Common.csproj", "{5643589D-8D46-4717-AE66-994173F3D671}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Forms.Model", "Startitecture.Forms.Model\Startitecture.Forms.Model.csproj", "{8C414EA1-5AB4-43BA-BB01-88CE7DE25FC6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Forms.Model", "Startitecture.Forms.Model\Startitecture.Forms.Model.csproj", "{8C414EA1-5AB4-43BA-BB01-88CE7DE25FC6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Common.Model", "Startitecture.Common.Model\Startitecture.Common.Model.csproj", "{B2A85677-E1D8-4919-A5C6-1B8BB59C819A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Common.Model", "Startitecture.Common.Model\Startitecture.Common.Model.csproj", "{B2A85677-E1D8-4919-A5C6-1B8BB59C819A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Workflow.Model", "Startitecture.Workflow.Model\Startitecture.Workflow.Model.csproj", "{F3999755-90B5-46E7-A5FD-3D671D20DB93}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Workflow.Model", "Startitecture.Workflow.Model\Startitecture.Workflow.Model.csproj", "{F3999755-90B5-46E7-A5FD-3D671D20DB93}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Startitecture.Platform.Schema", "Startitecture.Platform.Schema\Startitecture.Platform.Schema.sqlproj", "{87098990-87F5-4DA1-B9C7-055FE93A8756}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Platform.Entities", "Startitecture.Platform.Entities\Startitecture.Platform.Entities.csproj", "{53EFAF7A-78E1-4D04-B2FC-5C272B2D9D90}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Platform.Entities", "Startitecture.Platform.Entities\Startitecture.Platform.Entities.csproj", "{53EFAF7A-78E1-4D04-B2FC-5C272B2D9D90}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Core", "Startitecture.Core\Startitecture.Core.csproj", "{A0CDFF29-B883-478A-B8C5-698F9771529F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Core", "Startitecture.Core\Startitecture.Core.csproj", "{A0CDFF29-B883-478A-B8C5-698F9771529F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Model", "Startitecture.Orm.Model\Startitecture.Orm.Model.csproj", "{74143502-7860-42C5-B9CB-9D0CEDDC41D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Model", "Startitecture.Orm.Model\Startitecture.Orm.Model.csproj", "{74143502-7860-42C5-B9CB-9D0CEDDC41D2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Query", "Startitecture.Orm.Query\Startitecture.Orm.Query.csproj", "{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Query", "Startitecture.Orm.Query\Startitecture.Orm.Query.csproj", "{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Resources", "Startitecture.Resources\Startitecture.Resources.csproj", "{199411AA-992F-48AB-B8A3-E1E5506F72F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Resources", "Startitecture.Resources\Startitecture.Resources.csproj", "{199411AA-992F-48AB-B8A3-E1E5506F72F5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B9191F04-16D8-43DB-9E74-427EEB7D8698}"
 EndProject
@@ -52,25 +54,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{E2CC06
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Internal", "Internal", "{98AAE6EB-76D9-4D84-B74B-1981D5D597C3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Schema", "Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj", "{9D984C1F-1486-4718-9D52-0A36B1C06DB3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Schema", "Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj", "{9D984C1F-1486-4718-9D52-0A36B1C06DB3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Sql", "Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj", "{1F629078-CE41-48E5-8160-C13D46121252}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Sql", "Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj", "{1F629078-CE41-48E5-8160-C13D46121252}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Mapper", "Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj", "{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Mapper", "Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj", "{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Repository", "Startitecture.Orm.Repository\Startitecture.Orm.Repository.csproj", "{93206D9F-C517-46E9-AFBA-34190DDDE488}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Repository", "Startitecture.Orm.Repository\Startitecture.Orm.Repository.csproj", "{93206D9F-C517-46E9-AFBA-34190DDDE488}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Core.Tests", "Startitecture.Core.Tests\Startitecture.Core.Tests.csproj", "{A8165E22-777E-4B60-81CB-AF6FEF1696E6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Repository.Tests", "Startitecture.Orm.Repository.Tests\Startitecture.Orm.Repository.Tests.csproj", "{CF0E37ED-19A1-4F1C-861C-8279FC074E62}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Testing.RhinoMocks", "Startitecture.Orm.Testing.RhinoMocks\Startitecture.Orm.Testing.RhinoMocks.csproj", "{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.RhinoMocks", "Startitecture.Orm.Testing.RhinoMocks\Startitecture.Orm.Testing.RhinoMocks.csproj", "{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Schema.Tests", "Startitecture.Orm.Schema.Tests\Startitecture.Orm.Schema.Tests.csproj", "{93FB0C49-DA3C-49F8-B10B-A4DB4BB7C17C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Model.Tests", "Startitecture.Orm.Model.Tests\Startitecture.Orm.Model.Tests.csproj", "{C5D4A33E-8DB6-4AF3-8406-17AC4241FBB2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Testing.Model", "Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj", "{2541775F-1B34-4E5A-95BB-B8961633114A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.Model", "Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj", "{2541775F-1B34-4E5A-95BB-B8961633114A}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Query.Tests", "Startitecture.Orm.Query.Tests\Startitecture.Orm.Query.Tests.csproj", "{73680A86-D3B8-4475-B528-FE81D5A87DBB}"
 EndProject
@@ -80,7 +82,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Sql.Tests
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Startitecture.Orm.Testing.Schema", "Startitecture.Orm.Testing.Schema\Startitecture.Orm.Testing.Schema.sqlproj", "{40106EBF-BF23-427D-B3AD-9D32EBF54FDF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Testing.Entities", "Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj", "{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.Entities", "Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj", "{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{5A41FA6C-648C-488C-BC31-FB580931C88B}"
 EndProject
@@ -603,8 +605,8 @@ Global
 		{8F7F395A-6152-4F7A-8DC4-4610A9E38EC8} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
+		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi
