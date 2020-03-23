@@ -23,14 +23,14 @@ namespace Startitecture.Orm.Mapper
         where TContext : IDatabaseContext
     {
         /// <summary>
-        /// Prevents a default instance of the <see cref="T:Startitecture.Orm.Mapper.GenericDatabaseFactory`1"/> class from being created.
+        /// Prevents a default instance of the <see cref="GenericDatabaseFactory{TContext}"/> class from being created.
         /// </summary>
         private GenericDatabaseFactory()
         {
         }
 
         /// <summary>
-        /// Gets the default database factory instance.
+        /// Gets the default database factory instance. TODO: Fix CA1000 on this by putting TContext into method
         /// </summary>
         public static GenericDatabaseFactory<TContext> Default { get; } = new GenericDatabaseFactory<TContext>();
 

@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Mapper
 {
     using System;
     using System.Data.Common;
+    using System.Globalization;
     using System.Reflection;
 
     using Startitecture.Resources;
@@ -109,20 +110,14 @@ namespace Startitecture.Orm.Mapper
 
             if (connectionType == null)
             {
-                throw new InvalidOperationException(String.Format((string)ErrorMessages.ConnectionTypeNotFound, ConnectionTypeName));
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, ErrorMessages.ConnectionTypeNotFound, ConnectionTypeName));
             }
         }
 
         /// <summary>
         /// Gets the default instance of the provider.
         /// </summary>
-        public static OracleProvider Instance
-        {
-            get
-            {
-                return ProviderInstance;
-            }
-        }
+        public static OracleProvider Instance => ProviderInstance;
 
         #endregion
 
@@ -186,7 +181,7 @@ namespace Startitecture.Orm.Mapper
             if (assemblyName == null)
             {
                 // No assembly was specified for the type, so just fail
-                string message = String.Format((string)ErrorMessages.TypeCouldNotBeLoaded, typeName);
+                string message = string.Format(CultureInfo.CurrentCulture, ErrorMessages.TypeCouldNotBeLoaded, typeName);
                 throw new TypeLoadException(message);
             }
 
@@ -194,7 +189,7 @@ namespace Startitecture.Orm.Mapper
 
             if (assembly == null)
             {
-                throw new InvalidOperationException(String.Format((string)ErrorMessages.AssemblyNotFound, assemblyName));
+                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture, ErrorMessages.AssemblyNotFound, assemblyName));
             }
 
             return assembly.GetType(typeName);

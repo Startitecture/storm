@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Select.cs" company="Startitecture">
+// <copyright file="SqlSelect.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -16,7 +16,7 @@ namespace Startitecture.Orm.Sql
     /// <summary>
     /// A static class for creating Transact-SQL queries.
     /// </summary>
-    public static class Select
+    public static class SqlSelect
     {
         /// <summary>
         /// Creates a query from the specified item type.

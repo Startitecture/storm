@@ -70,8 +70,13 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// An <see cref="EntityReference"/> for the <paramref name="propertyInfo"/>.
         /// </returns>
-        public override EntityReference GetEntityReference(PropertyInfo propertyInfo)
+        public override EntityReference GetEntityReference([NotNull] PropertyInfo propertyInfo)
         {
+            if (propertyInfo == null)
+            {
+                throw new ArgumentNullException(nameof(propertyInfo));
+            }
+
             var relatedEntityAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
             var relationAttribute = propertyInfo.GetCustomAttribute<RelationAttribute>();
 

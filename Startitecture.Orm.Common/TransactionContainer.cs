@@ -38,7 +38,7 @@ namespace Startitecture.Orm.Common
         {
             if (repositoryProvider == null)
             {
-                throw new ArgumentNullException("repositoryProvider");
+                throw new ArgumentNullException(nameof(repositoryProvider));
             }
 
             if (repositoryProvider.IsDisposed)

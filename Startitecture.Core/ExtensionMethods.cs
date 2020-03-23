@@ -13,6 +13,8 @@ namespace Startitecture.Core
     using System.Collections;
     using System.Collections.Generic;
     using System.Collections.Specialized;
+    using System.Diagnostics;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -82,7 +84,7 @@ namespace Startitecture.Core
 
             if (propertyInfo.GetIndexParameters().Any())
             {
-                throw new NotSupportedException("Index properties are not supported by this method.");
+                throw new NotSupportedException(ErrorMessages.IndexPropertiesNotSupported);
             }
 
             return propertyInfo.GetValue(entity, null);
@@ -114,7 +116,7 @@ namespace Startitecture.Core
                 return;
             }
 
-            dictionary.Add(ItemKey, Convert.ToString(item));
+            dictionary.Add(ItemKey, Convert.ToString(item, CultureInfo.CurrentCulture));
 
             foreach (var keyValuePair in item.ToSerializableDictionary())
             {
@@ -184,7 +186,8 @@ namespace Startitecture.Core
 
             if (type.GetGenericArguments().Any())
             {
-                return string.Format(FriendlyGenericTypeFormat, type.Name, string.Join(", ", type.GetGenericArguments().Select(TypeNameSelector)));
+                var arguments = string.Join(", ", type.GetGenericArguments().Select(TypeNameSelector));
+                return string.Format(CultureInfo.CurrentCulture, FriendlyGenericTypeFormat, type.Name, arguments);
             }
 
             return type.Name;
@@ -289,7 +292,7 @@ namespace Startitecture.Core
             if (info == null)
             {
                 throw new ArgumentException(
-                    string.Format(ValidationMessages.TypeDoesNotContainProperty, typeof(T).Name, propertyName),
+                    string.Format(CultureInfo.CurrentCulture, ValidationMessages.TypeDoesNotContainProperty, typeof(T).Name, propertyName),
                     nameof(propertyName));
             }
 
@@ -530,7 +533,7 @@ namespace Startitecture.Core
             }
 
             // Note: use full name and not GetRuntimeName() otherwise each item type would require a different setting.
-            var name = string.Format(QualifiedPropertyNameFormat, typeof(TItem).FullName, propertyExpression.GetPropertyName());
+            var name = string.Format(CultureInfo.InvariantCulture, QualifiedPropertyNameFormat, typeof(TItem).FullName, propertyExpression.GetPropertyName());
 
             var newValue = collection.AllKeys.Contains(name)
                                ? TryParse(collection[name], defaultValue, parser)
@@ -588,6 +591,7 @@ namespace Startitecture.Core
             }
 
             string message = string.Format(
+                CultureInfo.CurrentCulture,
                 ValidationMessages.EntityDependencyCheckFailed,
                 typeof(TDependency).Name,
                 selector.GetPropertyName());
@@ -689,14 +693,17 @@ namespace Startitecture.Core
             {
                 return parser(value);
             }
-            catch (ArgumentException)
+            catch (ArgumentException ex)
             {
+                Trace.TraceWarning($"Parse of '{value}' resulted in {ex.GetType().Name}: {ex.Message}");
             }
-            catch (FormatException)
+            catch (FormatException ex)
             {
+                Trace.TraceWarning($"Parse of '{value}' resulted in {ex.GetType().Name}: {ex.Message}");
             }
-            catch (OverflowException)
+            catch (OverflowException ex)
             {
+                Trace.TraceWarning($"Parse of '{value}' resulted in {ex.GetType().Name}: {ex.Message}");
             }
 
             return defaultValue;
@@ -733,7 +740,7 @@ namespace Startitecture.Core
         /// The properties to include. If no properties are specified, all valid properties are included.
         /// </param>
         /// <returns>
-        /// A <see cref="T:System.Collections.Generic.Dictionary`2"/> of the item's properties.
+        /// A <see cref="Dictionary{TKey, TValue}"/> of the item's properties.
         /// </returns>
         private static Dictionary<string, object> ToPropertyDictionary(this object item, params string[] propertiesToInclude)
         {
@@ -824,7 +831,7 @@ namespace Startitecture.Core
                 return null;
             }
 
-            return pair.Value.GetType().IsSerializable ? pair.Value : Convert.ToString(pair.Value);
+            return pair.Value.GetType().IsSerializable ? pair.Value : Convert.ToString(pair.Value, CultureInfo.CurrentCulture);
         }
     }
 }

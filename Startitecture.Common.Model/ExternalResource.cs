@@ -94,7 +94,7 @@ namespace Startitecture.Common.Model
         /// <summary>
         /// Gets or sets the uri.
         /// </summary>
-        public string Uri { get; set; }
+        public Uri Uri { get; set; }
 
         #region Equality and Comparison Methods and Operators
 

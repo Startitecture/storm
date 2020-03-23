@@ -48,7 +48,7 @@ namespace Startitecture.Orm.Sql
         /// The type of item to generate an example selection for.
         /// </typeparam>
         /// <returns>
-        /// A <see cref="T:SAF.Data.ExampleSelection`1"/> for the current item using the specified selectors.
+        /// A <see cref="SqlSelection{TItem}"/> for the current item using the specified selectors.
         /// </returns>
         public static SqlSelection<TItem> ToExampleSelection<TItem>(this TItem example, params Expression<Func<TItem, object>>[] selectors)
             where TItem : ITransactionContext, new()
@@ -140,8 +140,13 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The <see cref="Startitecture.Orm.Schema.TableInfo"/> for the specified type.
         /// </returns>
-        public static TableInfo ToTableInfo(this IEntityDefinition definition)
+        public static TableInfo ToTableInfo([NotNull] this IEntityDefinition definition)
         {
+            if (definition == null)
+            {
+                throw new ArgumentNullException(nameof(definition));
+            }
+
             // Get the table name
             var tableName = $"[{definition.EntityContainer}].[{definition.EntityName}]";
 

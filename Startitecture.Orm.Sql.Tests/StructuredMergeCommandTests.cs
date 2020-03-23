@@ -119,7 +119,7 @@ namespace Startitecture.Orm.Sql.Tests
                     {
                         // Before we can insert the value instances, we must first delete them. TODO: Update UDTT to support merge here as well. 
                         var deleteIntegerQuery =
-                            Select.From<UnifiedIntegerValueRow>()
+                            SqlSelect.From<UnifiedIntegerValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 
@@ -145,7 +145,7 @@ namespace Startitecture.Orm.Sql.Tests
                     if (numericDetailRows.Any())
                     {
                         var deleteNumericQuery =
-                            Select.From<UnifiedNumericValueRow>()
+                            SqlSelect.From<UnifiedNumericValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 
@@ -164,7 +164,7 @@ namespace Startitecture.Orm.Sql.Tests
                     if (dateDetailRows.Any())
                     {
                         var deleteDateQuery =
-                            Select.From<UnifiedDateValueRow>()
+                            SqlSelect.From<UnifiedDateValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 
@@ -183,7 +183,7 @@ namespace Startitecture.Orm.Sql.Tests
                     if (stringDetailRows.Any())
                     {
                         var deleteStringQuery =
-                            Select.From<UnifiedStringValueRow>()
+                            SqlSelect.From<UnifiedStringValueRow>()
                                 .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
                                 .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
 

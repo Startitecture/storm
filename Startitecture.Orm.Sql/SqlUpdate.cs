@@ -8,6 +8,7 @@ namespace Startitecture.Orm.Sql
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -152,7 +153,7 @@ SET
         /// The item containing the target values.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Sql.SqlUpdate`1"/>.
+        /// The current <see cref="SqlUpdate{TItem}"/>.
         /// </returns>
         public SqlUpdate<TItem> Set(TItem item)
         {
@@ -169,7 +170,7 @@ SET
         /// The attributes to update.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Sql.SqlUpdate`1"/>.
+        /// The current <see cref="SqlUpdate{TItem}"/>.
         /// </returns>
         public SqlUpdate<TItem> Set(TItem item, params EntityAttributeDefinition[] attributes)
         {
@@ -188,7 +189,7 @@ SET
         /// The properties to update.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Sql.SqlUpdate`1"/>.
+        /// The current <see cref="SqlUpdate{TItem}"/>.
         /// </returns>
         public SqlUpdate<TItem> Set(TItem item, params Expression<Func<TItem, object>>[] properties)
         {
@@ -235,8 +236,8 @@ SET
                 var qualifiedName = Singleton<TransactSqlQualifier>.Instance.Qualify(attributeDefinition);
                 setItems.Add(
                     attributeInstance.Value == null
-                        ? string.Format(NullParameterFormat, qualifiedName)
-                        : string.Format(ParameterFormat, qualifiedName, index));
+                        ? string.Format(CultureInfo.CurrentCulture, NullParameterFormat, qualifiedName)
+                        : string.Format(CultureInfo.CurrentCulture, ParameterFormat, qualifiedName, index));
 
                 if (attributeInstance.Value != null)
                 {
@@ -258,7 +259,7 @@ SET
             var predicateClause = this.queryFactory.Create(new QueryContext<TItem>(this.selection, StatementOutputType.Update, index));
 
             return string.Concat(
-                string.Format(SqlUpdateClause, entityName, setClause),
+                string.Format(CultureInfo.InvariantCulture, SqlUpdateClause, entityName, setClause),
                 joinClause,
                 Environment.NewLine,
                 WhereClause,

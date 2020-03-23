@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Mapper
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using System.Text;
@@ -27,8 +28,8 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The POCO factories.
         /// </summary>
-        private static readonly Cache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo> PocoFactories =
-            new Cache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo>();
+        private static readonly MemoryCache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo> PocoFactories =
+            new MemoryCache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo>();
 
         /// <summary>
         /// The direct factory.
@@ -38,12 +39,12 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The relation properties cache.
         /// </summary>
-        private static readonly Cache<string, PropertyInfo> RelationPropertiesCache = new Cache<string, PropertyInfo>();
+        private static readonly MemoryCache<string, PropertyInfo> RelationPropertiesMemoryCache = new MemoryCache<string, PropertyInfo>();
 
         /// <summary>
         /// The POCO cache. Not static because we do not want to cache POCOs beyond the connection context.
         /// </summary>
-        private readonly Cache<string, object> pocoCache = new Cache<string, object>();
+        private readonly MemoryCache<string, object> pocoMemoryCache = new MemoryCache<string, object>();
 
         /// <summary>
         /// The definition provider.
@@ -87,7 +88,7 @@ namespace Startitecture.Orm.Mapper
         /// <inheritdoc />
         public void Dispose()
         {
-            this.pocoCache.Dispose();
+            this.pocoMemoryCache.Dispose();
         }
 
         /// <summary>
@@ -115,7 +116,7 @@ namespace Startitecture.Orm.Mapper
             var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
 
             var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.PhysicalName).ToList());
-            var poco = (T)this.pocoCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, typeQualifiedName, entityDefinition, reader));
+            var poco = (T)this.pocoMemoryCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, typeQualifiedName, entityDefinition, reader));
 
             var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
 
@@ -139,7 +140,7 @@ namespace Startitecture.Orm.Mapper
                                               EntityAlias = relationAttribute.Alias
                                           };
 
-                var relatedEntity = this.pocoCache.Get(
+                var relatedEntity = this.pocoMemoryCache.Get(
                     relatedPocoKey,
                     () => this.GetRelatedEntity(dataRequest, typeQualifiedName, entityDefinition, reader, entityReference));
 
@@ -300,7 +301,7 @@ namespace Startitecture.Orm.Mapper
                 // The property info is specific to the raised property on our POCO.
                 var entityType = currentEntity.GetType();
                 var relationKey = string.Concat(entityType, '.', relationName);
-                var propertyInfo = RelationPropertiesCache.Get(relationKey, () => entityType.GetProperty(relationName));
+                var propertyInfo = RelationPropertiesMemoryCache.Get(relationKey, () => entityType.GetProperty(relationName));
 
                 if (propertyInfo == null)
                 {
@@ -317,6 +318,7 @@ namespace Startitecture.Orm.Mapper
                     if (propertyInfo.CanWrite == false)
                     {
                         var message = string.Format(
+                            CultureInfo.CurrentCulture,
                             ErrorMessages.ReadOnlyPropertyCannotBeWrittenTo,
                             propertyInfo.Name,
                             entityType.Name,

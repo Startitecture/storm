@@ -165,8 +165,8 @@ namespace Startitecture.Core.Tests
         [TestMethod]
         public void GenerateHashCode_WithObjectEnumerable_MatchesExpected()
         {
-            IEnumerable<object> values = new object[] { };
-            int expected = values.Aggregate(0, (i, o) => (i * 397) + Evaluate.GetHashCode<object>(o));
+            IEnumerable<object> values = Array.Empty<object>();
+            int expected = values.Aggregate(0, (i, o) => (i * 397) + Evaluate.GetHashCode(o));
             int actual = Evaluate.GenerateHashCode(values);
             Assert.AreEqual(expected, actual);
         }
@@ -191,10 +191,10 @@ namespace Startitecture.Core.Tests
         {
             var item = new FakeTestItem { TestDateTime = DateTime.Today, TestInt = 2342, TestString = "asdsdfa2342345" };
             IEnumerable<Func<FakeTestItem, object>> selectors = new Func<FakeTestItem, object>[]
-                                                                  {
-                                                                      dest => dest.TestDateTime, dest => dest.TestInt, 
-                                                                      dest => dest.TestString
-                                                                  };
+                                                                    {
+                                                                        dest => dest.TestDateTime, dest => dest.TestInt, 
+                                                                        dest => dest.TestString
+                                                                    };
 
             int expected = new object[] { item.TestDateTime, item.TestInt, item.TestString }.Aggregate(
                 0, (i, o) => (i * 397) + Evaluate.GetHashCode(o));

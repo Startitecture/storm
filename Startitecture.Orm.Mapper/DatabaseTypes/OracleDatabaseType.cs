@@ -68,7 +68,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// </returns>
         public override string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
         {
-            if (pageStatement.SqlSelectRemoved.StartsWith("*"))
+            if (pageStatement.SqlSelectRemoved.StartsWith("*", StringComparison.Ordinal))
             {
                 throw new InvalidOperationException(ErrorMessages.OracleQueryMustAliasForPagedQuery);
             }

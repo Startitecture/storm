@@ -3,9 +3,10 @@
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   The main PetaPoco Database class.  You can either use this class directly, or derive from it.
+//   The main Database class.  You can either use this class directly, or derive from it.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace Startitecture.Orm.Mapper
 {
     using System;
@@ -13,6 +14,7 @@ namespace Startitecture.Orm.Mapper
     using System.Configuration;
     using System.Data;
     using System.Data.Common;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
     using System.Text.RegularExpressions;
@@ -43,8 +45,8 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The poco factories.
         /// </summary>
-        private static readonly Cache<Tuple<string, string, int, int>, Delegate> PocoFactories =
-            new Cache<Tuple<string, string, int, int>, Delegate>();
+        private static readonly MemoryCache<Tuple<string, string, int, int>, Delegate> PocoFactories =
+            new MemoryCache<Tuple<string, string, int, int>, Delegate>();
 */
 
         #endregion
@@ -332,7 +334,8 @@ namespace Startitecture.Orm.Mapper
 
                 if (this.Connection == null)
                 {
-                    throw new InvalidOperationException(string.Format(ErrorMessages.ConnectionFactoryReturnedNullConnection, this.factory));
+                    throw new InvalidOperationException(
+                        string.Format(CultureInfo.CurrentCulture, ErrorMessages.ConnectionFactoryReturnedNullConnection, this.factory));
                 }
 
                 this.Connection.ConnectionString = this.connectionString;
@@ -421,8 +424,18 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The number of rows affected
         /// </returns>
-        public int Execute(string sql, params object[] args)
+        public int Execute([NotNull] string sql, [NotNull] params object[] args)
         {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(sql));
+            }
+
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             try
             {
                 this.OpenSharedConnection();
@@ -460,8 +473,18 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The scalar value cast to T
         /// </returns>
-        public T ExecuteScalar<T>(string sql, params object[] args)
+        public T ExecuteScalar<T>([NotNull] string sql, [NotNull] params object[] args)
         {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(sql));
+            }
+
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             try
             {
                 this.OpenSharedConnection();
@@ -479,7 +502,7 @@ namespace Startitecture.Orm.Mapper
                         return default(T);
                     }
 
-                    return (T)Convert.ChangeType(result, underlyingType ?? typeof(T));
+                    return (T)Convert.ChangeType(result, underlyingType ?? typeof(T), CultureInfo.CurrentCulture);
                 }
             }
             catch (Exception ex)
@@ -516,8 +539,23 @@ namespace Startitecture.Orm.Mapper
         /// For some DB providers, care should be taken to not start a new Query before finishing with and disposing the previous one.
         /// In cases where this is an issue, consider using Fetch which returns the results as a List rather than an IEnumerable.
         /// </remarks>
-        public IEnumerable<T> Query<T>(string sql, params object[] args)
+        public IEnumerable<T> Query<T>([NotNull] string sql, [NotNull] params object[] args)
         {
+            if (sql == null)
+            {
+                throw new ArgumentNullException(nameof(sql));
+            }
+
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(sql));
+            }
+
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
             if (this.EnableAutoSelect)
             {
                 var entityDefinition = this.DefinitionProvider.Resolve<T>();
@@ -786,7 +824,7 @@ namespace Startitecture.Orm.Mapper
         /// <remarks>
         /// Throws an exception if there are zero or more than one matching record
         /// </remarks>
-        public T Single<T>(string sql, params object[] args)
+        public T Unique<T>(string sql, params object[] args)
         {
             return this.Fetch<T>(sql, args).Single();
         }
@@ -806,7 +844,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The single record matching the specified primary key value, or default(T) if no matching rows
         /// </returns>
-        public T SingleOrDefault<T>(string sql, params object[] args)
+        public T UniqueOrDefault<T>(string sql, params object[] args)
         {
             return this.Fetch<T>(sql, args).SingleOrDefault();
         }
@@ -1123,6 +1161,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.pocoFactory?.Dispose();
+            this.transaction?.Dispose();
         }
 
         /// <summary>
@@ -1210,13 +1249,15 @@ namespace Startitecture.Orm.Mapper
                 {
                     // out of memory exception occurs if trying to save more than 4000 characters to SQL Server CE NText column. 
                     // Set before attempting to set Size, or Size will always max out at 4000
-                    if ((value as string ?? Convert.ToString(value)).Length + 1 > 4000 && parameter.GetType().Name == "SqlCeParameter")
+                    var length = (value as string ?? Convert.ToString(value, CultureInfo.CurrentCulture))?.Length;
+
+                    if (length + 1 > 4000 && parameter.GetType().Name == "SqlCeParameter")
                     {
                         parameter.GetType().GetProperty("SqlDbType")?.SetValue(parameter, SqlDbType.NText, null);
                     }
 
                     // Help query plan caching by using common size
-                    parameter.Size = Math.Max((value as string ?? Convert.ToString(value)).Length + 1, 4000);
+                    parameter.Size = Math.Max(length.GetValueOrDefault() + 1, 4000);
                     parameter.Value = value;
                 }
                 else if (type == typeof(AnsiString))
@@ -1281,7 +1322,11 @@ namespace Startitecture.Orm.Mapper
                 sql = ParameterPrefixRegex.Replace(sql, m => this.paramPrefix + m.Value.Substring(1));
             }
 
+#if NETSTANDARD
+            sql = sql.Replace("@@", "@", StringComparison.Ordinal); // <- double @@ escapes a single @
+#else
             sql = sql.Replace("@@", "@"); // <- double @@ escapes a single @
+#endif
 
             // Create the command and add parameters
             var command = connection.CreateCommand();
@@ -1397,6 +1442,6 @@ namespace Startitecture.Orm.Mapper
             this.paramPrefix = this.databaseType.GetParameterPrefix(this.connectionString);
         }
 
-        #endregion
+#endregion
     }
 }

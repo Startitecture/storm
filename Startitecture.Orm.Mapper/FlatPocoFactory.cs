@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Mapper
     using System.Collections.Generic;
     using System.Data;
     using System.Dynamic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -195,7 +196,8 @@ namespace Startitecture.Orm.Mapper
 
                 if (constructorInfo == null)
                 {
-                    throw new InvalidOperationException(string.Format(ErrorMessages.ConstructorInfoDoesNotExist, typeof(ExpandoObject)));
+                    throw new InvalidOperationException(
+                        string.Format(CultureInfo.CurrentCulture, ErrorMessages.ConstructorInfoDoesNotExist, typeof(ExpandoObject)));
                 }
 
                 generator.Emit(OpCodes.Newobj, constructorInfo); // obj
@@ -301,7 +303,7 @@ namespace Startitecture.Orm.Mapper
 
                 // var poco=new T()
                 const BindingFlags InstanceConstructors = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
-                generator.Emit(OpCodes.Newobj, type.GetConstructor(InstanceConstructors, null, new Type[0], null));
+                generator.Emit(OpCodes.Newobj, type.GetConstructor(InstanceConstructors, null, Array.Empty<Type>(), null));
 
                 ////int columnsMapped = attributeDefinitions.Count;
 
@@ -373,7 +375,8 @@ namespace Startitecture.Orm.Mapper
 
                                 if (constructorInfo == null)
                                 {
-                                    throw new InvalidOperationException(string.Format(ErrorMessages.ConstructorInfoDoesNotExist, nullableType));
+                                    throw new InvalidOperationException(
+                                        string.Format(CultureInfo.CurrentCulture, ErrorMessages.ConstructorInfoDoesNotExist, nullableType));
                                 }
 
                                 generator.Emit(OpCodes.Newobj, constructorInfo);
@@ -417,7 +420,7 @@ namespace Startitecture.Orm.Mapper
                 ////        $"Expected {dataRequest.FieldCount} columns, {columnsMapped} columns were not mapped.");
                 ////}
 
-                var onLoadedMethod = RecurseInheritedTypes(type, x => x.GetMethod("OnLoaded", InstanceConstructors, null, new Type[0], null));
+                var onLoadedMethod = RecurseInheritedTypes(type, x => x.GetMethod("OnLoaded", InstanceConstructors, null, Array.Empty<Type>(), null));
 
                 if (onLoadedMethod != null)
                 {

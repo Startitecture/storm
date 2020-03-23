@@ -10,6 +10,7 @@
 namespace Startitecture.Core
 {
     using System;
+    using System.Globalization;
 
     /// <summary>
     /// Contains the result of a property comparison.
@@ -78,12 +79,12 @@ namespace Startitecture.Core
         /// Returns the fully qualified type name of this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.String"/> containing a fully qualified type name.
+        /// A <see cref="String"/> containing a fully qualified type name.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return string.Format(ToStringFormat, this.PropertyName, this.OriginalValue, this.NewValue);
+            return string.Format(CultureInfo.CurrentCulture, ToStringFormat, this.PropertyName, this.OriginalValue, this.NewValue);
         }
 
         /// <summary>

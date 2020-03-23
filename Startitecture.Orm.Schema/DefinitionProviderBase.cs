@@ -16,6 +16,8 @@ namespace Startitecture.Orm.Schema
     using System.Reflection;
     using System.Runtime.Caching;
 
+    using JetBrains.Annotations;
+
     using Startitecture.Core;
     using Startitecture.Orm.Model;
 
@@ -115,8 +117,13 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// The <see cref="EntityLocation"/>.
         /// </returns>
-        protected EntityLocation GetEntityLocationByReference(EntityReference entityReference)
+        protected EntityLocation GetEntityLocationByReference([NotNull] EntityReference entityReference)
         {
+            if (entityReference == null)
+            {
+                throw new ArgumentNullException(nameof(entityReference));
+            }
+
             var entityType = entityReference.EntityType;
             var entityQualifiedName = this.GetEntityQualifiedName(entityType);
 
@@ -346,7 +353,7 @@ namespace Startitecture.Orm.Schema
                 var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
 
                 var entityIdentifier = relatedLocation.Alias ?? relatedLocation.Name;
-                var attributeName = attributeReference.UseAttributeAlias && relatedPhysicalName.StartsWith(entityIdentifier)
+                var attributeName = attributeReference.UseAttributeAlias && relatedPhysicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
                                         ? relatedPhysicalName.Substring(entityIdentifier.Length)
                                         : relatedPhysicalName;
 
@@ -485,7 +492,7 @@ namespace Startitecture.Orm.Schema
                     physicalName = attributeReference.PhysicalName ?? physicalName; // relatedEntity.PhysicalName ?? physicalName;
 
                     attributeName = attributeReference.UseAttributeAlias && // relatedEntity.UseAttributeAlias && 
-                                    physicalName.StartsWith(entityIdentifier)
+                                    physicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
                                         ? physicalName.Substring(entityIdentifier.Length)
                                         : physicalName;
 

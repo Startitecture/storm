@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Query
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -183,7 +184,7 @@ namespace Startitecture.Orm.Query
         /// </returns>
         public override string ToString()
         {
-            return string.Format(ToStringFormat, this.AttributeLocation, string.Join(ValueSeparator, this.FilterValues));
+            return string.Format(CultureInfo.CurrentCulture, ToStringFormat, this.AttributeLocation, string.Join(ValueSeparator, this.FilterValues));
         }
 
         #endregion

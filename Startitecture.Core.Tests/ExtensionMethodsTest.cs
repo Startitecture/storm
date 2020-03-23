@@ -9,6 +9,7 @@ namespace Startitecture.Core.Tests
     using System;
     using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -55,8 +56,8 @@ namespace Startitecture.Core.Tests
             var propertyInfo = typeof(FakeTestItem).GetProperty("TestString");
             var entity = new FakeTestItem { TestInt = 12, TestString = "Test" };
             const string Expected = "Test";
-            var actual = ExtensionMethods.GetPropertyValue(propertyInfo, (object)entity);
-            Assert.AreEqual(Expected, Convert.ToString(actual));
+            var actual = propertyInfo.GetPropertyValue(entity);
+            Assert.AreEqual(Expected, Convert.ToString(actual, CultureInfo.CurrentCulture));
         }
 
         /// <summary>
@@ -108,7 +109,7 @@ namespace Startitecture.Core.Tests
         {
             var baseline = new FakeTestItem { TestInt = 20, TestString = "TestString" };
             var comparison = new FakeTestItem { TestInt = 21, TestString = "TestString2" };
-            var propertiesToCompare = new string[0];
+            var propertiesToCompare = Array.Empty<string>();
             IEnumerable<PropertyComparisonResult> expected = new List<PropertyComparisonResult>
                                                                  {
                                                                      new PropertyComparisonResult
@@ -149,7 +150,7 @@ namespace Startitecture.Core.Tests
         {
             var baseline = new FakeTestItem { TestInt = 20, TestString = "TestString" };
             var comparison = new FakeTestItem { TestInt = 20, TestString = "TestString" };
-            var propertiesToCompare = new string[0];
+            var propertiesToCompare = Array.Empty<string>();
             IEnumerable<PropertyComparisonResult> expected = new List<PropertyComparisonResult>();
             IEnumerable<PropertyComparisonResult> actual = baseline.GetDifferences(comparison, propertiesToCompare);
             CollectionAssert.AreEqual(expected.ToList(), actual.ToList());

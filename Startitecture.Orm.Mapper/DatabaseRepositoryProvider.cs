@@ -14,6 +14,7 @@ namespace Startitecture.Orm.Mapper
     using System.Configuration;
     using System.Data;
     using System.Data.SqlClient;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.Caching;
@@ -639,15 +640,15 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// A <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return string.Format(ToStringFormat, this.DatabaseContext?.Connection?.Database, this.InstanceIdentifier);
+            return string.Format(CultureInfo.CurrentCulture, ToStringFormat, this.DatabaseContext?.Connection?.Database, this.InstanceIdentifier);
         }
 
         /// <summary>
@@ -664,7 +665,7 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         private static string CreateCacheKey<TDataItem>(ItemSelection<TDataItem> selection)
         {
-            return string.Format(CacheKeyFormat, typeof(TDataItem).ToRuntimeName(), selection);
+            return string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TDataItem).ToRuntimeName(), selection);
         }
 
         /// <summary>
@@ -722,7 +723,7 @@ namespace Startitecture.Orm.Mapper
         {
             if (this.IsDisposed)
             {
-                throw new ObjectDisposedException(Convert.ToString(this));
+                throw new ObjectDisposedException(Convert.ToString(this, CultureInfo.CurrentCulture));
             }
         }
 

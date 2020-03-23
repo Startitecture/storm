@@ -165,9 +165,9 @@ namespace Startitecture.Core
         /// <c>true</c> if the specified properties of the values are equal; otherwise, <c>false</c>.
         /// </returns>
         /// <remarks>
-        /// This method uses <see cref="T:System.Collections.Generic.EqualityComparer`1"/> when no selectors have been specified. 
-        /// Calling this method from within an implementation of <see cref="T:System.IEquatable`1"/> on an object of the same type 
-        /// without specifying selectors will result in a recursive loop as <see cref="T:System.Collections.Generic.EqualityComparer`1"/> 
+        /// This method uses <see cref="EqualityComparer{T}"/> when no selectors have been specified. 
+        /// Calling this method from within an implementation of <see cref="IEquatable{T}"/> on an object of the same type 
+        /// without specifying selectors will result in a recursive loop as <see cref="EqualityComparer{T}"/> 
         /// calls <see cref="System.IEquatable{T}.Equals(T)"/>. The same issue applies if the calling type is not 
         /// <see cref="System.IEquatable{T}.Equals(T)"/>.
         /// </remarks>
@@ -272,9 +272,9 @@ namespace Startitecture.Core
         /// </para>
         /// </returns>
         /// <remarks>
-        /// This method uses <see cref="T:System.Collections.Generic.Comparer`1"/> when no selectors have been specified. Calling this
-        /// method from within an implementation of <see cref="T:System.IComparable`1"/> on an object of the same type without 
-        /// specifying selectors will result in a recursive loop as <see cref="T:System.Collections.Generic.Comparer`1"/> calls 
+        /// This method uses <see cref="Comparer{T}"/> when no selectors have been specified. Calling this
+        /// method from within an implementation of <see cref="IComparable{T}"/> on an object of the same type without 
+        /// specifying selectors will result in a recursive loop as <see cref="Comparer{T}"/> calls 
         /// <see cref="System.IComparable{T}.CompareTo(T)"/>.
         /// </remarks>
         public static int Compare<T>(T valueA, T valueB, params Func<T, object>[] selectors)

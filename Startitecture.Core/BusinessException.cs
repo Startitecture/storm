@@ -13,6 +13,7 @@ namespace Startitecture.Core
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Collections.Specialized;
+    using System.Globalization;
     using System.Linq;
     using System.Runtime.Serialization;
     using System.Security.Permissions;
@@ -179,7 +180,7 @@ namespace Startitecture.Core
             : base(message, innerException)
         {
             this.TargetEntity = targetEntity;
-            this.Data.Add(TargetEntityKey, Convert.ToString(this.TargetEntity));
+            this.Data.Add(TargetEntityKey, Convert.ToString(this.TargetEntity, CultureInfo.CurrentCulture));
 
             IEnumerable<string> errors = entityErrors as IList<string> ?? entityErrors.ToList();
 
@@ -191,7 +192,7 @@ namespace Startitecture.Core
 
                 foreach (string error in errors)
                 {
-                    this.Data.Add(string.Format(EntityErrorKeyFormat, index), error);
+                    this.Data.Add(string.Format(CultureInfo.CurrentCulture, EntityErrorKeyFormat, index), error);
                     index++;
                 }
             }
@@ -279,7 +280,7 @@ namespace Startitecture.Core
         {
             base.GetObjectData(info, context);
 
-            info.AddValue("TargetEntity", Convert.ToString(this.TargetEntity));
+            info.AddValue("TargetEntity", Convert.ToString(this.TargetEntity, CultureInfo.CurrentCulture));
             info.AddValue("EntityErrors", this.EntityErrors);
         }
 
@@ -298,10 +299,15 @@ namespace Startitecture.Core
         /// </returns>
         private static string CreateMessage(IEnumerable<string> entityErrors)
         {
-            IList<string> errors = entityErrors as IList<string> ?? entityErrors.ToList();
+            if (entityErrors == null)
+            {
+                throw new ArgumentNullException(nameof(entityErrors));
+            }
+
+            var errors = entityErrors as IList<string> ?? entityErrors.ToList();
             return errors.Count > 1
-                       ? string.Format(ValidationMessages.EntityValidationFailedMultiple, errors.Count, errors.First())
-                       : string.Format(ValidationMessages.EntityValidationFailedSingle, errors.FirstOrDefault() ?? NoErrorsMessage);
+                       ? string.Format(CultureInfo.CurrentCulture, ValidationMessages.EntityValidationFailedMultiple, errors.Count, errors.First())
+                       : string.Format(CultureInfo.CurrentCulture, ValidationMessages.EntityValidationFailedSingle, errors.FirstOrDefault() ?? NoErrorsMessage);
         }
 
         #endregion

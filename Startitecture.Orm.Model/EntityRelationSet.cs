@@ -43,7 +43,7 @@ namespace Startitecture.Orm.Model
         /// The right selector of the JOIN clause.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> InnerJoin(
             [NotNull] Expression<Func<TItem, object>> leftSelector,
@@ -77,7 +77,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> InnerJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -114,7 +114,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> InnerJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -153,7 +153,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -184,7 +184,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -217,7 +217,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
@@ -252,7 +252,7 @@ namespace Startitecture.Orm.Model
         /// The right selector of the JOIN clause.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> LeftJoin(
             [NotNull] Expression<Func<TItem, object>> leftSelector,
@@ -286,7 +286,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> LeftJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -323,7 +323,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> LeftJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -362,7 +362,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -393,7 +393,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         public EntityRelationSet<TItem> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -426,7 +426,7 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]

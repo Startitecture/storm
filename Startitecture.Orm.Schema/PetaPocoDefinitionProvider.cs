@@ -15,6 +15,8 @@ namespace Startitecture.Orm.Schema
     using System.Linq.Expressions;
     using System.Reflection;
 
+    using JetBrains.Annotations;
+
     using Model;
 
     using Startitecture.Core;
@@ -79,8 +81,13 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
-        public override EntityReference GetEntityReference(PropertyInfo propertyInfo)
+        public override EntityReference GetEntityReference([NotNull] PropertyInfo propertyInfo)
         {
+            if (propertyInfo == null)
+            {
+                throw new ArgumentNullException(nameof(propertyInfo));
+            }
+
             var relatedEntityAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
             var relationAttribute = propertyInfo.GetCustomAttribute<RelationAttribute>();
 
@@ -95,8 +102,13 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
-        protected override string GetEntityQualifiedName(Type entityType)
+        protected override string GetEntityQualifiedName([NotNull] Type entityType)
         {
+            if (entityType == null)
+            {
+                throw new ArgumentNullException(nameof(entityType));
+            }
+
             var sourceTableNameAttribute = entityType.GetCustomAttributes<TableNameAttribute>(true).FirstOrDefault();
             return sourceTableNameAttribute == null ? entityType.Name : sourceTableNameAttribute.TableName ?? entityType.Name;
         }
@@ -109,10 +121,15 @@ namespace Startitecture.Orm.Schema
         /// The entity property to evaluate.
         /// </param>
         /// <returns>
-        /// The name of the property as a <see cref="T:System.String" />.
+        /// The name of the property as a <see cref="String" />.
         /// </returns>
-        protected override string GetPhysicalName(PropertyInfo entityProperty)
+        protected override string GetPhysicalName([NotNull] PropertyInfo entityProperty)
         {
+            if (entityProperty == null)
+            {
+                throw new ArgumentNullException(nameof(entityProperty));
+            }
+
             var columnAttribute = entityProperty.GetCustomAttribute<ColumnAttribute>();
             var relationAttribute = entityProperty.GetCustomAttribute<RelationAttribute>();
 

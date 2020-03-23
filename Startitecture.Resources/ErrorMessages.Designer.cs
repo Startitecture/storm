@@ -484,6 +484,15 @@ namespace Startitecture.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Index properties are not supported by this method..
+        /// </summary>
+        public static string IndexPropertiesNotSupported {
+            get {
+                return ResourceManager.GetString("IndexPropertiesNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A(n) {0} (message: {1}) resulted in the following {2}: {3}.
         /// </summary>
         public static string InnerExceptionMessage {
@@ -642,6 +651,15 @@ namespace Startitecture.Resources {
         public static string ProcessCanceledAndCannotBeRestarted {
             get {
                 return ResourceManager.GetString("ProcessCanceledAndCannotBeRestarted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Property {0}.{1} value {2} is out of range..
+        /// </summary>
+        public static string PropertyIsOutOfRange {
+            get {
+                return ResourceManager.GetString("PropertyIsOutOfRange", resourceCulture);
             }
         }
         

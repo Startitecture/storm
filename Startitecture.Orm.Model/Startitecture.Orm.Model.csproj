@@ -19,6 +19,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>Startitecture.Orm.snk</AssemblyOriginatorKeyFile>
+    <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />

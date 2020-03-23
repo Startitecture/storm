@@ -673,7 +673,7 @@ namespace Startitecture.Orm.Repository.Tests
         ////    };
 
         ////    var entities = new List<FakeComplexEntity> { match1, match2 };
-        ////    var matches = entities.Select(this.entityMapper.Map<FakeComplexRow>).ToList();
+        ////    var matches = entities.SqlSelect(this.entityMapper.Map<FakeComplexRow>).ToList();
 
         ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
         ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeComplexRow>>.Is.Anything)).Return(matches);
@@ -719,7 +719,7 @@ namespace Startitecture.Orm.Repository.Tests
         ////    };
 
         ////    var entities = new List<FakeComplexEntity> { match1, match2 };
-        ////    var matches = entities.Select(this.entityMapper.Map<FakeComplexRow>).ToList();
+        ////    var matches = entities.SqlSelect(this.entityMapper.Map<FakeComplexRow>).ToList();
 
         ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
         ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeComplexRow>>.Is.Anything)).Return(matches);
@@ -1280,7 +1280,7 @@ namespace Startitecture.Orm.Repository.Tests
         ////    var match3 = new FakeChildEntity(fakeComplexEntity, 237) { Name = "YetAnotherName", SomeValue = 113, Parent = match2 };
 
         ////    var entities = new List<FakeChildEntity> { match1, match2, match3 };
-        ////    var matches = entities.Select(this.entityMapper.Map<FakeChildRow>).ToList();
+        ////    var matches = entities.SqlSelect(this.entityMapper.Map<FakeChildRow>).ToList();
 
         ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
         ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeChildRow>>.Is.Anything)).Return(matches);
@@ -1332,7 +1332,7 @@ namespace Startitecture.Orm.Repository.Tests
         ////    var match3 = new FakeChildEntity(fakeComplexEntity, 237) { Name = "YetAnotherName", SomeValue = 113, Parent = match1 };
 
         ////    var entities = new List<FakeChildEntity> { match1, match2, match3 };
-        ////    var matches = entities.Select(this.entityMapper.Map<FakeChildRow>).ToList();
+        ////    var matches = entities.SqlSelect(this.entityMapper.Map<FakeChildRow>).ToList();
 
         ////    var repositoryAdapter = MockRepository.GenerateMock<IRepositoryAdapter>();
         ////    repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<FakeChildRow>>.Is.Anything)).Return(matches);

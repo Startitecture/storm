@@ -166,7 +166,7 @@ namespace Startitecture.Orm.Sql.Tests
         {
             var example = new FormSubmissionValueRow { FormSubmissionId = submissionId };
             var deleteSelection =
-                Select.From<UnifiedFieldValueRow>()
+                SqlSelect.From<UnifiedFieldValueRow>()
                     .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId)
                     .Matching(example, row => row.FormSubmissionId);
 
@@ -349,7 +349,7 @@ namespace Startitecture.Orm.Sql.Tests
         private static Person GetPerson(IRepositoryProvider provider, IEntityMapper entityMapper)
         {
             var personRepository = new PersonRepository(provider, entityMapper);
-            var selection = Select.From<ActionPrincipalRow>();
+            var selection = SqlSelect.From<ActionPrincipalRow>();
             selection.Limit = 1;
             var person = personRepository.SelectPeople(selection).First();
             return person;

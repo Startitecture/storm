@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Sql
     using System;
     using System.Data;
     using System.Data.SqlClient;
+    using System.Globalization;
     using System.Linq;
     using System.Reflection;
 
@@ -82,7 +83,7 @@ namespace Startitecture.Orm.Sql
                 var requiredAttributeName = typeof(TableTypeAttribute).Name;
                 throw new OperationException(
                     structureType,
-                    string.Format(ErrorMessages.AttributeRequiredForType, structureType, requiredAttributeName));
+                    string.Format(CultureInfo.CurrentCulture, ErrorMessages.AttributeRequiredForType, structureType, requiredAttributeName));
             }
 
             this.StructureTypeName = tableTypeAttribute.TypeName;

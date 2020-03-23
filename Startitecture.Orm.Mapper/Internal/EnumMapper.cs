@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Mapper.Internal
         /// <summary>
         /// The _types.
         /// </summary>
-        private static readonly Cache<Type, Dictionary<string, object>> Types = new Cache<Type, Dictionary<string, object>>();
+        private static readonly MemoryCache<Type, Dictionary<string, object>> Types = new MemoryCache<Type, Dictionary<string, object>>();
 
         #endregion
 

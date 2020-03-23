@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Cache.cs" company="Startitecture">
+// <copyright file="MemoryCache.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -23,7 +23,7 @@ namespace Startitecture.Core
     /// <typeparam name="TValue">
     /// The type of value stored in the cache.
     /// </typeparam>
-    public sealed class Cache<TKey, TValue> : IDisposable
+    public sealed class MemoryCache<TKey, TValue> : IDisposable
     {
         #region Fields
 

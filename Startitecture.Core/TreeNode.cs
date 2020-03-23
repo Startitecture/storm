@@ -9,6 +9,7 @@ namespace Startitecture.Core
     using System;
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
+    using System.Globalization;
     using System.Linq;
 
     /// <summary>
@@ -127,6 +128,11 @@ namespace Startitecture.Core
         /// </param>
         public void Traverse(Action<T> action)
         {
+            if (action == null)
+            {
+                throw new ArgumentNullException(nameof(action));
+            }
+
             action(this.Value);
 
             foreach (var child in this.children)
@@ -146,6 +152,11 @@ namespace Startitecture.Core
         /// </returns>
         public TreeNode<T> FirstOrDefault(Predicate<T> predicate)
         {
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+
             if (predicate(this.Value))
             {
                 return this;
@@ -175,6 +186,11 @@ namespace Startitecture.Core
         /// </returns>
         public TreeNode<T> FirstCommonAncestor(IEnumerable<TreeNode<T>> endpoints)
         {
+            if (endpoints == null)
+            {
+                throw new ArgumentNullException(nameof(endpoints));
+            }
+
             // Assumption - the top node will always be a common parent.
             var pathsList = new List<LinkedList<TreeNode<T>>>();
 
@@ -224,7 +240,7 @@ namespace Startitecture.Core
         /// <inheritdoc />
         public override string ToString()
         {
-            return Convert.ToString(this.Value);
+            return Convert.ToString(this.Value, CultureInfo.CurrentCulture);
         }
     }
 }

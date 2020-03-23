@@ -42,7 +42,7 @@ namespace Startitecture.Orm.Sql.Tests
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeFlatDataRow>()
+            var selection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -122,7 +122,7 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeRaisedDataRow>()
+            var selection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -203,7 +203,7 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeFlatDataRow>()
+            var selection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -282,7 +282,7 @@ WHERE
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeRaisedDataRow>()
+            var selection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -349,7 +349,7 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeFlatDataRow>()
+            var selection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -408,7 +408,7 @@ WHERE
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeRaisedDataRow>()
+            var selection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -477,7 +477,7 @@ WHERE
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeFlatDataRow>()
+            var selection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -539,7 +539,7 @@ WHERE
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection = Select.From<FakeRaisedDataRow>()
+            var selection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)

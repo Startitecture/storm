@@ -103,7 +103,7 @@ namespace Startitecture.Orm.Query
         /// The property name selectors. If empty, all properties are returned.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.ItemSelection"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Select(params Expression<Func<TItem, object>>[] selectors)
         {
@@ -144,7 +144,7 @@ namespace Startitecture.Orm.Query
         /// The value filter to add.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueFilter"/> is null.
@@ -170,7 +170,7 @@ namespace Startitecture.Orm.Query
         /// The selectors of the properties to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Matching(TItem example, params Expression<Func<TItem, object>>[] selectors)
         {
@@ -206,7 +206,7 @@ namespace Startitecture.Orm.Query
         /// The selectors of the properties to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Matching<TDataItem>(TDataItem example, params Expression<Func<TDataItem, object>>[] selectors)
         {
@@ -242,7 +242,7 @@ namespace Startitecture.Orm.Query
         /// The type of the value.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -275,7 +275,7 @@ namespace Startitecture.Orm.Query
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -304,7 +304,7 @@ namespace Startitecture.Orm.Query
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -333,7 +333,7 @@ namespace Startitecture.Orm.Query
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -362,7 +362,7 @@ namespace Startitecture.Orm.Query
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -391,7 +391,7 @@ namespace Startitecture.Orm.Query
         /// The inclusion values.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Include<TValue>(
             Expression<Func<TItem, TValue>> selector,
@@ -428,7 +428,7 @@ namespace Startitecture.Orm.Query
         /// The inclusion values.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> IncludeRelated<TDataItem, TValue>(
             Expression<Func<TDataItem, TValue>> selector,
@@ -462,7 +462,7 @@ namespace Startitecture.Orm.Query
         /// The selectors of the properties to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Between(
             TItem baseline,
@@ -514,7 +514,7 @@ namespace Startitecture.Orm.Query
         /// The selectors of the properties to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Between<TDataItem>(
             TDataItem baseline,
@@ -564,7 +564,7 @@ namespace Startitecture.Orm.Query
         /// The right selector of the JOIN clause.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> InnerJoin(
             [NotNull] Expression<Func<TItem, object>> leftSelector,
@@ -598,7 +598,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> InnerJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -635,7 +635,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> InnerJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -674,7 +674,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -705,7 +705,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -738,7 +738,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
@@ -773,7 +773,7 @@ namespace Startitecture.Orm.Query
         /// The right selector of the JOIN clause.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> LeftJoin(
             [NotNull] Expression<Func<TItem, object>> leftSelector,
@@ -807,7 +807,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> LeftJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -844,7 +844,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> LeftJoin<TRelation>(
             Expression<Func<TItem, object>> leftSelector,
@@ -883,7 +883,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -914,7 +914,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
@@ -947,7 +947,7 @@ namespace Startitecture.Orm.Query
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.Providers.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
@@ -983,7 +983,7 @@ namespace Startitecture.Orm.Query
         /// The selection to combine.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Union(ItemSelection<TItem> selection)
         {
@@ -998,7 +998,7 @@ namespace Startitecture.Orm.Query
         /// The selection to combine.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Intersect(ItemSelection<TItem> selection)
         {
@@ -1013,7 +1013,7 @@ namespace Startitecture.Orm.Query
         /// The selection to combine.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Except(ItemSelection<TItem> selection)
         {
@@ -1024,10 +1024,10 @@ namespace Startitecture.Orm.Query
         #endregion
 
         /// <summary>
-        /// Returns a <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.String"/> that represents the current <see cref="T:System.Object"/>.
+        /// A <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         public override string ToString()
@@ -1048,7 +1048,7 @@ namespace Startitecture.Orm.Query
         /// The property names to include in the filter.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Query.ItemSelection`1"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         protected ItemSelection<TItem> Matching<TDataItem>(TDataItem example, IEnumerable<LambdaExpression> propertyExpressions)
         {
@@ -1079,7 +1079,7 @@ namespace Startitecture.Orm.Query
         /// The relation to add.
         /// </param>
         /// <returns>
-        /// The current <see cref="T:SAF.Data.ItemSelection"/>.
+        /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         protected ItemSelection<TItem> AddRelation([NotNull] IEntityRelation relation)
         {

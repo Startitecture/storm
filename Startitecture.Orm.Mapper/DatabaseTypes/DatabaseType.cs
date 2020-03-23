@@ -39,37 +39,37 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         public static DatabaseType Resolve(string typeName, string providerName)
         {
             // Try using type name first (more reliable)
-            if (typeName.StartsWith("MySql"))
+            if (typeName.StartsWith("MySql", StringComparison.Ordinal))
             {
                 return Singleton<MySqlDatabaseType>.Instance;
             }
 
-            if (typeName.StartsWith("SqlCe"))
+            if (typeName.StartsWith("SqlCe", StringComparison.Ordinal))
             {
                 return Singleton<SqlServerCeDatabaseType>.Instance;
             }
 
-            if (typeName.StartsWith("Npgsql") || typeName.StartsWith("PgSql"))
+            if (typeName.StartsWith("Npgsql", StringComparison.Ordinal) || typeName.StartsWith("PgSql", StringComparison.Ordinal))
             {
                 return Singleton<PostgreSqlDatabaseType>.Instance;
             }
 
-            if (typeName.StartsWith("Oracle"))
+            if (typeName.StartsWith("Oracle", StringComparison.Ordinal))
             {
                 return Singleton<OracleDatabaseType>.Instance;
             }
 
-            if (typeName.StartsWith("SQLite"))
+            if (typeName.StartsWith("SQLite", StringComparison.Ordinal))
             {
                 return Singleton<SQLiteDatabaseType>.Instance;
             }
 
-            if (typeName.StartsWith("System.Data.SqlClient."))
+            if (typeName.StartsWith("System.Data.SqlClient.", StringComparison.Ordinal))
             {
                 return Singleton<SqlServerDatabaseType>.Instance;
             }
 
-            if (typeName.StartsWith("Firebird"))
+            if (typeName.StartsWith("Firebird", StringComparison.Ordinal))
             {
                 return Singleton<FirebirdDatabaseType>.Instance;
             }
@@ -166,7 +166,11 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         public virtual string EscapeTableName(string tableName)
         {
             // Assume table names with "dot" are already escaped
+#if NETSTANDARD
+            return tableName.IndexOf('.', StringComparison.Ordinal) >= 0 ? tableName : this.EscapeSqlIdentifier(tableName);
+#else
             return tableName.IndexOf('.') >= 0 ? tableName : this.EscapeSqlIdentifier(tableName);
+#endif
         }
 
         /// <summary>
@@ -281,6 +285,6 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         {
         }
 
-        #endregion
+#endregion
     }
 }

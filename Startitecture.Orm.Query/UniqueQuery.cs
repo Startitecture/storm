@@ -6,8 +6,11 @@
 
 namespace Startitecture.Orm.Query
 {
+    using System;
     using System.Diagnostics;
     using System.Linq;
+
+    using JetBrains.Annotations;
 
     using Startitecture.Orm.Model;
 
@@ -28,8 +31,18 @@ namespace Startitecture.Orm.Query
         /// <param name="item">
         /// The item.
         /// </param>
-        public UniqueQuery(IEntityDefinitionProvider definitionProvider, TItem item)
+        public UniqueQuery([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] TItem item)
         {
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            if (item == null)
+            {
+                throw new ArgumentNullException(nameof(item));
+            }
+
             var entityDefinition = definitionProvider.Resolve<TItem>();
 
             foreach (var keyAttribute in entityDefinition.PrimaryKeyAttributes)

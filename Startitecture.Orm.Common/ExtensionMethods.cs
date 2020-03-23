@@ -104,10 +104,12 @@ namespace Startitecture.Orm.Common
         }
 */
 
+/*
         /// <summary>
         /// The not indexed property selector.
         /// </summary>
         private static readonly Func<PropertyInfo, bool> NotIndexedProperty = x => x.GetIndexParameters().Length == 0;
+*/
 
         /// <summary>
         /// Gets a collection of properties for the specified type.

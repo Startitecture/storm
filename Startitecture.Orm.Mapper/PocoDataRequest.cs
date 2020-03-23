@@ -48,7 +48,7 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] Type pocoType, IEntityDefinitionProvider definitionProvider)
+        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] Type pocoType, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (dataReader == null)
             {
@@ -58,6 +58,11 @@ namespace Startitecture.Orm.Mapper
             if (pocoType == null)
             {
                 throw new ArgumentNullException(nameof(pocoType));
+            }
+
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
             }
 
             this.DataReader = dataReader;

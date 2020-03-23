@@ -8,6 +8,8 @@ namespace Startitecture.Orm.Schema
 {
     using System;
 
+    using Startitecture.Resources;
+
     /// <summary>
     /// The index attribute.
     /// </summary>
@@ -50,7 +52,7 @@ namespace Startitecture.Orm.Schema
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException("Value cannot be null or whitespace.", nameof(name));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(name));
             }
 
             this.Name = name;
@@ -58,37 +60,37 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether is clustered.
+        /// Gets or sets a value indicating whether the index is clustered.
         /// </summary>
         public bool IsClustered { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether is clustered configured.
+        /// Gets or sets a value indicating whether the index is clustered configured.
         /// </summary>
         public bool IsClusteredConfigured { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether is unique.
+        /// Gets or sets a value indicating whether the index is unique.
         /// </summary>
         public bool IsUnique { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether is unique configured.
+        /// Gets or sets a value indicating whether the index is uniquely configured.
         /// </summary>
         public bool IsUniqueConfigured { get; set; }
 
         /// <summary>
-        /// Gets or sets the name.
+        /// Gets the name of the index.
         /// </summary>
-        public string Name { get; set; }
+        public string Name { get; }
 
         /// <summary>
-        /// Gets or sets the order.
+        /// Gets the order of the index.
         /// </summary>
-        public int Order { get; set; }
+        public int Order { get; }
 
         /// <summary>
-        /// The type id.
+        /// The type ID for this instance.
         /// </summary>
         public override object TypeId => this.instanceGuid;
     }

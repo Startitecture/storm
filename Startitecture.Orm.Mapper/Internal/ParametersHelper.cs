@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Mapper.Internal
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Reflection;
     using System.Text;
     using System.Text.RegularExpressions;
@@ -89,15 +90,14 @@ namespace Startitecture.Orm.Mapper.Internal
         {
             string param = match.Value.Substring(1);
             object parameterValue;
-            int paramIndex;
 
-            if (Int32.TryParse(param, out paramIndex))
+            if (int.TryParse(param, out var paramIndex))
             {
                 // Numbered parameter
                 if (paramIndex < 0 || paramIndex >= sourceParams.Count)
                 {
                     throw new ArgumentOutOfRangeException(
-                        string.Format(ValidationMessages.SqlParameterHasNoMatchingValue, paramIndex, sourceParams.Count, sql));
+                        string.Format(CultureInfo.CurrentCulture, ValidationMessages.SqlParameterHasNoMatchingValue, paramIndex, sourceParams.Count, sql));
                 }
 
                 parameterValue = sourceParams[paramIndex];
@@ -124,7 +124,7 @@ namespace Startitecture.Orm.Mapper.Internal
 
                 if (found == false)
                 {
-                    throw new ArgumentException(String.Format((string)ValidationMessages.SqlParameterDoesNotMatchArguments, param, sql));
+                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture, ValidationMessages.SqlParameterDoesNotMatchArguments, param, sql));
                 }
             }
 
@@ -143,7 +143,7 @@ namespace Startitecture.Orm.Mapper.Internal
             }
 
             destParams.Add(parameterValue);
-            return String.Format("@{0}", destParams.Count - 1);
+            return $"@{destParams.Count - 1}";
         }
 
         #endregion

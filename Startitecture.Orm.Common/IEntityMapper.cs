@@ -51,9 +51,6 @@ namespace Startitecture.Orm.Common
         /// <exception cref="ArgumentNullException">
         /// <paramref name="input"/> was null.
         /// </exception>
-        /// <exception cref="T:SAF.Core.ApplicationConfigurationException">
-        /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
-        /// </exception>
         TOutput Map<TOutput>(object input, Func<Type, object> serviceConstructor);
 
         /// <summary>

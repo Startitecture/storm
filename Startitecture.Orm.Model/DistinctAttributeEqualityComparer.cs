@@ -9,6 +9,7 @@
 
 namespace Startitecture.Orm.Model
 {
+    using System;
     using System.Collections.Generic;
 
     using Startitecture.Core;
@@ -45,7 +46,7 @@ namespace Startitecture.Orm.Model
         /// <param name="obj">
         /// The object for which to get a hash code.
         /// </param>
-        /// <exception cref="T:System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// The type of <paramref name="obj" /> is a reference type and
         /// <paramref name="obj" /> is null.
         /// </exception>

@@ -38,7 +38,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// </returns>
         public override string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
         {
-            var sqlPage = string.Format("{0}\nOFFSET @{1} ROWS FETCH NEXT @{2} ROWS ONLY", pageStatement.Sql, args.Length, args.Length + 1);
+            var sqlPage = $"{pageStatement.Sql}\nOFFSET @{args.Length} ROWS FETCH NEXT @{args.Length + 1} ROWS ONLY";
             args = args.Concat(new object[] { skip, take }).ToArray();
             return sqlPage;
         }

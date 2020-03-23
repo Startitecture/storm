@@ -32,7 +32,7 @@ namespace Startitecture.Orm.Sql.Tests
             var match = new FakeFlatDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeFlatDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeFlatDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -101,7 +101,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var baseline = new FakeFlatDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeFlatDataRow { FakeDataId = 20, AnotherColumn = "Less" };
 
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -151,7 +151,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeFlatDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeFlatDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeFlatDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -198,7 +198,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -253,7 +253,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -303,7 +303,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
             var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -357,7 +357,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -418,7 +418,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -473,7 +473,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeFlatDataRow { FakeDataId = 10 };
             var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -525,7 +525,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -586,7 +586,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -641,7 +641,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 
             var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
             var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -716,7 +716,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var baseline3 = new FakeFlatDataRow { FakeDataId = 60 };
             var boundary3 = new FakeFlatDataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
@@ -729,7 +729,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAliasRelatedProperty)
                 .Between(baseline1, boundary1, row => row.FakeDataId)
                 .Union(
-                    Select.From<FakeFlatDataRow>()
+                    SqlSelect.From<FakeFlatDataRow>()
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
                         .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
                         .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
@@ -742,7 +742,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                             row => row.OtherAliasRelatedProperty)
                         .Between(baseline2, boundary2, row => row.FakeDataId)
                         .Union(
-                            Select.From<FakeFlatDataRow>()
+                            SqlSelect.From<FakeFlatDataRow>()
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
                                 .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
                                 .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
@@ -856,7 +856,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeFlatDataRow { FakeDataId = 60 };
             var boundary3 = new FakeFlatDataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
@@ -869,7 +869,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                     row => row.OtherAliasRelatedProperty)
                 .Between(baseline1, boundary1, row => row.FakeDataId)
                 .Union(
-                    Select.From<FakeFlatDataRow>()
+                    SqlSelect.From<FakeFlatDataRow>()
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
                         .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
                         .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
@@ -882,7 +882,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                             row => row.OtherAliasRelatedProperty)
                         .Between(baseline2, boundary2, row => row.FakeDataId)
                         .Union(
-                            Select.From<FakeFlatDataRow>()
+                            SqlSelect.From<FakeFlatDataRow>()
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
                                 .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
                                 .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
@@ -986,7 +986,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeFlatDataRow { FakeDataId = 60 };
             var boundary3 = new FakeFlatDataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select.From<FakeFlatDataRow>()
+            var transactionSelection = SqlSelect.From<FakeFlatDataRow>()
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
@@ -999,7 +999,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                     row => row.OtherAliasRelatedProperty)
                 .Between(baseline1, boundary1, row => row.FakeDataId)
                 .Union(
-                    Select.From<FakeFlatDataRow>()
+                    SqlSelect.From<FakeFlatDataRow>()
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
                         .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
                         .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
@@ -1012,7 +1012,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                             row => row.OtherAliasRelatedProperty)
                         .Between(baseline2, boundary2, row => row.FakeDataId)
                         .Union(
-                            Select.From<FakeFlatDataRow>()
+                            SqlSelect.From<FakeFlatDataRow>()
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
                                 .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
                                 .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
@@ -1083,7 +1083,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var baseline3 = new FakeRaisedDataRow { FakeDataId = 60 };
             var boundary3 = new FakeRaisedDataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
@@ -1096,7 +1096,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedProperty)
                 .Between(baseline1, boundary1, row => row.FakeDataId)
                 .Union(
-                    Select.From<FakeRaisedDataRow>()
+                    SqlSelect.From<FakeRaisedDataRow>()
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
                         .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
                         .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
@@ -1109,7 +1109,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                             row => row.OtherAlias.RelatedProperty)
                         .Between(baseline2, boundary2, row => row.FakeDataId)
                         .Union(
-                            Select.From<FakeRaisedDataRow>()
+                            SqlSelect.From<FakeRaisedDataRow>()
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
                                 .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
                                 .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
@@ -1223,7 +1223,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeRaisedDataRow { FakeDataId = 60 };
             var boundary3 = new FakeRaisedDataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
@@ -1236,7 +1236,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                     row => row.OtherAlias.RelatedProperty)
                 .Between(baseline1, boundary1, row => row.FakeDataId)
                 .Union(
-                    Select.From<FakeRaisedDataRow>()
+                    SqlSelect.From<FakeRaisedDataRow>()
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
                         .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
                         .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
@@ -1249,7 +1249,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                             row => row.OtherAlias.RelatedProperty)
                         .Between(baseline2, boundary2, row => row.FakeDataId)
                         .Union(
-                            Select.From<FakeRaisedDataRow>()
+                            SqlSelect.From<FakeRaisedDataRow>()
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
                                 .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
                                 .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
@@ -1353,7 +1353,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             var baseline3 = new FakeRaisedDataRow { FakeDataId = 60 };
             var boundary3 = new FakeRaisedDataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select.From<FakeRaisedDataRow>()
+            var transactionSelection = SqlSelect.From<FakeRaisedDataRow>()
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
@@ -1366,7 +1366,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                     row => row.OtherAlias.RelatedProperty)
                 .Between(baseline1, boundary1, row => row.FakeDataId)
                 .Union(
-                    Select.From<FakeRaisedDataRow>()
+                    SqlSelect.From<FakeRaisedDataRow>()
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
                         .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
                         .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
@@ -1379,7 +1379,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                             row => row.OtherAlias.RelatedProperty)
                         .Between(baseline2, boundary2, row => row.FakeDataId)
                         .Union(
-                            Select.From<FakeRaisedDataRow>()
+                            SqlSelect.From<FakeRaisedDataRow>()
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
                                 .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
                                 .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)

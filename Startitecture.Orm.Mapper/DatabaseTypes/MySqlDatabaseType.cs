@@ -29,7 +29,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// </returns>
         public override string EscapeSqlIdentifier(string str)
         {
-            return string.Format("`{0}`", str);
+            return $"`{str}`";
         }
 
         /// <summary>

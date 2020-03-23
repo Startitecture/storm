@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Core;
 
     /// <summary>
-    /// A static class for managing registration of IMapper instances with PetaPoco.
+    /// A static class for managing registration of IMapper instances.
     /// </summary>
     public static class Mappers
     {
@@ -51,16 +51,14 @@ namespace Startitecture.Orm.Mapper
         {
             if (type == null)
             {
-                throw new ArgumentNullException("type");
+                throw new ArgumentNullException(nameof(type));
             }
 
             Lock.EnterReadLock();
 
             try
             {
-                IMapper val;
-
-                if (MappersDictionary.TryGetValue(type, out val))
+                if (MappersDictionary.TryGetValue(type, out var val))
                 {
                     return val;
                 }

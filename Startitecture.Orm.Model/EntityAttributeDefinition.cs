@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Model
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq.Expressions;
     using System.Reflection;
 
@@ -41,7 +42,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The delegate cache.
         /// </summary>
-        private static readonly Cache<string, Delegate> DelegateCache  = new Cache<string, Delegate>();
+        private static readonly MemoryCache<string, Delegate> DelegateMemoryCache  = new MemoryCache<string, Delegate>();
 
         /// <summary>
         /// The comparison properties.
@@ -158,20 +159,15 @@ namespace Startitecture.Orm.Model
             this.PropertyInfo = propertyInfo;
             var getMethodInfo = propertyInfo.GetGetMethod(true);
             this.GetValueMethod = getMethodInfo;
-            this.GetValueDelegate = DelegateCache.Get(
+            this.GetValueDelegate = DelegateMemoryCache.Get(
                 $"{nameof(getMethodInfo)}.{propertyInfo.DeclaringType}.{propertyInfo.Name}",
                 () => CreateFunctionDelegate(propertyInfo, getMethodInfo));
 
             var setMethodInfo = propertyInfo.GetSetMethod(true);
-
-            if (setMethodInfo == null)
-            {
-                throw new InvalidOperationException(
+            this.SetValueMethod = setMethodInfo ?? throw new InvalidOperationException(
                     $"The property '{propertyInfo.PropertyType.Name}.{propertyInfo.Name}' requires a set method for this delegate to be built.");
-            }
 
-            this.SetValueMethod = setMethodInfo;
-            this.SetValueDelegate = DelegateCache.Get(
+            this.SetValueDelegate = DelegateMemoryCache.Get(
                 $"{nameof(setMethodInfo)}.{propertyInfo.DeclaringType}.{propertyInfo.Name}",
                 () => CreateActionDelegate(propertyInfo, setMethodInfo));
 
@@ -181,13 +177,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the entity that contains this attribute.
         /// </summary>
-        public EntityLocation Entity
-        {
-            get
-            {
-                return this.EntityNode?.Value ?? default(EntityLocation);
-            }
-        }
+        public EntityLocation Entity => this.EntityNode?.Value ?? default;
 
         /// <summary>
         /// Gets the reference node that this attribute is located on in the object graph.
@@ -375,7 +365,7 @@ namespace Startitecture.Orm.Model
         /// <param name="obj">
         /// An object to compare with this instance.
         /// </param>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
         /// <filterpriority>2</filterpriority>
@@ -404,14 +394,14 @@ namespace Startitecture.Orm.Model
         /// Returns the fully qualified type name of this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.String" /> containing a fully qualified type name.
+        /// A <see cref="String" /> containing a fully qualified type name.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return this.Alias == null
-                       ? string.Format(AttributeNameFormat, this.Entity, this.PropertyName)
-                       : string.Format(AliasedNameFormat, this.Entity, this.PropertyName, this.Alias);
+                       ? string.Format(CultureInfo.CurrentCulture, AttributeNameFormat, this.Entity, this.PropertyName)
+                       : string.Format(CultureInfo.CurrentCulture, AliasedNameFormat, this.Entity, this.PropertyName, this.Alias);
         }
 
         /// <summary>

@@ -652,7 +652,7 @@ namespace Startitecture.Orm.Repository
                 throw new ArgumentNullException(nameof(selectExpressions));
             }
 
-            return Sql.Select.From<TDataItem>();
+            return Sql.SqlSelect.From<TDataItem>();
         }
     }
 }

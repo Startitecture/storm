@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Model
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
 
     using Startitecture.Core;
 
@@ -215,7 +216,7 @@ namespace Startitecture.Orm.Model
         /// <param name="obj">
         /// An object to compare with this instance.
         /// </param>
-        /// <exception cref="T:System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
         /// <filterpriority>2</filterpriority>
@@ -252,12 +253,12 @@ namespace Startitecture.Orm.Model
         /// Returns the fully qualified type name of this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="T:System.String" /> containing a fully qualified type name.
+        /// A <see cref="String" /> containing a fully qualified type name.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return string.Format(ToStringFormat, this.Container, this.Alias ?? this.Name);
+            return string.Format(CultureInfo.CurrentCulture, ToStringFormat, this.Container, this.Alias ?? this.Name);
         }
 
         /// <summary>

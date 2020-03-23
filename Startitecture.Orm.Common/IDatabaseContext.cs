@@ -297,7 +297,7 @@ namespace Startitecture.Orm.Common
         /// <remarks>
         /// Throws an exception if there are zero or more than one matching record
         /// </remarks>
-        T Single<T>(string sql, params object[] args);
+        T Unique<T>(string sql, params object[] args);
 
         /// <summary>
         /// Runs a query that should always return either a single row, or no rows
@@ -314,7 +314,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The single record matching the specified primary key value, or default(T) if no matching rows
         /// </returns>
-        T SingleOrDefault<T>(string sql, params object[] args);
+        T UniqueOrDefault<T>(string sql, params object[] args);
 
         /// <summary>
         /// Retrieves a range of records from result set

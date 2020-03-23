@@ -8,6 +8,7 @@ namespace Startitecture.Orm.Sql
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
 
     using JetBrains.Annotations;
@@ -187,41 +188,7 @@ namespace Startitecture.Orm.Sql
             var selection = queryContext.Selection;
             var entityDefinition = this.definitionProvider.Resolve<TItem>();
 
-            switch (queryContext.OutputType)
-            {
-                case StatementOutputType.Select:
-                    return this.CreateCompleteStatement(queryContext, false);
-                case StatementOutputType.Contains:
-                    return string.Format(IfExistsClause, this.CreateCompleteStatement(queryContext, true));
-                case StatementOutputType.Update:
-                    return this.CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset);
-                case StatementOutputType.Delete:
-                    // Rely on the underlying entity definition for delimiters.
-                    var primaryTableName = entityDefinition.QualifiedName;
-                    var filter = selection.Filters.Any()
-                                     ? string.Concat(
-                                         Environment.NewLine,
-                                         string.Format(SqlWhereClause, this.CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset)))
-                                     : string.Empty;
-
-                    if (selection.Relations.Any() == false)
-                    {
-                        return string.Concat(DeleteFromStatement, primaryTableName, filter);
-                    }
-
-                    return string.Concat(
-                        DeleteStatement,
-                        primaryTableName,
-                        Environment.NewLine,
-                        FromStatement,
-                        primaryTableName,
-                        Environment.NewLine,
-                        this.transactSqlJoin.Create(selection), //// selection.Relations.CreateJoinClause(),
-                        filter);
-
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            return this.CompleteStatement(queryContext, queryContext.OutputType, entityDefinition, selection);
         }
 
         /// <summary>
@@ -241,8 +208,8 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private static string GetInclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            var indexTokens = filterValues.Select((o, i) => string.Format(ParameterFormat, filterIndex + i));
-            var inclusionToken = string.Format(InclusionPredicate, qualifiedName, string.Join(ParameterSeparator, indexTokens));
+            var indexTokens = filterValues.Select((o, i) => string.Format(CultureInfo.InvariantCulture, ParameterFormat, filterIndex + i));
+            var inclusionToken = string.Format(CultureInfo.InvariantCulture, InclusionPredicate, qualifiedName, string.Join(ParameterSeparator, indexTokens));
             return inclusionToken;
         }
 
@@ -275,8 +242,8 @@ namespace Startitecture.Orm.Sql
             var referenceName = SqlQualifier.GetReferenceName(attribute);
 
             var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
-                                          ? string.Format(SelectColumnFormat, qualifiedName)
-                                          : string.Format(AliasColumnFormat, referenceName, attribute.Alias);
+                                          ? string.Format(CultureInfo.InvariantCulture, SelectColumnFormat, qualifiedName)
+                                          : string.Format(CultureInfo.InvariantCulture, AliasColumnFormat, referenceName, attribute.Alias);
 
             return qualifiedColumnName;
         }
@@ -313,6 +280,84 @@ namespace Startitecture.Orm.Sql
             }
 
             return linkStatement;
+        }
+
+        /// <summary>
+        /// Adds tokens to the <paramref name="filterTokens"/> list.
+        /// </summary>
+        /// <param name="filterType">
+        /// The filter type for this operation.
+        /// </param>
+        /// <param name="firstFilterValue">
+        /// The first filter value of the filter. This will determine how equality is rendered.
+        /// </param>
+        /// <param name="filterTokens">
+        /// The filter tokens.
+        /// </param>
+        /// <param name="referenceName">
+        /// The reference name.
+        /// </param>
+        /// <param name="setValues">
+        /// The set values.
+        /// </param>
+        /// <param name="index">
+        /// The index.
+        /// </param>
+        /// <returns>
+        /// The current index as an <see cref="int"/>.
+        /// </returns>
+        /// <exception cref="NotImplementedException">
+        /// <paramref name="filterType"/> is a value that is not supported by this operation.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="filterType"/> is outside the range of values for <see cref="FilterType"/>.
+        /// </exception>
+        private static int AddTokens(
+            FilterType filterType,
+            object firstFilterValue,
+            ICollection<string> filterTokens,
+            string referenceName,
+            IReadOnlyCollection<object> setValues,
+            int index)
+        {
+            switch (filterType)
+            {
+                case FilterType.Equality:
+                    filterTokens.Add(
+                        string.Format(CultureInfo.InvariantCulture, EqualityFilter, referenceName, GetEqualityOperand(firstFilterValue), index++));
+                    break;
+                case FilterType.Inequality:
+                    throw new NotImplementedException();
+                case FilterType.LessThan:
+                    throw new NotImplementedException();
+                case FilterType.LessThanOrEqualTo:
+                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, LessThanPredicate, referenceName, index++));
+                    break;
+                case FilterType.GreaterThan:
+                    throw new NotImplementedException();
+                case FilterType.GreaterThanOrEqualTo:
+                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, GreaterThanPredicate, referenceName, index++));
+                    break;
+                case FilterType.Between:
+                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, BetweenFilter, referenceName, index++, index++));
+                    break;
+                case FilterType.MatchesSet:
+                    filterTokens.Add(GetInclusionFilter(referenceName, index, setValues));
+                    index += setValues.Count;
+                    break;
+                case FilterType.DoesNotMatchSet:
+                    throw new NotImplementedException();
+                case FilterType.IsSet:
+                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, NotNullPredicate, referenceName));
+                    break;
+                case FilterType.IsNotSet:
+                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, NullPredicate, referenceName));
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(filterType));
+            }
+
+            return index;
         }
 
         /// <summary>
@@ -355,41 +400,7 @@ namespace Startitecture.Orm.Sql
                 var referenceName = SqlQualifier.GetReferenceName(attribute);
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
-                switch (filter.FilterType)
-                {
-                    case FilterType.Equality:
-                        filterTokens.Add(string.Format(EqualityFilter, referenceName, GetEqualityOperand(filter.FilterValues.First()), index++));
-                        break;
-                    case FilterType.Inequality:
-                        throw new NotImplementedException();
-                    case FilterType.LessThan:
-                        throw new NotImplementedException();
-                    case FilterType.LessThanOrEqualTo:
-                        filterTokens.Add(string.Format(LessThanPredicate, referenceName, index++));
-                        break;
-                    case FilterType.GreaterThan:
-                        throw new NotImplementedException();
-                    case FilterType.GreaterThanOrEqualTo:
-                        filterTokens.Add(string.Format(GreaterThanPredicate, referenceName, index++));
-                        break;
-                    case FilterType.Between:
-                        filterTokens.Add(string.Format(BetweenFilter, referenceName, index++, index++));
-                        break;
-                    case FilterType.MatchesSet:
-                        filterTokens.Add(GetInclusionFilter(referenceName, index, setValues));
-                        index += setValues.Count;
-                        break;
-                    case FilterType.DoesNotMatchSet:
-                        throw new NotImplementedException();
-                    case FilterType.IsSet:
-                        filterTokens.Add(string.Format(NotNullPredicate, referenceName));
-                        break;
-                    case FilterType.IsNotSet:
-                        filterTokens.Add(string.Format(NullPredicate, referenceName));
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(filter.FilterType));
-                }
+                index = AddTokens(filter.FilterType, filter.FilterValues.First(), filterTokens, referenceName, setValues, index);
             }
 
             return string.Join(string.Concat(FilterSeparator, Environment.NewLine), filterTokens);
@@ -468,7 +479,7 @@ namespace Startitecture.Orm.Sql
             }
 
             string selectColumns = isContains
-                                       ? '1'.ToString()
+                                       ? '1'.ToString(CultureInfo.InvariantCulture)
                                        : string.Join(string.Concat(",", Environment.NewLine), selectAttributes.Select(GetQualifiedColumnName));
 
             ////if (selection.SelectionSource == selection.ItemDefinition.EntityName)
@@ -489,17 +500,86 @@ namespace Startitecture.Orm.Sql
             var filter = selection.Filters.Any()
                              ? string.Concat(
                                  Environment.NewLine,
-                                 string.Format(SqlWhereClause, this.CreateFilter(entityDefinition, selection.Filters, indexOffset)))
+                                 string.Format(CultureInfo.InvariantCulture, SqlWhereClause, this.CreateFilter(entityDefinition, selection.Filters, indexOffset)))
                              : string.Empty;
 
             return string.Concat(
-                selection.Limit > 0 ? string.Format(SelectTopStatement, selection.Limit) : SelectStatement,
+                selection.Limit > 0 ? string.Format(CultureInfo.InvariantCulture, SelectTopStatement, selection.Limit) : SelectStatement,
                 Environment.NewLine,
                 selectColumns,
                 Environment.NewLine,
                 fromClause,
                 selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClause) : string.Empty,
                 filter);
+        }
+
+        /// <summary>
+        /// Completes the query statement.
+        /// </summary>
+        /// <param name="queryContext">
+        /// The query context.
+        /// </param>
+        /// <param name="queryContextOutputType">
+        /// The query context output type.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="selection">
+        /// The selection.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item being queried.
+        /// </typeparam>
+        /// <returns>
+        /// The query as a <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="StatementOutputType"/>.
+        /// </exception>
+        private string CompleteStatement<TItem>(
+            QueryContext<TItem> queryContext,
+            StatementOutputType queryContextOutputType,
+            IEntityDefinition entityDefinition,
+            ItemSelection<TItem> selection)
+        {
+            var completeStatement = this.CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset);
+
+            switch (queryContextOutputType)
+            {
+                case StatementOutputType.Select:
+                    return this.CreateCompleteStatement(queryContext, false);
+                case StatementOutputType.Contains:
+                    return string.Format(CultureInfo.InvariantCulture, IfExistsClause, this.CreateCompleteStatement(queryContext, true));
+                case StatementOutputType.Update:
+                    return completeStatement;
+                case StatementOutputType.Delete:
+                    // Rely on the underlying entity definition for delimiters.
+                    var primaryTableName = entityDefinition.QualifiedName;
+                    var filter = selection.Filters.Any()
+                                     ? string.Concat(
+                                         Environment.NewLine,
+                                         string.Format(CultureInfo.InvariantCulture, SqlWhereClause, completeStatement))
+                                     : string.Empty;
+
+                    if (selection.Relations.Any() == false)
+                    {
+                        return string.Concat(DeleteFromStatement, primaryTableName, filter);
+                    }
+
+                    return string.Concat(
+                        DeleteStatement,
+                        primaryTableName,
+                        Environment.NewLine,
+                        FromStatement,
+                        primaryTableName,
+                        Environment.NewLine,
+                        this.transactSqlJoin.Create(selection), //// selection.Relations.CreateJoinClause(),
+                        filter);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(queryContextOutputType));
+            }
         }
     }
 }

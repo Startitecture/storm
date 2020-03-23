@@ -93,7 +93,7 @@ namespace Startitecture.Orm.Mapper.Internal
         /// </returns>
         public string AddSelectClause(string sql)
         {
-            if (sql.StartsWith(";"))
+            if (sql.StartsWith(";", StringComparison.Ordinal))
             {
                 return sql.Substring(1);
             }

@@ -59,7 +59,7 @@ namespace Startitecture.Core
                 return false;
             }
 
-            if (Object.ReferenceEquals(x, y))
+            if (ReferenceEquals(x, y))
             {
                 return true;
             }
@@ -67,7 +67,7 @@ namespace Startitecture.Core
             var first = x as IList<T> ?? x.ToList();
             var second = y as IList<T> ?? y.ToList();
 
-            if (first.Count() != second.Count())
+            if (first.Count != second.Count)
             {
                 return false;
             }

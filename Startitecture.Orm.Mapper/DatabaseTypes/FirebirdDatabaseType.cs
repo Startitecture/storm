@@ -10,7 +10,7 @@
 namespace Startitecture.Orm.Mapper.DatabaseTypes
 {
     /// <summary>
-    /// The Firebird database type.
+    /// The Firebird database type. TODO: Turn into interface
     /// </summary>
     internal class FirebirdDatabaseType : DatabaseType
     {

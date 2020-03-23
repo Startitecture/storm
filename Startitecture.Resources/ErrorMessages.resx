@@ -485,4 +485,10 @@
   <data name="EnumerationMustBeKnownValue" xml:space="preserve">
     <value>The enumeration must be set to a known value.</value>
   </data>
+  <data name="IndexPropertiesNotSupported" xml:space="preserve">
+    <value>Index properties are not supported by this method.</value>
+  </data>
+  <data name="PropertyIsOutOfRange" xml:space="preserve">
+    <value>Property {0}.{1} value {2} is out of range.</value>
+  </data>
 </root>

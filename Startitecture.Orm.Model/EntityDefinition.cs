@@ -320,7 +320,7 @@ namespace Startitecture.Orm.Model
             /// </summary>
             /// <returns>A hash code for the specified object.</returns>
             /// <param name="obj">The object for which to get a hash code.</param>
-            /// <exception cref="T:System.ArgumentNullException">
+            /// <exception cref="ArgumentNullException">
             /// The type of <paramref name="obj" /> is a reference type and
             /// <paramref name="obj" /> is null.
             /// </exception>

@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Mapper
     using System.Collections.Generic;
     using System.Data;
     using System.Data.SqlClient;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
 
@@ -263,7 +264,7 @@ namespace Startitecture.Orm.Mapper
 
             if (result == null)
             {
-                string message = string.Format(ErrorMessages.DataItemInsertionFailed, typeof(TDataItem).Name, dataItem);
+                string message = string.Format(CultureInfo.CurrentCulture, ErrorMessages.DataItemInsertionFailed, typeof(TDataItem).Name, dataItem);
                 throw new RepositoryException(dataItem, message);
             }
 

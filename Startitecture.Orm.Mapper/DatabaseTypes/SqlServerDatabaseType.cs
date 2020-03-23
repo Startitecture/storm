@@ -50,12 +50,8 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
             }
 
             string sqlPage =
-                string.Format(
-                    "SELECT * FROM (SELECT ROW_NUMBER() OVER ({0}) peta_rn, {1}) peta_paged WHERE peta_rn>@{2} AND peta_rn<=@{3}", 
-                    pageStatement.SqlOrderBy ?? "ORDER BY (SELECT NULL)", 
-                    pageStatement.SqlSelectRemoved, 
-                    args.Length, 
-                    args.Length + 1);
+                $"SELECT * FROM (SELECT ROW_NUMBER() OVER ({pageStatement.SqlOrderBy ?? "ORDER BY (SELECT NULL)"}) " + 
+                "peta_rn, {pageStatement.SqlSelectRemoved}) peta_paged WHERE peta_rn>@{args.Length} AND peta_rn<=@{args.Length + 1}";
 
             args = args.Concat(new object[] { skip, skip + take }).ToArray();
 
@@ -107,7 +103,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// </remarks>
         public override string GetInsertOutputClause(string primaryKeyName)
         {
-            return String.Format(" OUTPUT INSERTED.[{0}]", primaryKeyName);
+            return $" OUTPUT INSERTED.[{primaryKeyName}]";
         }
 
         #endregion

@@ -593,7 +593,7 @@ namespace Startitecture.Orm.Query.Tests
         ////    var selection = new SqlSelection<FakeRaisedChildRow>();
         ////    var entityDefinition = definitionProvider.Resolve<FakeRaisedChildRow>();
         ////    var expected = entityDefinition.ReturnableAttributes.ToList();
-        ////    var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+        ////    var actual = selection.SelectExpressions.SqlSelect(entityDefinition.Find).ToList();
         ////    CollectionAssert.AreEqual(expected, actual);
         ////}
 
@@ -636,7 +636,7 @@ namespace Startitecture.Orm.Query.Tests
         ////        .ReturnableAttributes.Distinct(new DistinctAttributeEqualityComparer())
         ////        .ToList();
 
-        ////    var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+        ////    var actual = selection.SelectExpressions.SqlSelect(entityDefinition.Find).ToList();
         ////    CollectionAssert.AreEqual(expected, actual);
         ////}
 
@@ -660,12 +660,12 @@ namespace Startitecture.Orm.Query.Tests
         ////    var expressions = new List<Expression<Func<InstanceSection, object>>> { expr1, expr2, expr3, expr4, expr5, expr6 };
 
         ////    var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
-        ////    var selection = new SqlSelection<InstanceSection>().Select(expressions.ToArray());
+        ////    var selection = new SqlSelection<InstanceSection>().SqlSelect(expressions.ToArray());
 
         ////    var entityDefinition = definitionProvider.Resolve<InstanceSection>();
-        ////    var expected = expressions.Select(entityDefinition.Find).Distinct(new DistinctAttributeEqualityComparer()).ToList();
+        ////    var expected = expressions.SqlSelect(entityDefinition.Find).Distinct(new DistinctAttributeEqualityComparer()).ToList();
 
-        ////    var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+        ////    var actual = selection.SelectExpressions.SqlSelect(entityDefinition.Find).ToList();
 
         ////    // Just to be sure, we check that our duplicate is eliminated.
         ////    Assert.AreEqual(expressions.Count - 1, expected.Count);

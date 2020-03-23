@@ -10,6 +10,7 @@
 namespace Startitecture.Orm.Sql
 {
     using System;
+    using System.Globalization;
     using System.Linq;
 
     using JetBrains.Annotations;
@@ -69,8 +70,13 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The JOIN clause as a <see cref="string"/>.
         /// </returns>
-        public string Create<TItem>(ItemSelection<TItem> selection)
+        public string Create<TItem>([NotNull] ItemSelection<TItem> selection)
         {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
             return string.Join(Environment.NewLine, selection.Relations.Select(this.GenerateRelationStatement));
         }
 
@@ -143,11 +149,12 @@ namespace Startitecture.Orm.Sql
             if (string.IsNullOrWhiteSpace(relationLocation.Alias))
             {
                 // Use the entity names for the inner join if no alias has been requested.
-                return string.Format(RelationStatementFormat, joinType, relationEntity, sourceName, relationName);
+                return string.Format(CultureInfo.InvariantCulture, RelationStatementFormat, joinType, relationEntity, sourceName, relationName);
             }
 
             // Use the entity names names for the inner join and alias the table.
             return string.Format(
+                CultureInfo.InvariantCulture, 
                 AliasedRelationStatementFormat,
                 joinType,
                 relationEntity,

@@ -38,8 +38,10 @@ namespace Startitecture.Orm.Mapper.Tests
                 var sqlConnection = target.Connection as SqlConnection;
                 Assert.IsNotNull(sqlConnection);
 
-                var command = new SqlCommand("SELECT TOP 1 * FROM sys.tables", sqlConnection, transaction);
-                command.ExecuteNonQuery();
+                using (var command = new SqlCommand("SELECT TOP 1 * FROM sys.tables", sqlConnection, transaction))
+                {
+                    command.ExecuteNonQuery();
+                }
 
                 target.AbortTransaction();
             }
@@ -51,32 +53,34 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void Insert_NewComplexRow_AutoNumberPrimaryKeyIsSet()
         {
-            var expected = 423;
+            const int Expected = 423;
 
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
             using (var target = new Database(connection, new PetaPocoDefinitionProvider()))
             {
-                var command = CreateMockCommand(connection);
+                using (var command = CreateMockCommand(connection))
+                {
+                    command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(Expected);
+                    command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(Expected);
 
-                command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(expected);
-                command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(expected);
+                    var row = new FakeRaisedComplexRow
+                                  {
+                                      CreatedByFakeMultiReferenceEntityId = 87354,
+                                      ModifiedByFakeMultiReferenceEntityId = 34598,
+                                      FakeEnumerationId = 8,
+                                      FakeOtherEnumerationId = 4,
+                                      UniqueName = "MyUniqueName",
+                                      Description = "Some Stuff!",
+                                      FakeSubEntityId = 4598,
+                                      CreationTime = DateTimeOffset.Now,
+                                      ModifiedTime = DateTimeOffset.Now
+                                  };
 
-                var row = new FakeRaisedComplexRow
-                              {
-                                  CreatedByFakeMultiReferenceEntityId = 87354,
-                                  ModifiedByFakeMultiReferenceEntityId = 34598,
-                                  FakeEnumerationId = 8,
-                                  FakeOtherEnumerationId = 4,
-                                  UniqueName = "MyUniqueName",
-                                  Description = "Some Stuff!",
-                                  FakeSubEntityId = 4598,
-                                  CreationTime = DateTimeOffset.Now,
-                                  ModifiedTime = DateTimeOffset.Now
-                              };
+                    var result = target.Insert(row);
 
-                var result = target.Insert(row);
-                Assert.AreEqual(expected, result);
-                Assert.AreEqual<int>(expected, row.FakeComplexEntityId);
+                    Assert.AreEqual(Expected, result);
+                    Assert.AreEqual(Expected, row.FakeComplexEntityId);
+                }
             }
         }
 
@@ -91,21 +95,22 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
             using (var target = new Database(connection, new PetaPocoDefinitionProvider()))
             {
-                var command = CreateMockCommand(connection);
+                using (var command = CreateMockCommand(connection))
+                {
+                    command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(expected);
+                    command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(expected);
 
-                command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(expected);
-                command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(expected);
+                    var row = new FakeDependentRow
+                                  {
+                                      FakeDependentEntityId = expected,
+                                      DependentIntegerValue = 4583,
+                                      DependentTimeValue = DateTimeOffset.Now
+                                  };
 
-                var row = new FakeDependentRow
-                              {
-                                  FakeDependentEntityId = expected,
-                                  DependentIntegerValue = 4583,
-                                  DependentTimeValue = DateTimeOffset.Now
-                              };
-
-                var result = target.Insert(row);
-                Assert.AreEqual(expected, result);
-                Assert.AreEqual<int>(expected, row.FakeDependentEntityId);
+                    var result = target.Insert(row);
+                    Assert.AreEqual(expected, result);
+                    Assert.AreEqual(expected, row.FakeDependentEntityId);
+                }
             }
         }
 

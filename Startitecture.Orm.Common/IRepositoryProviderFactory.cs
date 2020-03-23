@@ -15,10 +15,10 @@ namespace Startitecture.Orm.Common
     public interface IRepositoryProviderFactory
     {
         /// <summary>
-        /// Creates an <see cref="T:Startitecture.Orm.Common.IRepositoryProvider"/>. 
+        /// Creates an <see cref="IRepositoryProvider"/>. 
         /// </summary>
         /// <returns>
-        /// An <see cref="T:Startitecture.Orm.Common.IRepositoryProvider"/>.
+        /// An <see cref="IRepositoryProvider"/>.
         /// </returns>
         IRepositoryProvider Create();
     }
