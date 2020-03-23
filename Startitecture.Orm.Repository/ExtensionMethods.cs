@@ -8,6 +8,7 @@ namespace Startitecture.Orm.Repository
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -545,7 +546,7 @@ namespace Startitecture.Orm.Repository
 
             // Look for the name of the member.
             var propertyName = targetProperty.GetPropertyName();
-            var constructorParamName = string.Concat(char.ToLower(propertyName.First()), propertyName.Substring(1));
+            var constructorParamName = string.Concat(char.ToLower(propertyName.First(), CultureInfo.InvariantCulture), propertyName.Substring(1));
 
             return constructorInfo.GetParameters().FirstOrDefault(info => info.Name == constructorParamName);
         }

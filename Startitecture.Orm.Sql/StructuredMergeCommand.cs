@@ -29,6 +29,11 @@ namespace Startitecture.Orm.Sql
     public class StructuredMergeCommand<TStructure> : StructuredSqlCommand<TStructure>
     {
         /// <summary>
+        /// The transact SQL qualifier.
+        /// </summary>
+        private static readonly TransactSqlQualifier TransactSqlQualifier = Singleton<TransactSqlQualifier>.Instance;
+
+        /// <summary>
         /// The direct attributes.
         /// </summary>
         private readonly List<EntityAttributeDefinition> directAttributes = new List<EntityAttributeDefinition>();
@@ -62,8 +67,6 @@ namespace Startitecture.Orm.Sql
         /// The delete constraints.
         /// </summary>
         private List<Expression<Func<TStructure, object>>> deleteConstraints;
-
-        private static readonly TransactSqlQualifier TransactSqlQualifier = Singleton<TransactSqlQualifier>.Instance;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StructuredMergeCommand{TStructure}"/> class.
@@ -179,7 +182,7 @@ namespace Startitecture.Orm.Sql
             var structureDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TStructure>();
             var allAttributes = structureDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
-            // If there's an auto number primary key, then don't try to insert it. Only use the updatable attributes.
+            // If there's an auto number primary key, then don't try to insert it. Only use the updateable attributes.
             var targetColumns = this.insertAttributes.OrderBy(x => x.PhysicalName).Select(x => x.PhysicalName);
 
             var sourceAttributes = (from tvpAttribute in allAttributes

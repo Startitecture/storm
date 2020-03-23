@@ -60,7 +60,7 @@ namespace Startitecture.Orm.Repository
         /// <exception cref="ArgumentNullException">
         /// <paramref name="input"/> was null.
         /// </exception>
-        /// <exception cref="T:SAF.Core.ApplicationConfigurationException">
+        /// <exception cref="OperationException">
         /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
         /// </exception>
         public TOutput Map<TOutput>(object input)
@@ -86,7 +86,7 @@ namespace Startitecture.Orm.Repository
         /// <exception cref="ArgumentNullException">
         /// <paramref name="input"/> was null.
         /// </exception>
-        /// <exception cref="T:SAF.Core.ApplicationConfigurationException">
+        /// <exception cref="OperationException">
         /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
         /// </exception>
         public TOutput Map<TOutput>(object input, Func<Type, object> serviceConstructor)

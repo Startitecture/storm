@@ -44,10 +44,25 @@ namespace Startitecture.Orm.Sql
         /// </summary>
         private const string LeftJoinClause = "LEFT JOIN";
 
+        /// <summary>
+        /// The transact SQL qualifier.
+        /// </summary>
         private static readonly TransactSqlQualifier TransactSqlQualifier = Singleton<TransactSqlQualifier>.Instance;
 
+        /// <summary>
+        /// The definition provider.
+        /// </summary>
         private readonly IEntityDefinitionProvider definitionProvider;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TransactSqlJoin"/> class.
+        /// </summary>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="definitionProvider"/> is null.
+        /// </exception>
         public TransactSqlJoin([NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (definitionProvider == null)

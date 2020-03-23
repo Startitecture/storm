@@ -80,7 +80,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the data key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         public virtual IEntityMappingProfile<TEntity, TDataItem> SetPrimaryKey<TEntityKey, TDataKey>(
             Expression<Func<TEntity, TEntityKey>> entityKey,
@@ -236,7 +236,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         public IEntityMappingProfile<TEntity, TDataItem> SetUniqueKey<TKey>(Expression<Func<TDataItem, TKey>> key)
         {
@@ -272,7 +272,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         public IEntityMappingProfile<TEntity, TDataItem> SetDependencyKey<TDependency, TKey>(Expression<Func<TDependency, TKey>> key)
         {
@@ -313,7 +313,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         public IEntityMappingProfile<TEntity, TDataItem> SetDependencyKey<TDependency, TKey>(
             Expression<Func<TDependency, TKey>> sourceKey,

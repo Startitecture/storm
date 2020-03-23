@@ -33,7 +33,7 @@ namespace Startitecture.Orm.Repository
         where TDataItem : class, ITransactionContext, new()
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Repository.EntityRepository`2"/> class.
+        /// Initializes a new instance of the <see cref="EntityRepository{TEntity,TDataItem}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -50,7 +50,7 @@ namespace Startitecture.Orm.Repository
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Repository.EntityRepository`2"/> class.
+        /// Initializes a new instance of the <see cref="EntityRepository{TEntity,TDataItem}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -124,10 +124,10 @@ namespace Startitecture.Orm.Repository
         /// <exception cref="ArgumentNullException">
         /// <paramref name="item"/> is null.
         /// </exception>
-        /// <exception cref="T:SAF.Core.BusinessException">
+        /// <exception cref="BusinessException">
         /// <paramref name="item"/> failed to validate.
         /// </exception>
-        /// <exception cref="T:SAF.Core.ApplicationConfigurationException">
+        /// <exception cref="OperationException">
         /// <paramref name="item"/> failed to map from a <typeparamref name="TEntity"/> to a <typeparamref name="TDataItem"/>, or 
         /// <paramref name="item"/> failed to map from a <typeparamref name="TDataItem"/> to a <typeparamref name="TEntity"/>.
         /// </exception>

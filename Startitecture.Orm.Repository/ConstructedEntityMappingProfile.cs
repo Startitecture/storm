@@ -50,9 +50,9 @@ namespace Startitecture.Orm.Repository
         /// The type of the data key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
-        public sealed override IEntityMappingProfile<TEntity, TDataItem> SetPrimaryKey<TEntityKey, TDataKey>(
+        public override sealed IEntityMappingProfile<TEntity, TDataItem> SetPrimaryKey<TEntityKey, TDataKey>(
             Expression<Func<TEntity, TEntityKey>> entityKey,
             Expression<Func<TDataItem, TDataKey>> dataItemKey)
         {

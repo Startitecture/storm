@@ -48,7 +48,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the data key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetPrimaryKey<TEntityKey, TDataKey>(
@@ -74,7 +74,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetUniqueKey<TKey>([NotNull] Expression<Func<TDataItem, TKey>> key);
@@ -92,7 +92,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetDependencyKey<TDependency, TKey>(
@@ -114,7 +114,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the key property.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="T:Startitecture.Orm.Repository.EntityMappingProfile`2"/>.
+        /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
         [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetDependencyKey<TDependency, TKey>(

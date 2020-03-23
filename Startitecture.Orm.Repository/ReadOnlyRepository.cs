@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Repository
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.Caching;
@@ -66,7 +67,7 @@ namespace Startitecture.Orm.Repository
         ////private ItemSelection<TDataItem> useAlternateKeySelection;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Repository.ReadOnlyRepository`2"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity,TDataItem}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -83,7 +84,7 @@ namespace Startitecture.Orm.Repository
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="T:Startitecture.Orm.Repository.ReadOnlyRepository`2"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity,TDataItem}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -356,7 +357,7 @@ namespace Startitecture.Orm.Repository
         /// The item to create the selection for.
         /// </param>
         /// <returns>
-        /// A <see cref="T:SAF.Data.ItemSelection`1"/> for the specified item.
+        /// A <see cref="ItemSelection{TItem}"/> for the specified item.
         /// </returns>
         protected virtual ItemSelection<TDataItem> GetUniqueItemSelection(TDataItem item)
         {
@@ -444,13 +445,13 @@ namespace Startitecture.Orm.Repository
         /// The type of the data item's key.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="T:SAF.Data.ItemSelection`1"/> with the related entity associations.
+        /// The <see cref="ItemSelection{TItem}"/> with the related entity associations.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         protected ItemSelection<TDataItem> GetKeySelection<TKey>(TDataItem item, [NotNull] Expression<Func<TDataItem, TKey>> primaryKey)
         {
-            return this.GetKeySelection(item, primaryKey, new Expression<Func<TDataItem, object>>[] { });
+            return this.GetKeySelection(item, primaryKey, Array.Empty<Expression<Func<TDataItem, object>>>());
         }
 
         /// <summary>
@@ -469,7 +470,7 @@ namespace Startitecture.Orm.Repository
         /// The type of the data item's key.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="T:SAF.Data.ItemSelection`1"/> with the related entity associations.
+        /// The <see cref="ItemSelection{TItem}"/> with the related entity associations.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
@@ -544,7 +545,7 @@ namespace Startitecture.Orm.Repository
         /// </returns>
         private CacheResult<TEntity> QueryCache(ItemSelection<TDataItem> selection)
         {
-            var key = string.Format(CacheKeyFormat, typeof(TEntity).ToRuntimeName(), selection);
+            var key = string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TEntity).ToRuntimeName(), selection);
             var cacheResult = new CacheResult<TEntity>(default, false, key);
 
             if (this.RepositoryProvider.EnableCaching == false)

@@ -165,22 +165,22 @@ namespace Startitecture.Orm.Sql
         /// <summary>
         /// Gets object values except for indexed and <see cref="Startitecture.Orm.Common.ITransactionContext"/> properties.
         /// </summary>
-        /// <param name="obj">
+        /// <param name="context">
         /// The <see cref="Startitecture.Orm.Common.ITransactionContext"/> to obtain the properties for.
         /// </param>
         /// <returns>
         /// A collection of <see cref="System.Object"/> items containing property values of the object.
         /// </returns>
-        public static IEnumerable<object> ToValueCollection(this ITransactionContext obj)
+        public static IEnumerable<object> ToValueCollection(this ITransactionContext context)
         {
-            if (obj == null)
+            if (context == null)
             {
-                throw new ArgumentNullException(nameof(obj));
+                throw new ArgumentNullException(nameof(context));
             }
 
             var values = new List<object>();
 
-            var nonIndexedProperties = obj.GetType().GetNonIndexedProperties();
+            var nonIndexedProperties = context.GetType().GetNonIndexedProperties();
 
             // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var propertyInfo in nonIndexedProperties.OrderBy(NameSelector))
@@ -190,7 +190,7 @@ namespace Startitecture.Orm.Sql
                     continue;
                 }
 
-                values.Add(propertyInfo.GetPropertyValue(obj));
+                values.Add(propertyInfo.GetPropertyValue(context));
             }
 
             return values;

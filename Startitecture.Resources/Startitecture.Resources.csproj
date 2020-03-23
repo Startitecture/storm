@@ -20,6 +20,7 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>Startitecture.Core.pfx</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NeutralLanguage>en-US</NeutralLanguage>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="ActionMessages.Designer.cs">
