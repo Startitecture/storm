@@ -7,7 +7,6 @@
 namespace Startitecture.Orm.Repository
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -47,7 +46,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="IMappingExpression"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public static IMappingExpression<TDataItem, TEntity> DoNotMap<TDataItem, TEntity>(
             [NotNull] this IMappingExpression<TDataItem, TEntity> mappingExpression,
             [NotNull] Expression<Func<TEntity, object>> targetProperty)
@@ -126,8 +124,6 @@ namespace Startitecture.Orm.Repository
         /// <exception cref="ArgumentNullException">
         /// <paramref name="mapping"/> or <paramref name="keySelection"/> is null.
         /// </exception>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Allows fluent usage of the method.")]
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public static void MapKey<TKey, TDataItem>(
             [NotNull] this IMappingExpression<TKey, TDataItem> mapping,
             [NotNull] Expression<Func<TDataItem, TKey>> keySelection)
@@ -164,8 +160,6 @@ namespace Startitecture.Orm.Repository
         /// <param name="keySelection">
         /// An expression that selects the data item's primary key.
         /// </param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Required for implicit usage.")]
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Required for implicit usage.")]
         public static void ConfigureKey<TKey, TDataItem>(this Profile config, Expression<Func<TDataItem, TKey>> keySelection)
             where TDataItem : ITransactionContext
         {
@@ -212,7 +206,6 @@ namespace Startitecture.Orm.Repository
         /// <exception cref="ArgumentNullException">
         /// <paramref name="targetProperty"/> or <paramref name="sourceProperty"/> is null.
         /// </exception>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public static IMappingExpression<TDataItem, TEntity> MapEntityProperty<TDataItem, TSource, TEntity, TTarget>(
             [NotNull] this IMappingExpression<TDataItem, TEntity> mappingExpression,
             [NotNull] Expression<Func<TEntity, TTarget>> targetProperty,
@@ -287,8 +280,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current mapping expression.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Allows fluent usage of the method.")]
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public static IMappingExpression<TDataItem, TEntity> MapDependency<TDataItem, TEntity, TDependency, TKey>(
             [NotNull] this IMappingExpression<TDataItem, TEntity> mappingExpression,
             [NotNull] Expression<Func<TEntity, TDependency>> dependency,
@@ -338,8 +329,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The mapped or resolved <see cref="object"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Allows fluent usage of the method.")]
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public static object ResolveOrMapRelatedEntity<TDataItem, TKey, TEntity>(
             [NotNull] this TDataItem item,
             [NotNull] Expression<Func<TDataItem, TKey>> relationKey)
@@ -399,8 +388,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The mapped or resolved <see cref="object"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1004:GenericMethodsShouldProvideTypeParameter", Justification = "Allows fluent usage of the method.")]
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public static object ResolveOrMapRelatedEntity<TDataItem, TRelation, TEntity>(
             this TDataItem item,
             [NotNull] Expression<Func<TDataItem, TRelation>> relationExpression,
@@ -476,7 +463,6 @@ namespace Startitecture.Orm.Repository
         /// <param name="dependency">
         /// The dependency to set.
         /// </param>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public static void SetDependency<TDependency, TKey, TDataItem>(
             [NotNull] this TDataItem item,
             [NotNull] Expression<Func<TDataItem, TKey>> dependencyKey,

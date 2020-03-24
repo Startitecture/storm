@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
@@ -19,9 +19,7 @@ namespace Startitecture.Orm.Repository
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The view repository.
@@ -152,7 +150,7 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// <c>true</c> if the item exists in the repository; otherwise, <c>false</c>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="candidate"/> is null.
         /// </exception>
         /// <remarks>
@@ -189,7 +187,7 @@ namespace Startitecture.Orm.Repository
         /// The first <typeparamref name="TEntity"/> in the repository matching the candidate item's identifier or unique key, or a 
         /// default value of the <typeparamref name="TEntity"/> type if no entity could be found using the candidate.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="candidate"/> is null.
         /// </exception>
         public TEntity FirstOrDefault<TItem>(TItem candidate)
@@ -247,7 +245,7 @@ namespace Startitecture.Orm.Repository
         /// <param name="key">
         /// The key that uniquely identifies the entity.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="key"/> is null.
         /// </exception>
         /// <returns>
@@ -329,7 +327,7 @@ namespace Startitecture.Orm.Repository
         /// </returns>
         public IEnumerable<TEntity> SelectAll()
         {
-            var exampleSelection = new SqlSelection<TDataItem>(new TDataItem());
+            var exampleSelection = new ItemSelection<TDataItem>();
             var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
             return this.SelectResults(dataItems);
         }
@@ -508,7 +506,13 @@ namespace Startitecture.Orm.Repository
             }
             else
             {
-                selection = item.ToExampleSelection(alternateKeys);
+                selection = new ItemSelection<TDataItem>().Select(alternateKeys); ////item.ToExampleSelection(alternateKeys);
+
+                foreach (var alternateKey in alternateKeys)
+                {
+                    var propertyValue = item.GetPropertyValue(alternateKey.GetPropertyName());
+                    selection.WhereEqual(alternateKey, propertyValue);
+                }
             }
 
             return selection;
@@ -531,7 +535,8 @@ namespace Startitecture.Orm.Repository
         /// </returns>
         private static ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
         {
-            return new SqlSelection<TDataItem>(item, new[] { primaryKey });
+            return new ItemSelection<TDataItem>().Select(primaryKey).WhereEqual(primaryKey, item.GetPropertyValue(primaryKey.GetPropertyName()));
+            ////return new SqlSelection<TDataItem>(item, new[] { primaryKey });
         }
 
         /// <summary>

@@ -7,7 +7,6 @@
 namespace Startitecture.Orm.Repository
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq.Expressions;
 
     using AutoMapper;
@@ -391,7 +390,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="RelatedEntityMappingContainer{TDataItem, TRelation}"/> with the specified property mapped.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public RelatedEntityMappingContainer<TDataItem, TRelation> CreateRelatedEntityProfile<TRelation, TDataKey>(
             [NotNull] Expression<Func<TEntity, TRelation>> relationProperty,
             [NotNull] Expression<Func<TDataItem, TDataKey>> relationKey)
@@ -439,7 +437,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="RelatedEntityMappingContainer{TDataItem, TRelation}"/> with the specified property mapped.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public RelatedEntityMappingContainer<TDataItem, TRelation> CreateRelatedEntityProfile<TRelation, TDataKey, TEntityKey>(
             [NotNull] Expression<Func<TEntity, TRelation>> relationProperty,
             [NotNull] Expression<Func<TDataItem, TDataKey>> relationKey,
@@ -481,7 +478,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="IMappingExpression"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public IMappingExpression<TDataItem, TEntity> DoNotMap([NotNull] Expression<Func<TEntity, object>> targetProperty)
         {
             if (targetProperty == null)

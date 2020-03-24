@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,6 @@ namespace Startitecture.Orm.Repository
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Common;
 
     /// <summary>
     /// A base class for entity repositories.
@@ -121,7 +120,7 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The saved <typeparamref name="TEntity"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="item"/> is null.
         /// </exception>
         /// <exception cref="BusinessException">
@@ -131,7 +130,7 @@ namespace Startitecture.Orm.Repository
         /// <paramref name="item"/> failed to map from a <typeparamref name="TEntity"/> to a <typeparamref name="TDataItem"/>, or 
         /// <paramref name="item"/> failed to map from a <typeparamref name="TDataItem"/> to a <typeparamref name="TEntity"/>.
         /// </exception>
-        /// <exception cref="InvalidOperationException">
+        /// <exception cref="System.InvalidOperationException">
         /// The database operation failed.
         /// </exception>
         public TEntity Save<TItem>(TItem item)
@@ -271,7 +270,7 @@ namespace Startitecture.Orm.Repository
         /// <typeparam name="TDependency">
         /// The type of dependency being saved.
         /// </typeparam>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="entity"/>, <paramref name="dependencySelector"/>, <paramref name="repository"/> or 
         /// <paramref name="dataItem"/> is null.
         /// </exception>

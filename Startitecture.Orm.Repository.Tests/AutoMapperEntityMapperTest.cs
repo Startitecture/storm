@@ -13,6 +13,7 @@ namespace Startitecture.Orm.Repository.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Testing.Model;
     using Startitecture.Orm.Testing.RhinoMocks;
 
     /// <summary>
@@ -41,6 +42,19 @@ namespace Startitecture.Orm.Repository.Tests
                 });
 
         #region Public Methods and Operators
+
+        /// <summary>
+        /// The map to_ key to entity_ key is set.
+        /// </summary>
+        [TestMethod]
+        public void MapTo_KeyToEntity_KeyIsSet()
+        {
+            Func<object> function = () => 23;
+            object key = function.DynamicInvoke();
+            var subSubEntity = new FakeSubSubEntity("MySubSubEntity") { Description = "Woo" };
+            this.entityMapper.MapTo(key, subSubEntity);
+            Assert.AreEqual(key, subSubEntity.FakeSubSubEntityId);
+        }
 
         /// <summary>
         /// A test for Map

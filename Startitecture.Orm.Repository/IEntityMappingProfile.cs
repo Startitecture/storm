@@ -10,7 +10,6 @@
 namespace Startitecture.Orm.Repository
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq.Expressions;
 
     using AutoMapper;
@@ -50,7 +49,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetPrimaryKey<TEntityKey, TDataKey>(
             [NotNull] Expression<Func<TEntity, TEntityKey>> entityKey,
             [NotNull] Expression<Func<TDataItem, TDataKey>> dataItemKey);
@@ -76,7 +74,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetUniqueKey<TKey>([NotNull] Expression<Func<TDataItem, TKey>> key);
 
         /// <summary>
@@ -94,7 +91,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetDependencyKey<TDependency, TKey>(
             [NotNull] Expression<Func<TDependency, TKey>> key);
 
@@ -116,7 +112,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="IEntityMappingProfile{TEntity,TDataItem}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> SetDependencyKey<TDependency, TKey>(
             [NotNull] Expression<Func<TDependency, TKey>> sourceKey,
             [NotNull] Expression<Func<TDataItem, object>> targetKey);
@@ -139,7 +134,6 @@ namespace Startitecture.Orm.Repository
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="writeOnceColumns"/> is null.
         /// </exception>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         void CreateDependencyMap<TDependencyItem, TKey>(
             Expression<Func<TDependencyItem, TKey>> primaryKey,
             [NotNull] params Expression<Func<TDependencyItem, object>>[] writeOnceColumns) where TDependencyItem : ITransactionContext;
@@ -191,7 +185,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// An <see cref="IMappingExpression"/> that maps the specified <typeparamref name="TDataItem"/> to the <typeparamref name="TRelation"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> ResolveUnmappedEntity<TRelation, TDataKey>(
             Expression<Func<TEntity, TRelation>> relatedEntity,
             Expression<Func<TDataItem, TDataKey>> relatedEntityKey) where TRelation : class;
@@ -217,7 +210,6 @@ namespace Startitecture.Orm.Repository
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="entityProperty"/> or <paramref name="dataItemColumn"/> is <c>null</c>.
         /// </exception>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         IEntityMappingProfile<TEntity, TDataItem> MapProperty<TProperty, TColumn>(
             Expression<Func<TEntity, TProperty>> entityProperty,
             Expression<Func<TDataItem, TColumn>> dataItemColumn);

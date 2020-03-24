@@ -112,6 +112,26 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(selectors));
             }
 
+            this.Select(selectors as LambdaExpression[]);
+            return this;
+        }
+
+        /// <summary>
+        /// Selects the properties to return with the query.
+        /// </summary>
+        /// <param name="selectors">
+        /// The property name selectors. If empty, all properties are returned.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        public ItemSelection<TItem> Select(params LambdaExpression[] selectors)
+        {
+            if (selectors == null)
+            {
+                throw new ArgumentNullException(nameof(selectors));
+            }
+
             this.selectExpressions.AddRange(selectors);
             return this;
         }
@@ -248,6 +268,39 @@ namespace Startitecture.Orm.Query
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
         public ItemSelection<TItem> WhereEqual<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        {
+            ////if (valueExpression == null)
+            ////{
+            ////    throw new ArgumentNullException(nameof(valueExpression));
+            ////}
+
+            ////var valueFilter = Evaluate.IsNull(value)
+            ////                      ? new ValueFilter(valueExpression, FilterType.IsNotSet, value)
+            ////                      : new ValueFilter(valueExpression, FilterType.Equality, value);
+
+            ////this.valueFilters.Add(valueFilter);
+            return this.WhereEqual(valueExpression as LambdaExpression, value);
+        }
+
+        /// <summary>
+        /// Adds a equality filter for the specified property.
+        /// </summary>
+        /// <param name="valueExpression">
+        /// The value expression.
+        /// </param>
+        /// <param name="value">
+        /// The value to match.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of the value.
+        /// </typeparam>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueExpression"/> is null.
+        /// </exception>
+        public ItemSelection<TItem> WhereEqual<TValue>([NotNull] LambdaExpression valueExpression, TValue value)
         {
             if (valueExpression == null)
             {

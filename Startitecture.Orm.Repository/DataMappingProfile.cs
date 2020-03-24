@@ -10,7 +10,6 @@
 namespace Startitecture.Orm.Repository
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq.Expressions;
 
     using AutoMapper;
@@ -56,7 +55,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="DataMappingProfile{T}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public virtual DataMappingProfile<TDataItem> SetPrimaryKey<TDataKey>(
             Expression<Func<TDataItem, TDataKey>> dataItemKey)
         {
@@ -111,7 +109,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="DataMappingProfile{T}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public DataMappingProfile<TDataItem> SetUniqueKey<TKey>(Expression<Func<TDataItem, TKey>> key)
         {
             if (key == null)
@@ -143,7 +140,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="DataMappingProfile{T}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public DataMappingProfile<TDataItem> SetDependencyKey<TDependency, TKey>(Expression<Func<TDependency, TKey>> key)
         {
             if (key == null)
@@ -181,7 +177,6 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The current <see cref="DataMappingProfile{T}"/>.
         /// </returns>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public DataMappingProfile<TDataItem> SetDependencyKey<TDependency, TKey>(
             Expression<Func<TDependency, TKey>> sourceKey,
             Expression<Func<TDataItem, object>> targetKey)

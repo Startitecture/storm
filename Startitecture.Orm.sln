@@ -88,6 +88,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{5A41FA6C-6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storm", "Storm", "{8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Common.Tests", "Startitecture.Orm.Common.Tests\Startitecture.Orm.Common.Tests.csproj", "{B5B67152-6020-41D7-8E11-CF94F448BEA6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -569,6 +571,24 @@ Global
 		{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}.Release|x86.ActiveCfg = Release|Any CPU
 		{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}.Release|x86.Build.0 = Release|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Debug|x86.Build.0 = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.DebugLocal|x86.Build.0 = Debug|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Release|x86.ActiveCfg = Release|Any CPU
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -603,10 +623,11 @@ Global
 		{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 		{5A41FA6C-648C-488C-BC31-FB580931C88B} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
 		{8F7F395A-6152-4F7A-8DC4-4610A9E38EC8} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
+		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi
