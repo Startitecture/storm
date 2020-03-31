@@ -6,23 +6,25 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
-    using Startitecture.Orm.Repository;
+    using AutoMapper;
+
+    using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The fake sub entity mapping profile.
     /// </summary>
-    public class FakeSubEntityMappingProfile : EntityMappingProfile<FakeSubEntity, FakeFlatSubRow>
+    public class FakeSubEntityMappingProfile : Profile
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FakeSubEntityMappingProfile"/> class.
         /// </summary>
         public FakeSubEntityMappingProfile()
         {
-            this.SetPrimaryKey(entity => entity.FakeSubEntityId, row => row.FakeSubEntityId);
-            this.CreateRelatedEntityProfile(entity => entity.FakeSubSubEntity, row => row.FakeSubSubEntityId)
-                .MapEntityProperty(entity => entity.Description, row => row.FakeSubSubEntityDescription)
-                .MapEntityProperty(entity => entity.UniqueName, row => row.FakeSubSubEntityUniqueName);
+            this.CreateMap<SubEntity, SubRow>()
+                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+
+            this.CreateMap<SubRow, SubEntity>();
         }
     }
 }

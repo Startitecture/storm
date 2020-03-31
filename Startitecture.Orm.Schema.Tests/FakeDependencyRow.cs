@@ -6,6 +6,7 @@
 
 namespace Startitecture.Orm.Schema.Tests
 {
+    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Schema;
@@ -13,14 +14,14 @@ namespace Startitecture.Orm.Schema.Tests
     /// <summary>
     /// The fake dependency row.
     /// </summary>
-    [TableName("FakeDependencyEntity")]
-    [PrimaryKey("FakeDependencyEntityId")]
+    [Table("FakeDependencyEntity", Schema = "dbo")]
     public class FakeDependencyRow : TransactionItemBase
     {
         /// <summary>
         /// Gets or sets the fake dependency entity id.
         /// </summary>
         [Column]
+        [Key]
         public long FakeDependencyEntityId { get; set; }
 
         /// <summary>

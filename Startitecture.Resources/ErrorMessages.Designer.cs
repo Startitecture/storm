@@ -232,6 +232,15 @@ namespace Startitecture.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not set primary key {0}.{1} with value &apos;{2}&apos;: {3}.
+        /// </summary>
+        public static string CouldNotSetPrimaryKeyWithValue {
+            get {
+                return ResourceManager.GetString("CouldNotSetPrimaryKeyWithValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The current status of the routing request did not contain a current route..
         /// </summary>
         public static string CurrentRouteNotFound {
@@ -543,6 +552,15 @@ namespace Startitecture.Resources {
         public static string KeyTypeNotSupportedForInsert {
             get {
                 return ResourceManager.GetString("KeyTypeNotSupportedForInsert", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} does not have matching key property for {1}.{2}.
+        /// </summary>
+        public static string MatchingKeyPropertyNotFound {
+            get {
+                return ResourceManager.GetString("MatchingKeyPropertyNotFound", resourceCulture);
             }
         }
         
@@ -867,6 +885,15 @@ namespace Startitecture.Resources {
         public static string TypeCouldNotBeLoaded {
             get {
                 return ResourceManager.GetString("TypeCouldNotBeLoaded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable to set {0}.{1} to &apos;{2}&apos;: {3}.
+        /// </summary>
+        public static string UnableToSetPropertyToValue {
+            get {
+                return ResourceManager.GetString("UnableToSetPropertyToValue", resourceCulture);
             }
         }
         

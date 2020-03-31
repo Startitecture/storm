@@ -74,6 +74,10 @@
       <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
       <Name>Startitecture.Orm.Schema</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj">
+      <Project>{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}</Project>
+      <Name>Startitecture.Orm.Testing.Entities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj">
       <Project>{2541775F-1B34-4E5A-95BB-B8961633114A}</Project>
       <Name>Startitecture.Orm.Testing.Model</Name>

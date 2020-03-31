@@ -491,4 +491,13 @@
   <data name="PropertyIsOutOfRange" xml:space="preserve">
     <value>Property {0}.{1} value {2} is out of range.</value>
   </data>
+  <data name="CouldNotSetPrimaryKeyWithValue" xml:space="preserve">
+    <value>Could not set primary key {0}.{1} with value '{2}': {3}</value>
+  </data>
+  <data name="UnableToSetPropertyToValue" xml:space="preserve">
+    <value>Unable to set {0}.{1} to '{2}': {3}</value>
+  </data>
+  <data name="MatchingKeyPropertyNotFound" xml:space="preserve">
+    <value>{0} does not have matching key property for {1}.{2}</value>
+  </data>
 </root>

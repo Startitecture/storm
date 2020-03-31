@@ -3,7 +3,7 @@
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Contains the possible types of a data item property.
+//   Contains the types of an entity attribute.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -12,11 +12,16 @@ namespace Startitecture.Orm.Model
     using System;
 
     /// <summary>
-    /// Contains the possible types of a data item property.
+    /// Contains the types of an entity attribute.
     /// </summary>
     [Flags]
     public enum EntityAttributeTypes
     {
+        /// <summary>
+        /// The attribute has no declared type.
+        /// </summary>
+        None = 0,
+
         /// <summary>
         /// The attribute is a direct attribute of the data item.
         /// </summary>
@@ -33,7 +38,7 @@ namespace Startitecture.Orm.Model
         DirectPrimaryKey = DirectAttribute | PrimaryKey,
 
         /// <summary>
-        /// The attribute is an auto number primary key.
+        /// The attribute is a row identity.
         /// </summary>
         IdentityColumn = 4,
 

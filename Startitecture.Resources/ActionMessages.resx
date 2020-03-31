@@ -229,4 +229,7 @@
     <value>Reuse Idle Queue</value>
     <comment>The action for reusing an idle queue.</comment>
   </data>
+  <data name="CouldNotSetPrimaryKeyWithValue" xml:space="preserve">
+    <value>Could not set primary key {0}.{1} with value '{2}': {3}</value>
+  </data>
 </root>

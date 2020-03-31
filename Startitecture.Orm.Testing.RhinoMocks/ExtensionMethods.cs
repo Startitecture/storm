@@ -89,6 +89,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             return repositoryProvider;
         }
 
+/*
         /// <summary>
         /// Creates stubs to save and select an existing item.
         /// </summary>
@@ -135,6 +136,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
             return repositoryProvider;
         }
+*/
 
         /// <summary>
         /// Stubs a repository provider for a list of items.
@@ -199,7 +201,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             }
             else
             {
-                UpdateListKeys(target);
+                UpdateListKeys(target, repositoryProvider.EntityDefinitionProvider);
             }
 
             repositoryProvider.Stub(provider => provider.GetSelection(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(target);
@@ -305,7 +307,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             }
             else
             {
-                UpdateListKeys(target);
+                UpdateListKeys(target, repositoryProvider.EntityDefinitionProvider);
             }
 
             repositoryProvider.Stub(provider => provider.GetSelection(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(target);
@@ -557,6 +559,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="repositoryAdapter">
         /// The repository adapter to stub. 
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <typeparam name="TDataItem">
         /// The type of data item. 
         /// </typeparam>
@@ -564,7 +569,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for a new item.
         /// </returns>
         public static IRepositoryAdapter StubForNewItem<TDataItem>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter)
+            [NotNull] this IRepositoryAdapter repositoryAdapter, IEntityDefinitionProvider definitionProvider)
             where TDataItem : class, ITransactionContext
         {
             if (repositoryAdapter == null)
@@ -578,19 +583,16 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                     invocation =>
                     {
                         // Finds the item in the argument list.
-                        var item = Enumerable.OfType<TDataItem>(invocation.Arguments).First();
+                        var item = invocation.Arguments.OfType<TDataItem>().First();
 
                         // If the item needs to have an auto-incremented ID set, we set it to a random number.
-                        var primaryKeyAttribute = ((Object)item).GetType().GetCustomAttributes<PrimaryKeyAttribute>().FirstOrDefault();
-                        var autoIncrement = (primaryKeyAttribute?.AutoIncrement).GetValueOrDefault();
+                        var autoIncrement = definitionProvider.Resolve<TDataItem>().AutoNumberPrimaryKey;
 
-                        if (primaryKeyAttribute != null && autoIncrement)
-                        {
-                            var propertyName = primaryKeyAttribute.ColumnName;
-                            var property = typeof(TDataItem).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                            var propertySetter = property.SetMethod;
-                            propertySetter.Invoke(item, new object[] { NumberGenerator.Next(1, Int32.MaxValue) });
-                        }
+                        autoIncrement?.SetValueDelegate.DynamicInvoke(item, NumberGenerator.Next(1, int.MaxValue));
+                        ////var propertyName = primaryKeyAttribute.ColumnName;
+                        ////var property = typeof(TDataItem).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
+                        ////var propertySetter = property.SetMethod;
+                        ////propertySetter.Invoke(item, new object[] {  });
 
                         invocation.ReturnValue = item;
                     });
@@ -607,6 +609,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="target">
         /// The target of the items.
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <typeparam name="TDataItem">
         /// The type of data item. 
         /// </typeparam>
@@ -615,10 +620,11 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// </returns>
         public static IRepositoryAdapter StubForList<TDataItem>(
             [NotNull] this IRepositoryAdapter repositoryAdapter,
-            [NotNull] List<TDataItem> target)
+            [NotNull] List<TDataItem> target,
+            IEntityDefinitionProvider definitionProvider)
             where TDataItem : ITransactionContext
         {
-            return StubForList(repositoryAdapter, target, null);
+            return StubForList(repositoryAdapter, target, null, definitionProvider);
         }
 
         /// <summary>
@@ -633,6 +639,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="primaryKey">
         /// The primary Key.
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <typeparam name="TDataItem">
         /// The type of data item. 
         /// </typeparam>
@@ -642,7 +651,8 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         public static IRepositoryAdapter StubForList<TDataItem>(
             [NotNull] this IRepositoryAdapter repositoryAdapter,
             [NotNull] List<TDataItem> target,
-            Expression<Func<TDataItem, object>> primaryKey)
+            Expression<Func<TDataItem, object>> primaryKey,
+            IEntityDefinitionProvider definitionProvider)
             where TDataItem : ITransactionContext
         {
             if (repositoryAdapter == null)
@@ -661,7 +671,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             }
             else
             {
-                UpdateListKeys(target);
+                UpdateListKeys(target, definitionProvider);
             }
 
             repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(target);
@@ -680,6 +690,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="entityMapper">
         /// The entity mapper to use to map the items.
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition Provider.
+        /// </param>
         /// <typeparam name="TEntity">
         /// The type of entity. 
         /// </typeparam>
@@ -692,10 +705,11 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         public static IRepositoryAdapter StubForList<TEntity, TDataItem>(
             [NotNull] this IRepositoryAdapter repositoryAdapter,
             [NotNull] IEnumerable<TEntity> source,
-            [NotNull] IEntityMapper entityMapper)
+            [NotNull] IEntityMapper entityMapper,
+            IEntityDefinitionProvider definitionProvider)
             where TDataItem : ITransactionContext
         {
-            return StubForList(repositoryAdapter, source, new List<TDataItem>(), entityMapper);
+            return StubForList(repositoryAdapter, source, new List<TDataItem>(), entityMapper, definitionProvider);
         }
 
         /// <summary>
@@ -713,6 +727,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="entityMapper">
         /// The entity mapper to use to map the items.
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <typeparam name="TEntity">
         /// The type of entity. 
         /// </typeparam>
@@ -726,10 +743,11 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             [NotNull] this IRepositoryAdapter repositoryAdapter,
             [NotNull] IEnumerable<TEntity> source,
             [NotNull] List<TDataItem> target,
-            [NotNull] IEntityMapper entityMapper)
+            [NotNull] IEntityMapper entityMapper,
+            IEntityDefinitionProvider definitionProvider)
             where TDataItem : ITransactionContext
         {
-            return StubForList(repositoryAdapter, source, target, null, entityMapper);
+            return StubForList(repositoryAdapter, source, target, null, entityMapper, definitionProvider);
         }
 
         /// <summary>
@@ -750,6 +768,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="entityMapper">
         /// The entity mapper to use to map the items.
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <typeparam name="TEntity">
         /// The type of entity. 
         /// </typeparam>
@@ -764,7 +785,8 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             [NotNull] IEnumerable<TEntity> source,
             [NotNull] List<TDataItem> target,
             Expression<Func<TDataItem, object>> primaryKey,
-            [NotNull] IEntityMapper entityMapper)
+            [NotNull] IEntityMapper entityMapper,
+            [NotNull] IEntityDefinitionProvider definitionProvider)
             where TDataItem : ITransactionContext
         {
             if (repositoryAdapter == null)
@@ -787,6 +809,11 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                 throw new ArgumentNullException(nameof(entityMapper));
             }
 
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
             target.Clear();
             var items = entityMapper.Map<List<TDataItem>>(source);
             target.AddRange(items);
@@ -798,7 +825,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             }
             else
             {
-                UpdateListKeys(target);
+                UpdateListKeys(target, definitionProvider);
             }
 
             repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(target);
@@ -809,6 +836,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
         #region Structured Command Providers
 
+/*
         /// <summary>
         /// Stubs an <see cref="Startitecture.Orm.Sql.IStructuredCommandProvider"/> for the specified set of values. 
         /// The IDataReader mock supports FieldCount, GetOrdinal() and GetValues(). GetValues() must be called once per 
@@ -895,6 +923,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
             return provider;
         }
+*/
 
         #endregion
 
@@ -996,6 +1025,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             property.SetValue(target, value, null);
         }
 
+/*
         /// <summary>
         /// Sets the array values for the specified list.
         /// </summary>
@@ -1034,6 +1064,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                 itemArray[propertyOrdinal.Ordinal] = propertyValue;
             }
         }
+*/
 
         /// <summary>
         /// Stubs a list into the repository adapter.
@@ -1041,21 +1072,25 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// <param name="items">
         /// The items to stub
         /// </param>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
         /// <typeparam name="TDataItem">
         /// The type of data item. 
         /// </typeparam>
-        private static void UpdateListKeys<TDataItem>(IEnumerable<TDataItem> items)
+        private static void UpdateListKeys<TDataItem>(IEnumerable<TDataItem> items, IEntityDefinitionProvider definitionProvider)
             where TDataItem : ITransactionContext
         {
-            var primaryKeyAttribute = typeof(TDataItem).GetCustomAttributes<PrimaryKeyAttribute>().FirstOrDefault();
-            var autoIncrement = (primaryKeyAttribute?.AutoIncrement).GetValueOrDefault();
+            var autoIncrement = definitionProvider.Resolve<TDataItem>().AutoNumberPrimaryKey;
 
-            // Set autonumber keys for the returned items.
-            if (primaryKeyAttribute != null && autoIncrement)
+            if (!autoIncrement.HasValue)
             {
-                var propertyName = primaryKeyAttribute.ColumnName;
-                UpdateListKeys(items, propertyName);
+                return;
             }
+
+            // Set auto number keys for the returned items.
+            var propertyName = autoIncrement.Value.PhysicalName;
+            UpdateListKeys(items, propertyName);
         }
 
         /// <summary>

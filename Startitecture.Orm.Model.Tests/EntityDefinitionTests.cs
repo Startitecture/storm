@@ -15,7 +15,7 @@ namespace Startitecture.Orm.Model.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
     /// The entity definition tests.
@@ -29,8 +29,8 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void Find_DirectAttribute_MatchesExpected()
         {
-            var entityReference = new EntityReference { EntityType = typeof(FakeRaisedChildRow) };
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var entityReference = new EntityReference { EntityType = typeof(ChildRaisedRow) };
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
             var target = new EntityDefinition(definitionProvider, entityReference);
 
             var attributeLocation = definitionProvider.GetEntityLocation(entityReference);
@@ -42,7 +42,7 @@ namespace Startitecture.Orm.Model.Tests
                                "FakeComplexEntityId",
                                EntityAttributeTypes.DirectAttribute);
 
-            var actual = target.Find(CreateExpression<FakeRaisedChildRow, int>(row => row.FakeComplexEntityId));
+            var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.FakeComplexEntityId));
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
 
@@ -52,11 +52,11 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void Find_RelatedAttribute_MatchesExpected()
         {
-            var entityReference = new EntityReference { EntityType = typeof(FakeRaisedChildRow) };
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var entityReference = new EntityReference { EntityType = typeof(ChildRaisedRow) };
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
             var target = new EntityDefinition(definitionProvider, entityReference);
 
-            var relationReference = new EntityReference { EntityType = typeof(FakeRaisedComplexRow) };
+            var relationReference = new EntityReference { EntityType = typeof(ComplexRaisedRow) };
             var attributeLocation = definitionProvider.GetEntityLocation(relationReference);
             var attributePath = new LinkedList<EntityLocation>();
             attributePath.AddLast(attributeLocation);
@@ -65,9 +65,9 @@ namespace Startitecture.Orm.Model.Tests
                                relationReference.EntityType.GetProperty("FakeComplexEntityId", BindingFlags.Public | BindingFlags.Instance),
                                "FakeComplexEntityId",
                                EntityAttributeTypes.RelatedAutoNumberKey,
-                               "FakeComplexEntity.FakeComplexEntityId");
+                               "ComplexEntity.FakeComplexEntityId");
 
-            var actual = target.Find(CreateExpression<FakeRaisedChildRow, int>(row => row.FakeComplexEntity.FakeComplexEntityId));
+            var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.ComplexEntity.FakeComplexEntityId));
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
 
@@ -77,11 +77,11 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void Find_RelatedAttributeAliasedEntity_MatchesExpected()
         {
-            var entityReference = new EntityReference { EntityType = typeof(FakeRaisedChildRow) };
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var entityReference = new EntityReference { EntityType = typeof(ChildRaisedRow) };
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
             var target = new EntityDefinition(definitionProvider, entityReference);
 
-            var relationReference = new EntityReference { EntityType = typeof(FakeRaisedSubRow), EntityAlias = "FakeSubEntity" };
+            var relationReference = new EntityReference { EntityType = typeof(SubRow), EntityAlias = "SubEntity" };
             var attributeLocation = definitionProvider.GetEntityLocation(relationReference);
             var attributePath = new LinkedList<EntityLocation>();
             attributePath.AddLast(attributeLocation);
@@ -90,9 +90,9 @@ namespace Startitecture.Orm.Model.Tests
                                relationReference.EntityType.GetProperty("FakeSubEntityId", BindingFlags.Public | BindingFlags.Instance),
                                "FakeSubEntityId",
                                EntityAttributeTypes.RelatedAutoNumberKey,
-                               "FakeSubEntity.FakeSubEntityId");
+                               "SubEntity.FakeSubEntityId");
 
-            var actual = target.Find(CreateExpression<FakeRaisedChildRow, int>(row => row.FakeComplexEntity.FakeSubEntity.FakeSubEntityId));
+            var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.ComplexEntity.SubEntity.FakeSubEntityId));
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
 

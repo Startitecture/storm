@@ -91,7 +91,7 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
-        protected override string GetEntityQualifiedName([NotNull] Type entityType)
+        protected override QualifiedName GetEntityQualifiedName([NotNull] Type entityType)
         {
             if (entityType == null)
             {
@@ -100,8 +100,13 @@ namespace Startitecture.Orm.Schema
 
             var sourceTableNameAttribute = entityType.GetCustomAttributes<TableAttribute>(true).FirstOrDefault();
 
-            // TODO: Create database type provider to do name qualification.
-            return sourceTableNameAttribute == null ? entityType.Name : $"[{sourceTableNameAttribute.Schema}].[{sourceTableNameAttribute.Name}]";
+            return new QualifiedName(
+                null,
+                sourceTableNameAttribute?.Schema ?? entityType.Namespace,
+                sourceTableNameAttribute?.Name ?? entityType.Name,
+                null);
+
+            ////return sourceTableNameAttribute == null ? entityType.Name : $"[{sourceTableNameAttribute.Schema}].[{sourceTableNameAttribute.Name}]";
         }
 
         /// <inheritdoc />
@@ -178,7 +183,7 @@ namespace Startitecture.Orm.Schema
                                   EntityReference = new EntityReference { EntityType = entityType },
                                   Name = propertyInfo.Name,
                                   PropertyInfo = propertyInfo,
-                                  PhysicalName = propertyInfo.GetCustomAttribute<ColumnAttribute>()?.Name,
+                                  PhysicalName = propertyInfo.GetCustomAttribute<ColumnAttribute>()?.Name ?? propertyInfo.Name,
                                   IsIdentity = isIdentity,
                                   IsPrimaryKey = true
                               };

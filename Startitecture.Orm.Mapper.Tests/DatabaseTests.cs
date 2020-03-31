@@ -15,7 +15,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using Rhino.Mocks;
 
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
     /// The database tests.
@@ -30,7 +30,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void BeginTransaction_SqlCommand_ExecutesNonQuery()
         {
-            using (var target = new Database("MasterDatabase", new PetaPocoDefinitionProvider()))
+            using (var target = new Database("MasterDatabase", new DataAnnotationsDefinitionProvider()))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;
                 Assert.IsNotNull(transaction);
@@ -56,14 +56,14 @@ namespace Startitecture.Orm.Mapper.Tests
             const int Expected = 423;
 
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
-            using (var target = new Database(connection, new PetaPocoDefinitionProvider()))
+            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider()))
             {
                 using (var command = CreateMockCommand(connection))
                 {
                     command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(Expected);
                     command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(Expected);
 
-                    var row = new FakeRaisedComplexRow
+                    var row = new ComplexRaisedRow
                                   {
                                       CreatedByFakeMultiReferenceEntityId = 87354,
                                       ModifiedByFakeMultiReferenceEntityId = 34598,
@@ -93,14 +93,14 @@ namespace Startitecture.Orm.Mapper.Tests
             var expected = 423;
 
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
-            using (var target = new Database(connection, new PetaPocoDefinitionProvider()))
+            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider()))
             {
                 using (var command = CreateMockCommand(connection))
                 {
                     command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(expected);
                     command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(expected);
 
-                    var row = new FakeDependentRow
+                    var row = new DependentRow
                                   {
                                       FakeDependentEntityId = expected,
                                       DependentIntegerValue = 4583,

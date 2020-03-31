@@ -6,21 +6,23 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
-    using Startitecture.Orm.Repository;
+    using AutoMapper;
+
+    using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The fake multi reference entity mapping profile.
     /// </summary>
-    public class FakeMultiReferenceEntityMappingProfile : EntityMappingProfile<FakeMultiReferenceEntity, FakeMultiReferenceRow>
+    public class FakeMultiReferenceEntityMappingProfile : Profile
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FakeMultiReferenceEntityMappingProfile"/> class.
         /// </summary>
         public FakeMultiReferenceEntityMappingProfile()
         {
-            this.SetPrimaryKey(entity => entity.FakeMultiReferenceEntityId, row => row.FakeMultiReferenceEntityId)
-                .WriteOnce(row => row.Description, row => row.UniqueName);
+            this.CreateMap<MultiReferenceEntity, MultiReferenceRow>()
+                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
         }
     }
 }

@@ -51,23 +51,12 @@
     <Reference Include="System.Data" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormSubmissionMappingProfile.cs" />
-    <Compile Include="FormSubmissionValidator.cs" />
     <Compile Include="FormSubmissionValueDetailRowConverter.cs" />
-    <Compile Include="FormSubmissionValueMappingProfile.cs" />
-    <Compile Include="Generate.cs" />
-    <Compile Include="PersonMappingProfile.cs" />
-    <Compile Include="PersonRepository.cs" />
-    <Compile Include="PersonValidator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StructuredInsertCommandTests.cs" />
     <Compile Include="StructuredMergeCommandTests.cs" />
     <Compile Include="SqlSelectionTest.cs" />
     <Compile Include="TransactSqlUpdateTest.cs" />
-    <Compile Include="UnifiedFieldMappingProfile.cs" />
-    <Compile Include="UnifiedFieldRepository.cs" />
-    <Compile Include="UnifiedFieldValueValidator.cs" />
-    <Compile Include="UnifiedSourceValueValidator.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />
@@ -105,6 +94,10 @@
       <Project>{1F629078-CE41-48E5-8160-C13D46121252}</Project>
       <Name>Startitecture.Orm.Sql</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj">
+      <Project>{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}</Project>
+      <Name>Startitecture.Orm.Testing.Entities</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj">
       <Project>{2541775F-1B34-4E5A-95BB-B8961633114A}</Project>
       <Name>Startitecture.Orm.Testing.Model</Name>
@@ -120,7 +113,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="AutoMapper">
-      <Version>5.1.1</Version>
+      <Version>9.0.0</Version>
     </PackageReference>
     <PackageReference Include="FluentValidation">
       <Version>8.6.2</Version>

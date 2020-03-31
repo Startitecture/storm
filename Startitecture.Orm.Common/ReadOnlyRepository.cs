@@ -14,12 +14,14 @@ namespace Startitecture.Orm.Common
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Runtime.Caching;
 
     using JetBrains.Annotations;
 
     using Startitecture.Core;
     using Startitecture.Orm.Query;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The view repository.
@@ -73,11 +75,8 @@ namespace Startitecture.Orm.Common
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
-        /// <param name="key">
-        /// The key property for the <typeparamref name="TEntity"/>.
-        /// </param>
-        protected ReadOnlyRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper, Expression<Func<TEntity, object>> key)
-            : this(repositoryProvider, entityMapper, key, null)
+        public ReadOnlyRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : this(repositoryProvider, entityMapper, (IComparer<TDataItem>)null)
         {
         }
 
@@ -90,38 +89,18 @@ namespace Startitecture.Orm.Common
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
-        /// <param name="key">
-        /// The key property for the <typeparamref name="TEntity"/>.
-        /// </param>
         /// <param name="selectionComparer">
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
-        protected ReadOnlyRepository(
+        public ReadOnlyRepository(
             IRepositoryProvider repositoryProvider,
             [NotNull] IEntityMapper entityMapper,
-            Expression<Func<TEntity, object>> key,
             IComparer<TDataItem> selectionComparer)
         {
-            if (repositoryProvider == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryProvider));
-            }
-
-            if (entityMapper == null)
-            {
-                throw new ArgumentNullException(nameof(entityMapper));
-            }
-
-            this.PrimaryKeyExpression = key;
-            this.EntityMapper = entityMapper;
-            this.RepositoryProvider = repositoryProvider;
+            this.EntityMapper = entityMapper ?? throw new ArgumentNullException(nameof(entityMapper));
+            this.RepositoryProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
             this.selectionComparer = selectionComparer;
         }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to automatically set the transaction context of items.
-        /// </summary>
-        public bool AutomaticallySetTransactionContext { get; set; }
 
         /// <summary>
         /// Gets the repository provider.
@@ -163,7 +142,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext context)
+            if (candidate is ITransactionContext context)
             {
                 context.SetTransactionProvider(this.RepositoryProvider);
             }
@@ -197,16 +176,15 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext context)
+            if (candidate is ITransactionContext context)
             {
                 context.SetTransactionProvider(this.RepositoryProvider);
             }
 
             TEntity entity;
 
-            var selectionItem = candidate as TDataItem ?? this.EntityMapper.Map<TDataItem>(candidate);
+            var selectionItem = this.GetExampleItem(candidate);
             var uniqueItemSelection = this.GetUniqueItemSelection(selectionItem);
-            ////var selection = this.AssociateRelatedEntities(uniqueItemSelection);
             var cacheResult = this.QueryCache(uniqueItemSelection);
 
             if (cacheResult.Hit)
@@ -228,95 +206,12 @@ namespace Startitecture.Orm.Common
                 this.UpdateCache(cacheResult.Key, entity);
             }
 
-            if (this.AutomaticallySetTransactionContext && entity is ITransactionContext)
-            {
-                (entity as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
-            }
+            ////if (this.AutomaticallySetTransactionContext && entity is ITransactionContext)
+            ////{
+            ////    (entity as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
+            ////}
 
             return entity;
-        }
-
-        /// <summary>
-        /// Loads an entity with its children.
-        /// </summary>
-        /// <typeparam name="TKey">
-        /// The type of the key that uniquely identifies the entity.
-        /// </typeparam>
-        /// <param name="key">
-        /// The key that uniquely identifies the entity.
-        /// </param>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        /// <returns>
-        /// The entity with the specified key, with all child elements loaded, or null if the entity does not exist.
-        /// </returns>
-        public TEntity FirstOrDefaultWithChildren<TKey>([NotNull] TKey key)
-        {
-            if (key == null)
-            {
-                throw new ArgumentNullException(nameof(key));
-            }
-
-            // Get the entity based on the provided key (ID or some such).
-            var entity = this.FirstOrDefault(key);
-
-            if (entity == null)
-            {
-                return default;
-            }
-
-            this.LoadChildren(entity, this.RepositoryProvider);
-
-            // Return the fully hydrated entity.
-            return entity;
-        }
-
-        /// <summary>
-        /// Gets an item by its identifier or unique key.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to search for.
-        /// </typeparam>
-        /// <param name="candidate">
-        /// A candidate item representing the item to search for.
-        /// </param>
-        /// <returns>
-        /// The first <typeparamref name="TItem"/> in the repository matching the candidate item's identifier or unique key, or a 
-        /// default value of the <typeparamref name="TItem"/> type if no entity could be found using the candidate.
-        /// </returns>
-        public TItem FirstOrDefaultAs<TItem>(TItem candidate)
-        {
-            if (Evaluate.IsNull(candidate))
-            {
-                throw new ArgumentNullException(nameof(candidate));
-            }
-
-            if (this.AutomaticallySetTransactionContext && candidate is ITransactionContext context)
-            {
-                context.SetTransactionProvider(this.RepositoryProvider);
-            }
-
-            var selectionItem = candidate as TDataItem ?? this.EntityMapper.Map<TDataItem>(candidate);
-            var uniqueItemSelection = this.GetUniqueItemSelection(selectionItem);
-            ////var selection = this.AssociateRelatedEntities(uniqueItemSelection);
-            var dataItem = this.RepositoryProvider.GetFirstOrDefault(uniqueItemSelection);
-
-            if (Evaluate.IsNull(dataItem))
-            {
-                return default(TItem);
-            }
-
-            dataItem.SetTransactionProvider(this.RepositoryProvider);
-            var item = this.EntityMapper.Map<TItem>(dataItem);
-
-            // Propagate the transaction context.
-            if (this.AutomaticallySetTransactionContext && item is ITransactionContext)
-            {
-                (item as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
-            }
-
-            return item;
         }
 
         /// <summary>
@@ -330,22 +225,6 @@ namespace Startitecture.Orm.Common
             var exampleSelection = new ItemSelection<TDataItem>();
             var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
             return this.SelectResults(dataItems);
-        }
-
-        /// <summary>
-        /// Loads the children of the specified entity.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity to load the children for.
-        /// </param>
-        public void LoadChildren([NotNull] TEntity entity)
-        {
-            if (Evaluate.IsNull(entity))
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            this.LoadChildren(entity, this.RepositoryProvider);
         }
 
         /// <summary>
@@ -413,24 +292,6 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Selects a list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to select.
-        /// </typeparam>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        protected IEnumerable<TItem> SelectEntitiesAs<TItem>(ItemSelection<TDataItem> selection)
-        {
-            var items = this.SelectDataItems(selection);
-            return this.EntityMapper.Map<List<TItem>>(items);
-        }
-
-        /// <summary>
         /// Gets a unique selection based on a primary key and alternate keys.
         /// </summary>
         /// <param name="item">
@@ -487,11 +348,6 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(alternateKeys));
             }
 
-            if (this.PrimaryKeyExpression == null)
-            {
-                this.PrimaryKeyExpression = primaryKey;
-            }
-
             ItemSelection<TDataItem> selection;
 
             var keyValue = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>()
@@ -516,6 +372,82 @@ namespace Startitecture.Orm.Common
             }
 
             return selection;
+        }
+
+        /// <summary>
+        /// Gets an example item from the provided <typeparamref name="TDataItem"/> key.
+        /// </summary>
+        /// <param name="key">
+        /// The key for the example item.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item that represents the key.
+        /// </typeparam>
+        /// <returns>
+        /// An example of the data row as a <typeparamref name="TDataItem"/>.
+        /// </returns>
+        /// <exception cref="OperationException">
+        /// The key cannot be applied to the <typeparamref name="TDataItem"/>. The inner exception contains details as to why.
+        /// </exception>
+        protected TDataItem GetExampleItem<TItem>(TItem key)
+        {
+            TDataItem dataItem;
+
+            if (key?.GetType().IsValueType == true)
+            {
+                var keyDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>().PrimaryKeyAttributes.First();
+
+                // If the example is a value type, create a new data item as an example and set the key. Assumption is that the two are compatible.
+                dataItem = new TDataItem();
+                dataItem.SetTransactionProvider(this.RepositoryProvider);
+
+                try
+                {
+                    keyDefinition.SetValueDelegate.DynamicInvoke(dataItem, key);
+                }
+                catch (ArgumentException ex)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.CouldNotSetPrimaryKeyWithValue,
+                        typeof(TDataItem),
+                        keyDefinition.PropertyName,
+                        key,
+                        ex.Message);
+
+                    throw new OperationException(key, message, ex);
+                }
+                catch (MemberAccessException ex)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.CouldNotSetPrimaryKeyWithValue,
+                        typeof(TDataItem),
+                        keyDefinition.PropertyName,
+                        key,
+                        ex.Message);
+
+                    throw new OperationException(key, message, ex);
+                }
+                catch (TargetInvocationException ex)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.CouldNotSetPrimaryKeyWithValue,
+                        typeof(TDataItem),
+                        keyDefinition.PropertyName,
+                        key,
+                        ex.Message);
+
+                    throw new OperationException(key, message, ex);
+                }
+            }
+            else
+            {
+                dataItem = this.EntityMapper.Map<TDataItem>(key);
+            }
+
+            return dataItem;
         }
 
         /// <summary>

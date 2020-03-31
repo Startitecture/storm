@@ -87,7 +87,9 @@ namespace Startitecture.Orm.Sql
             }
 
             this.StructureTypeName = tableTypeAttribute.TypeName;
-            var structureDefinition = Singleton<PetaPocoDefinitionProvider>.Instance.Resolve<TStructure>();
+
+            // TODO: Send in via DI
+            var structureDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TStructure>();
             this.Parameter = $"@{structureDefinition.EntityName}Table";
         }
 

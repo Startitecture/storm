@@ -17,7 +17,7 @@ namespace Startitecture.Orm.Query.Tests
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
-    using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
     /// The item selection tests.
@@ -31,12 +31,12 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
 
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
                 ////    row => row.FakeComplexEntityId,
@@ -46,7 +46,7 @@ namespace Startitecture.Orm.Query.Tests
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
 
-            expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
+            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -58,16 +58,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void InnerJoin_WithMatchingRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            .InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            .InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -78,13 +78,13 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                .InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                .InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
                 ////    row => row.FakeComplexEntityId,
@@ -93,7 +93,7 @@ namespace Startitecture.Orm.Query.Tests
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -105,16 +105,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void InnerJoin_WithMatchingSourceAndRelationProperties_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -125,13 +125,13 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
 
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
                 ////    row => row.FakeComplexEntityId,
@@ -140,7 +140,7 @@ namespace Startitecture.Orm.Query.Tests
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -152,16 +152,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void InnerJoin_WithRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            .InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -172,18 +172,18 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                .InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, "OtherAlias", row => row.FakeComplexEntityId, "RelatedDependency")
+                .InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, "OtherAlias", row => row.FakeComplexEntityId, "RelatedDependency")
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -195,16 +195,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void InnerJoin_WithSourceAndRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.InnerJoin);
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -215,17 +215,17 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.FakeRelated.FakeDataId)
+            var relations = new SqlSelection<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
+            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -236,10 +236,10 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void InnerJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                .InnerJoin(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeComplexEntityId)
+                ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
 
                 ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
@@ -247,7 +247,7 @@ namespace Startitecture.Orm.Query.Tests
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -259,10 +259,10 @@ namespace Startitecture.Orm.Query.Tests
         ////[TestMethod]
         ////public void InnerJoin_InferredWithRelationProperty_MatchesExpected()
         ////{
-        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
+        ////    var relations = new SqlSelection<DataRow>()
 
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
 
         ////        ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
@@ -270,7 +270,7 @@ namespace Startitecture.Orm.Query.Tests
         ////        .Relations;
 
         ////    var expected = new EntityRelation(EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -282,10 +282,10 @@ namespace Startitecture.Orm.Query.Tests
         ////[TestMethod]
         ////public void InnerJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
         ////{
-        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
+        ////    var relations = new SqlSelection<DataRow>()
 
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////        ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
 
@@ -293,7 +293,7 @@ namespace Startitecture.Orm.Query.Tests
         ////        .Relations;
 
         ////    var expected = new EntityRelation(EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -304,12 +304,12 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
 
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
                 ////    row => row.FakeComplexEntityId,
@@ -318,7 +318,7 @@ namespace Startitecture.Orm.Query.Tests
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
+            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -330,16 +330,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void LeftJoin_WithMatchingRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            .LeftJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            .LeftJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -350,13 +350,13 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                .LeftJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                .LeftJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
                 ////    row => row.FakeComplexEntityId,
@@ -365,7 +365,7 @@ namespace Startitecture.Orm.Query.Tests
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -377,16 +377,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void LeftJoin_WithMatchingSourceAndRelationProperties_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .LeftJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            .LeftJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -397,13 +397,13 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
 
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
                 ////    row => row.FakeComplexEntityId,
@@ -412,7 +412,7 @@ namespace Startitecture.Orm.Query.Tests
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeFlatDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -424,16 +424,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void LeftJoin_WithRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            .LeftJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -444,18 +444,18 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeFlatDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                .LeftJoin<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, "OtherAlias", row => row.FakeComplexEntityId, "RelatedDependency")
+                .LeftJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, "OtherAlias", row => row.FakeComplexEntityId, "RelatedDependency")
 
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -467,16 +467,16 @@ namespace Startitecture.Orm.Query.Tests
         ////public void LeftJoin_WithSourceAndRelationProperty_MatchesExpected()
         ////{
         ////    var relations =
-        ////        new SqlSelection<FakeRaisedDataRow>()
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        new SqlSelection<DataRow>()
+        ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .LeftJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
-        ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    var expected = new EntityRelation(new DataAnnotationsDefinitionProvider(), EntityRelationType.LeftJoin);
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -487,17 +487,17 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
-                .LeftJoin(row => row.FakeDataId, row => row.FakeRelated.FakeDataId)
+            var relations = new SqlSelection<DataRow>()
+                .LeftJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
                 ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
+            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -508,10 +508,10 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void LeftJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
-            var relations = new SqlSelection<FakeRaisedDataRow>()
+            var relations = new SqlSelection<DataRow>()
 
-                ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-                .LeftJoin(row => row.FakeRelated.RelatedId, row => row.FakeDependencyEntity.FakeComplexEntityId)
+                ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+                .LeftJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
 
                 ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
                 ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
@@ -519,7 +519,7 @@ namespace Startitecture.Orm.Query.Tests
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -531,10 +531,10 @@ namespace Startitecture.Orm.Query.Tests
         ////[TestMethod]
         ////public void LeftJoin_InferredWithRelationProperty_MatchesExpected()
         ////{
-        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
+        ////    var relations = new SqlSelection<DataRow>()
 
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////        .LeftJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
 
         ////        ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
@@ -542,7 +542,7 @@ namespace Startitecture.Orm.Query.Tests
         ////        .Relations;
 
         ////    var expected = new EntityRelation(EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRaisedDataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
+        ////    expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -554,10 +554,10 @@ namespace Startitecture.Orm.Query.Tests
         ////[TestMethod]
         ////public void LeftJoin_InferredWithSourceAndRelationProperty_MatchesExpected()
         ////{
-        ////    var relations = new SqlSelection<FakeRaisedDataRow>()
+        ////    var relations = new SqlSelection<DataRow>()
 
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDataId, row => row.FakeDataId)
-        ////        ////.InnerJoin(row => row.FakeRelated, row => row.FakeDependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////        ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
+        ////        ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
         ////        ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////        .LeftJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
 
@@ -565,7 +565,7 @@ namespace Startitecture.Orm.Query.Tests
         ////        .Relations;
 
         ////    var expected = new EntityRelation(EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRelatedRow, FakeDependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -576,7 +576,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void ClearRelations_ItemSelectionWithRelations_RelationsAreCleared()
         {
-            var selection = new SqlSelection<FakeRaisedDataRow>();
+            var selection = new SqlSelection<DataRow>();
             Assert.IsNotNull(selection.Relations.FirstOrDefault());
             selection.ClearRelations();
             Assert.IsNull(selection.Relations.FirstOrDefault());
@@ -589,9 +589,9 @@ namespace Startitecture.Orm.Query.Tests
         ////[TestMethod]
         ////public void Select_DataItemWithDistinctAttributeReferences_MatchesExpected()
         ////{
-        ////    var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
-        ////    var selection = new SqlSelection<FakeRaisedChildRow>();
-        ////    var entityDefinition = definitionProvider.Resolve<FakeRaisedChildRow>();
+        ////    var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
+        ////    var selection = new SqlSelection<ChildRaisedRow>();
+        ////    var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
         ////    var expected = entityDefinition.ReturnableAttributes.ToList();
         ////    var actual = selection.SelectExpressions.SqlSelect(entityDefinition.Find).ToList();
         ////    CollectionAssert.AreEqual(expected, actual);
@@ -603,19 +603,19 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void Select_DataItemExplicitSelectionsWithDistinctAttributeReferences_MatchesExpected()
         {
-            Expression<Func<FakeRaisedChildRow, object>> expr1 = row => row.FakeChildEntityId;
-            Expression<Func<FakeRaisedChildRow, object>> expr2 = row => row.Name;
-            Expression<Func<FakeRaisedChildRow, object>> expr3 = row => row.SomeValue;
-            Expression<Func<FakeRaisedChildRow, object>> expr4 = row => row.FakeComplexEntity.Description;
-            Expression<Func<FakeRaisedChildRow, object>> expr5 = row => row.FakeComplexEntity.FakeSubEntity.Description;
-            Expression<Func<FakeRaisedChildRow, object>> expr6 = row => row.FakeComplexEntity.FakeSubEntity.FakeSubSubEntity.UniqueName;
+            Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
+            Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
+            Expression<Func<ChildRaisedRow, object>> expr3 = row => row.SomeValue;
+            Expression<Func<ChildRaisedRow, object>> expr4 = row => row.ComplexEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr5 = row => row.ComplexEntity.SubEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr6 = row => row.ComplexEntity.SubEntity.SubSubEntity.UniqueName;
 
-            var expressions = new List<Expression<Func<FakeRaisedChildRow, object>>> { expr1, expr2, expr3, expr4, expr5, expr6 };
+            var expressions = new List<Expression<Func<ChildRaisedRow, object>>> { expr1, expr2, expr3, expr4, expr5, expr6 };
 
-            var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
-            var selection = new SqlSelection<FakeRaisedChildRow>().Select(expressions.ToArray());
+            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
+            var selection = new SqlSelection<ChildRaisedRow>().Select(expressions.ToArray());
 
-            var entityDefinition = definitionProvider.Resolve<FakeRaisedChildRow>();
+            var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
             var expected = expressions.Select(entityDefinition.Find).ToList();
 
             var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
@@ -629,7 +629,7 @@ namespace Startitecture.Orm.Query.Tests
         ////[TestMethod]
         ////public void Select_DataItemWithDuplicateAttributeReferences_MatchesExpected()
         ////{
-        ////    var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
+        ////    var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
         ////    var selection = new SqlSelection<InstanceSection>();
         ////    var entityDefinition = definitionProvider.Resolve<InstanceSection>();
         ////    var expected = entityDefinition
@@ -659,7 +659,7 @@ namespace Startitecture.Orm.Query.Tests
 
         ////    var expressions = new List<Expression<Func<InstanceSection, object>>> { expr1, expr2, expr3, expr4, expr5, expr6 };
 
-        ////    var definitionProvider = Singleton<PetaPocoDefinitionProvider>.Instance;
+        ////    var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
         ////    var selection = new SqlSelection<InstanceSection>().SqlSelect(expressions.ToArray());
 
         ////    var entityDefinition = definitionProvider.Resolve<InstanceSection>();
@@ -679,11 +679,11 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void SelectionStatement_DirectData_MatchesExpected()
         {
-            var match = new FakeFlatDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
-            var baseline = new FakeFlatDataRow { FakeDataId = 10, NormalColumn = "Greater" };
-            var boundary = new FakeFlatDataRow { FakeDataId = 20, AnotherColumn = "Less" };
-            var definitionProvider = new PetaPocoDefinitionProvider();
-            var transactionSelection = new ItemSelection<FakeFlatDataRow>()
+            var match = new DataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
+            var baseline = new DataRow { FakeDataId = 10, NormalColumn = "Greater" };
+            var boundary = new DataRow { FakeDataId = 20, AnotherColumn = "Less" };
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .Select(
                     row => row.FakeDataId,
@@ -725,9 +725,9 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void SelectionStatement_DirectDataRaisedRow_MatchesExpected()
         {
-            var match = new FakeRaisedDataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
-            var baseline = new FakeRaisedDataRow { FakeDataId = 10, NormalColumn = "Greater" };
-            var boundary = new FakeRaisedDataRow { FakeDataId = 20, AnotherColumn = "Less" };
+            var match = new DataRow { ValueColumn = 2, NullableColumn = "CouldHaveBeenNull", NullableValueColumn = null };
+            var baseline = new DataRow { FakeDataId = 10, NormalColumn = "Greater" };
+            var boundary = new DataRow { FakeDataId = 20, AnotherColumn = "Less" };
             var transactionSelection =
                 match.ToExampleSelection(
                         row => row.ValueColumn,
@@ -767,46 +767,49 @@ namespace Startitecture.Orm.Query.Tests
                 string.Join(",", actual));
         }
 
-        /// <summary>
-        /// The selection statement_ related data_ matches expected.
-        /// </summary>
-        [TestMethod]
-        public void SelectionStatement_RelatedData_MatchesExpected()
-        {
-            var match = new FakeFlatDataRow
-            {
-                NullableValueColumn = null,
-                RelatedAliasRelatedProperty = "Related",
-                NullableColumn = "CouldHaveBeenNull",
-                ValueColumn = 2
-            };
+        /////// <summary>
+        /////// The selection statement_ related data_ matches expected.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void SelectionStatement_RelatedData_MatchesExpected()
+        ////{
+        ////    var match = new DataRow
+        ////    {
+        ////        NullableValueColumn = null,
+        ////        RelatedAlias = new FakeRelatedRow
+        ////                           {
+        ////                               RelatedProperty = "Related"
+        ////                           },
+        ////        NullableColumn = "CouldHaveBeenNull",
+        ////        ValueColumn = 2
+        ////    };
 
-            var baseline = new FakeFlatDataRow { FakeDataId = 10 };
-            var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var definitionProvider = new PetaPocoDefinitionProvider();
-            var transactionSelection =
-                new ItemSelection<FakeFlatDataRow>().Matching(
-                    match,
-                    row => row.ValueColumn,
-                    row => row.NullableColumn,
-                    row => row.NullableValueColumn,
-                    row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.FakeRelatedRelatedId,
-                        row => row.FakeRelatedRelatedProperty,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedId,
-                        row => row.OtherAliasRelatedProperty,
-                        row => row.ParentFakeDataId)
-                    .Between(baseline, boundary, row => row.FakeDataId);
+        ////    var baseline = new DataRow { FakeDataId = 10 };
+        ////    var boundary = new DataRow { FakeDataId = 20 };
+        ////    var definitionProvider = new DataAnnotationsDefinitionProvider();
+        ////    var transactionSelection =
+        ////        new ItemSelection<DataRow>().Matching(
+        ////            match,
+        ////            row => row.ValueColumn,
+        ////            row => row.NullableColumn,
+        ////            row => row.NullableValueColumn,
+        ////            row => row.RelatedAlias.RelatedProperty)
+        ////            .Select(
+        ////                row => row.FakeDataId,
+        ////                row => row.NormalColumn,
+        ////                row => row.Related.RelatedId,
+        ////                row => row.Related.RelatedProperty,
+        ////                row => row.Related.RelatedId,
+        ////                row => row.RelatedAlias.RelatedProperty,
+        ////                row => row.OtherAlias.RelatedId,
+        ////                row => row.OtherAlias.RelatedProperty,
+        ////                row => row.ParentFakeDataId)
+        ////            .Between(baseline, boundary, row => row.FakeDataId);
 
-            CollectionAssert.AreEqual(
-                new object[] { 2, "CouldHaveBeenNull", "Related", 10, 20 },
-                transactionSelection.PropertyValues.ToArray());
-        }
+        ////    CollectionAssert.AreEqual(
+        ////        new object[] { 2, "CouldHaveBeenNull", "Related", 10, 20 },
+        ////        transactionSelection.PropertyValues.ToArray());
+        ////}
 
         /// <summary>
         /// The selection statement_ related data_ matches expected.
@@ -814,7 +817,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void SelectionStatement_RelatedDataRaisedRow_MatchesExpected()
         {
-            var match = new FakeRaisedDataRow
+            var match = new DataRow
                             {
                                 NullableValueColumn = null,
                                 RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related" },
@@ -822,17 +825,17 @@ namespace Startitecture.Orm.Query.Tests
                                 ValueColumn = 2
                             };
 
-            var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
-            var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var definitionProvider = new PetaPocoDefinitionProvider();
-            var transactionSelection = new ItemSelection<FakeRaisedDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related").Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.ParentFakeDataId,
-                    row => row.FakeRelated.RelatedId,
-                    row => row.FakeRelated.RelatedProperty,
+                    row => row.Related.RelatedId,
+                    row => row.Related.RelatedProperty,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedId,
@@ -843,96 +846,96 @@ namespace Startitecture.Orm.Query.Tests
                 transactionSelection.PropertyValues.ToArray());
         }
 
-        /// <summary>
-        /// The selection statement_ union related data_ matches expected.
-        /// </summary>
-        [TestMethod]
-        public void SelectionStatement_UnionRelatedData_MatchesExpected()
-        {
-            var match1 = new FakeFlatDataRow
-            {
-                NullableValueColumn = null,
-                RelatedAliasRelatedProperty = "Related1",
-                NullableColumn = "CouldHaveBeenNull1",
-                ValueColumn = 2
-            };
+        /////// <summary>
+        /////// The selection statement_ union related data_ matches expected.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void SelectionStatement_UnionRelatedData_MatchesExpected()
+        ////{
+        ////    var match1 = new DataRow
+        ////    {
+        ////        NullableValueColumn = null,
+        ////        RelatedAliasRelatedProperty = "Related1",
+        ////        NullableColumn = "CouldHaveBeenNull1",
+        ////        ValueColumn = 2
+        ////    };
 
-            var baseline1 = new FakeFlatDataRow { FakeDataId = 10 };
-            var boundary1 = new FakeFlatDataRow { FakeDataId = 20 };
+        ////    var baseline1 = new DataRow { FakeDataId = 10 };
+        ////    var boundary1 = new DataRow { FakeDataId = 20 };
 
-            var match2 = new FakeFlatDataRow
-            {
-                NullableValueColumn = null,
-                RelatedAliasRelatedProperty = "Related2",
-                NullableColumn = "CouldHaveBeenNull2",
-                ValueColumn = 3
-            };
+        ////    var match2 = new DataRow
+        ////    {
+        ////        NullableValueColumn = null,
+        ////        RelatedAliasRelatedProperty = "Related2",
+        ////        NullableColumn = "CouldHaveBeenNull2",
+        ////        ValueColumn = 3
+        ////    };
 
-            var baseline2 = new FakeFlatDataRow { FakeDataId = 50 };
-            var boundary2 = new FakeFlatDataRow { FakeDataId = 40 };
+        ////    var baseline2 = new DataRow { FakeDataId = 50 };
+        ////    var boundary2 = new DataRow { FakeDataId = 40 };
 
-            var match3 = new FakeFlatDataRow
-            {
-                NullableValueColumn = null,
-                RelatedAliasRelatedProperty = "Related3",
-                NullableColumn = "CouldHaveBeenNull3",
-                ValueColumn = 4
-            };
+        ////    var match3 = new DataRow
+        ////    {
+        ////        NullableValueColumn = null,
+        ////        RelatedAliasRelatedProperty = "Related3",
+        ////        NullableColumn = "CouldHaveBeenNull3",
+        ////        ValueColumn = 4
+        ////    };
 
-            var baseline3 = new FakeFlatDataRow { FakeDataId = 60 };
-            var boundary3 = new FakeFlatDataRow { FakeDataId = 70 };
+        ////    var baseline3 = new DataRow { FakeDataId = 60 };
+        ////    var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var definitionProvider = new PetaPocoDefinitionProvider();
-            var transactionSelection =
-                new ItemSelection<FakeFlatDataRow>()
-                    .Matching(
-                        match1,
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline1, boundary1, row => row.FakeDataId)
-                    .Union(match2.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline2, boundary2, row => row.FakeDataId)
-                    .Union(match3.ToExampleSelection(
-                        row => row.ValueColumn,
-                        row => row.NullableColumn,
-                        row => row.NullableValueColumn,
-                        row => row.RelatedAliasRelatedProperty)
-                    .Select(
-                        row => row.FakeDataId,
-                        row => row.NormalColumn,
-                        row => row.RelatedId,
-                        row => row.RelatedAliasRelatedProperty,
-                        row => row.OtherAliasRelatedProperty)
-                    .Between(baseline3, boundary3, row => row.FakeDataId)));
+        ////    var definitionProvider = new DataAnnotationsDefinitionProvider();
+        ////    var transactionSelection =
+        ////        new ItemSelection<DataRow>()
+        ////            .Matching(
+        ////                match1,
+        ////                row => row.ValueColumn,
+        ////                row => row.NullableColumn,
+        ////                row => row.NullableValueColumn,
+        ////                row => row.RelatedAliasRelatedProperty)
+        ////            .Select(
+        ////                row => row.FakeDataId,
+        ////                row => row.NormalColumn,
+        ////                row => row.RelatedId,
+        ////                row => row.RelatedAliasRelatedProperty,
+        ////                row => row.OtherAliasRelatedProperty)
+        ////            .Between(baseline1, boundary1, row => row.FakeDataId)
+        ////            .Union(match2.ToExampleSelection(
+        ////                row => row.ValueColumn,
+        ////                row => row.NullableColumn,
+        ////                row => row.NullableValueColumn,
+        ////                row => row.RelatedAliasRelatedProperty)
+        ////            .Select(
+        ////                row => row.FakeDataId,
+        ////                row => row.NormalColumn,
+        ////                row => row.RelatedId,
+        ////                row => row.RelatedAliasRelatedProperty,
+        ////                row => row.OtherAliasRelatedProperty)
+        ////            .Between(baseline2, boundary2, row => row.FakeDataId)
+        ////            .Union(match3.ToExampleSelection(
+        ////                row => row.ValueColumn,
+        ////                row => row.NullableColumn,
+        ////                row => row.NullableValueColumn,
+        ////                row => row.RelatedAliasRelatedProperty)
+        ////            .Select(
+        ////                row => row.FakeDataId,
+        ////                row => row.NormalColumn,
+        ////                row => row.RelatedId,
+        ////                row => row.RelatedAliasRelatedProperty,
+        ////                row => row.OtherAliasRelatedProperty)
+        ////            .Between(baseline3, boundary3, row => row.FakeDataId)));
 
-            var expected = new object[]
-                               {
-                                   2, "CouldHaveBeenNull1", "Related1", 10, 20,
-                                   3, "CouldHaveBeenNull2", "Related2", 40, 50,
-                                   4, "CouldHaveBeenNull3", "Related3", 60, 70
-                               };
+        ////    var expected = new object[]
+        ////                       {
+        ////                           2, "CouldHaveBeenNull1", "Related1", 10, 20,
+        ////                           3, "CouldHaveBeenNull2", "Related2", 40, 50,
+        ////                           4, "CouldHaveBeenNull3", "Related3", 60, 70
+        ////                       };
 
-            var actual = transactionSelection.PropertyValues.ToArray();
-            CollectionAssert.AreEqual(expected, actual);
-        }
+        ////    var actual = transactionSelection.PropertyValues.ToArray();
+        ////    CollectionAssert.AreEqual(expected, actual);
+        ////}
 
         /// <summary>
         /// The selection statement_ union related data_ matches expected.
@@ -940,7 +943,7 @@ namespace Startitecture.Orm.Query.Tests
         [TestMethod]
         public void SelectionStatement_UnionRelatedDataRaisedRow_MatchesExpected()
         {
-            var match1 = new FakeRaisedDataRow
+            var match1 = new DataRow
             {
                 NullableValueColumn = null,
                 RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related1" },
@@ -948,10 +951,10 @@ namespace Startitecture.Orm.Query.Tests
                 ValueColumn = 2
             };
 
-            var baseline1 = new FakeRaisedDataRow { FakeDataId = 10 };
-            var boundary1 = new FakeRaisedDataRow { FakeDataId = 20 };
+            var baseline1 = new DataRow { FakeDataId = 10 };
+            var boundary1 = new DataRow { FakeDataId = 20 };
 
-            var match2 = new FakeRaisedDataRow
+            var match2 = new DataRow
             {
                 NullableValueColumn = null,
                 RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related2" },
@@ -959,10 +962,10 @@ namespace Startitecture.Orm.Query.Tests
                 ValueColumn = 3
             };
 
-            var baseline2 = new FakeFlatDataRow { FakeDataId = 50 };
-            var boundary2 = new FakeFlatDataRow { FakeDataId = 40 };
+            var baseline2 = new DataRow { FakeDataId = 50 };
+            var boundary2 = new DataRow { FakeDataId = 40 };
 
-            var match3 = new FakeRaisedDataRow
+            var match3 = new DataRow
             {
                 NullableValueColumn = null,
                 RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related3" },
@@ -970,12 +973,12 @@ namespace Startitecture.Orm.Query.Tests
                 ValueColumn = 4
             };
 
-            var baseline3 = new FakeRaisedDataRow { FakeDataId = 60 };
-            var boundary3 = new FakeRaisedDataRow { FakeDataId = 70 };
+            var baseline3 = new DataRow { FakeDataId = 60 };
+            var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
             var transactionSelection =
-                new ItemSelection<FakeRaisedDataRow>()
+                new ItemSelection<DataRow>()
                     .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                     .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
                     .Select(

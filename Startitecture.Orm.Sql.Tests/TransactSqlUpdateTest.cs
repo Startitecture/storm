@@ -13,7 +13,7 @@ namespace Startitecture.Orm.Sql.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
     /// The update operation test.
@@ -30,7 +30,7 @@ namespace Startitecture.Orm.Sql.Tests
         [TestMethod]
         public void UpdateStatement_DirectData_MatchesExpected()
         {
-            var match = new FakeFlatDataRow
+            var match = new DataRow
                             {
                                 NormalColumn = "NormalColumn",
                                 NullableColumn = "CouldHaveBeenNull",
@@ -40,9 +40,9 @@ namespace Startitecture.Orm.Sql.Tests
                                 AnotherColumn = "Some Other Value"
                             };
 
-            var baseline = new FakeFlatDataRow { FakeDataId = 10 };
-            var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeFlatDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -54,7 +54,7 @@ namespace Startitecture.Orm.Sql.Tests
                     row => row.ValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
 
             var statement = updateOperation.ExecutionStatement;
             var expected = new object[]
@@ -89,12 +89,12 @@ SET
 [dbo].[FakeData].[AnotherColumn] = @4,
 [dbo].[FakeData].[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @5 AND
 [dbo].[FakeData].[NullableColumn] LIKE @6 AND
@@ -110,7 +110,7 @@ WHERE
         [TestMethod]
         public void UpdateStatement_RaisedDirectData_MatchesExpected()
         {
-            var match = new FakeRaisedDataRow
+            var match = new DataRow
             {
                 NormalColumn = "NormalColumn",
                 NullableColumn = "CouldHaveBeenNull",
@@ -120,9 +120,9 @@ WHERE
                 AnotherColumn = "Some Other Value"
             };
 
-            var baseline = new FakeFlatDataRow { FakeDataId = 10 };
-            var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeRaisedDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -134,7 +134,7 @@ WHERE
                     row => row.ValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
 
             var statement = updateOperation.ExecutionStatement;
             var expected = new object[]
@@ -169,12 +169,12 @@ SET
 [dbo].[FakeData].[AnotherColumn] = @4,
 [dbo].[FakeData].[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @5 AND
 [dbo].[FakeData].[NullableColumn] LIKE @6 AND
@@ -190,33 +190,36 @@ WHERE
         [TestMethod]
         public void UpdateStatement_RelatedData_MatchesExpected()
         {
-            var match = new FakeFlatDataRow
-            {
-                NormalColumn = "NormalColumn",
-                RelatedAliasRelatedProperty = "Related",
-                NullableColumn = "CouldHaveBeenNull",
-                ValueColumn = 2,
-                NullableValueColumn = null,
-                AnotherValueColumn = 12,
-                AnotherColumn = "Some Other Value"
-            };
+            var match = new DataRow
+                            {
+                                NormalColumn = "NormalColumn",
+                                RelatedAlias = new FakeRelatedRow
+                                                   {
+                                                       RelatedProperty = "Related"
+                                                   },
+                                NullableColumn = "CouldHaveBeenNull",
+                                ValueColumn = 2,
+                                NullableValueColumn = null,
+                                AnotherValueColumn = 12,
+                                AnotherColumn = "Some Other Value"
+                            };
 
-            var baseline = new FakeFlatDataRow { FakeDataId = 10 };
-            var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeFlatDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAliasRelatedProperty, match.RelatedAliasRelatedProperty)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
                 .Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
-                    row => row.RelatedId,
-                    row => row.RelatedAliasRelatedProperty,
-                    row => row.OtherAliasRelatedProperty)
+                    row => row.Related.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -237,12 +240,12 @@ SET
 [dbo].[FakeData].[AnotherColumn] = @4,
 [dbo].[FakeData].[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @5 AND
 [dbo].[FakeData].[NullableColumn] LIKE @6 AND
@@ -269,7 +272,7 @@ WHERE
         [TestMethod]
         public void UpdateStatement_RaisedRelatedData_MatchesExpected()
         {
-            var match = new FakeRaisedDataRow
+            var match = new DataRow
             {
                 NormalColumn = "NormalColumn",
                 RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related" },
@@ -280,9 +283,9 @@ WHERE
                 AnotherColumn = "Some Other Value"
             };
 
-            var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
-            var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeRaisedDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -295,7 +298,7 @@ WHERE
                     row => row.OtherAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(match);
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -316,12 +319,12 @@ SET
 [dbo].[FakeData].[AnotherColumn] = @4,
 [dbo].[FakeData].[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @5 AND
 [dbo].[FakeData].[NullableColumn] LIKE @6 AND
@@ -339,7 +342,7 @@ WHERE
         [TestMethod]
         public void UpdateStatement_DirectDataSpecificSetValues_MatchesExpected()
         {
-            var match = new FakeFlatDataRow
+            var match = new DataRow
             {
                 NormalColumn = "NormalColumn",
                 NullableColumn = "CouldHaveBeenNull",
@@ -347,9 +350,9 @@ WHERE
                 NullableValueColumn = null,
             };
 
-            var baseline = new FakeFlatDataRow { FakeDataId = 10 };
-            var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeFlatDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -361,8 +364,8 @@ WHERE
                     row => row.ValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
+            var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -376,12 +379,12 @@ SET
 [dbo].[FakeData].[NormalColumn] = @0,
 [dbo].[FakeData].[NullableColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @1 AND
 [dbo].[FakeData].[NullableColumn] LIKE @2 AND
@@ -398,7 +401,7 @@ WHERE
         [TestMethod]
         public void UpdateStatement_RaisedDirectDataSpecificSetValues_MatchesExpected()
         {
-            var match = new FakeRaisedDataRow
+            var match = new DataRow
             {
                 NormalColumn = "NormalColumn",
                 NullableColumn = "CouldHaveBeenNull",
@@ -406,9 +409,9 @@ WHERE
                 NullableValueColumn = null,
             };
 
-            var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
-            var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeRaisedDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -420,8 +423,8 @@ WHERE
                     row => row.ValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
+            var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -435,12 +438,12 @@ SET
 [dbo].[FakeData].[NormalColumn] = @0,
 [dbo].[FakeData].[NullableColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @1 AND
 [dbo].[FakeData].[NullableColumn] LIKE @2 AND
@@ -466,32 +469,35 @@ WHERE
         [TestMethod]
         public void UpdateStatement_RelatedDataSpecificSetValues_MatchesExpected()
         {
-            var match = new FakeFlatDataRow
-            {
-                NormalColumn = "NormalColumn",
-                RelatedAliasRelatedProperty = "Related",
-                NullableColumn = "CouldHaveBeenNull",
-                ValueColumn = 2,
-                NullableValueColumn = null,
-            };
+            var match = new DataRow
+                            {
+                                NormalColumn = "NormalColumn",
+                                RelatedAlias = new FakeRelatedRow
+                                                   {
+                                                       RelatedProperty = "Related"
+                                                   },
+                                NullableColumn = "CouldHaveBeenNull",
+                                ValueColumn = 2,
+                                NullableValueColumn = null,
+                            };
 
-            var baseline = new FakeFlatDataRow { FakeDataId = 10 };
-            var boundary = new FakeFlatDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeFlatDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAliasRelatedProperty, match.RelatedAliasRelatedProperty)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
                 .Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
-                    row => row.RelatedId,
-                    row => row.RelatedAliasRelatedProperty,
-                    row => row.OtherAliasRelatedProperty)
+                    row => row.Related.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var target = new FakeFlatDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeFlatDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
+            var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -505,12 +511,12 @@ SET
 [dbo].[FakeData].[NormalColumn] = @0,
 [dbo].[FakeData].[NullableColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @1 AND
 [dbo].[FakeData].[NullableColumn] LIKE @2 AND
@@ -528,7 +534,7 @@ WHERE
         [TestMethod]
         public void UpdateStatement_RaisedRelatedDataSpecificSetValues_MatchesExpected()
         {
-            var match = new FakeRaisedDataRow
+            var match = new DataRow
             {
                 NormalColumn = "NormalColumn",
                 RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related" },
@@ -537,9 +543,9 @@ WHERE
                 NullableValueColumn = null,
             };
 
-            var baseline = new FakeRaisedDataRow { FakeDataId = 10 };
-            var boundary = new FakeRaisedDataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<FakeRaisedDataRow>()
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = SqlSelect.From<DataRow>()
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
                 .WhereEqual(row => row.NullableColumn, match.NullableColumn)
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
@@ -552,8 +558,8 @@ WHERE
                     row => row.OtherAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var target = new FakeRaisedDataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<FakeRaisedDataRow>(new PetaPocoDefinitionProvider(), selection).Set(
+            var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -567,12 +573,12 @@ SET
 [dbo].[FakeData].[NormalColumn] = @0,
 [dbo].[FakeData].[NullableColumn] = NULL
 FROM [dbo].[FakeData]
-INNER JOIN [someschema].[FakeRelated] ON [dbo].[FakeData].[FakeRowId] = [someschema].[FakeRelated].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] ON [someschema].[FakeRelated].[RelatedId] = [dbo].[FakeDependencyEntity].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[FakeDependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
-INNER JOIN [someschema].[FakeRelated] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
-LEFT JOIN [dbo].[FakeSubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[FakeSubData].[FakeSubDataId]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE
 [dbo].[FakeData].[ValueColumn] = @1 AND
 [dbo].[FakeData].[NullableColumn] LIKE @2 AND

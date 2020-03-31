@@ -55,7 +55,7 @@ namespace Startitecture.Orm.Query
                 this.AddFilter(valueFilter);
             }
 
-            // Use all available values if no keys are defined. Trace a warning becuase that's a problem.
+            // Use all available values if no keys are defined.
             if (this.Filters.Any())
             {
                 return;

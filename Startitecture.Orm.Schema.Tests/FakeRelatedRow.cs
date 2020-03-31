@@ -6,6 +6,7 @@
 
 namespace Startitecture.Orm.Schema.Tests
 {
+    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
@@ -14,14 +15,14 @@ namespace Startitecture.Orm.Schema.Tests
     /// <summary>
     /// The fake related row.
     /// </summary>
-    [TableName("[someschema].[FakeRelated]")]
-    [PrimaryKey("RelatedId")]
+    [Table("FakeRelated", Schema = @"someschema")]
     public class FakeRelatedRow : ITransactionContext
     {
         /// <summary>
         /// Gets or sets the related id.
         /// </summary>
         [Column]
+        [Key]
         public int RelatedId { get; set; }
 
         /// <summary>

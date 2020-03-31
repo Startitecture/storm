@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Common
     /// <typeparam name="TEntity">
     /// The type of entity to allow access to.
     /// </typeparam>
-    public interface IReadOnlyRepository<TEntity>
+    public interface IReadOnlyRepository<out TEntity>
     {
         /// <summary>
         /// Determines whether an item exists in the repository.
@@ -59,51 +59,11 @@ namespace Startitecture.Orm.Common
         TEntity FirstOrDefault<TItem>(TItem candidate);
 
         /// <summary>
-        /// Loads an entity with its children.
-        /// </summary>
-        /// <typeparam name="TKey">
-        /// The type of the key that uniquely identifies the entity.
-        /// </typeparam>
-        /// <param name="key">
-        /// The key that uniquely identifies the entity.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="key"/> is null.
-        /// </exception>
-        /// <returns>
-        /// The entity with the specified key, with all child elements loaded, or null if the entity does not exist.
-        /// </returns>
-        TEntity FirstOrDefaultWithChildren<TKey>(TKey key);
-
-        /// <summary>
-        /// Gets an item by its identifier or unique key.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to search for.
-        /// </typeparam>
-        /// <param name="candidate">
-        /// A candidate item representing the item to search for.
-        /// </param>
-        /// <returns>
-        /// The first <typeparamref name="TItem"/> in the repository matching the candidate item's identifier or unique key, or a 
-        /// default value of the <typeparamref name="TItem"/> type if no entity could be found using the candidate.
-        /// </returns>
-        TItem FirstOrDefaultAs<TItem>(TItem candidate);
-
-        /// <summary>
         /// Selects all items in the repository.
         /// </summary>
         /// <returns>
         /// A collection of items that match the criteria.
         /// </returns>
         IEnumerable<TEntity> SelectAll();
-
-        /// <summary>
-        /// Loads the children of the specified entity.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity to load the children for.
-        /// </param>
-        void LoadChildren(TEntity entity);
     }
 }

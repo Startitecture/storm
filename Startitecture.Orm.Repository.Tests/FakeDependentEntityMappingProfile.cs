@@ -6,21 +6,25 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
-    using Startitecture.Orm.Repository;
+    using AutoMapper;
+
+    using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The fake dependent entity mapping profile.
     /// </summary>
-    public class FakeDependentEntityMappingProfile : EntityMappingProfile<FakeDependentEntity, FakeDependentRow>
+    public class FakeDependentEntityMappingProfile : Profile
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FakeDependentEntityMappingProfile"/> class.
         /// </summary>
         public FakeDependentEntityMappingProfile()
         {
-            this.SetPrimaryKey(entity => entity.FakeDependentEntityId, row => row.FakeDependentEntityId)
-                .SetDependencyKey<FakeComplexRow, int>(row => row.FakeComplexEntityId, row => row.FakeDependentEntityId);
+            this.CreateMap<DependentEntity, DependentRow>()
+                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+
+            this.CreateMap<DependentRow, DependentEntity>();
         }
     }
 }

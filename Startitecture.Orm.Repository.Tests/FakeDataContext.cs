@@ -19,7 +19,7 @@ namespace Startitecture.Orm.Repository.Tests
         /// Initializes a new instance of the <see cref="FakeDataContext"/> class.
         /// </summary>
         public FakeDataContext()
-            : this(new PetaPocoDefinitionProvider())
+            : this(new DataAnnotationsDefinitionProvider())
         {
         }
 

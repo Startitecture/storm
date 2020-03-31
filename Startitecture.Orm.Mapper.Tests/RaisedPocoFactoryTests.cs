@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Mapper.Tests
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
-    using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The raised poco factory tests.
@@ -35,7 +34,7 @@ namespace Startitecture.Orm.Mapper.Tests
         ////    {
         ////        var fakeComplexRow = Generate.CreateFakeComplexRow();
         ////        var pocoDataRequest = Generate.CreatePocoDataRequest(fakeComplexRow);
-        ////        var actual = target.CreateDelegate<FakeComplexRow>(pocoDataRequest);
+        ////        var actual = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest);
         ////        Assert.IsNotNull(actual);
         ////    }
         ////}
@@ -46,7 +45,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_RaisedPocoFactoryForFlatComplexRow_DelegateSetsPocoAsExpected()
         {
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
 
             using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
@@ -56,7 +55,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 var stopwatch = Stopwatch.StartNew();
                 stopwatch.Start();
-                var actual = target.CreatePoco<FakeComplexRow>(pocoDataRequest);
+                var actual = target.CreatePoco<ComplexFlatRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #1");
                 stopwatch.Reset();
 
@@ -65,12 +64,12 @@ namespace Startitecture.Orm.Mapper.Tests
                 Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
 
                 stopwatch.Start();
-                target.CreatePoco<FakeComplexRow>(pocoDataRequest);
+                target.CreatePoco<ComplexFlatRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #2");
                 stopwatch.Reset();
 
                 stopwatch.Start();
-                target.CreatePoco<FakeComplexRow>(pocoDataRequest);
+                target.CreatePoco<ComplexFlatRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #3");
                 stopwatch.Reset();
             }
@@ -82,12 +81,12 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_RaisedPocoFactoryForRaisedComplexRow_IsNotNull()
         {
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
 
             using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var pocoDataRequest = Generate.CreatePocoDataRequest(Generate.CreateFakeRaisedComplexRow(true), definitionProvider);
-                var actual = target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
+                var actual = target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                 Assert.IsNotNull(actual);
             }
         }
@@ -98,7 +97,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_RaisedPocoFactoryForRaisedComplexRow_DelegateSetsPocoAsExpected()
         {
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
 
             using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
@@ -108,7 +107,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 var stopwatch = Stopwatch.StartNew();
                 stopwatch.Start();
-                var actual = target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
+                var actual = target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #1");
                 stopwatch.Reset();
 
@@ -116,24 +115,24 @@ namespace Startitecture.Orm.Mapper.Tests
                 Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
 
                 Assert.AreEqual(
-                    expected.FakeSubEntity,
-                    actual.FakeSubEntity,
-                    string.Join(Environment.NewLine, expected.FakeSubEntity.GetDifferences(actual.FakeSubEntity)));
+                    expected.SubEntity,
+                    actual.SubEntity,
+                    string.Join(Environment.NewLine, expected.SubEntity.GetDifferences(actual.SubEntity)));
 
                 Assert.AreEqual(
-                    expected.FakeDependentEntity,
-                    actual.FakeDependentEntity,
-                    string.Join(Environment.NewLine, expected.FakeDependentEntity.GetDifferences(actual.FakeDependentEntity)));
+                    expected.DependentEntity,
+                    actual.DependentEntity,
+                    string.Join(Environment.NewLine, expected.DependentEntity.GetDifferences(actual.DependentEntity)));
 
                 Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
 
                 stopwatch.Start();
-                target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
+                target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #2");
                 stopwatch.Reset();
 
                 stopwatch.Start();
-                target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
+                target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #3");
                 stopwatch.Reset();
             }
@@ -357,7 +356,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_RaisedPocoFactoryForRaisedComplexRowWithoutDependentEntity_DelegateSetsPocoAsExpected()
         {
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
 
             using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
@@ -367,7 +366,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 var stopwatch = Stopwatch.StartNew();
                 stopwatch.Start();
-                var actual = target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
+                var actual = target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #1");
                 stopwatch.Reset();
 
@@ -375,22 +374,22 @@ namespace Startitecture.Orm.Mapper.Tests
                 Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
 
                 Assert.AreEqual(
-                    expected.FakeSubEntity,
-                    actual.FakeSubEntity,
-                    string.Join(Environment.NewLine, expected.FakeSubEntity.GetDifferences(actual.FakeSubEntity)));
+                    expected.SubEntity,
+                    actual.SubEntity,
+                    string.Join(Environment.NewLine, expected.SubEntity.GetDifferences(actual.SubEntity)));
 
-                Assert.IsNull(expected.FakeDependentEntity);
-                Assert.IsNull(actual.FakeDependentEntity);
+                Assert.IsNull(expected.DependentEntity);
+                Assert.IsNull(actual.DependentEntity);
 
                 Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
 
                 stopwatch.Start();
-                target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
+                target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #2");
                 stopwatch.Reset();
 
                 stopwatch.Start();
-                target.CreatePoco<FakeRaisedComplexRow>(pocoDataRequest);
+                target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #3");
                 stopwatch.Reset();
             }
@@ -471,7 +470,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                };
 
             var stopwatch = Stopwatch.StartNew();
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
             var pocoDataRequest = Generate.CreatePocoDataRequest(expected, definitionProvider);
             Trace.TraceInformation($"{stopwatch.Elapsed} Create data request");
             stopwatch.Reset();
@@ -521,7 +520,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_RaisedPocoFactoryForRaisedPhysicalNameOverriddenRow_DelegateSetsPocoAsExpected()
         {
-            var definitionProvider = new PetaPocoDefinitionProvider();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
             using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
             {
                 var expected = new RaisedOverriddenColumnNameRow

@@ -58,10 +58,8 @@
   </Choose>
   <ItemGroup>
     <Compile Include="PetaPocoDefinitionProviderTests.cs" />
-    <Compile Include="FakeDataRowBase.cs" />
     <Compile Include="FakeDependencyRow.cs" />
     <Compile Include="FakeDependentEntity.cs" />
-    <Compile Include="FakeRaisedDataRow.cs" />
     <Compile Include="FakeRelatedRow.cs" />
     <Compile Include="FakeSubDataRow.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

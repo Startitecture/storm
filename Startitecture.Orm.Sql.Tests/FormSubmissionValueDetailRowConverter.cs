@@ -6,20 +6,7 @@
 
 namespace Startitecture.Orm.Sql.Tests
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Globalization;
-    using System.Linq;
-
-    using JetBrains.Annotations;
-
-    using Startitecture.Orm.Testing.Model;
-    using Startitecture.Orm.Testing.Model.DocumentEntities;
-    using Startitecture.Orm.Testing.Model.FieldEntities;
-    using Startitecture.Orm.Testing.Model.PM;
-
-    using FormSubmissionValue = Startitecture.Orm.Testing.Model.PM.FormSubmissionValue;
-
+/*
     /// <summary>
     /// The form submission value detail row converter.
     /// </summary>
@@ -104,4 +91,5 @@ namespace Startitecture.Orm.Sql.Tests
             }
         }
     }
+*/
 }

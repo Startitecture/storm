@@ -34,11 +34,6 @@ namespace Startitecture.Orm.Schema
 */
 
         /// <summary>
-        /// The default schema.
-        /// </summary>
-        private const string DefaultSchema = "dbo";
-
-        /// <summary>
         /// The cache lock.
         /// </summary>
         private static readonly object CacheLock = new object();
@@ -127,23 +122,28 @@ namespace Startitecture.Orm.Schema
             var entityType = entityReference.EntityType;
             var entityQualifiedName = this.GetEntityQualifiedName(entityType);
 
-            // Here we assume no servers are included.
-            var locationTokens = entityQualifiedName.Split(new[] { '.' }, 2, StringSplitOptions.RemoveEmptyEntries);
+            ////// Here we assume no servers are included.
+            ////var locationTokens = entityQualifiedName.Split(new[] { '.' }, 2, StringSplitOptions.RemoveEmptyEntries);
 
-            // Remove delimiters so we can expect consistent names.
-            var nameToken = locationTokens.Last().Trim('[', ']');
+            ////// Remove delimiters so we can expect consistent names.
+            ////var nameToken = locationTokens.Last().Trim('[', ']');
 
             // Only set the alias if it doesn't match the name.
-            var entityAlias = entityReference.EntityAlias == nameToken ? null : entityReference.EntityAlias;
+            var entityAlias = string.Equals(entityReference.EntityAlias, entityQualifiedName.Entity, StringComparison.OrdinalIgnoreCase)
+                                  ? null
+                                  : entityReference.EntityAlias;
 
-            switch (locationTokens.Length)
-            {
-                case 2:
-                    return new EntityLocation(entityReference.EntityType, locationTokens.First().Trim('[', ']'), nameToken, entityAlias);
+            ////var schema = string.IsNullOrWhiteSpace(entityQualifiedName.Schema) ? DefaultSchema : entityQualifiedName.Schema;
+            return new EntityLocation(entityReference.EntityType, entityQualifiedName.Schema, entityQualifiedName.Entity, entityAlias);
 
-                default:
-                    return new EntityLocation(entityReference.EntityType, DefaultSchema, nameToken, entityAlias);
-            }
+            ////switch (locationTokens.Length)
+            ////{
+            ////    case 2:
+            ////        return new EntityLocation(entityReference.EntityType, locationTokens.First().Trim('[', ']'), nameToken, entityAlias);
+
+            ////    default:
+            ////        return new EntityLocation(entityReference.EntityType, DefaultSchema, nameToken, entityAlias);
+            ////}
         }
 
         /// <summary>
@@ -155,7 +155,7 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// The qualified name as a <see cref="string"/>.
         /// </returns>
-        protected abstract string GetEntityQualifiedName(Type entityType);
+        protected abstract QualifiedName GetEntityQualifiedName(Type entityType);
 
         /// <summary>
         /// Gets properties related to direct attributes, related attributes or related entities.
@@ -417,7 +417,6 @@ namespace Startitecture.Orm.Schema
         /// </returns>
         private IEnumerable<EntityAttributeDefinition> GetRelationAttributes(Type entityType)
         {
-            ////var includedProperties = this.GetFilteredRelationProperties(entityType);
             var entityReference = new EntityReference { EntityType = entityType };
             var entityLocation = this.GetEntityLocation(entityReference);
 
@@ -434,43 +433,61 @@ namespace Startitecture.Orm.Schema
                 ////var relatedEntity = attributeReference.GetCustomAttribute<RelatedEntityAttribute>(false);
                 ////var relation = attributeReference.GetCustomAttribute<RelationAttribute>(false);
 
-                var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey && x.IsIdentity == false).Select(x => x.PhysicalName)
-                    .Contains(physicalName);
+                ////if (isPrimaryKey)
+                ////{
+                ////    var entityAttributeDefinition = new EntityAttributeDefinition(
+                ////        entityPath,
+                ////        attributeReference.PropertyInfo,
+                ////        attributeName,
+                ////        EntityAttributeTypes.DirectPrimaryKey);
 
+                ////    yield return entityAttributeDefinition;
+                ////}
+                ////else if (isIdentity)
+                ////{
+                ////    var entityAttributeDefinition = new EntityAttributeDefinition(
+                ////        entityPath,
+                ////        attributeReference.PropertyInfo,
+                ////        attributeName,
+                ////        EntityAttributeTypes.DirectAutoNumberKey);
+
+                ////    yield return entityAttributeDefinition;
+                ////}
+                ////else if (attributeReference.IgnoreReference)
+                ////{
+                ////    var entityAttributeDefinition = new EntityAttributeDefinition(
+                ////        entityPath,
+                ////        attributeReference.PropertyInfo,
+                ////        attributeName,
+                ////        EntityAttributeTypes.MappedAttribute);
+
+                ////    yield return entityAttributeDefinition;
+                ////}
+                ////else
+
+                var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey).Select(x => x.PhysicalName).Contains(physicalName);
                 var isIdentity = keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
+
+                var attributeTypes = EntityAttributeTypes.None;
 
                 if (isPrimaryKey)
                 {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                        entityPath,
-                        attributeReference.PropertyInfo,
-                        attributeName,
-                        EntityAttributeTypes.DirectPrimaryKey);
-
-                    yield return entityAttributeDefinition;
+                    attributeTypes |= EntityAttributeTypes.PrimaryKey;
                 }
-                else if (isIdentity)
-                {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                        entityPath,
-                        attributeReference.PropertyInfo,
-                        attributeName,
-                        EntityAttributeTypes.DirectAutoNumberKey);
 
-                    yield return entityAttributeDefinition;
-                }
-                else if (attributeReference.IgnoreReference)
+                if (isIdentity)
                 {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                        entityPath,
-                        attributeReference.PropertyInfo,
-                        attributeName,
-                        EntityAttributeTypes.MappedAttribute);
+                    attributeTypes |= EntityAttributeTypes.IdentityColumn;
+                }
 
-                    yield return entityAttributeDefinition;
-                }
-                else if (attributeReference.IsRelatedAttribute)
+                if (attributeReference.IgnoreReference)
                 {
+                    attributeTypes |= EntityAttributeTypes.MappedAttribute;
+                }
+
+                if (attributeReference.IsRelatedAttribute)
+                {
+                    attributeTypes |= EntityAttributeTypes.ExplicitRelatedAttribute;
                     var relatedEntityReference = new EntityReference
                                                      {
                                                          EntityType = attributeReference.EntityReference.EntityType, // relatedEntity.EntityType,
@@ -503,7 +520,7 @@ namespace Startitecture.Orm.Schema
                         entityPath,
                         attributeReference.PropertyInfo,
                         attributeName,
-                        EntityAttributeTypes.ExplicitRelatedAttribute,
+                        attributeTypes,
                         attributeAlias);
 
                     entityPath.RemoveLast();
@@ -512,12 +529,14 @@ namespace Startitecture.Orm.Schema
                 }
                 else if (attributeReference.IsRelation)
                 {
+                    attributeTypes |= EntityAttributeTypes.Relation;
+
                     // Include the relation itself for quick access to getter/setter methods.
                     var entityAttributeDefinition = new EntityAttributeDefinition(
                         entityPath,
                         attributeReference.PropertyInfo,
                         attributeName,
-                        EntityAttributeTypes.Relation,
+                        attributeTypes,
                         attributeReference.Name);
 
                     yield return entityAttributeDefinition;
@@ -529,11 +548,12 @@ namespace Startitecture.Orm.Schema
                 }
                 else
                 {
+                    attributeTypes |= EntityAttributeTypes.DirectAttribute;
                     var entityAttributeDefinition = new EntityAttributeDefinition(
                         entityPath,
                         attributeReference.PropertyInfo,
                         attributeName,
-                        EntityAttributeTypes.DirectAttribute);
+                        attributeTypes);
 
                     yield return entityAttributeDefinition;
                 }

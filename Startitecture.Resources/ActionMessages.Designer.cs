@@ -124,6 +124,15 @@ namespace Startitecture.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Could not set primary key {0}.{1} with value &apos;{2}&apos;: {3}.
+        /// </summary>
+        public static string CouldNotSetPrimaryKeyWithValue {
+            get {
+                return ResourceManager.GetString("CouldNotSetPrimaryKeyWithValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to DenyQueueCreation.
         /// </summary>
         public static string DenyQueueCreation {

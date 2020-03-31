@@ -15,6 +15,17 @@
     <CodeAnalysisRuleSet></CodeAnalysisRuleSet>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="DocumentEntities\**" />
+    <Compile Remove="FieldEntities\**" />
+    <Compile Remove="PM\**" />
+    <EmbeddedResource Remove="DocumentEntities\**" />
+    <EmbeddedResource Remove="FieldEntities\**" />
+    <EmbeddedResource Remove="PM\**" />
+    <None Remove="DocumentEntities\**" />
+    <None Remove="FieldEntities\**" />
+    <None Remove="PM\**" />
+  </ItemGroup>
+  <ItemGroup>
     <None Remove="TestProject.editorconfig" />
   </ItemGroup>
   <ItemGroup>

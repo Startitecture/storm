@@ -16,7 +16,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using Rhino.Mocks;
 
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
     /// The generate.
@@ -57,11 +57,11 @@ namespace Startitecture.Orm.Mapper.Tests
         /// Creates a fake complex row.
         /// </summary>
         /// <returns>
-        /// A new <see cref="FakeComplexRow" /> instance.
+        /// A new <see cref="ComplexFlatRow" /> instance.
         /// </returns>
-        public static FakeComplexRow CreateFakeComplexRow()
+        public static ComplexFlatRow CreateFakeComplexRow()
         {
-            return new FakeComplexRow
+            return new ComplexFlatRow
                        {
                            CreatedByDescription = MyString, 
                            CreatedByFakeMultiReferenceEntityId = MyInt, 
@@ -96,39 +96,39 @@ namespace Startitecture.Orm.Mapper.Tests
         /// A value indicating whether to create the row with a dependent entity.
         /// </param>
         /// <returns>
-        /// A new <see cref="FakeComplexRow"/> instance.
+        /// A new <see cref="ComplexFlatRow"/> instance.
         /// </returns>
-        public static FakeRaisedComplexRow CreateFakeRaisedComplexRow(bool withDependentEntity)
+        public static ComplexRaisedRow CreateFakeRaisedComplexRow(bool withDependentEntity)
         {
-            var createdBy = new FakeMultiReferenceRow { Description = MyString, FakeMultiReferenceEntityId = MyInt, UniqueName = MyString };
-            var fakeSubSubEntity = new FakeSubSubRow { FakeSubSubEntityId = MyInt, UniqueName = MyString, Description = MyString };
-            var fakeSubEntity = new FakeRaisedSubRow
+            var createdBy = new MultiReferenceRow { Description = MyString, FakeMultiReferenceEntityId = MyInt, UniqueName = MyString };
+            var fakeSubSubEntity = new SubSubRow { FakeSubSubEntityId = MyInt, UniqueName = MyString, Description = MyString };
+            var fakeSubEntity = new SubRow
                                     {
                                         FakeSubEntityId = MyInt,
                                         FakeSubSubEntityId = MyInt,
-                                        FakeSubSubEntity = fakeSubSubEntity,
+                                        SubSubEntity = fakeSubSubEntity,
                                         UniqueName = MyString,
                                         UniqueOtherId = MyShort,
                                         Description = MyString
                                     };
 
-            var modifiedBy = new FakeMultiReferenceRow { FakeMultiReferenceEntityId = MyInt, Description = MyString, UniqueName = MyString };
+            var modifiedBy = new MultiReferenceRow { FakeMultiReferenceEntityId = MyInt, Description = MyString, UniqueName = MyString };
 
-            var fakeDependentEntity = new FakeDependentRow
+            var fakeDependentEntity = new DependentRow
                                           {
                                               FakeDependentEntityId = MyInt,
                                               DependentIntegerValue = MyInt,
                                               DependentTimeValue = MyDateTimeOffset
                                           };
 
-            return new FakeRaisedComplexRow
+            return new ComplexRaisedRow
                        {
                            CreatedBy = createdBy,
                            UniqueName = MyString,
                            FakeSubEntityId = MyInt,
-                           FakeSubEntity = fakeSubEntity,
+                           SubEntity = fakeSubEntity,
                            ModifiedBy = modifiedBy,
-                           FakeDependentEntity = withDependentEntity ? fakeDependentEntity : null,
+                           DependentEntity = withDependentEntity ? fakeDependentEntity : null,
                            ModifiedTime = MyDateTimeOffset,
                            Description = MyString,
                            FakeEnumerationId = MyInt,

@@ -71,7 +71,7 @@ namespace Startitecture.Orm.Mapper
                 return (TDependency)value;
             }
 
-            return default(TDependency);
+            return default;
         }
 
         /// <summary>

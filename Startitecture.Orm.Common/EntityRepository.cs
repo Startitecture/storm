@@ -8,12 +8,14 @@ namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
     using System.Linq;
-    using System.Linq.Expressions;
+    using System.Reflection;
 
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Resources;
 
     /// <summary>
     /// A base class for entity repositories.
@@ -40,11 +42,8 @@ namespace Startitecture.Orm.Common
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
-        /// <param name="key">
-        /// The key property for the <typeparamref name="TEntity"/>.
-        /// </param>
-        public EntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper, Expression<Func<TEntity, object>> key)
-            : this(repositoryProvider, entityMapper, key, null)
+        public EntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : this(repositoryProvider, entityMapper, null)
         {
         }
 
@@ -57,18 +56,14 @@ namespace Startitecture.Orm.Common
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
-        /// <param name="key">
-        /// The key property for the <typeparamref name="TEntity"/>.
-        /// </param>
         /// <param name="selectionComparer">
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
         public EntityRepository(
             IRepositoryProvider repositoryProvider,
             IEntityMapper entityMapper,
-            Expression<Func<TEntity, object>> key,
             IComparer<TDataItem> selectionComparer)
-            : base(repositoryProvider, entityMapper, key, selectionComparer)
+            : base(repositoryProvider, entityMapper, selectionComparer)
         {
         }
 
@@ -168,9 +163,9 @@ namespace Startitecture.Orm.Common
             this.SaveDependents(entity, this.RepositoryProvider, dataItem);
             var savedItem = this.EntityMapper.Map<TItem>(dataItem);
 
-            if (this.AutomaticallySetTransactionContext && savedItem is ITransactionContext)
+            if (savedItem is ITransactionContext context)
             {
-                (savedItem as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
+                context.SetTransactionProvider(this.RepositoryProvider);
             }
 
             return savedItem;
@@ -183,14 +178,15 @@ namespace Startitecture.Orm.Common
         /// The type of item that contains the example properties.
         /// </typeparam>
         /// <param name="example">
-        /// The example entity.
+        /// The example entity, or the ID of the <typeparamref name="TDataItem"/> to delete.
         /// </param>
         /// <returns>
         /// The number of items affected as an <see cref="int"/>.
         /// </returns>
         public int Delete<TItem>(TItem example)
         {
-            var dataItem = this.EntityMapper.Map<TDataItem>(example);
+            var dataItem = this.GetExampleItem(example);
+
             var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
             return this.RepositoryProvider.DeleteItems(uniqueItemSelection);
         }
@@ -316,7 +312,12 @@ namespace Startitecture.Orm.Common
             else
             {
                 // Needed to apply the newly set parent ID.
-                this.EntityMapper.MapTo(entityKey, dependency);
+                ////this.EntityMapper.MapTo(entityKey, dependency);
+                var dependencyDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDependency>();
+                dependencyDefinition
+                    .PrimaryKeyAttributes.First()
+                    .SetValueDelegate.DynamicInvoke(dependency, entityKey);
+
                 repository.Save(dependency);
 
                 // Now that the entity has been updated, map back to the data item.
@@ -397,20 +398,91 @@ namespace Startitecture.Orm.Common
             var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>();
             var key = entityDefinition.PrimaryKeyAttributes.First().GetValueDelegate.DynamicInvoke(dataItem);
 
+            // Assume identical key name
+            if (entityDefinition.AutoNumberPrimaryKey.HasValue)
+            {
+                var keyProperty = typeof(TEntity).GetProperty(entityDefinition.AutoNumberPrimaryKey.Value.PropertyName);
+
+                if (keyProperty == null)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.MatchingKeyPropertyNotFound,
+                        item,
+                        typeof(TDataItem),
+                        entityDefinition.AutoNumberPrimaryKey.Value.PropertyName);
+
+                    throw new OperationException(item, message);
+                }
+
+                try
+                {
+                    keyProperty.SetValue(item, key);
+                }
+                catch (ArgumentException ex)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.UnableToSetPropertyToValue,
+                        typeof(TEntity),
+                        keyProperty,
+                        key,
+                        ex.Message);
+
+                    throw new OperationException(item, message, ex);
+                }
+                catch (TargetException ex)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.UnableToSetPropertyToValue,
+                        typeof(TEntity),
+                        keyProperty,
+                        key,
+                        ex.Message);
+
+                    throw new OperationException(item, message, ex);
+                }
+                catch (MethodAccessException ex)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.UnableToSetPropertyToValue,
+                        typeof(TEntity),
+                        keyProperty,
+                        key,
+                        ex.Message);
+
+                    throw new OperationException(item, message, ex);
+                }
+                catch (TargetInvocationException ex)
+                {
+                    var message = string.Format(
+                        CultureInfo.CurrentCulture,
+                        ErrorMessages.UnableToSetPropertyToValue,
+                        typeof(TEntity),
+                        keyProperty,
+                        key,
+                        ex.Message);
+
+                    throw new OperationException(item, message, ex);
+                }
+            }
+
                     ////.PrimaryKeyExpression.Compile().DynamicInvoke(dataItem);
 
-                if (key is int integerKey)
-                {
-                    this.EntityMapper.MapTo(integerKey, item);
-                }
+                ////if (key is int integerKey)
+                ////{
+                ////    this.EntityMapper.MapTo(integerKey, item);
+                ////}
 
-                if (key is long longKey)
-                {
-                    this.EntityMapper.MapTo(longKey, item);
-                }
+                ////if (key is long longKey)
+                ////{
+                ////    this.EntityMapper.MapTo(longKey, item);
+                ////}
 
-                // The mapping must also have set the primary key.
-                this.EntityMapper.MapTo(key, item);
+                ////// The mapping must also have set the primary key.
+                ////this.EntityMapper.MapTo(key, item);
             ////}
 
             this.SaveDependents(item, this.RepositoryProvider, dataItem);

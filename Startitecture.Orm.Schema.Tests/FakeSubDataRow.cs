@@ -6,18 +6,20 @@
 
 namespace Startitecture.Orm.Schema.Tests
 {
-    using Startitecture.Orm.Schema;
+    using System.ComponentModel.DataAnnotations;
+    using System.ComponentModel.DataAnnotations.Schema;
 
     /// <summary>
     /// The fake sub data row.
     /// </summary>
-    [PrimaryKey("FakeSubDataId", AutoIncrement = false)]
-    [TableName("[FakeSubData]")]
+    [Table("FakeSubData", Schema = "dbo")]
     public class FakeSubDataRow : TransactionItemBase
     {
         /// <summary>
         /// Gets or sets the fake sub data id.
         /// </summary>
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int FakeSubDataId { get; set; }
 
         /// <summary>

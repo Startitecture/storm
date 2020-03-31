@@ -14,7 +14,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
     /// The flat poco factory tests.
@@ -30,8 +30,8 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var target = new FlatPocoFactory();
             var fakeComplexRow = Generate.CreateFakeComplexRow();
-            var pocoDataRequest = Generate.CreatePocoDataRequest(fakeComplexRow, new PetaPocoDefinitionProvider());
-            var actual = target.CreateDelegate<FakeComplexRow>(pocoDataRequest);
+            var pocoDataRequest = Generate.CreatePocoDataRequest(fakeComplexRow, new DataAnnotationsDefinitionProvider());
+            var actual = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest);
             Assert.IsNotNull(actual);
         }
 
@@ -43,10 +43,10 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var target = new FlatPocoFactory();
             var expected = Generate.CreateFakeComplexRow();
-            var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new PetaPocoDefinitionProvider());
+            var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new DataAnnotationsDefinitionProvider());
 
             var stopwatch = Stopwatch.StartNew();
-            var pocoDelegate = target.CreateDelegate<FakeComplexRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, FakeComplexRow>;
+            var pocoDelegate = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, ComplexFlatRow>;
             Trace.TraceInformation($"{stopwatch.Elapsed} Create delegate");
             stopwatch.Reset();
 
@@ -90,7 +90,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                    RelatedRowName = "RelatedName"
                                };
 
-            var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new PetaPocoDefinitionProvider());
+            var pocoDataRequest = Generate.CreatePocoDataRequest(expected, new DataAnnotationsDefinitionProvider());
 
             var stopwatch = Stopwatch.StartNew();
             var pocoDelegate = target.CreateDelegate<OverriddenColumnNameRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, OverriddenColumnNameRow>;

@@ -9,20 +9,23 @@
 
 namespace Startitecture.Orm.Repository.Tests
 {
-    using Startitecture.Orm.Repository;
+    using AutoMapper;
+
+    using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
     /// The fake created by mapping profile.
     /// </summary>
-    public class FakeCreatedByMappingProfile : EntityMappingProfile<FakeCreatedBy, FakeMultiReferenceRow>
+    public class FakeCreatedByMappingProfile : Profile
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FakeCreatedByMappingProfile"/> class.
         /// </summary>
         public FakeCreatedByMappingProfile()
         {
-            this.SetPrimaryKey(by => by.FakeMultiReferenceEntityId, row => row.FakeMultiReferenceEntityId).SetUniqueKey(row => row.UniqueName);
+            this.CreateMap<CreatedBy, MultiReferenceRow>().ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+            this.CreateMap<MultiReferenceRow, CreatedBy>();
         }
     }
 }
