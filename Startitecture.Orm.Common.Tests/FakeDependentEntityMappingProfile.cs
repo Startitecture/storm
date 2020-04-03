@@ -1,10 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeMultiReferenceEntityMappingProfile.cs" company="Startitecture">
+// <copyright file="FakeDependentEntityMappingProfile.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests
+namespace Startitecture.Orm.Common.Tests
 {
     using AutoMapper;
 
@@ -12,17 +12,19 @@ namespace Startitecture.Orm.Repository.Tests
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
-    /// The fake multi reference entity mapping profile.
+    /// The fake dependent entity mapping profile.
     /// </summary>
-    public class FakeMultiReferenceEntityMappingProfile : Profile
+    public class FakeDependentEntityMappingProfile : Profile
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FakeMultiReferenceEntityMappingProfile"/> class.
+        /// Initializes a new instance of the <see cref="FakeDependentEntityMappingProfile"/> class.
         /// </summary>
-        public FakeMultiReferenceEntityMappingProfile()
+        public FakeDependentEntityMappingProfile()
         {
-            this.CreateMap<MultiReferenceEntity, MultiReferenceRow>()
+            this.CreateMap<DependentEntity, DependentRow>()
                 .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+
+            this.CreateMap<DependentRow, DependentEntity>();
         }
     }
 }

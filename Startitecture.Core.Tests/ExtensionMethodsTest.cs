@@ -32,9 +32,10 @@ namespace Startitecture.Core.Tests
             var item = new FakeTestItem { TestDateTime = DateTime.Today, TestInt = 23, TestString = "Test String" };
             IDictionary<string, object> expected = new Dictionary<string, object>
                                                        {
-                                                           { "{Item}", item.GetType().FullName },
+                                                           { "{Item}", item },
                                                            { "TestDateTime", item.TestDateTime },
                                                            { "TestInt", item.TestInt },
+                                                           { "TestList", item.TestList },
                                                            { "TestString", item.TestString }
                                                        };
 
@@ -71,30 +72,8 @@ namespace Startitecture.Core.Tests
             var propertiesToCompare = new[] { "TestInt", "TestString" };
             IEnumerable<PropertyComparisonResult> expected = new List<PropertyComparisonResult>
                                                                  {
-                                                                     new PropertyComparisonResult
-                                                                         {
-                                                                             PropertyName
-                                                                                 =
-                                                                                 "TestInt",
-                                                                             OriginalValue
-                                                                                 =
-                                                                                 20,
-                                                                             NewValue
-                                                                                 =
-                                                                                 21
-                                                                         },
-                                                                     new PropertyComparisonResult
-                                                                         {
-                                                                             PropertyName
-                                                                                 =
-                                                                                 "TestString",
-                                                                             OriginalValue
-                                                                                 =
-                                                                                 "TestString",
-                                                                             NewValue
-                                                                                 =
-                                                                                 "TestString2"
-                                                                         }
+                                                                     new PropertyComparisonResult("TestInt", 20, 21),
+                                                                     new PropertyComparisonResult("TestString", "TestString", "TestString2")
                                                                  };
 
             IEnumerable<PropertyComparisonResult> actual = baseline.GetDifferences(comparison, propertiesToCompare);
@@ -110,36 +89,14 @@ namespace Startitecture.Core.Tests
             var baseline = new FakeTestItem { TestInt = 20, TestString = "TestString" };
             var comparison = new FakeTestItem { TestInt = 21, TestString = "TestString2" };
             var propertiesToCompare = Array.Empty<string>();
-            IEnumerable<PropertyComparisonResult> expected = new List<PropertyComparisonResult>
-                                                                 {
-                                                                     new PropertyComparisonResult
-                                                                         {
-                                                                             PropertyName
-                                                                                 =
-                                                                                 "TestInt",
-                                                                             OriginalValue
-                                                                                 =
-                                                                                 20,
-                                                                             NewValue
-                                                                                 =
-                                                                                 21
-                                                                         },
-                                                                     new PropertyComparisonResult
-                                                                         {
-                                                                             PropertyName
-                                                                                 =
-                                                                                 "TestString",
-                                                                             OriginalValue
-                                                                                 =
-                                                                                 "TestString",
-                                                                             NewValue
-                                                                                 =
-                                                                                 "TestString2"
-                                                                         }
-                                                                 };
+            var expected = new List<PropertyComparisonResult>
+                               {
+                                   new PropertyComparisonResult("TestInt", 20, 21),
+                                   new PropertyComparisonResult("TestString", "TestString", "TestString2")
+                               };
 
-            IEnumerable<PropertyComparisonResult> actual = baseline.GetDifferences(comparison, propertiesToCompare);
-            CollectionAssert.AreEqual(expected.ToList(), actual.ToList());
+            var actual = baseline.GetDifferences(comparison, propertiesToCompare).ToList();
+            CollectionAssert.AreEqual(expected, actual);
         }
 
         /// <summary>

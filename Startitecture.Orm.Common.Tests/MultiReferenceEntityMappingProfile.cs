@@ -1,13 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeModifiedByMappingProfile.cs" company="Startitecture">
+// <copyright file="MultiReferenceEntityMappingProfile.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
-// <summary>
-//   The fake modified by mapping profile.
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests
+namespace Startitecture.Orm.Common.Tests
 {
     using AutoMapper;
 
@@ -15,19 +12,17 @@ namespace Startitecture.Orm.Repository.Tests
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
-    /// The fake modified by mapping profile.
+    /// The fake multi reference entity mapping profile.
     /// </summary>
-    public class FakeModifiedByMappingProfile : Profile
+    public class MultiReferenceEntityMappingProfile : Profile
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FakeModifiedByMappingProfile"/> class.
+        /// Initializes a new instance of the <see cref="MultiReferenceEntityMappingProfile"/> class.
         /// </summary>
-        public FakeModifiedByMappingProfile()
+        public MultiReferenceEntityMappingProfile()
         {
-            this.CreateMap<ModifiedBy, MultiReferenceRow>()
+            this.CreateMap<MultiReferenceEntity, MultiReferenceRow>()
                 .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
-
-            this.CreateMap<MultiReferenceRow, ModifiedBy>();
         }
     }
 }

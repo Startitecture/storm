@@ -124,7 +124,7 @@ namespace Startitecture.Orm.Model
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return $"{this.EntityReference}/{this.PropertyInfo}";
+            return $"{this.EntityReference}/{this.PropertyInfo.Name}";
         }
 
         /// <summary>

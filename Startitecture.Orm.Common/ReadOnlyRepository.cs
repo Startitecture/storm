@@ -13,7 +13,6 @@ namespace Startitecture.Orm.Common
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
-    using System.Linq.Expressions;
     using System.Reflection;
     using System.Runtime.Caching;
 
@@ -76,7 +75,7 @@ namespace Startitecture.Orm.Common
         /// The entity mapper.
         /// </param>
         public ReadOnlyRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
-            : this(repositoryProvider, entityMapper, (IComparer<TDataItem>)null)
+            : this(repositoryProvider, entityMapper, null)
         {
         }
 
@@ -112,29 +111,7 @@ namespace Startitecture.Orm.Common
         /// </summary>
         protected IEntityMapper EntityMapper { get; }
 
-        /// <summary>
-        /// Gets the primary key expression for the current repository.
-        /// </summary>
-        protected LambdaExpression PrimaryKeyExpression { get; private set; }
-
-        /// <summary>
-        /// Determines whether an item exists in the repository.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to search for.
-        /// </typeparam>
-        /// <param name="candidate">
-        /// The candidate to search for.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the item exists in the repository; otherwise, <c>false</c>.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="candidate"/> is null.
-        /// </exception>
-        /// <remarks>
-        /// This method always queries the underlying provider directly rather than using a cache.
-        /// </remarks>
+        /// <inheritdoc />
         public bool Contains<TItem>(TItem candidate)
         {
             if (Evaluate.IsNull(candidate))
@@ -142,33 +119,12 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            if (candidate is ITransactionContext context)
-            {
-                context.SetTransactionProvider(this.RepositoryProvider);
-            }
-
-            var dataItem = candidate as TDataItem ?? this.EntityMapper.Map<TDataItem>(candidate);
-            dataItem.SetTransactionProvider(this.RepositoryProvider);
+            var dataItem = this.GetExampleItem(candidate);
             var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
             return this.RepositoryProvider.Contains(uniqueItemSelection);
         }
 
-        /// <summary>
-        /// Gets an item by its identifier or unique key.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to search for.
-        /// </typeparam>
-        /// <param name="candidate">
-        /// A candidate item representing the item to search for.
-        /// </param>
-        /// <returns>
-        /// The first <typeparamref name="TEntity"/> in the repository matching the candidate item's identifier or unique key, or a 
-        /// default value of the <typeparamref name="TEntity"/> type if no entity could be found using the candidate.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="candidate"/> is null.
-        /// </exception>
+        /// <inheritdoc />
         public TEntity FirstOrDefault<TItem>(TItem candidate)
         {
             if (Evaluate.IsNull(candidate))
@@ -206,24 +162,27 @@ namespace Startitecture.Orm.Common
                 this.UpdateCache(cacheResult.Key, entity);
             }
 
-            ////if (this.AutomaticallySetTransactionContext && entity is ITransactionContext)
-            ////{
-            ////    (entity as ITransactionContext).SetTransactionProvider(this.RepositoryProvider);
-            ////}
-
             return entity;
         }
 
-        /// <summary>
-        /// Selects all items in the repository.
-        /// </summary>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
+        /// <inheritdoc />
         public IEnumerable<TEntity> SelectAll()
         {
             var exampleSelection = new ItemSelection<TDataItem>();
             var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
+            return this.SelectResults(dataItems);
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<TEntity> Select<TItem>([NotNull] ItemSelection<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            var mappedSelection = selection.MapTo<TDataItem>();
+            var dataItems = this.RepositoryProvider.GetSelection(mappedSelection);
             return this.SelectResults(dataItems);
         }
 
@@ -239,19 +198,6 @@ namespace Startitecture.Orm.Common
         protected virtual ItemSelection<TDataItem> GetUniqueItemSelection(TDataItem item)
         {
             return new UniqueQuery<TDataItem>(this.RepositoryProvider.EntityDefinitionProvider, item);
-        }
-
-        /// <summary>
-        /// Loads the children of the specified entity.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity to load the children for.
-        /// </param>
-        /// <param name="provider">
-        /// The repository provider.
-        /// </param>
-        protected virtual void LoadChildren(TEntity entity, IRepositoryProvider provider)
-        {
         }
 
         /// <summary>
@@ -287,91 +233,8 @@ namespace Startitecture.Orm.Common
         /// </returns>
         protected IEnumerable<TEntity> SelectEntities(ItemSelection<TDataItem> selection)
         {
-            var items = this.SelectDataItems(selection);
-            return this.SelectResults(items);
-        }
-
-        /// <summary>
-        /// Gets a unique selection based on a primary key and alternate keys.
-        /// </summary>
-        /// <param name="item">
-        /// The item to create the selection for.
-        /// </param>
-        /// <param name="primaryKey">
-        /// The primary key.
-        /// </param>
-        /// <typeparam name="TKey">
-        /// The type of the data item's key.
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="ItemSelection{TItem}"/> with the related entity associations.
-        /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
-        protected ItemSelection<TDataItem> GetKeySelection<TKey>(TDataItem item, [NotNull] Expression<Func<TDataItem, TKey>> primaryKey)
-        {
-            return this.GetKeySelection(item, primaryKey, Array.Empty<Expression<Func<TDataItem, object>>>());
-        }
-
-        /// <summary>
-        /// Gets a unique selection based on a primary key and alternate keys.
-        /// </summary>
-        /// <param name="item">
-        /// The item to create the selection for.
-        /// </param>
-        /// <param name="primaryKey">
-        /// The primary key.
-        /// </param>
-        /// <param name="alternateKeys">
-        /// The alternate keys to use if the primary key cannot be used.
-        /// </param>
-        /// <typeparam name="TKey">
-        /// The type of the data item's key.
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="ItemSelection{TItem}"/> with the related entity associations.
-        /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
-        protected ItemSelection<TDataItem> GetKeySelection<TKey>(
-            TDataItem item,
-            [NotNull] Expression<Func<TDataItem, TKey>> primaryKey,
-            [NotNull] params Expression<Func<TDataItem, object>>[] alternateKeys)
-        {
-            if (primaryKey == null)
-            {
-                throw new ArgumentNullException(nameof(primaryKey));
-            }
-
-            if (alternateKeys == null)
-            {
-                throw new ArgumentNullException(nameof(alternateKeys));
-            }
-
-            ItemSelection<TDataItem> selection;
-
-            var keyValue = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>()
-                .PrimaryKeyAttributes.First()
-                .GetValueDelegate.DynamicInvoke(item);
-
-            var usePrimaryKey = Evaluate.Equals(default(TKey), keyValue) == false;
-
-            if (usePrimaryKey || alternateKeys.Length == 0)
-            {
-                selection = GetPrimaryKeySelection(item, primaryKey);
-            }
-            else
-            {
-                selection = new ItemSelection<TDataItem>().Select(alternateKeys); ////item.ToExampleSelection(alternateKeys);
-
-                foreach (var alternateKey in alternateKeys)
-                {
-                    var propertyValue = item.GetPropertyValue(alternateKey.GetPropertyName());
-                    selection.WhereEqual(alternateKey, propertyValue);
-                }
-            }
-
-            return selection;
+            var dataItems = this.RepositoryProvider.GetSelection(selection);
+            return this.SelectResults(dataItems);
         }
 
         /// <summary>
@@ -399,7 +262,6 @@ namespace Startitecture.Orm.Common
 
                 // If the example is a value type, create a new data item as an example and set the key. Assumption is that the two are compatible.
                 dataItem = new TDataItem();
-                dataItem.SetTransactionProvider(this.RepositoryProvider);
 
                 try
                 {
@@ -447,28 +309,8 @@ namespace Startitecture.Orm.Common
                 dataItem = this.EntityMapper.Map<TDataItem>(key);
             }
 
+            dataItem.SetTransactionProvider(this.RepositoryProvider);
             return dataItem;
-        }
-
-        /// <summary>
-        /// Gets the primary key.
-        /// </summary>
-        /// <param name="item">
-        /// The item.
-        /// </param>
-        /// <param name="primaryKey">
-        /// The primary key.
-        /// </param>
-        /// <typeparam name="TKey">
-        /// The type of the key value.
-        /// </typeparam>
-        /// <returns>
-        /// Gets the primary key selection.
-        /// </returns>
-        private static ItemSelection<TDataItem> GetPrimaryKeySelection<TKey>(TDataItem item, Expression<Func<TDataItem, TKey>> primaryKey)
-        {
-            return new ItemSelection<TDataItem>().Select(primaryKey).WhereEqual(primaryKey, item.GetPropertyValue(primaryKey.GetPropertyName()));
-            ////return new SqlSelection<TDataItem>(item, new[] { primaryKey });
         }
 
         /// <summary>
@@ -516,21 +358,6 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Selects a list of items from the repository.
-        /// </summary>
-        /// <param name="dataSelection">
-        /// The data selection.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        private IEnumerable<TDataItem> SelectDataItems(ItemSelection<TDataItem> dataSelection)
-        {
-            var dataItems = this.RepositoryProvider.GetSelection(dataSelection);
-            return dataItems;
-        }
-
-        /// <summary>
         /// Selects results and adds them to the cache.
         /// </summary>
         /// <param name="dataItems">
@@ -543,8 +370,10 @@ namespace Startitecture.Orm.Common
         {
             var results = new List<TEntity>();
 
+            // Order the list of data items if desired.
             var items = this.selectionComparer == null ? dataItems : dataItems.OrderBy(x => x, this.selectionComparer);
 
+            // TODO: Put results in the container for usage by the construct entity hook.
             foreach (var dataItem in items)
             {
                 dataItem.SetTransactionProvider(this.RepositoryProvider);

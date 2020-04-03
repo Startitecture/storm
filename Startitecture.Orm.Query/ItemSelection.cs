@@ -158,29 +158,6 @@ namespace Startitecture.Orm.Query
         #region Predicates
 
         /// <summary>
-        /// Adds a <see cref="ValueFilter"/> to the selection.
-        /// </summary>
-        /// <param name="valueFilter">
-        /// The value filter to add.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="valueFilter"/> is null.
-        /// </exception>
-        public ItemSelection<TItem> AddFilter([NotNull] ValueFilter valueFilter)
-        {
-            if (valueFilter == null)
-            {
-                throw new ArgumentNullException(nameof(valueFilter));
-            }
-
-            this.valueFilters.Add(valueFilter);
-            return this;
-        }
-
-        /// <summary>
         /// Adds a match filter for the specified example item.
         /// </summary>
         /// <param name="example">
@@ -193,42 +170,6 @@ namespace Startitecture.Orm.Query
         /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
         public ItemSelection<TItem> Matching(TItem example, params Expression<Func<TItem, object>>[] selectors)
-        {
-            if (Evaluate.IsNull(example))
-            {
-                throw new ArgumentNullException(nameof(example));
-            }
-
-            if (selectors == null)
-            {
-                throw new ArgumentNullException(nameof(selectors));
-            }
-
-            foreach (var selector in selectors)
-            {
-                var value = selector.Compile().Invoke(example);
-                this.valueFilters.Add(new ValueFilter(selector, FilterType.Equality, value));
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Adds a match filter for the specified example item.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item to match.
-        /// </typeparam>
-        /// <param name="example">
-        /// The example to match.
-        /// </param>
-        /// <param name="selectors">
-        /// The selectors of the properties to match.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
-        /// </returns>
-        public ItemSelection<TItem> Matching<TDataItem>(TDataItem example, params Expression<Func<TDataItem, object>>[] selectors)
         {
             if (Evaluate.IsNull(example))
             {
@@ -269,16 +210,6 @@ namespace Startitecture.Orm.Query
         /// </exception>
         public ItemSelection<TItem> WhereEqual<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
         {
-            ////if (valueExpression == null)
-            ////{
-            ////    throw new ArgumentNullException(nameof(valueExpression));
-            ////}
-
-            ////var valueFilter = Evaluate.IsNull(value)
-            ////                      ? new ValueFilter(valueExpression, FilterType.IsNotSet, value)
-            ////                      : new ValueFilter(valueExpression, FilterType.Equality, value);
-
-            ////this.valueFilters.Add(valueFilter);
             return this.WhereEqual(valueExpression as LambdaExpression, value);
         }
 
@@ -466,40 +397,49 @@ namespace Startitecture.Orm.Query
         }
 
         /// <summary>
-        /// Adds an inclusion filter for the specified example item.
+        /// Adds a between filter for the specified attribute
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item to include.
-        /// </typeparam>
-        /// <typeparam name="TValue">
-        /// The type of value specified by the selector.
-        /// </typeparam>
         /// <param name="selector">
-        /// The property selector.
+        /// The attribute selector.
         /// </param>
-        /// <param name="inclusionValues">
-        /// The inclusion values.
+        /// <param name="minValue">
+        /// The minimum value.
         /// </param>
+        /// <param name="maxValue">
+        /// The maximum value.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of the value to compare.
+        /// </typeparam>
         /// <returns>
         /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
-        public ItemSelection<TItem> IncludeRelated<TDataItem, TValue>(
-            Expression<Func<TDataItem, TValue>> selector,
-            params TValue[] inclusionValues)
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selector"/>, <paramref name="minValue"/> or <paramref name="maxValue"/> is null.
+        /// </exception>
+        public ItemSelection<TItem> Between<TValue>([NotNull] Expression<Func<TItem, TValue>> selector, [NotNull] TValue minValue, [NotNull] TValue maxValue)
+            where TValue : IComparable
         {
             if (selector == null)
             {
                 throw new ArgumentNullException(nameof(selector));
             }
 
-            if (inclusionValues == null)
+            if (minValue == null)
             {
-                throw new ArgumentNullException(nameof(inclusionValues));
+                throw new ArgumentNullException(nameof(minValue));
             }
 
-            var valueFilter = new ValueFilter(selector, FilterType.MatchesSet, inclusionValues.Cast<object>().ToArray());
-            this.valueFilters.Add(valueFilter);
-            return this;
+            if (maxValue == null)
+            {
+                throw new ArgumentNullException(nameof(maxValue));
+            }
+
+            var min = minValue.CompareTo(maxValue) < 0 ? minValue : maxValue;
+            var max = maxValue.CompareTo(minValue) > 0 ? maxValue : minValue;
+
+            var valueFilter = new ValueFilter(selector, FilterType.Between, min, max);
+            return this.AddFilter(valueFilter);
         }
 
         /// <summary>
@@ -1077,6 +1017,35 @@ namespace Startitecture.Orm.Query
         #endregion
 
         /// <summary>
+        /// Maps the current selection to the target selection type.
+        /// </summary>
+        /// <typeparam name="TDestItem">
+        /// The destination item type.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="ItemSelection{TDestItem}"/> for the destination type.
+        /// </returns>
+        public ItemSelection<TDestItem> MapTo<TDestItem>()
+            where TDestItem : class, new()
+        {
+            var mappedSelection = MapSelection<TDestItem>(this);
+
+            var currentSelection = this;
+            var linkedSelection = mappedSelection;
+
+            while (currentSelection.LinkedSelection != null)
+            {
+                var targetSelection = MapSelection<TDestItem>(currentSelection.LinkedSelection.Selection);
+                LinkSelection(currentSelection.LinkedSelection.LinkType, linkedSelection, targetSelection);
+
+                currentSelection = currentSelection.LinkedSelection.Selection;
+                linkedSelection = linkedSelection.LinkedSelection.Selection;
+            }
+
+            return mappedSelection;
+        }
+
+        /// <summary>
         /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </summary>
         /// <returns>
@@ -1086,6 +1055,29 @@ namespace Startitecture.Orm.Query
         public override string ToString()
         {
             return string.Join(ValueSeparator, this.valueFilters.OrderBy(x => x.AttributeLocation?.ToString()));
+        }
+
+        /// <summary>
+        /// Adds a <see cref="ValueFilter"/> to the selection.
+        /// </summary>
+        /// <param name="valueFilter">
+        /// The value filter to add.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueFilter"/> is null.
+        /// </exception>
+        protected ItemSelection<TItem> AddFilter([NotNull] ValueFilter valueFilter)
+        {
+            if (valueFilter == null)
+            {
+                throw new ArgumentNullException(nameof(valueFilter));
+            }
+
+            this.valueFilters.Add(valueFilter);
+            return this;
         }
 
         /// <summary>
@@ -1141,12 +1133,68 @@ namespace Startitecture.Orm.Query
                 throw new ArgumentNullException(nameof(relation));
             }
 
-            ////if (this.relations.Contains(relation) == false)
-            ////{
             this.relations.Add(relation);
-            ////}
-
             return this;
+        }
+
+        /// <summary>
+        /// Links two selections together based on the <paramref name="linkType"/>.
+        /// </summary>
+        /// <param name="linkType">
+        /// The link type.
+        /// </param>
+        /// <param name="sourceSelection">
+        /// The source selection.
+        /// </param>
+        /// <param name="targetSelection">
+        /// The target selection.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of selection to link.
+        /// </typeparam>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="linkType"/> is not one of the values of <see cref="SelectionLinkType"/>.
+        /// </exception>
+        private static void LinkSelection<T>(SelectionLinkType linkType, ItemSelection<T> sourceSelection, ItemSelection<T> targetSelection)
+            where T : class, new()
+        {
+            switch (linkType)
+            {
+                case SelectionLinkType.Union:
+                    sourceSelection.Union(targetSelection);
+                    break;
+                case SelectionLinkType.Intersection:
+                    sourceSelection.Intersect(targetSelection);
+                    break;
+                case SelectionLinkType.Exception:
+                    sourceSelection.Except(targetSelection);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(linkType));
+            }
+        }
+
+        /// <summary>
+        /// Maps the core part of the selection from this selection to an <see cref="ItemSelection{TDestItem}"/>.
+        /// </summary>
+        /// <param name="sourceSelection">
+        /// The source selection.
+        /// </param>
+        /// <typeparam name="TDestItem">
+        /// The type of the selection items to map to.
+        /// </typeparam>
+        /// <returns>
+        /// The mapped <see cref="ItemSelection{TDestItem}"/>.
+        /// </returns>
+        private static ItemSelection<TDestItem> MapSelection<TDestItem>(ItemSelection<TItem> sourceSelection)
+            where TDestItem : class, new()
+        {
+            var targetSelection = new ItemSelection<TDestItem>();
+            targetSelection.selectExpressions.AddRange(sourceSelection.selectExpressions);
+            targetSelection.valueFilters.AddRange(sourceSelection.valueFilters);
+            targetSelection.relations.AddRange(sourceSelection.relations);
+            targetSelection.Limit = sourceSelection.Limit;
+            return targetSelection;
         }
 
         /// <summary>
@@ -1163,7 +1211,7 @@ namespace Startitecture.Orm.Query
         /// </param>
         private void AddRangeFilter(LambdaExpression propertyExpression, object leftValue, object rightValue)
         {
-            if (Evaluate.Equals(leftValue, rightValue))
+            if (Evaluate.RecursiveEquals(leftValue, rightValue))
             {
                 this.valueFilters.Add(new ValueFilter(propertyExpression, FilterType.Equality, leftValue));
             }

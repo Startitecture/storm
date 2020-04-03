@@ -45,5 +45,11 @@ namespace Startitecture.Orm.Query
         public ItemSelection<TItem> Selection { get; private set; }
 
         #endregion
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{this.LinkType} {this.Selection}";
+        }
     }
 }

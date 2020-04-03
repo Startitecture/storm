@@ -238,59 +238,6 @@
             Gets the key.
             </summary>
         </member>
-        <member name="T:Startitecture.Core.CollectionComparer`1">
-            <summary>
-            Compares two <see cref="T:System.Collections.Generic.IEnumerable`1"/> collections for equality of elements and sequence.
-            </summary>
-            <typeparam name="T">The type of item contained in the collections</typeparam>
-            <remarks>From http://stackoverflow.com/questions/50098/comparing-two-collections-for-equality. The author 
-            claims he developed it from reflected .NET code (CollectionAssert in testing namespace).</remarks>
-        </member>
-        <member name="F:Startitecture.Core.CollectionComparer`1.DefaultComparer">
-            <summary>
-            The default equality comparer for the type specified by the generic type argument.
-            </summary>
-        </member>
-        <member name="P:Startitecture.Core.CollectionComparer`1.Default">
-            <summary>
-            Gets a default equality comparer for the type specified by the generic type argument.
-            </summary>
-        </member>
-        <member name="M:Startitecture.Core.CollectionComparer`1.Equals(System.Collections.Generic.IEnumerable{`0},System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Compares two collections for equality of elements and sequence.
-            </summary>
-            <param name="x">The first collection to compare.</param>
-            <param name="y">The second collection to compare.</param>
-            <returns>True if the collections contain equal elements in the same order; otherwise, false.</returns>
-        </member>
-        <member name="M:Startitecture.Core.CollectionComparer`1.GetHashCode(System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Gets the hash code of an enumerable collection.
-            </summary>
-            <param name="obj">The collection to retrieve a hash code for.</param>
-            <returns>The hash code of the collection.</returns>
-        </member>
-        <member name="M:Startitecture.Core.CollectionComparer`1.HaveMismatchedElement(System.Collections.Generic.IEnumerable{`0},System.Collections.Generic.IEnumerable{`0})">
-            <summary>
-            Determines if the collections contain mismatched elements.
-            </summary>
-            <param name="first">The first collection to compare.</param>
-            <param name="second">The second collection to compare.</param>
-            <returns>True if the collections contain mismatched elements; otherwise, false.</returns>
-        </member>
-        <member name="M:Startitecture.Core.CollectionComparer`1.GetElementCounts(System.Collections.Generic.IEnumerable{`0},System.Int32@)">
-            <summary>
-            Returns a dictionary of elements of an <see cref="T:System.Collections.Generic.IEnumerable`1"/> as keys and their placement in 
-            the <see cref="T:System.Collections.Generic.IEnumerable`1"/> as values.
-            </summary>
-            <param name="enumerable">The <see cref="T:System.Collections.Generic.IEnumerable`1"/> to retrieve an ordered element dictionary for.</param>
-            <param name="nullCount">The number of null values within the <see cref="T:System.Collections.Generic.IEnumerable`1"/>.</param>
-            <returns>
-            A dictionary of elements of an <see cref="T:System.Collections.Generic.IEnumerable`1"/> as keys and their placement in the 
-            <see cref="T:System.Collections.Generic.IEnumerable`1"/> as values.
-            </returns>
-        </member>
         <member name="T:Startitecture.Core.DomainException">
             <summary>
             Provides a base exception for all explicitly-thrown framework exceptions. 
@@ -416,19 +363,18 @@
             True if the value is in its default state, otherwise false.
             </returns>
         </member>
-        <member name="M:Startitecture.Core.Evaluate.Equals(System.Byte[],System.Byte[])">
+        <member name="M:Startitecture.Core.Evaluate.RecursiveEquals(System.Object,System.Object)">
             <summary>
-            Determines whether two byte arrays are equal.
+            Tests the equality of two items, using recursion if non-string enumerable properties are encountered.
             </summary>
-            <param name="reference">
-            The byte array to reference.
+            <param name="itemA">
+            The base item.
             </param>
-            <param name="comparison">
-            The byte array to compare.
+            <param name="itemB">
+            The comparison item.
             </param>
             <returns>
-            <c>true</c> if each byte in the reference array is equivalent to the byte at the same index in the comparison array;
-            otherwise, <c>false</c>.
+            <c>true</c> if the items are equal; otherwise, <c>false</c>.
             </returns>
         </member>
         <member name="M:Startitecture.Core.Evaluate.Equals``1(``0,System.Object)">
@@ -455,11 +401,11 @@
             <typeparam name="T">
             The type of values to compare.
             </typeparam>
-            <param name="valueA">
-            The base value.
+            <param name="itemA">
+            The base item.
             </param>
-            <param name="valueB">
-            The comparison value.
+            <param name="itemB">
+            The comparison item.
             </param>
             <param name="selectors">
             The value selectors. If none are specified, the default equality comparer is used.
@@ -545,23 +491,6 @@
             <see cref="M:System.IComparable`1.CompareTo(`0)"/>.
             </remarks>
         </member>
-        <member name="M:Startitecture.Core.Evaluate.CollectionEquals``1(System.Collections.Generic.IEnumerable{``0},System.Collections.Generic.IEnumerable{``0})">
-            <summary>
-            Tests the equality of two collections.
-            </summary>
-            <typeparam name="T">
-            The type of the objects to compare.
-            </typeparam>
-            <param name="collectionA">
-            The base collection.
-            </param>
-            <param name="collectionB">
-            The comparison collection.
-            </param>
-            <returns>
-            True if the collections contain equal elements (ordinal); otherwise, false.
-            </returns>
-        </member>
         <member name="M:Startitecture.Core.Evaluate.GetHashCode``1(``0)">
             <summary>
             Gets the hash code of the specified generic value, returning 0 for null values.
@@ -620,6 +549,27 @@
             <exception cref="T:System.ArgumentNullException">
             <paramref name="selectors"/> is null.
             </exception>
+        </member>
+        <member name="M:Startitecture.Core.Evaluate.AreEqual``1(``0,``0,System.Collections.Generic.IEnumerable{System.Func{``0,System.Object}})">
+            <summary>
+            Determine whether the list of selectors return equal values for <paramref name="itemA"/> and <paramref name="itemB"/>. If the
+            selection returns an <see cref="T:System.Collections.IEnumerable"/>, the enumerable is iterated item by item in order.
+            </summary>
+            <param name="itemA">
+            The first item.
+            </param>
+            <param name="itemB">
+            The second item.
+            </param>
+            <param name="selectors">
+            The selectors to evaluate.
+            </param>
+            <typeparam name="T">
+            The type of item being evaluated.
+            </typeparam>
+            <returns>
+            <c>true</c> if all the values in the item are equal; otherwise, <c>false</c>.
+            </returns>
         </member>
         <member name="M:Startitecture.Core.Evaluate.AggregateHash``1(System.Int32,``0)">
             <summary>
@@ -1140,19 +1090,36 @@
             The to string format.
             </summary>
         </member>
+        <member name="M:Startitecture.Core.PropertyComparisonResult.#ctor(System.String,System.Object,System.Object)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Startitecture.Core.PropertyComparisonResult"/> struct.
+            </summary>
+            <param name="propertyName">
+            The property name.
+            </param>
+            <param name="originalValue">
+            The original value.
+            </param>
+            <param name="newValue">
+            The new value.
+            </param>
+            <exception cref="T:System.ArgumentException">
+            <paramref name="propertyName"/> is null or whitespace.
+            </exception>
+        </member>
         <member name="P:Startitecture.Core.PropertyComparisonResult.PropertyName">
             <summary>
-            Gets or sets the property name.
+            Gets the property name.
             </summary>
         </member>
         <member name="P:Startitecture.Core.PropertyComparisonResult.OriginalValue">
             <summary>
-            Gets or sets the original value.
+            Gets the original value.
             </summary>
         </member>
         <member name="P:Startitecture.Core.PropertyComparisonResult.NewValue">
             <summary>
-            Gets or sets the new value.
+            Gets the new value.
             </summary>
         </member>
         <member name="M:Startitecture.Core.PropertyComparisonResult.op_Equality(Startitecture.Core.PropertyComparisonResult,Startitecture.Core.PropertyComparisonResult)">

@@ -9,6 +9,8 @@
 
 namespace Startitecture.Orm.Common
 {
+    using Startitecture.Orm.Query;
+
     /// <summary>
     /// Provides an interface to an entity repository.
     /// </summary>
@@ -29,17 +31,6 @@ namespace Startitecture.Orm.Common
         TEntity Save(TEntity item);
 
         /// <summary>
-        /// Saves an item to the database along with the children of the entity.
-        /// </summary>
-        /// <param name="item">
-        /// The entity to save.
-        /// </param>
-        /// <returns>
-        /// The saved <typeparamref name="TEntity"/> instance.
-        /// </returns>
-        TEntity SaveWithChildren(TEntity item);
-
-        /// <summary>
         /// Saves an item to the database.
         /// </summary>
         /// <typeparam name="TItem">
@@ -51,27 +42,16 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The saved <typeparamref name="TEntity"/> instance.
         /// </returns>
+        /// <exception cref="System.ArgumentNullException">
+        /// <paramref name="item"/> is null.
+        /// </exception>
         TEntity Save<TItem>(TItem item);
 
         /// <summary>
-        /// Saves an entity to the database.
+        /// Deletes a single entity.
         /// </summary>
         /// <typeparam name="TItem">
-        /// The type of item to retrieve.
-        /// </typeparam>
-        /// <param name="entity">
-        /// The entity to save.
-        /// </param>
-        /// <returns>
-        /// The saved <typeparamref name="TItem"/> instance.
-        /// </returns>
-        TItem SaveAs<TItem>(TEntity entity);
-
-        /// <summary>
-        /// Deletes a single item.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item that contains the example properties.
+        /// The type of item that can be mapped to a unique repository entity.
         /// </typeparam>
         /// <param name="example">
         /// The example entity.
@@ -82,14 +62,17 @@ namespace Startitecture.Orm.Common
         int Delete<TItem>(TItem example);
 
         /// <summary>
-        /// Deletes a single item with its child items.
+        /// Deletes all entities matching the selection.
         /// </summary>
-        /// <param name="entity">
-        /// The entity to delete.
+        /// <param name="selection">
+        /// The selection.
         /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item that contains properties that can be mapped to an item selection for the repository entities.
+        /// </typeparam>
         /// <returns>
-        /// The number of non-child items affected as an <see cref="int"/>.
+        /// The number of items affected as an <see cref="int"/>.
         /// </returns>
-        int DeleteWithChildren(TEntity entity);
+        int Delete<TItem>(ItemSelection<TItem> selection);
     }
 }

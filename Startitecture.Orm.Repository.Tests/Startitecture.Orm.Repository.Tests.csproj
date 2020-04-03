@@ -53,20 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntityRepositoryTests.cs" />
-    <Compile Include="FakeChildEntityMappingProfile.cs" />
-    <Compile Include="FakeComplexEntityMappingProfile.cs" />
-    <Compile Include="FakeCreatedByMappingProfile.cs" />
-    <Compile Include="FakeDataContext.cs" />
-    <Compile Include="FakeDependentEntityMappingProfile.cs" />
-    <Compile Include="FakeModifiedByMappingProfile.cs" />
-    <Compile Include="FakeMultiReferenceEntityMappingProfile.cs" />
-    <Compile Include="FakeRaisedComplexEntityRepositoryTest.cs" />
-    <Compile Include="ReadOnlyRepositoryTest.cs" />
-    <Compile Include="FakeSubEntityMappingProfile.cs" />
-    <Compile Include="FakeSubSubEntityMappingProfile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="src\Public\Storm\Startitecture.Orm.Repository.Tests\ReadOnlyRepositoryTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".editorconfig" />

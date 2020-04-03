@@ -15,8 +15,19 @@ namespace Startitecture.Core.Tests
     /// The fake test item.
     /// </summary>
     [ExcludeFromCodeCoverage]
-    public class FakeTestItem
+    public class FakeTestItem : IEquatable<FakeTestItem>
     {
+        /// <summary>
+        /// The comparison properties.
+        /// </summary>
+        private static readonly Func<FakeTestItem, object>[] ComparisonProperties =
+            {
+                item => item.TestInt,
+                item => item.TestString,
+                item => item.TestDateTime,
+                item => item.testList
+            };
+
         /// <summary>
         /// The test list.
         /// </summary>
@@ -40,6 +51,11 @@ namespace Startitecture.Core.Tests
         public DateTime TestDateTime { get; set; }
 
         /// <summary>
+        /// The test list.
+        /// </summary>
+        public IEnumerable<string> TestList => this.testList;
+
+        /// <summary>
         /// The this.
         /// </summary>
         /// <param name="index">
@@ -50,58 +66,95 @@ namespace Startitecture.Core.Tests
         /// </returns>
         public string this[int index] => this.testList[index];
 
+        #region Equality and Comparison Methods and Operators
+
         /// <summary>
-        /// The equals.
+        /// Determines if two values of the same type are equal.
         /// </summary>
-        /// <param name="obj">
-        /// The obj.
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
         /// </param>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
         /// </returns>
-        public override bool Equals(object obj)
+        public static bool operator ==(FakeTestItem valueA, FakeTestItem valueB)
         {
-            return ReferenceEquals(this, obj) || (obj is FakeTestItem && this.Equals(obj as FakeTestItem));
+            return EqualityComparer<FakeTestItem>.Default.Equals(valueA, valueB);
         }
 
         /// <summary>
-        /// The equals.
+        /// Determines if two values of the same type are not equal.
         /// </summary>
-        /// <param name="obj">
-        /// The obj.
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
         /// </param>
         /// <returns>
-        /// The <see cref="bool"/>.
+        /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public bool Equals(FakeTestItem obj)
+        public static bool operator !=(FakeTestItem valueA, FakeTestItem valueB)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
-            return Evaluate.CollectionEquals(
-                new object[]
-                    {
-                        this.TestString,
-                        this.TestInt
-                    },
-                new object[]
-                    {
-                        obj.TestString,
-                        obj.TestInt
-                    });
+            return !(valueA == valueB);
         }
 
         /// <summary>
-        /// The get hash code.
+        /// Returns a string that represents the current object.
         /// </summary>
         /// <returns>
-        /// The <see cref="int"/>.
+        /// A string that represents the current object.
         /// </returns>
+        /// <filterpriority>2</filterpriority>
+        public override string ToString()
+        {
+            return $"{this.TestInt}:{this.TestString}:{this.TestDateTime}:{string.Join(";", this.testList)}";
+        }
+
+        /// <summary>
+        /// Serves as the default hash function.
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current object.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
-            return Evaluate.GenerateHashCode(this.TestString, this.TestInt);
+            return Evaluate.GenerateHashCode(this, ComparisonProperties);
         }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current object.
+        /// </summary>
+        /// <returns>
+        /// true if the specified object  is equal to the current object; otherwise, false.
+        /// </returns>
+        /// <param name="obj">
+        /// The object to compare with the current object. 
+        /// </param>
+        /// <filterpriority>2</filterpriority>
+        public override bool Equals(object obj)
+        {
+            return Evaluate.Equals(this, obj);
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+        /// </returns>
+        /// <param name="other">
+        /// An object to compare with this object.
+        /// </param>
+        public bool Equals(FakeTestItem other)
+        {
+            return Evaluate.Equals(this, other, ComparisonProperties);
+        }
+
+        #endregion
     }
 }

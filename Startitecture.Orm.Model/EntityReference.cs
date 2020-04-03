@@ -98,7 +98,7 @@ namespace Startitecture.Orm.Model
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return $"{(this.ContainerType ?? this.EntityType)?.FullName}({this.EntityType?.FullName}:[{this.EntityAlias}])";
+            return $"{(this.ContainerType ?? this.EntityType)?.Name}({this.EntityType?.Name}:[{this.EntityAlias}])";
         }
 
         /// <summary>

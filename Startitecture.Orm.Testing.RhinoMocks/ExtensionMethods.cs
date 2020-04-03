@@ -12,10 +12,10 @@ namespace Startitecture.Orm.Testing.RhinoMocks
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
 
     using Common;
 
@@ -28,7 +28,6 @@ namespace Startitecture.Orm.Testing.RhinoMocks
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
-    using Startitecture.Resources;
 
     /// <summary>
     /// The extension methods.
@@ -91,77 +90,6 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
 /*
         /// <summary>
-        /// Creates stubs to save and select an existing item.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider to stub. 
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a new item.
-        /// </returns>
-        public static IRepositoryProvider StubForNewItem<TDataItem>(
-            [NotNull] this IRepositoryProvider repositoryProvider)
-            where TDataItem : class, ITransactionContext
-        {
-            if (repositoryProvider == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryProvider));
-            }
-
-            repositoryProvider.Stub(provider => provider.Contains(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(false);
-            repositoryProvider.Stub(provider => provider.Save(Arg<TDataItem>.Is.Anything)).Return(null)
-                .WhenCalled(
-                    invocation =>
-                    {
-                        // Finds the item in the argument list.
-                        var item = Enumerable.OfType<TDataItem>(invocation.Arguments).First();
-
-                        // If the item needs to have an auto-incremented ID set, we set it to a random number.
-                        var primaryKeyAttribute = ((Object)item).GetType().GetCustomAttributes<PrimaryKeyAttribute>().FirstOrDefault();
-                        var autoIncrement = (primaryKeyAttribute?.AutoIncrement).GetValueOrDefault();
-
-                        if (primaryKeyAttribute != null && autoIncrement)
-                        {
-                            var propertyName = primaryKeyAttribute.ColumnName;
-                            var property = typeof(TDataItem).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                            var propertySetter = property.SetMethod;
-                            propertySetter.Invoke(item, new object[] { NumberGenerator.Next(1, Int32.MaxValue) });
-                        }
-
-                        invocation.ReturnValue = item;
-                    });
-
-            return repositoryProvider;
-        }
-*/
-
-        /// <summary>
-        /// Stubs a repository provider for a list of items.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider.
-        /// </param>
-        /// <param name="target">
-        /// The target of the items.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a list of items.
-        /// </returns>
-        public static IRepositoryProvider StubForList<TDataItem>(
-            [NotNull] this IRepositoryProvider repositoryProvider,
-            [NotNull] List<TDataItem> target)
-            where TDataItem : ITransactionContext
-        {
-            return StubForList(repositoryProvider, target, null);
-        }
-
-        /// <summary>
         /// Stubs a repository provider for a list of items.
         /// </summary>
         /// <param name="repositoryProvider">
@@ -207,41 +135,9 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             repositoryProvider.Stub(provider => provider.GetSelection(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(target);
             return repositoryProvider;
         }
+*/
 
-        /// <summary>
-        /// Stubs a repository provider for a list of items.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        /// <param name="source">
-        /// The source of the items.
-        /// </param>
-        /// <param name="target">
-        /// The target of the items.
-        /// </param>
-        /// <typeparam name="TEntity">
-        /// The type of entity. 
-        /// </typeparam>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryProvider"/> with methods stubbed for a list of items.
-        /// </returns>
-        public static IRepositoryProvider StubForList<TEntity, TDataItem>(
-            [NotNull] this IRepositoryProvider repositoryProvider,
-            [NotNull] IEntityMapper entityMapper,
-            [NotNull] IEnumerable<TEntity> source,
-            [NotNull] List<TDataItem> target)
-            where TDataItem : ITransactionContext
-        {
-            return StubForList(repositoryProvider, entityMapper, source, target, null);
-        }
-
+/*
         /// <summary>
         /// Stubs a repository provider for a list of items.
         /// </summary>
@@ -313,320 +209,13 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             repositoryProvider.Stub(provider => provider.GetSelection(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(target);
             return repositoryProvider;
         }
+*/
 
         #endregion
 
         #region Repository Adapters
 
-        /// <summary>
-        /// Creates stubs to save and select an existing item.
-        /// </summary>
-        /// <param name="repositoryAdapter">
-        /// The repository adapter to stub. 
-        /// </param>
-        /// <param name="item">
-        /// The existing item. 
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for an existing item.
-        /// </returns>
-        public static IRepositoryAdapter StubForExistingItem<TDataItem>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter,
-            [NotNull] TDataItem item)
-            where TDataItem : class, ITransactionContext
-        {
-            if (repositoryAdapter == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryAdapter));
-            }
-
-            if (item == null)
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            repositoryAdapter.Stub(adapter => adapter.Contains(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(true);
-
-            // TODO: Clone the item when returning it.
-            repositoryAdapter.Stub(adapter => adapter.FirstOrDefault(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(item);
-            repositoryAdapter.Stub(
-                adapter =>
-                adapter.Update(
-                    Arg<TDataItem>.Is.Anything,
-                    Arg<ItemSelection<TDataItem>>.Is.Anything,
-                    Arg<Expression<Func<TDataItem, object>>>.Is.Anything)).Return(1);
-
-            return repositoryAdapter;
-        }
-
-        /// <summary>
-        /// Creates stubs to save and select an existing item.
-        /// </summary>
-        /// <param name="repositoryAdapter">
-        /// The repository adapter to stub. 
-        /// </param>
-        /// <param name="entity">
-        /// The existing entity. 
-        /// </param>
-        /// <param name="mapper">
-        /// The entity mapper. 
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for an existing item.
-        /// </returns>
-        public static IRepositoryAdapter StubForExistingItem<TDataItem>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter,
-            [NotNull] object entity,
-            [NotNull] IEntityMapper mapper)
-            where TDataItem : class, ITransactionContext
-        {
-            if (repositoryAdapter == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryAdapter));
-            }
-
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (mapper == null)
-            {
-                throw new ArgumentNullException(nameof(mapper));
-            }
-
-            repositoryAdapter.Stub(adapter => adapter.Contains(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(true);
-
-            // Ensures that the data item is fresh every time. TODO: We may need this in other areas.
-            repositoryAdapter.Stub(adapter => adapter.FirstOrDefault(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(null).WhenCalled(
-                invocation =>
-                {
-                    invocation.ReturnValue = mapper.Map<TDataItem>(entity);
-                });
-
-            repositoryAdapter.Stub(
-                adapter =>
-                adapter.Update(
-                    Arg<TDataItem>.Is.Anything,
-                    Arg<ItemSelection<TDataItem>>.Is.Anything,
-                    Arg<Expression<Func<TDataItem, object>>[]>.Is.Anything)).Return(1);
-
-            return repositoryAdapter;
-        }
-
-        /// <summary>
-        /// Creates stubs to save and select an existing item.
-        /// </summary>
-        /// <param name="repositoryAdapter">
-        /// The repository adapter to stub. 
-        /// </param>
-        /// <param name="entity">
-        /// The existing entity. 
-        /// </param>
-        /// <param name="mapper">
-        /// The entity mapper. 
-        /// </param>
-        /// <param name="selectionPredicate">
-        /// The selection predicate.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for an existing item.
-        /// </returns>
-        public static IRepositoryAdapter StubForExistingItem<TDataItem>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter,
-            [NotNull] object entity,
-            [NotNull] IEntityMapper mapper,
-            Expression<Predicate<ItemSelection<TDataItem>>> selectionPredicate)
-            where TDataItem : class, ITransactionContext
-        {
-            if (repositoryAdapter == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryAdapter));
-            }
-
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (mapper == null)
-            {
-                throw new ArgumentNullException(nameof(mapper));
-            }
-
-            repositoryAdapter.Stub(adapter => adapter.Contains(Arg<ItemSelection<TDataItem>>.Matches(selectionPredicate))).Return(true);
-
-            // Ensures that the data item is fresh every time. TODO: We may need this in other areas.
-            repositoryAdapter.Stub(adapter => adapter.FirstOrDefault(Arg<ItemSelection<TDataItem>>.Matches(selectionPredicate))).Return(null).WhenCalled(
-                invocation =>
-                {
-                    invocation.ReturnValue = mapper.Map<TDataItem>(entity);
-                });
-
-            repositoryAdapter.Stub(
-                adapter =>
-                adapter.Update(
-                    Arg<TDataItem>.Is.Anything,
-                    Arg<ItemSelection<TDataItem>>.Matches(selectionPredicate),
-                    Arg<Expression<Func<TDataItem, object>>[]>.Is.Anything)).Return(1);
-
-            return repositoryAdapter;
-        }
-
-        /// <summary>
-        /// Creates stubs to save and select an existing item.
-        /// </summary>
-        /// <param name="repositoryAdapter">
-        /// The repository adapter to stub. 
-        /// </param>
-        /// <param name="entity">
-        /// The existing entity. 
-        /// </param>
-        /// <param name="mapper">
-        /// The entity mapper. 
-        /// </param>
-        /// <param name="itemProperty">
-        /// An item property included in the item selection filters, typically the primary key property.
-        /// </param>
-        /// <param name="value">
-        /// The value to test for. This will typically be the primary key value.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <typeparam name="TValue">
-        /// The type of value to test for.
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for an existing item.
-        /// </returns>
-        public static IRepositoryAdapter StubForExistingItem<TDataItem, TValue>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter,
-            [NotNull] object entity,
-            [NotNull] IEntityMapper mapper,
-            Expression<Func<TDataItem, TValue>> itemProperty,
-            TValue value)
-            where TDataItem : class, ITransactionContext
-        {
-            if (repositoryAdapter == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryAdapter));
-            }
-
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (mapper == null)
-            {
-                throw new ArgumentNullException(nameof(mapper));
-            }
-
-            Expression<Predicate<ItemSelection<TDataItem>>> predicate = selection => TestForItem(selection, itemProperty, value);
-
-            repositoryAdapter.Stub(adapter => adapter.Contains(Arg<ItemSelection<TDataItem>>.Matches(predicate))).Return(true);
-
-            // Ensures that the data item is fresh every time. TODO: We may need this in other areas.
-            repositoryAdapter.Stub(adapter => adapter.FirstOrDefault(Arg<ItemSelection<TDataItem>>.Matches(predicate))).Return(null).WhenCalled(
-                invocation =>
-                {
-                    invocation.ReturnValue = mapper.Map<TDataItem>(entity);
-                });
-
-            repositoryAdapter.Stub(
-                adapter =>
-                adapter.Update(
-                    Arg<TDataItem>.Is.Anything,
-                    Arg<ItemSelection<TDataItem>>.Matches(predicate),
-                    Arg<Expression<Func<TDataItem, object>>[]>.Is.Anything)).Return(1);
-
-            return repositoryAdapter;
-        }
-
-        /// <summary>
-        /// Creates stubs to save and select an existing item.
-        /// </summary>
-        /// <param name="repositoryAdapter">
-        /// The repository adapter to stub. 
-        /// </param>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for a new item.
-        /// </returns>
-        public static IRepositoryAdapter StubForNewItem<TDataItem>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter, IEntityDefinitionProvider definitionProvider)
-            where TDataItem : class, ITransactionContext
-        {
-            if (repositoryAdapter == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryAdapter));
-            }
-
-            repositoryAdapter.Stub(adapter => adapter.Contains(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(false);
-            repositoryAdapter.Stub(adapter => adapter.Insert(Arg<TDataItem>.Is.Anything)).Return(null)
-                .WhenCalled(
-                    invocation =>
-                    {
-                        // Finds the item in the argument list.
-                        var item = invocation.Arguments.OfType<TDataItem>().First();
-
-                        // If the item needs to have an auto-incremented ID set, we set it to a random number.
-                        var autoIncrement = definitionProvider.Resolve<TDataItem>().AutoNumberPrimaryKey;
-
-                        autoIncrement?.SetValueDelegate.DynamicInvoke(item, NumberGenerator.Next(1, int.MaxValue));
-                        ////var propertyName = primaryKeyAttribute.ColumnName;
-                        ////var property = typeof(TDataItem).GetProperty(propertyName, BindingFlags.Public | BindingFlags.Instance);
-                        ////var propertySetter = property.SetMethod;
-                        ////propertySetter.Invoke(item, new object[] {  });
-
-                        invocation.ReturnValue = item;
-                    });
-
-            return repositoryAdapter;
-        }
-
-        /// <summary>
-        /// Stubs a repository provider for a list of items.
-        /// </summary>
-        /// <param name="repositoryAdapter">
-        /// The repository adapter.
-        /// </param>
-        /// <param name="target">
-        /// The target of the items.
-        /// </param>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for a list of items.
-        /// </returns>
-        public static IRepositoryAdapter StubForList<TDataItem>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter,
-            [NotNull] List<TDataItem> target,
-            IEntityDefinitionProvider definitionProvider)
-            where TDataItem : ITransactionContext
-        {
-            return StubForList(repositoryAdapter, target, null, definitionProvider);
-        }
-
+/*
         /// <summary>
         /// Stubs a repository provider for a list of items.
         /// </summary>
@@ -677,40 +266,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             repositoryAdapter.Stub(adapter => adapter.SelectItems(Arg<ItemSelection<TDataItem>>.Is.Anything)).Return(target);
             return repositoryAdapter;
         }
-
-        /// <summary>
-        /// Stubs a repository provider for a list of items.
-        /// </summary>
-        /// <param name="repositoryAdapter">
-        /// The repository provider.
-        /// </param>
-        /// <param name="source">
-        /// The source of the items.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper to use to map the items.
-        /// </param>
-        /// <param name="definitionProvider">
-        /// The definition Provider.
-        /// </param>
-        /// <typeparam name="TEntity">
-        /// The type of entity. 
-        /// </typeparam>
-        /// <typeparam name="TDataItem">
-        /// The type of data item. 
-        /// </typeparam>
-        /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IRepositoryAdapter"/> with methods stubbed for a list of items.
-        /// </returns>
-        public static IRepositoryAdapter StubForList<TEntity, TDataItem>(
-            [NotNull] this IRepositoryAdapter repositoryAdapter,
-            [NotNull] IEnumerable<TEntity> source,
-            [NotNull] IEntityMapper entityMapper,
-            IEntityDefinitionProvider definitionProvider)
-            where TDataItem : ITransactionContext
-        {
-            return StubForList(repositoryAdapter, source, new List<TDataItem>(), entityMapper, definitionProvider);
-        }
+*/
 
         /// <summary>
         /// Stubs a repository provider for a list of items.
@@ -836,14 +392,16 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
         #region Structured Command Providers
 
-/*
         /// <summary>
-        /// Stubs an <see cref="Startitecture.Orm.Sql.IStructuredCommandProvider"/> for the specified set of values. 
+        /// Stubs an <see cref="IStructuredCommandProvider"/> for the specified set of values. 
         /// The IDataReader mock supports FieldCount, GetOrdinal() and GetValues(). GetValues() must be called once per 
         /// IDataReader.Read() to align with expected output.
         /// </summary>
-        /// <param name="provider">
+        /// <param name="commandProvider">
         /// The provider.
+        /// </param>
+        /// <param name="definitionProvider">
+        /// The definition Provider.
         /// </param>
         /// <param name="values">
         /// The values to stub.
@@ -852,18 +410,19 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         /// The type of data item to return via the command.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="Startitecture.Orm.Sql.IStructuredCommandProvider"/>.
+        /// The <see cref="IStructuredCommandProvider"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="provider"/> or <paramref name="values"/> is null.
+        /// <paramref name="commandProvider"/> or <paramref name="values"/> is null.
         /// </exception>
         public static IStructuredCommandProvider StubForList<TDataItem>(
-            [NotNull] this IStructuredCommandProvider provider,
+            [NotNull] this IStructuredCommandProvider commandProvider,
+            [NotNull] IEntityDefinitionProvider definitionProvider,
             [NotNull] List<TDataItem> values)
         {
-            if (provider == null)
+            if (commandProvider == null)
             {
-                throw new ArgumentNullException(nameof(provider));
+                throw new ArgumentNullException(nameof(commandProvider));
             }
 
             if (values == null)
@@ -887,7 +446,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                              orderby p.Name
                              select p;
 
-            var primaryKeyAttribute = typeof(TDataItem).GetCustomAttributes<PrimaryKeyAttribute>().FirstOrDefault();
+            var primaryKeyAttribute = definitionProvider.Resolve<TDataItem>().PrimaryKeyAttributes.FirstOrDefault(); //// typeof(TDataItem).GetCustomAttributes<PrimaryKeyAttribute>().FirstOrDefault();
 
             // Set up ordinals in alphabetical order. This mirrors the current convention for UDTTs and structured commands.
             var propertyOrdinals = properties.Select((info, i) => new PropertyOrdinal { Ordinal = i, Property = info }).ToList();
@@ -904,7 +463,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                 dataReader.Expect(reader => reader.GetValues(Arg<object[]>.Is.Anything)).Return(propertyOrdinals.Count).WhenCalled(
                     invocation =>
                         {
-                            var itemArray = Enumerable.OfType<object[]>(invocation.Arguments).First();
+                            var itemArray = invocation.Arguments.OfType<object[]>().First();
                             SetListValues(propertyOrdinals, value, primaryKeyAttribute, itemArray);
                         }).Repeat.Once();
             }
@@ -912,7 +471,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             var dataCommand = MockRepository.GenerateMock<IDbCommand>();
 
             // Only stub when the structured type names match.
-            provider.Stub(
+            commandProvider.Stub(
                 command =>
                 command.CreateCommand(
                     Arg<IStructuredCommand>.Matches(structuredCommand => structuredCommand.StructureTypeName == structureTypeName),
@@ -921,111 +480,15 @@ namespace Startitecture.Orm.Testing.RhinoMocks
 
             dataCommand.Stub(command => command.ExecuteReader()).Return(dataReader);
 
-            return provider;
+            return commandProvider;
         }
-*/
 
         #endregion
 
         #region Mapping
 
-        /// <summary>
-        /// Clones an entity object.
-        /// </summary>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        /// <param name="entity">
-        /// The entity to clone.
-        /// </param>
-        /// <param name="constructor">
-        /// A constructor for the entity.
-        /// </param>
-        /// <typeparam name="TEntity">
-        /// The type of entity to clone.
-        /// </typeparam>
-        /// <returns>
-        /// A clone of the <paramref name="entity"/>.
-        /// </returns>
-        public static TEntity Clone<TEntity>([NotNull] this IEntityMapper entityMapper, TEntity entity, [NotNull] Func<TEntity> constructor)
-        {
-            if (entityMapper == null)
-            {
-                throw new ArgumentNullException(nameof(entityMapper));
-            }
-
-            if (constructor == null)
-            {
-                throw new ArgumentNullException(nameof(constructor));
-            }
-
-            var clone = constructor();
-            return entityMapper.MapTo(entity, clone);
-        }
-
         #endregion
 
-        /// <summary>
-        /// Sets the property value for the specified property.
-        /// </summary>
-        /// <param name="target">
-        /// The target.
-        /// </param>
-        /// <param name="itemProperty">
-        /// The item property.
-        /// </param>
-        /// <param name="value">
-        /// The value to set.
-        /// </param>
-        /// <typeparam name="T">
-        /// The type of the item to set a property on.
-        /// </typeparam>
-        [SuppressMessage("Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent use of the method.")]
-        [SuppressMessage("Microsoft.Design", "CA1011:ConsiderPassingBaseTypesAsParameters", Justification = "Allows fluent use of the method.")]
-        public static void SetPropertyValue<T>(this T target, Expression<Func<T, object>> itemProperty, object value)
-        {
-            if (target == null)
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
-            if (itemProperty == null)
-            {
-                throw new ArgumentNullException(nameof(itemProperty));
-            }
-
-            MemberExpression memberSelectorExpression;
-
-            if (itemProperty.Body.NodeType == ExpressionType.Convert)
-            {
-                if (!(itemProperty.Body is UnaryExpression unaryExpression))
-                {
-                    throw new BusinessException(itemProperty, ValidationMessages.SelectorCannotBeEvaluated);
-                }
-
-                memberSelectorExpression = unaryExpression.Operand as MemberExpression;
-            }
-            else
-            {
-                memberSelectorExpression = itemProperty.Body as MemberExpression;
-            }
-
-            if (memberSelectorExpression == null)
-            {
-                throw new BusinessException(itemProperty, ValidationMessages.SelectorCannotBeEvaluated);
-            }
-
-            var property = memberSelectorExpression.Member as PropertyInfo;
-
-            if (property == null)
-            {
-                throw new BusinessException(itemProperty, ValidationMessages.SelectorCannotBeEvaluated);
-            }
-
-            property.SetValue(target, value, null);
-        }
-
-/*
         /// <summary>
         /// Sets the array values for the specified list.
         /// </summary>
@@ -1047,7 +510,7 @@ namespace Startitecture.Orm.Testing.RhinoMocks
         private static void SetListValues<TDataItem>(
             IEnumerable<PropertyOrdinal> propertyOrdinals,
             TDataItem value,
-            PrimaryKeyAttribute primaryKeyAttribute,
+            EntityAttributeDefinition primaryKeyAttribute,
             IList<object> itemArray)
         {
             // Set the values in the array.
@@ -1055,8 +518,8 @@ namespace Startitecture.Orm.Testing.RhinoMocks
             {
                 var propertyValue = propertyOrdinal.Property.GetMethod.Invoke(value, null);
 
-                if (primaryKeyAttribute?.AutoIncrement == true && propertyOrdinal.Property.Name == primaryKeyAttribute.ColumnName
-                    && (propertyValue == null || propertyValue.Equals(0)))
+                if (primaryKeyAttribute.IsIdentityColumn && propertyOrdinal.Property.Name == primaryKeyAttribute.PropertyName
+                                                         && (propertyValue == null || propertyValue.Equals(0)))
                 {
                     propertyValue = NumberGenerator.Next(1, int.MaxValue);
                 }
@@ -1064,7 +527,6 @@ namespace Startitecture.Orm.Testing.RhinoMocks
                 itemArray[propertyOrdinal.Ordinal] = propertyValue;
             }
         }
-*/
 
         /// <summary>
         /// Stubs a list into the repository adapter.

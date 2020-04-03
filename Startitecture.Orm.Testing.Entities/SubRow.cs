@@ -17,14 +17,12 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Core;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake sub raised row.
     /// </summary>
     [Table("SubEntity", Schema = "dbo")]
-    public class SubRow : TransactionItemBase, IEquatable<SubRow>, ICompositeEntity
+    public class SubRow : TransactionItemBase, IEquatable<SubRow>
     {
         /// <summary>
         /// The comparison properties.
@@ -36,12 +34,6 @@ namespace Startitecture.Orm.Testing.Entities
                 item => item.UniqueOtherId,
                 item => item.SubSubEntity
             };
-
-        /// <summary>
-        /// The sub entity relations.
-        /// </summary>
-        private static readonly IEnumerable<IEntityRelation> SubEntityRelations =
-            new SqlFromClause<SubRow>().InnerJoin<SubSubRow>(row => row.FakeSubSubEntityId, row => row.FakeSubSubEntityId).Relations;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SubRow"/> class.
@@ -88,11 +80,6 @@ namespace Startitecture.Orm.Testing.Entities
         /// </summary>
         [Column]
         public short UniqueOtherId { get; set; }
-
-        /// <summary>
-        /// Gets the entity relations.
-        /// </summary>
-        public IEnumerable<IEntityRelation> EntityRelations => SubEntityRelations;
 
         /// <summary>
         /// Determines if two values of the same type are equal.

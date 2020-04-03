@@ -73,41 +73,79 @@ namespace Startitecture.Core
         [DebuggerHidden]
         public static bool IsDefaultValue<T>(T value)
         {
-            return EqualityComparer<T>.Default.Equals(value, default(T));
+            return EqualityComparer<T>.Default.Equals(value, default);
         }
 
         #endregion
 
-        #region Comparison
+        #region Equality and Comparison
 
         /// <summary>
-        /// Determines whether two byte arrays are equal.
+        /// Tests the equality of two items, using recursion if non-string enumerable properties are encountered.
         /// </summary>
-        /// <param name="reference">
-        /// The byte array to reference.
+        /// <param name="itemA">
+        /// The base item.
         /// </param>
-        /// <param name="comparison">
-        /// The byte array to compare.
+        /// <param name="itemB">
+        /// The comparison item.
         /// </param>
         /// <returns>
-        /// <c>true</c> if each byte in the reference array is equivalent to the byte at the same index in the comparison array;
-        /// otherwise, <c>false</c>.
+        /// <c>true</c> if the items are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool Equals(byte[] reference, byte[] comparison)
+        public static bool RecursiveEquals(object itemA, object itemB)
         {
-            if (reference == null)
+            switch (itemA)
             {
-                throw new ArgumentNullException(nameof(reference));
+                // Don't allow strings to get evaluated as collections.
+                case string stringValueA when itemB is string stringValueB && Equals(stringValueA, stringValueB) == false:
+                // Validate buffers are the same length.
+                // This also ensures that the count does not exceed the length of either buffer.  
+                case byte[] bytesA when itemB is byte[] bytesB
+                                        && (bytesA.Length == bytesB.Length && NativeMethods.memcmp(bytesA, bytesB, bytesA.Length) == 0) == false:
+                    return false;
+                case IEnumerable enumerableA when itemB is IEnumerable enumerableB:
+                    {
+                        if (enumerableA is ICollection collectionA && enumerableB is ICollection collectionB)
+                        {
+                            if (collectionA.Count != collectionB.Count)
+                            {
+                                return false;
+                            }
+                        }
+
+                        var iteratorA = enumerableA.GetEnumerator();
+                        var iteratorB = enumerableB.GetEnumerator();
+
+                        while (iteratorA.MoveNext() && iteratorB.MoveNext())
+                        {
+                            if (RecursiveEquals(iteratorA.Current, iteratorB.Current) == false)
+                            {
+                                return false;
+                            }
+                        }
+
+                        // One collection is longer than the other one, but we did not capture this initially because the enumerable objects were not
+                        // collections.
+                        if (iteratorA.MoveNext() || iteratorB.MoveNext())
+                        {
+                            return false;
+                        }
+
+                        break;
+                    }
+
+                default:
+                    {
+                        if (Equals(itemA, itemB) == false)
+                        {
+                            return false;
+                        }
+
+                        break;
+                    }
             }
 
-            if (comparison == null)
-            {
-                throw new ArgumentNullException(nameof(comparison));
-            }
-
-            // Validate buffers are the same length.
-            // This also ensures that the count does not exceed the length of either buffer.  
-            return reference.Length == comparison.Length && NativeMethods.memcmp(reference, comparison, reference.Length) == 0;
+            return true;
         }
 
         /// <summary>
@@ -152,11 +190,11 @@ namespace Startitecture.Core
         /// <typeparam name="T">
         /// The type of values to compare.
         /// </typeparam>
-        /// <param name="valueA">
-        /// The base value.
+        /// <param name="itemA">
+        /// The base item.
         /// </param>
-        /// <param name="valueB">
-        /// The comparison value.
+        /// <param name="itemB">
+        /// The comparison item.
         /// </param>
         /// <param name="selectors">
         /// The value selectors. If none are specified, the default equality comparer is used.
@@ -172,22 +210,26 @@ namespace Startitecture.Core
         /// <see cref="System.IEquatable{T}.Equals(T)"/>.
         /// </remarks>
         [DebuggerHidden]
-        public static bool Equals<T>(T valueA, T valueB, params Func<T, object>[] selectors)
+        public static bool Equals<T>(T itemA, T itemB, params Func<T, object>[] selectors)
         {
-            if (IsNull(valueA) && IsNull(valueB))
+            if (selectors == null)
+            {
+                throw new ArgumentNullException(nameof(selectors));
+            }
+
+            if (IsNull(itemA) && IsNull(itemB))
             {
                 return true;
             }
 
-            if (IsNull(valueA) || IsNull(valueB))
+            if (IsNull(itemA) || IsNull(itemB))
             {
                 return false;
             }
 
-            // TODO: Compare collections and byte arrays specifically
             return selectors.Any()
-                       ? selectors.All(selector => Equals(selector(valueA), selector(valueB)))
-                       : EqualityComparer<T>.Default.Equals(valueA, valueB);
+                       ? AreEqual(itemA, itemB, selectors)
+                       : EqualityComparer<T>.Default.Equals(itemA, itemB);
         }
 
         /// <summary>
@@ -301,27 +343,6 @@ namespace Startitecture.Core
         }
 
         /// <summary>
-        /// Tests the equality of two collections.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type of the objects to compare.
-        /// </typeparam>
-        /// <param name="collectionA">
-        /// The base collection.
-        /// </param>
-        /// <param name="collectionB">
-        /// The comparison collection.
-        /// </param>
-        /// <returns>
-        /// True if the collections contain equal elements (ordinal); otherwise, false.
-        /// </returns>
-        [DebuggerHidden]
-        public static bool CollectionEquals<T>(IEnumerable<T> collectionA, IEnumerable<T> collectionB)
-        {
-            return CollectionComparer<T>.Default.Equals(collectionA, collectionB);
-        }
-
-        /// <summary>
         /// Gets the hash code of the specified generic value, returning 0 for null values.
         /// </summary>
         /// <typeparam name="T">
@@ -418,13 +439,64 @@ namespace Startitecture.Core
             foreach (var selector in selectors)
             {
                 // ReSharper restore LoopCanBeConvertedToQuery
-                items.Add(selector(item));
+                var value = selector(item);
+
+                switch (value)
+                {
+                    // Don't allow strings to fall through to IEnumerable
+                    case string _:
+                        items.Add(value);
+                        break;
+                    case IEnumerable collection:
+                        {
+                            var iterator = collection.GetEnumerator();
+
+                            while (iterator.MoveNext())
+                            {
+                                items.Add(iterator.Current);
+                            }
+
+                            break;
+                        }
+
+                    default:
+                        items.Add(value);
+                        break;
+                }
             }
 
             return GenerateHashCode(items);
         }
 
         #endregion
+
+        /// <summary>
+        /// Determine whether the list of selectors return equal values for <paramref name="itemA"/> and <paramref name="itemB"/>. If the
+        /// selection returns an <see cref="IEnumerable"/>, the enumerable is iterated item by item in order.
+        /// </summary>
+        /// <param name="itemA">
+        /// The first item.
+        /// </param>
+        /// <param name="itemB">
+        /// The second item.
+        /// </param>
+        /// <param name="selectors">
+        /// The selectors to evaluate.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of item being evaluated.
+        /// </typeparam>
+        /// <returns>
+        /// <c>true</c> if all the values in the item are equal; otherwise, <c>false</c>.
+        /// </returns>
+        private static bool AreEqual<T>(T itemA, T itemB, IEnumerable<Func<T, object>> selectors)
+        {
+            return !(from selector in selectors
+                     let valueA = selector(itemA)
+                     let valueB = selector(itemB)
+                     where RecursiveEquals(valueA, valueB) == false
+                     select valueA).Any();
+        }
 
         /// <summary>
         /// Aggregates a hash code.

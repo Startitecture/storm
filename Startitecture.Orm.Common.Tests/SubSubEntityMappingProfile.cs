@@ -1,10 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeSubSubEntityMappingProfile.cs" company="Startitecture">
+// <copyright file="SubSubEntityMappingProfile.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests
+namespace Startitecture.Orm.Common.Tests
 {
     using AutoMapper;
 
@@ -14,12 +14,12 @@ namespace Startitecture.Orm.Repository.Tests
     /// <summary>
     /// The fake sub sub entity mapping profile.
     /// </summary>
-    public class FakeSubSubEntityMappingProfile : Profile
+    public class SubSubEntityMappingProfile : Profile
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FakeSubSubEntityMappingProfile"/> class.
+        /// Initializes a new instance of the <see cref="SubSubEntityMappingProfile"/> class.
         /// </summary>
-        public FakeSubSubEntityMappingProfile()
+        public SubSubEntityMappingProfile()
         {
             this.CreateMap<SubSubEntity, SubSubRow>()
                 .ForMember(row => row.TransactionProvider, expression => expression.Ignore());

@@ -32,7 +32,10 @@ namespace Startitecture.Orm.Repository
         /// <param name="configAction">
         /// The AutoMapper configuration action to apply.
         /// </param>
-        public void Initialize(Action<IMapperConfigurationExpression> configAction)
+        /// <returns>
+        /// The current <see cref="IEntityMapper"/>.
+        /// </returns>
+        public IEntityMapper Initialize(Action<IMapperConfigurationExpression> configAction)
         {
             if (configAction == null)
             {
@@ -43,6 +46,7 @@ namespace Startitecture.Orm.Repository
             mappingConfiguration.AssertConfigurationIsValid();
 
             this.mapperEngine = mappingConfiguration.CreateMapper();
+            return this;
         }
 
         /// <summary>

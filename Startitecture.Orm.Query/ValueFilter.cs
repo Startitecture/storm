@@ -17,18 +17,14 @@ namespace Startitecture.Orm.Query
 
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Model;
 
     /// <summary>
     /// Contains a filter for a specific item attribute.
     /// </summary>
-    public class ValueFilter
+    public class ValueFilter : IEquatable<ValueFilter>
     {
-        /// <summary>
-        /// Selects all of the values from the value filter.
-        /// </summary>
-        public static readonly Func<ValueFilter, IEnumerable<object>> SelectAllValues = x => x.FilterValues;
-
         /// <summary>
         /// Selects all of the non-null values from the value filter.
         /// </summary>
@@ -45,6 +41,16 @@ namespace Startitecture.Orm.Query
         /// The value separator.
         /// </summary>
         private const string ValueSeparator = ",";
+
+        /// <summary>
+        /// The comparison properties.
+        /// </summary>
+        private static readonly Func<ValueFilter, object>[] ComparisonProperties =
+            {
+                item => item.AttributeLocation,
+                item => item.FilterType,
+                item => item.values
+            };
 
         #endregion
 
@@ -88,33 +94,6 @@ namespace Startitecture.Orm.Query
             this.values.AddRange(values);
         }
 
-        /////// <summary>
-        /////// Initializes a new instance of the <see cref="ValueFilter"/> class.
-        /////// </summary>
-        /////// <param name="propertyName">
-        /////// The property name.
-        /////// </param>
-        /////// <param name="filterType">
-        /////// The filter type for this value filter.
-        /////// </param>
-        /////// <param name="values">
-        /////// The values.
-        /////// </param>
-        /////// <exception cref="ArgumentException">
-        /////// <paramref name="propertyName"/> is null or whitespace.
-        /////// </exception>
-        ////public ValueFilter([NotNull] string propertyName, FilterType filterType, params object[] values)
-        ////{
-        ////    if (string.IsNullOrWhiteSpace(propertyName))
-        ////    {
-        ////        throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(propertyName));
-        ////    }
-
-        ////    this.PropertyName = propertyName;
-        ////    this.FilterType = filterType;
-        ////    this.values.AddRange(values);
-        ////}
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ValueFilter"/> class.
         /// </summary>
@@ -157,11 +136,6 @@ namespace Startitecture.Orm.Query
         /// </summary>
         public AttributeLocation AttributeLocation { get; }
 
-        /////// <summary>
-        /////// Gets the property name.
-        /////// </summary>
-        ////public string PropertyName { get; }
-
         /// <summary>
         /// Gets the filter type for this value filter.
         /// </summary>
@@ -174,7 +148,82 @@ namespace Startitecture.Orm.Query
 
         #endregion
 
-        #region Public Methods and Operators
+        #region Equality and Comparison Methods and Operators
+
+        /// <summary>
+        /// Determines if two values of the same type are equal.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(ValueFilter valueA, ValueFilter valueB)
+        {
+            return EqualityComparer<ValueFilter>.Default.Equals(valueA, valueB);
+        }
+
+        /// <summary>
+        /// Determines if two values of the same type are not equal.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(ValueFilter valueA, ValueFilter valueB)
+        {
+            return !(valueA == valueB);
+        }
+
+        /// <summary>
+        /// Serves as the default hash function.
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current object.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
+        public override int GetHashCode()
+        {
+            return Evaluate.GenerateHashCode(this, ComparisonProperties);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current object.
+        /// </summary>
+        /// <returns>
+        /// true if the specified object  is equal to the current object; otherwise, false.
+        /// </returns>
+        /// <param name="obj">
+        /// The object to compare with the current object. 
+        /// </param>
+        /// <filterpriority>2</filterpriority>
+        public override bool Equals(object obj)
+        {
+            return Evaluate.Equals(this, obj);
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+        /// </returns>
+        /// <param name="other">
+        /// An object to compare with this object.
+        /// </param>
+        public bool Equals(ValueFilter other)
+        {
+            return Evaluate.Equals(this, other, ComparisonProperties);
+        }
 
         /// <summary>
         /// The to string.

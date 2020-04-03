@@ -1,8 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlUpdateTest.cs" company="Startitecture">
+// <copyright file="SqlUpdateTest.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
+// ReSharper disable StringLiteralTypo
 namespace Startitecture.Orm.Sql.Tests
 {
     using System;
@@ -12,6 +13,7 @@ namespace Startitecture.Orm.Sql.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
 
@@ -20,7 +22,7 @@ namespace Startitecture.Orm.Sql.Tests
     /// </summary>
     [TestClass]
     [ExcludeFromCodeCoverage]
-    public class TransactSqlUpdateTest
+    public class SqlUpdateTest
     {
         #region Public Methods and Operators
 
@@ -42,16 +44,21 @@ namespace Startitecture.Orm.Sql.Tests
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
                     row => row.NullableValueColumn,
                     row => row.ValueColumn)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
@@ -122,16 +129,21 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
                     row => row.NullableValueColumn,
                     row => row.ValueColumn)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
@@ -206,17 +218,22 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.Related.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
@@ -285,17 +302,22 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
@@ -352,16 +374,21 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
                     row => row.NullableValueColumn,
                     row => row.ValueColumn)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
@@ -411,16 +438,21 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
                     row => row.NullableValueColumn,
                     row => row.ValueColumn)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
@@ -483,17 +515,22 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.Related.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
@@ -545,17 +582,22 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = SqlSelect.From<DataRow>()
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Select(
+            var selection = Select.From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };

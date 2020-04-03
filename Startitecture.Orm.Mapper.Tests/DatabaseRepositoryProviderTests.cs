@@ -13,6 +13,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Query;
     using Startitecture.Orm.Repository;
     using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
@@ -96,7 +97,7 @@ namespace Startitecture.Orm.Mapper.Tests
             // New context again
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var actual = target.GetFirstOrDefault(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
+                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
@@ -274,7 +275,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var itemSelection = SqlSelect.From<DomainAggregateRow>()
+                var itemSelection = Select.From<DomainAggregateRow>()
                     .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
                     .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
                     .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
@@ -320,7 +321,7 @@ namespace Startitecture.Orm.Mapper.Tests
             // New context again
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var actual = target.GetFirstOrDefault(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
@@ -429,7 +430,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var itemSelection = SqlSelect.From<DomainAggregateRow>()
+                var itemSelection = Select.From<DomainAggregateRow>()
                     .WhereEqual(row => row.DomainAggregateId, expected.DomainAggregateId)
                     .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
                     .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
@@ -459,7 +460,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var actual = target.GetFirstOrDefault(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
+                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsNull(actual);
             }
         }
@@ -488,7 +489,7 @@ namespace Startitecture.Orm.Mapper.Tests
             // New context again
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var actual = target.Contains(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsTrue(actual);
             }
         }
@@ -503,7 +504,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var actual = target.Contains(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
+                var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsFalse(actual);
             }
         }
@@ -534,9 +535,9 @@ namespace Startitecture.Orm.Mapper.Tests
             // New context again
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                target.DeleteItems(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                target.DeleteItems(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
 
-                var actual = target.Contains(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsFalse(actual);
             }
         }
@@ -581,7 +582,7 @@ namespace Startitecture.Orm.Mapper.Tests
             // New context again
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var itemSelection = SqlSelect.From<FieldRow>().WhereEqual(row => row.Description, description);
+                var itemSelection = Select.From<FieldRow>().WhereEqual(row => row.Description, description);
                 var affected = target.DeleteItems(itemSelection);
 
                 Assert.AreEqual(3, affected);
@@ -654,7 +655,7 @@ namespace Startitecture.Orm.Mapper.Tests
             // New context again
             using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
-                var actual = target.GetFirstOrDefault(SqlSelect.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
+                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
@@ -671,14 +672,14 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
             {
                 // Delete the attachment documents based on finding their versions.
-                provider.DeleteItems(SqlSelect.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(SqlSelect.From<OtherAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(SqlSelect.From<DomainAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(SqlSelect.From<SubContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(SqlSelect.From<TopContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(SqlSelect.From<CategoryAttributeRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(SqlSelect.From<TemplateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(SqlSelect.From<DomainIdentityRow>().WhereEqual(row => row.UniqueIdentifier, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<OtherAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<DomainAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<SubContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<TopContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<CategoryAttributeRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<TemplateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.DeleteItems(Select.From<DomainIdentityRow>().WhereEqual(row => row.UniqueIdentifier, "UNIT_TEST:%"));
             }
         }
     }

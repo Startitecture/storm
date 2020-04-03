@@ -30,6 +30,8 @@ namespace Startitecture.Core
         /// <summary>
         /// Gets the singleton instance for the current type.
         /// </summary>
+#pragma warning disable CA1000 // Do not declare static members on generic types
         public static T Instance => DefaultInstance;
+#pragma warning restore CA1000 // Do not declare static members on generic types
     }
 }

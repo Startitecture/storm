@@ -16,13 +16,12 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake complex row.
     /// </summary>
     [Table("ComplexEntity")]
-    public class ComplexFlatRow : TransactionItemBase, ICompositeEntity, IEquatable<ComplexFlatRow>
+    public class ComplexFlatRow : TransactionItemBase, IEquatable<ComplexFlatRow>
     {
         /// <summary>
         /// The lazy relations.
@@ -30,7 +29,7 @@ namespace Startitecture.Orm.Testing.Entities
         private static readonly Lazy<IEnumerable<IEntityRelation>> LazyRelations =
             new Lazy<IEnumerable<IEntityRelation>>(
                 () =>
-                new SqlFromClause<ComplexFlatRow>().InnerJoin<SubRow>(row => row.FakeSubEntityId, entity => entity.FakeSubEntityId)
+                new EntityRelationSet<ComplexFlatRow>().InnerJoin<SubRow>(row => row.FakeSubEntityId, entity => entity.FakeSubEntityId)
                     .InnerJoin<SubRow, SubSubRow>(row => row.FakeSubSubEntityId, row => row.FakeSubSubEntityId)
                     .InnerJoin<MultiReferenceRow>(row => row.CreatedByFakeMultiReferenceEntityId, row => row.FakeMultiReferenceEntityId)
                     .InnerJoin<MultiReferenceRow>(row => row.ModifiedByFakeMultiReferenceEntityId, row => row.FakeMultiReferenceEntityId)

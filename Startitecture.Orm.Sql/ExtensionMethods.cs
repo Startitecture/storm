@@ -7,15 +7,10 @@
 namespace Startitecture.Orm.Sql
 {
     using System;
-    using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
@@ -25,37 +20,6 @@ namespace Startitecture.Orm.Sql
     /// </summary>
     public static class ExtensionMethods
     {
-        /// <summary>
-        /// The name selector.
-        /// </summary>
-        private static readonly Func<PropertyInfo, string> NameSelector = x => x.Name;
-
-        /// <summary>
-        /// A collection of all property names associated with the <see cref="ITransactionContext" /> interface.
-        /// </summary>
-        private static readonly IEnumerable<string> TransactionProperties = typeof(ITransactionContext).GetNonIndexedProperties().Select(NameSelector);
-
-        /// <summary>
-        /// Gets an example selection for the current item.
-        /// </summary>
-        /// <param name="example">
-        /// The example item.
-        /// </param>
-        /// <param name="selectors">
-        /// The property selectors.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to generate an example selection for.
-        /// </typeparam>
-        /// <returns>
-        /// A <see cref="SqlSelection{TItem}"/> for the current item using the specified selectors.
-        /// </returns>
-        public static SqlSelection<TItem> ToExampleSelection<TItem>(this TItem example, params Expression<Func<TItem, object>>[] selectors)
-            where TItem : ITransactionContext, new()
-        {
-            return new SqlSelection<TItem>(example, selectors);
-        }
-
         /// <summary>
         /// Gets a <see cref="QueryContext{TItem}"/> as a SELECT statement.
         /// </summary>
@@ -162,6 +126,7 @@ namespace Startitecture.Orm.Sql
             return new TableInfo(tableName, null) { AutoIncrement = autoIncrement, PrimaryKey = primaryKey };
         }
 
+/*
         /// <summary>
         /// Gets object values except for indexed and <see cref="Startitecture.Orm.Common.ITransactionContext"/> properties.
         /// </summary>
@@ -195,5 +160,6 @@ namespace Startitecture.Orm.Sql
 
             return values;
         }
+*/
     }
 }

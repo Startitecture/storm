@@ -1,22 +1,22 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlSelect.cs" company="Startitecture">
+// <copyright file="Select.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.Query
 {
     using System;
     using System.Linq.Expressions;
 
     using JetBrains.Annotations;
 
-    using Startitecture.Orm.Common;
-
     /// <summary>
     /// A static class for creating Transact-SQL queries.
     /// </summary>
-    public static class SqlSelect
+#pragma warning disable CA1716 // Identifiers should not match keywords
+    public static class Select
+#pragma warning restore CA1716 // Identifiers should not match keywords
     {
         /// <summary>
         /// Creates a query from the specified item type.
@@ -28,20 +28,19 @@ namespace Startitecture.Orm.Sql
         /// The type of item to query.
         /// </typeparam>
         /// <returns>
-        /// A new <see cref="SqlSelection{TItem}"/> for the specified type.
+        /// A new <see cref="ItemSelection{TItem}"/> for the specified type.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selections"/> is null.
         /// </exception>
-        public static SqlSelection<TItem> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] selections)
-            where TItem : ITransactionContext, new()
+        public static ItemSelection<TItem> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] selections)
         {
             if (selections == null)
             {
                 throw new ArgumentNullException(nameof(selections));
             }
 
-            return new SqlSelection<TItem>(new TItem(), selections);
+            return new ItemSelection<TItem>().Select(selections);
         }
     }
 }

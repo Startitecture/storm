@@ -17,19 +17,18 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake raised child row.
     /// </summary>
     [Table("ChildEntity")]
-    public class ChildRaisedRow : TransactionItemBase, ICompositeEntity
+    public class ChildRaisedRow : TransactionItemBase
     {
         /// <summary>
         /// The fake child relations.
         /// </summary>
         private static readonly IEnumerable<IEntityRelation> FakeChildRelations =
-            new SqlFromClause<ChildRaisedRow>()
+            new EntityRelationSet<ChildRaisedRow>()
                 .InnerJoin(
                     row => row.FakeComplexEntityId,
                     row => row.ComplexEntity.FakeComplexEntityId)

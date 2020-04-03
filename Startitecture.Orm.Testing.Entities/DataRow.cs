@@ -9,40 +9,19 @@
 
 namespace Startitecture.Orm.Testing.Entities
 {
-    using System;
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The fake raised data row.
     /// </summary>
     [Table("FakeData", Schema = "dbo")]
-    public class DataRow : ICompositeEntity, ITransactionContext
+    public class DataRow : ITransactionContext
     {
-        /// <summary>
-        /// The lazy relations.
-        /// </summary>
-        private static readonly Lazy<EntityRelationSet<DataRow>> LazyRelations = 
-            new Lazy<EntityRelationSet<DataRow>>(
-                () =>
-                    {
-                        return
-                            new SqlFromClause<DataRow>()
-                                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
-                                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
-                                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId);
-                    });
-
         /// <summary>
         /// Gets or sets the fake related row.
         /// </summary>
@@ -78,17 +57,6 @@ namespace Startitecture.Orm.Testing.Entities
         /// </summary>
         [RelatedEntity(typeof(SubDataRow))]
         public int? ParentFakeDataId { get; set; }
-
-        /// <summary>
-        /// Gets the entity relations.
-        /// </summary>
-        public IEnumerable<IEntityRelation> EntityRelations
-        {
-            get
-            {
-                return LazyRelations.Value.Relations;
-            }
-        }
 
         /// <summary>
         /// Gets or sets the fake data id.

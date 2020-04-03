@@ -640,22 +640,28 @@ namespace Startitecture.Core
 
             var allProperties = GetAllProperties<TItem>(propertiesToCompare);
 
-            var originalProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(baseline));
+            var comparisonList = from p in allProperties
+                                 select new
+                                            {
+                                                p.Name,
+                                                OriginalValue = p.GetValue(baseline),
+                                                NewValue = p.GetValue(comparison)
+                                            };
 
-            var newProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(comparison));
+            return from c in comparisonList
+                   where !Evaluate.RecursiveEquals(c.OriginalValue, c.NewValue)
+                   select new PropertyComparisonResult(c.Name, c.OriginalValue, c.NewValue);
 
-            return (from propertyName in allProperties.Select(x => x.Name)
-                    let originalValue = originalProperties[propertyName]
-                    let newValue = newProperties[propertyName]
-                    where !ReferenceEquals(originalValue, newValue)
-                    where (originalValue != null && !originalValue.Equals(newValue)) || !newValue.Equals(originalValue)
-                    select
-                        new PropertyComparisonResult
-                        {
-                            PropertyName = propertyName,
-                            OriginalValue = originalValue,
-                            NewValue = newValue
-                        }).ToList();
+            ////var originalProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(baseline));
+
+            ////var newProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(comparison));
+
+            ////return (from propertyName in allProperties.Select(x => x.Name)
+            ////        let originalValue = originalProperties[propertyName]
+            ////        let newValue = newProperties[propertyName]
+            ////        where !ReferenceEquals(originalValue, newValue)
+            ////        where (originalValue != null && !originalValue.Equals(newValue)) || !newValue.Equals(originalValue)
+            ////        select new PropertyComparisonResult(propertyName, originalValue, newValue)).ToList();
         }
 
         /// <summary>
@@ -724,9 +730,15 @@ namespace Startitecture.Core
         private static List<PropertyInfo> GetAllProperties<TItem>(string[] propertiesToCompare)
         {
             var allProperties = propertiesToCompare.Any()
-                                    ? typeof(TItem).GetProperties().Where(x => propertiesToCompare.Contains(x.Name) && !x.GetIndexParameters().Any())
-                                        .OrderBy(x => x.Name).ToList()
-                                    : typeof(TItem).GetProperties().Where(x => !x.GetIndexParameters().Any()).OrderBy(x => x.Name).ToList();
+                                    ? typeof(TItem).GetProperties()
+                                        .Where(x => propertiesToCompare.Contains(x.Name) && x.GetIndexParameters().Any() == false)
+                                        .OrderBy(x => x.Name)
+                                        .ToList()
+                                    : typeof(TItem).GetProperties()
+                                        .Where(x => x.GetIndexParameters().Any() == false)
+                                        .OrderBy(x => x.Name)
+                                        .ToList();
+
             return allProperties;
         }
 

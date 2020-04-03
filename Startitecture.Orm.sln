@@ -62,8 +62,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Repositor
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Core.Tests", "Startitecture.Core.Tests\Startitecture.Core.Tests.csproj", "{A8165E22-777E-4B60-81CB-AF6FEF1696E6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Repository.Tests", "Startitecture.Orm.Repository.Tests\Startitecture.Orm.Repository.Tests.csproj", "{CF0E37ED-19A1-4F1C-861C-8279FC074E62}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.RhinoMocks", "Startitecture.Orm.Testing.RhinoMocks\Startitecture.Orm.Testing.RhinoMocks.csproj", "{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Schema.Tests", "Startitecture.Orm.Schema.Tests\Startitecture.Orm.Schema.Tests.csproj", "{93FB0C49-DA3C-49F8-B10B-A4DB4BB7C17C}"
@@ -88,7 +86,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storm", "Storm", "{8F7F395A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Common.Tests", "Startitecture.Orm.Common.Tests\Startitecture.Orm.Common.Tests.csproj", "{B5B67152-6020-41D7-8E11-CF94F448BEA6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Testing.Moq", "Startitecture.Orm.Testing.Moq\Startitecture.Orm.Testing.Moq.csproj", "{628FE999-E820-466C-BB85-96EFF48FA58F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.Moq", "Startitecture.Orm.Testing.Moq\Startitecture.Orm.Testing.Moq.csproj", "{628FE999-E820-466C-BB85-96EFF48FA58F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -364,24 +362,6 @@ Global
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6}.Release|x86.ActiveCfg = Release|Any CPU
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6}.Release|x86.Build.0 = Release|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Debug|x86.Build.0 = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.DebugLocal|x86.Build.0 = Debug|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Release|Any CPU.Build.0 = Release|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Release|Mixed Platforms.Build.0 = Release|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Release|x86.ActiveCfg = Release|Any CPU
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62}.Release|x86.Build.0 = Release|Any CPU
 		{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
@@ -610,7 +590,6 @@ Global
 		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 		{93206D9F-C517-46E9-AFBA-34190DDDE488} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6} = {5A41FA6C-648C-488C-BC31-FB580931C88B}
-		{CF0E37ED-19A1-4F1C-861C-8279FC074E62} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 		{2E56B43E-1EBD-4DCB-87AD-0DEF1134C12B} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 		{93FB0C49-DA3C-49F8-B10B-A4DB4BB7C17C} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 		{C5D4A33E-8DB6-4AF3-8406-17AC4241FBB2} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
@@ -626,8 +605,8 @@ Global
 		{628FE999-E820-466C-BB85-96EFF48FA58F} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
+		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

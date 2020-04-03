@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests
+namespace Startitecture.Orm.Common.Tests
 {
     using AutoMapper;
 

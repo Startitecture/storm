@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FakeCreatedByMappingProfile.cs" company="Startitecture">
+// <copyright file="CreatedByMappingProfile.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository.Tests
+namespace Startitecture.Orm.Common.Tests
 {
     using AutoMapper;
 
@@ -17,12 +17,12 @@ namespace Startitecture.Orm.Repository.Tests
     /// <summary>
     /// The fake created by mapping profile.
     /// </summary>
-    public class FakeCreatedByMappingProfile : Profile
+    public class CreatedByMappingProfile : Profile
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FakeCreatedByMappingProfile"/> class.
+        /// Initializes a new instance of the <see cref="CreatedByMappingProfile"/> class.
         /// </summary>
-        public FakeCreatedByMappingProfile()
+        public CreatedByMappingProfile()
         {
             this.CreateMap<CreatedBy, MultiReferenceRow>().ForMember(row => row.TransactionProvider, expression => expression.Ignore());
             this.CreateMap<MultiReferenceRow, CreatedBy>();

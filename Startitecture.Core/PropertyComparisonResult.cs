@@ -12,6 +12,8 @@ namespace Startitecture.Core
     using System;
     using System.Globalization;
 
+    using Startitecture.Resources;
+
     /// <summary>
     /// Contains the result of a property comparison.
     /// </summary>
@@ -22,22 +24,49 @@ namespace Startitecture.Core
         /// </summary>
         private const string ToStringFormat = "{0}: '{1}' -> '{2}'";
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PropertyComparisonResult"/> struct.
+        /// </summary>
+        /// <param name="propertyName">
+        /// The property name.
+        /// </param>
+        /// <param name="originalValue">
+        /// The original value.
+        /// </param>
+        /// <param name="newValue">
+        /// The new value.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="propertyName"/> is null or whitespace.
+        /// </exception>
+        public PropertyComparisonResult(string propertyName, object originalValue, object newValue)
+        {
+            if (string.IsNullOrWhiteSpace(propertyName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(propertyName));
+            }
+
+            this.PropertyName = propertyName;
+            this.OriginalValue = originalValue;
+            this.NewValue = newValue;
+        }
+
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the property name.
+        /// Gets the property name.
         /// </summary>
-        public string PropertyName { get; set; }
+        public string PropertyName { get; }
 
         /// <summary>
-        /// Gets or sets the original value.
+        /// Gets the original value.
         /// </summary>
-        public object OriginalValue { get; set; }
+        public object OriginalValue { get; }
 
         /// <summary>
-        /// Gets or sets the new value.
+        /// Gets the new value.
         /// </summary>
-        public object NewValue { get; set; }
+        public object NewValue { get; }
 
         #endregion
 
@@ -108,9 +137,7 @@ namespace Startitecture.Core
         /// <param name="other">An object to compare with this object.</param>
         public bool Equals(PropertyComparisonResult other)
         {
-            return Evaluate.CollectionEquals(
-                new[] { this.PropertyName, this.OriginalValue, this.NewValue },
-                new[] { other.PropertyName, other.OriginalValue, other.NewValue });
+            return Evaluate.Equals(this, other, result => result.PropertyName, result => result.OriginalValue, result => result.NewValue);
         }
 
         /// <summary>

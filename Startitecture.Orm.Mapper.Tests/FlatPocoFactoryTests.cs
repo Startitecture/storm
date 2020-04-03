@@ -72,7 +72,6 @@ namespace Startitecture.Orm.Mapper.Tests
             stopwatch.Reset();
         }
 
-
         /// <summary>
         /// The create delegate test.
         /// </summary>

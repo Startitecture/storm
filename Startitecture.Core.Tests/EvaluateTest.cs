@@ -24,57 +24,13 @@ namespace Startitecture.Core.Tests
         #region Public Methods and Operators
 
         /// <summary>
-        /// A test for CollectionEquals
-        /// </summary>
-        [TestMethod]
-        public void CollectionEquals_IdenticalObjectArrays_ReturnsTrue()
-        {
-            var testObject = new FakeTestItem { TestString = "DKDSK", TestInt = 4908393 };
-            string testString = "m,jioqw094ur8903";
-            double testDouble = 9.393;
-            long? testLong = 44839483948;
-            long? testLong2 = null;
-
-            var valuesA = new object[] { testString, testObject, null, testDouble, testLong, testLong2 };
-            var valuesB = new object[] { testString, testObject, null, testDouble, testLong, testLong2 };
-            bool expected = true;
-            bool actual;
-            actual = Evaluate.CollectionEquals(valuesA, valuesB);
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
-        /// A test for CollectionEquals
-        /// </summary>
-        [TestMethod]
-        public void CollectionEquals_MisorderedEquivalentArrays_ReturnsFalse()
-        {
-            var testObject = new FakeTestItem { TestString = "DKDSK", TestInt = 4908393 };
-            string testString = "m,jioqw094ur8903";
-            double testDouble = 9.393;
-            long? testLong = 44839483948;
-            long? testLong2 = null;
-
-            var valuesA = new object[] { testObject, testString, null, testDouble, testLong, testLong2 };
-            var valuesB = new object[] { testString, testObject, null, testDouble, testLong, testLong2 };
-            bool expected = true;
-            bool actual;
-            actual = Evaluate.CollectionEquals(valuesA, valuesB);
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
         /// A test for Equals
         /// </summary>
         [TestMethod]
         public void Equals_BothNull_ReturnsTrue()
         {
-            FakeTestItem valueA = null;
-            FakeTestItem valueB = null;
-            bool expected = true;
-            bool actual;
-            actual = Evaluate.Equals(valueA, valueB);
-            Assert.AreEqual(expected, actual);
+            var actual = Evaluate.Equals(null, null);
+            Assert.IsTrue(actual);
         }
 
         /// <summary>
@@ -83,12 +39,9 @@ namespace Startitecture.Core.Tests
         [TestMethod]
         public void Equals_LeftNull_ReturnsFalse()
         {
-            FakeTestItem valueA = null;
             var valueB = new FakeTestItem { TestDateTime = DateTime.Now, TestInt = 290, TestString = "blah" };
-            bool expected = false;
-            bool actual;
-            actual = Evaluate.Equals(valueA, valueB);
-            Assert.AreEqual(expected, actual);
+            var actual = Evaluate.Equals(null, valueB);
+            Assert.IsFalse(actual);
         }
 
         /// <summary>
@@ -98,11 +51,8 @@ namespace Startitecture.Core.Tests
         public void Equals_RightNull_ReturnsFalse()
         {
             var valueA = new FakeTestItem { TestDateTime = DateTime.Now, TestInt = 290, TestString = "blah" };
-            FakeTestItem valueB = null;
-            bool expected = false;
-            bool actual;
-            actual = Evaluate.Equals(valueA, valueB);
-            Assert.AreEqual(expected, actual);
+            var actual = Evaluate.Equals(valueA, null);
+            Assert.IsFalse(actual);
         }
 
         /// <summary>
@@ -111,12 +61,9 @@ namespace Startitecture.Core.Tests
         [TestMethod]
         public void Equals_LeftNullWithParameters_ReturnsFalse()
         {
-            FakeTestItem valueA = null;
             var valueB = new FakeTestItem { TestDateTime = DateTime.Now, TestInt = 290, TestString = "blah" };
-            bool expected = false;
-            bool actual;
-            actual = Evaluate.Equals(valueA, valueB, item => item.TestDateTime, item => item.TestInt, item => item.TestString);
-            Assert.AreEqual(expected, actual);
+            var actual = Evaluate.Equals(null, valueB, item => item.TestDateTime, item => item.TestInt, item => item.TestString);
+            Assert.IsFalse(actual);
         }
 
         /// <summary>
@@ -126,11 +73,8 @@ namespace Startitecture.Core.Tests
         public void Equals_RightNullWithParameters_ReturnsFalse()
         {
             var valueA = new FakeTestItem { TestDateTime = DateTime.Now, TestInt = 290, TestString = "blah" };
-            FakeTestItem valueB = null;
-            bool expected = false;
-            bool actual;
-            actual = Evaluate.Equals(valueA, valueB, item => item.TestDateTime, item => item.TestInt, item => item.TestString);
-            Assert.AreEqual(expected, actual);
+            var actual = Evaluate.Equals(valueA, null, item => item.TestDateTime, item => item.TestInt, item => item.TestString);
+            Assert.IsFalse(actual);
         }
 
         /// <summary>
@@ -141,10 +85,8 @@ namespace Startitecture.Core.Tests
         {
             var valueA = new FakeTestItem { TestString = "test", TestInt = 1 };
             var valueB = new FakeTestItem { TestString = "test", TestInt = 1 };
-            bool expected = true;
-            bool actual;
-            actual = Evaluate.Equals(valueA, valueB);
-            Assert.AreEqual(expected, actual);
+            var actual = Evaluate.Equals(valueA, valueB);
+            Assert.IsTrue(actual);
         }
 
         /// <summary>
@@ -192,7 +134,8 @@ namespace Startitecture.Core.Tests
             var item = new FakeTestItem { TestDateTime = DateTime.Today, TestInt = 2342, TestString = "asdsdfa2342345" };
             IEnumerable<Func<FakeTestItem, object>> selectors = new Func<FakeTestItem, object>[]
                                                                     {
-                                                                        dest => dest.TestDateTime, dest => dest.TestInt, 
+                                                                        dest => dest.TestDateTime,
+                                                                        dest => dest.TestInt,
                                                                         dest => dest.TestString
                                                                     };
 
