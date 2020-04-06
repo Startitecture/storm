@@ -26,12 +26,12 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
-                ////    row => row.FakeComplexEntityId,
+                ////    row => row.ComplexEntityId,
                 ////    "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
@@ -53,9 +53,9 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            .InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
@@ -74,18 +74,18 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                .InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                .InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
-                ////    row => row.FakeComplexEntityId,
+                ////    row => row.ComplexEntityId,
                 ////    "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
 
             var actual = relations.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -100,14 +100,14 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            .InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
         ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
 
         ////    var actual = relations.FirstOrDefault();
         ////    Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, Evaluate.GetDifferences(expected, actual)));
@@ -121,12 +121,12 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 .InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
-                ////    row => row.FakeComplexEntityId,
+                ////    row => row.ComplexEntityId,
                 ////    "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
@@ -147,9 +147,9 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            .InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
@@ -168,18 +168,18 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 .InnerJoin<FakeRelatedRow, DependencyRow>(
                     row => row.RelatedId,
                     "OtherAlias",
-                    row => row.FakeComplexEntityId,
+                    row => row.ComplexEntityId,
                     "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
 
             var actual = relations.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -194,14 +194,14 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            .InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
         ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    var actual = relations.FirstOrDefault();
         ////    Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, Evaluate.GetDifferences(expected, actual)));
@@ -216,9 +216,9 @@ namespace Startitecture.Orm.Model.Tests
             var relations =
                 new EntityRelationSet<DataRow>()
                     .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                    ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+                    ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
@@ -237,14 +237,14 @@ namespace Startitecture.Orm.Model.Tests
             var relations =
                 new EntityRelationSet<DataRow>()
                     ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-                    .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                    .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -259,9 +259,9 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
@@ -281,14 +281,14 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+        ////            .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
         ////    var expected = new EntityRelation(EntityRelationType.InnerJoin);
-        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}
@@ -301,12 +301,12 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
-                ////    row => row.FakeComplexEntityId,
+                ////    row => row.ComplexEntityId,
                 ////    "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
@@ -327,9 +327,9 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            .LeftJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
@@ -348,18 +348,18 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                .LeftJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                .LeftJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
-                ////    row => row.FakeComplexEntityId,
+                ////    row => row.ComplexEntityId,
                 ////    "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
 
             var actual = relations.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -374,14 +374,14 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .LeftJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            .LeftJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
         ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
 
         ////    var actual = relations.FirstOrDefault();
         ////    Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, Evaluate.GetDifferences(expected, actual)));
@@ -395,12 +395,12 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 .LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 ////.InnerJoin<FakeRelatedRow, DependencyRow>(
                 ////    row => row.RelatedId,
                 ////    "OtherAlias",
-                ////    row => row.FakeComplexEntityId,
+                ////    row => row.ComplexEntityId,
                 ////    "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
@@ -421,9 +421,9 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            .LeftJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
@@ -442,18 +442,18 @@ namespace Startitecture.Orm.Model.Tests
         {
             var relations = new EntityRelationSet<DataRow>()
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId)
-                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId)
+                ////.InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 .LeftJoin<FakeRelatedRow, DependencyRow>(
                     row => row.RelatedId,
                     "OtherAlias",
-                    row => row.FakeComplexEntityId,
+                    row => row.ComplexEntityId,
                     "RelatedDependency")
                 ////.InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "RelatedAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
 
             var actual = relations.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -468,14 +468,14 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .LeftJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            .LeftJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
         ////    var expected = new EntityRelation(new PetaPocoDefinitionProvider(), EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    var actual = relations.FirstOrDefault();
         ////    Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, Evaluate.GetDifferences(expected, actual)));
@@ -490,9 +490,9 @@ namespace Startitecture.Orm.Model.Tests
             var relations =
                 new EntityRelationSet<DataRow>()
                     .LeftJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                    ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+                    ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
@@ -511,14 +511,14 @@ namespace Startitecture.Orm.Model.Tests
             var relations =
                 new EntityRelationSet<DataRow>()
                     ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-                    .LeftJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                    .LeftJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                     ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+                    ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
                     ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
                     .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId);
+            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         }
@@ -533,9 +533,9 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            .LeftJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.OtherAlias, row => row.RelatedDependency, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
@@ -555,14 +555,14 @@ namespace Startitecture.Orm.Model.Tests
         ////    var relations =
         ////        new SqlFromClause<DataRow>()
         ////            ////.InnerJoin(row => row.Related, row => row.FakeDataId, row => row.FakeDataId)
-        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.FakeComplexEntityId)
+        ////            ////.InnerJoin(row => row.Related, row => row.DependencyEntity, row => row.RelatedId, row => row.ComplexEntityId)
         ////            ////.InnerJoin(row => row.OtherAlias, row => row.FakeDataId, row => row.FakeDataId)
-        ////            .LeftJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+        ////            .LeftJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
         ////            ////.InnerJoin(row => row.RelatedAlias, row => row.FakeDataId, row => row.FakeDataId)
         ////            .Relations;
 
         ////    var expected = new EntityRelation(EntityRelationType.LeftJoin);
-        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeComplexEntityId, "OtherAlias", "RelatedDependency");
+        ////    expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
 
         ////    Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
         ////}

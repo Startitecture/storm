@@ -14,8 +14,6 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Core;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
-    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake complex row.
@@ -23,20 +21,6 @@ namespace Startitecture.Orm.Testing.Entities
     [Table("ComplexEntity", Schema = "dbo")]
     public class ComplexRaisedRow : TransactionItemBase, IEquatable<ComplexRaisedRow>
     {
-        /// <summary>
-        /// The lazy relations.
-        /// </summary>
-        private static readonly Lazy<IEnumerable<IEntityRelation>> LazyRelations =
-            new Lazy<IEnumerable<IEntityRelation>>(
-                () =>
-                new EntityRelationSet<ComplexRaisedRow>()
-                    .InnerJoin(row => row.FakeSubEntityId, row => row.SubEntity.FakeSubEntityId)
-                    .InnerJoin(row => row.SubEntity.FakeSubSubEntityId, row => row.SubEntity.SubSubEntity.FakeSubSubEntityId)
-                    .InnerJoin(row => row.CreatedByFakeMultiReferenceEntityId, row => row.CreatedBy.FakeMultiReferenceEntityId)
-                    .InnerJoin(row => row.ModifiedByFakeMultiReferenceEntityId, row => row.ModifiedBy.FakeMultiReferenceEntityId)
-                    .LeftJoin(row => row.FakeComplexEntityId, row => row.DependentEntity.FakeDependentEntityId)
-                    .Relations);
-
         /// <summary>
         /// The comparison properties.
         /// </summary>
@@ -69,57 +53,57 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the fake complex entity id.
         /// </summary>
-        [Column]
+        [Column(Order = 1)]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int FakeComplexEntityId { get; set; }
+        public int ComplexEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the unique name.
         /// </summary>
-        [Column]
+        [Column(Order = 2)]
         public string UniqueName { get; set; }
 
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
-        [Column]
+        [Column(Order = 3)]
         public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets the fake sub entity id.
         /// </summary>
-        [Column]
+        [Column(Order = 4)]
         public int FakeSubEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the fake enumeration.
         /// </summary>
-        [Column]
+        [Column(Order = 5)]
         public int FakeEnumerationId { get; set; }
 
         /// <summary>
         /// Gets or sets the fake other enumeration.
         /// </summary>
-        [Column]
+        [Column(Order = 6)]
         public int FakeOtherEnumerationId { get; set; }
 
         /// <summary>
         /// Gets or sets the creation time.
         /// </summary>
-        [Column]
+        [Column(Order = 7)]
         public DateTimeOffset CreationTime { get; set; }
 
         /// <summary>
         /// Gets or sets the modified time.
         /// </summary>
-        [Column]
+        [Column(Order = 8)]
         public DateTimeOffset ModifiedTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the created by fake multi reference entity id.
+        /// Gets or sets the created by fake multi reference entity ID.
         /// </summary>
-        [Column]
+        [Column(Order = 9)]
         public int CreatedByFakeMultiReferenceEntityId { get; set; }
 
         /// <summary>
@@ -129,9 +113,9 @@ namespace Startitecture.Orm.Testing.Entities
         public MultiReferenceRow CreatedBy { get; set; }
 
         /// <summary>
-        /// Gets or sets the modified by fake multi reference entity id.
+        /// Gets or sets the modified by fake multi reference entity ID.
         /// </summary>
-        [Column]
+        [Column(Order = 10)]
         public int ModifiedByFakeMultiReferenceEntityId { get; set; }
 
         /// <summary>
@@ -151,18 +135,6 @@ namespace Startitecture.Orm.Testing.Entities
         /// </summary>
         [Relation]
         public DependentRow DependentEntity { get; set; }
-
-        /// <summary>
-        /// Gets the entity relations.
-        /// </summary>
-        [Ignore]
-        public IEnumerable<IEntityRelation> EntityRelations
-        {
-            get
-            {
-                return LazyRelations.Value;
-            }
-        }
 
         /// <summary>
         /// Determines if two values of the same type are equal.

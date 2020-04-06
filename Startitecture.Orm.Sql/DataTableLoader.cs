@@ -14,10 +14,7 @@ namespace Startitecture.Orm.Sql
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
-    using Startitecture.Resources;
 
     /// <summary>
     /// A base class for data table loaders.
@@ -28,22 +25,31 @@ namespace Startitecture.Orm.Sql
     public class DataTableLoader<T>
     {
         /// <summary>
-        /// The form submission data columns.
+        /// The property dictionary.
         /// </summary>
-        /// <remarks>
-        /// Avoid interface properties by filtering out non-writable properties.
-        /// </remarks>
-        private static readonly Lazy<Dictionary<string, PropertyInfo>> DataProperties =
-            new Lazy<Dictionary<string, PropertyInfo>>(
-                () =>
-                    (from p in typeof(T).GetProperties(BindingFlags.Instance | BindingFlags.Public)
-                     where p.CanWrite && CustomAttributeExtensions.GetCustomAttribute<RelationAttribute>((MemberInfo)p) == null
-                     orderby p.Name
-                     select new
-                                {
-                                    p.Name, PropertyInfo = p
-                                })
-                .ToDictionary(property => property.Name, property => property.PropertyInfo));
+        private readonly Lazy<Dictionary<string, PropertyInfo>> propertyDictionary;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DataTableLoader{T}"/> class.
+        /// </summary>
+        /// <param name="definitionProvider">
+        /// The definition provider.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="definitionProvider"/> is null.
+        /// </exception>
+        public DataTableLoader([NotNull] IEntityDefinitionProvider definitionProvider)
+        {
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            this.propertyDictionary = new Lazy<Dictionary<string, PropertyInfo>>(
+                () => definitionProvider.Resolve<T>()
+                    .DirectAttributes.OrderBy(definition => definition.Ordinal)
+                    .ToDictionary(definition => definition.PropertyInfo.Name, definition => definition.PropertyInfo));
+        }
 
         /// <summary>
         /// Loads and returns a data table with the specified values.
@@ -61,9 +67,8 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(values));
             }
 
-            var dataColumnProperties = DataProperties.Value;
             var dataTable = new DataTable();
-            var dataColumns = dataColumnProperties.Values.Select(CreateDataColumn).ToArray();
+            var dataColumns = this.propertyDictionary.Value.Values.Select(CreateDataColumn).ToArray();
             dataTable.Columns.AddRange(dataColumns);
 
             foreach (var value in values)
@@ -72,7 +77,7 @@ namespace Startitecture.Orm.Sql
 
                 foreach (var column in dataColumns)
                 {
-                    SetDataRowColumnValue(dataColumnProperties, column, value, dataRow);
+                    SetDataRowColumnValue(this.propertyDictionary.Value, column, value, dataRow);
                 }
 
                 dataTable.Rows.Add(dataRow);
@@ -81,41 +86,41 @@ namespace Startitecture.Orm.Sql
             return dataTable;
         }
 
-        /// <summary>
-        /// Loads and returns a data table with the specified values mapped from the <paramref name="items"/>.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to map.
-        /// </typeparam>
-        /// <param name="items">
-        /// The items to load.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper to use to map the items into the typed values.
-        /// </param>
-        /// <returns>
-        /// A <see cref="DataTable"/> with the loaded values.
-        /// </returns>
-        public DataTable Load<TItem>([NotNull] IEnumerable<TItem> items, [NotNull] IEntityMapper entityMapper)
-        {
-            if (items == null)
-            {
-                throw new ArgumentNullException(nameof(items));
-            }
+        /////// <summary>
+        /////// Loads and returns a data table with the specified values mapped from the <paramref name="items"/>.
+        /////// </summary>
+        /////// <typeparam name="TItem">
+        /////// The type of item to map.
+        /////// </typeparam>
+        /////// <param name="items">
+        /////// The items to load.
+        /////// </param>
+        /////// <param name="entityMapper">
+        /////// The entity mapper to use to map the items into the typed values.
+        /////// </param>
+        /////// <returns>
+        /////// A <see cref="DataTable"/> with the loaded values.
+        /////// </returns>
+        ////public DataTable Load<TItem>([NotNull] IEnumerable<TItem> items, [NotNull] IEntityMapper entityMapper)
+        ////{
+        ////    if (items == null)
+        ////    {
+        ////        throw new ArgumentNullException(nameof(items));
+        ////    }
 
-            if (entityMapper == null)
-            {
-                throw new ArgumentNullException(nameof(entityMapper));
-            }
+        ////    if (entityMapper == null)
+        ////    {
+        ////        throw new ArgumentNullException(nameof(entityMapper));
+        ////    }
 
-            var mappedValues = entityMapper.Map<List<T>>(items);
-            return this.Load(mappedValues);
-        }
+        ////    var mappedValues = entityMapper.Map<List<T>>(items);
+        ////    return this.Load(mappedValues);
+        ////}
 
+/*
         /// <summary>
         /// Refreshes an existing data table with the values in the enumerable. This method assumes that the enumerable items and
-        /// the
-        /// table rows are in the same order.
+        /// the table rows are in the same order.
         /// </summary>
         /// <param name="values">
         /// The values to apply.
@@ -149,19 +154,21 @@ namespace Startitecture.Orm.Sql
                     foreach (var column in dataTable.Columns.OfType<DataColumn>())
                     {
                         var dataColumnValue = dataRow[column];
-                        var itemValue = DataProperties.Value[column.ColumnName].GetMethod.Invoke(enumerator.Current, null);
+                        var itemValue = this.propertyDictionary.Value[column.ColumnName].GetMethod.Invoke(enumerator.Current, null);
 
                         if (dataColumnValue.Equals(itemValue))
                         {
                             continue;
                         }
 
-                        SetDataRowColumnValue(DataProperties.Value, column, enumerator.Current, dataRow);
+                        SetDataRowColumnValue(this.propertyDictionary.Value, column, enumerator.Current, dataRow);
                     }
                 }
             }
         }
+*/
 
+/*
         /// <summary>
         /// Refreshes an existing data table with the values in the enumerable. This method assumes that the enumerable items and
         /// the
@@ -199,6 +206,7 @@ namespace Startitecture.Orm.Sql
             var mappedValues = entityMapper.Map<List<T>>(items);
             this.Refresh(mappedValues, dataTable);
         }
+*/
 
         /// <summary>
         /// Creates a data column.

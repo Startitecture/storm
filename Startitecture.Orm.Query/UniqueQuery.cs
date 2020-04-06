@@ -47,7 +47,6 @@ namespace Startitecture.Orm.Query
 
             foreach (var keyAttribute in entityDefinition.PrimaryKeyAttributes)
             {
-                // TODO: Should this be physical name?
                 var entityReference = new EntityReference { EntityAlias = keyAttribute.Entity.Alias, EntityType = keyAttribute.Entity.EntityType };
                 var attributeLocation = new AttributeLocation(keyAttribute.PropertyInfo, entityReference);
                 var valueFilter = new ValueFilter(attributeLocation, FilterType.Equality, keyAttribute.GetValueDelegate.DynamicInvoke(item));

@@ -112,7 +112,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 stopwatch.Reset();
 
                 Assert.IsNotNull(actual);
-                Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
+                Assert.AreEqual(expected.ComplexEntityId, actual.ComplexEntityId);
 
                 Assert.AreEqual(
                     expected.SubEntity,
@@ -371,7 +371,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 stopwatch.Reset();
 
                 Assert.IsNotNull(actual);
-                Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
+                Assert.AreEqual(expected.ComplexEntityId, actual.ComplexEntityId);
 
                 Assert.AreEqual(
                     expected.SubEntity,

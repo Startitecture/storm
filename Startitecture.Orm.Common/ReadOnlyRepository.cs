@@ -54,17 +54,6 @@ namespace Startitecture.Orm.Common
         /// </summary>
         private readonly IComparer<TDataItem> selectionComparer;
 
-        // TODO: Caching must be enabled at a higher level. This approach makes relations get applied multiple times.
-        /////// <summary>
-        /////// The use primary key selection.
-        /////// </summary>
-        ////private ItemSelection<TDataItem> usePrimaryKeySelection;
-
-        /////// <summary>
-        /////// The use alternate key selection.
-        /////// </summary>
-        ////private ItemSelection<TDataItem> useAlternateKeySelection;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity,TDataItem}"/> class.
         /// </summary>
@@ -92,7 +81,7 @@ namespace Startitecture.Orm.Common
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
         public ReadOnlyRepository(
-            IRepositoryProvider repositoryProvider,
+            [NotNull] IRepositoryProvider repositoryProvider,
             [NotNull] IEntityMapper entityMapper,
             IComparer<TDataItem> selectionComparer)
         {
@@ -122,6 +111,17 @@ namespace Startitecture.Orm.Common
             var dataItem = this.GetExampleItem(candidate);
             var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
             return this.RepositoryProvider.Contains(uniqueItemSelection);
+        }
+
+        /// <inheritdoc />
+        public bool Contains<TItem>([NotNull] ItemSelection<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return this.RepositoryProvider.Contains(selection.MapTo<TDataItem>());
         }
 
         /// <inheritdoc />
@@ -163,6 +163,18 @@ namespace Startitecture.Orm.Common
             }
 
             return entity;
+        }
+
+        /// <inheritdoc />
+        public TEntity FirstOrDefault<TItem>([NotNull] ItemSelection<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            var item = this.RepositoryProvider.GetFirstOrDefault(selection.MapTo<TDataItem>());
+            return this.EntityMapper.Map<TEntity>(item);
         }
 
         /// <inheritdoc />

@@ -168,6 +168,12 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
+        protected override int GetOrdinal(PropertyInfo entityProperty)
+        {
+            return entityProperty.GetCustomAttribute<ColumnAttribute>()?.Order ?? int.MaxValue;
+        }
+
+        /// <inheritdoc />
         protected override IEnumerable<AttributeReference> GetKeyAttributes([NotNull] Type entityType)
         {
             if (entityType == null)

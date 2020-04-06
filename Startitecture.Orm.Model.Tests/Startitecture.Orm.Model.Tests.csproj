@@ -51,7 +51,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AttributeLocationTests.cs" />
-    <Compile Include="DistinctAttributeEqualityComparerTests.cs" />
     <Compile Include="EntityDefinitionTests.cs" />
     <Compile Include="EntityRelationSetTests.cs" />
     <Compile Include="EntityRelationTests.cs" />

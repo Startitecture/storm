@@ -28,7 +28,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// Gets or sets the fake complex entity id.
         /// </summary>
         [Column]
-        public int FakeComplexEntityId { get; set; }
+        public int ComplexEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the unique name.

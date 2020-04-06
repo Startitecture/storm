@@ -7,4 +7,11 @@
     <Property Name="ParentElementType" Value="SqlSchema" />
     <Property Name="NewName" Value="[AggregateSubmission]" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="78f1d69d-005c-4db8-a770-bfd33e9b518b" ChangeDateTime="04/03/2020 19:22:40">
+    <Property Name="ElementName" Value="[dbo].[TextElement].[Id]" />
+    <Property Name="ElementType" Value="SqlSimpleColumn" />
+    <Property Name="ParentElementName" Value="[dbo].[TextElement]" />
+    <Property Name="ParentElementType" Value="SqlTable" />
+    <Property Name="NewName" Value="TextElementId" />
+  </Operation>
 </Operations>

@@ -11,11 +11,18 @@ namespace Startitecture.Orm.Sql
 {
     using System.Data;
 
+    using Startitecture.Orm.Model;
+
     /// <summary>
     /// The StructuredCommandProvider interface.
     /// </summary>
     public interface IStructuredCommandProvider
     {
+        /// <summary>
+        /// Gets the entity definition provider.
+        /// </summary>
+        IEntityDefinitionProvider EntityDefinitionProvider { get; }
+
         /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>

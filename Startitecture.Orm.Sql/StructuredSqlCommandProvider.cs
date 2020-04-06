@@ -15,6 +15,7 @@ namespace Startitecture.Orm.Sql
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
@@ -33,10 +34,14 @@ namespace Startitecture.Orm.Sql
         /// <param name="contextProvider">
         /// The context provider.
         /// </param>
-        public StructuredSqlCommandProvider(IDatabaseContextProvider contextProvider)
+        public StructuredSqlCommandProvider([NotNull] IDatabaseContextProvider contextProvider)
         {
-            this.contextProvider = contextProvider;
+            this.contextProvider = contextProvider ?? throw new ArgumentNullException(nameof(contextProvider));
+            this.EntityDefinitionProvider = contextProvider.DatabaseContext.DefinitionProvider;
         }
+
+        /// <inheritdoc />
+        public IEntityDefinitionProvider EntityDefinitionProvider { get; }
 
         /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
@@ -78,16 +83,12 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(transaction));
             }
 
-            var sqlConnection = this.contextProvider.DatabaseContext.Connection as SqlConnection;
-
-            if (sqlConnection == null)
+            if (!(this.contextProvider.DatabaseContext.Connection is SqlConnection sqlConnection))
             {
                 throw new OperationException(this.contextProvider, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
             }
 
-            var sqlTransaction = transaction as SqlTransaction;
-
-            var sqlCommand = sqlTransaction == null
+            var sqlCommand = !(transaction is SqlTransaction sqlTransaction)
                                  ? new SqlCommand(structuredCommand.CommandText, sqlConnection)
                                  : new SqlCommand(structuredCommand.CommandText, sqlConnection, sqlTransaction);
 

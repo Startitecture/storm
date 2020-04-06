@@ -11,7 +11,6 @@ namespace Startitecture.Orm.Mapper
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
@@ -228,57 +227,6 @@ namespace Startitecture.Orm.Mapper
             this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Database"/> class. 
-        /// Construct a Database using a supplied connectionString Name.  The actual connection string and provider will be
-        /// read from app/web.config.
-        /// </summary>
-        /// <param name="connectionStringName">
-        /// The name of the connection
-        /// </param>
-        /// <param name="definitionProvider">
-        /// The entity definition provider.
-        /// </param>
-        public Database(string connectionStringName, [NotNull] IEntityDefinitionProvider definitionProvider)
-        {
-            // Use first?
-            if (string.IsNullOrWhiteSpace(connectionStringName))
-            {
-                connectionStringName = ConfigurationManager.ConnectionStrings[0].Name;
-            }
-
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
-            this.DefinitionProvider = definitionProvider;
-
-            // Work out connection string and provider name
-            var providerType = "System.Data.SqlClient";
-
-            if (ConfigurationManager.ConnectionStrings[connectionStringName] != null)
-            {
-                if (string.IsNullOrEmpty(ConfigurationManager.ConnectionStrings[connectionStringName].ProviderName) == false)
-                {
-                    providerType = ConfigurationManager.ConnectionStrings[connectionStringName].ProviderName;
-                }
-            }
-            else
-            {
-                throw new InvalidOperationException("Can't find a connection string with the name '" + connectionStringName + "'");
-            }
-
-            // Store factory and connection string
-            this.connectionString = ConfigurationManager.ConnectionStrings[connectionStringName].ConnectionString;
-            this.providerName = providerType;
-            ////this.pocoDataFactory = new PocoDataFactory();
-            this.CommonConstruct();
-
-            // TODO: Make other qualifiers based on database type
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
-        }
-
         #endregion
 
         #region Public Properties
@@ -315,7 +263,6 @@ namespace Startitecture.Orm.Mapper
 
         #endregion
 
-        // Helper to create a transaction scope
         #region Public Methods and Operators
 
         #region Connections and Transactions

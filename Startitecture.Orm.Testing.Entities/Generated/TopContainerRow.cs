@@ -8,7 +8,7 @@
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable RedundantOverridenMember
 // ReSharper disable UseNameofExpression
-// TargetFrameworkVersion = 4.8
+// TargetFrameworkVersion = 2.1
 #pragma warning disable 1591    //  Ignore "Missing XML Comment" warning
 
 using System.ComponentModel.DataAnnotations;

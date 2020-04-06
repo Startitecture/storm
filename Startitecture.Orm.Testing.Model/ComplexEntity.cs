@@ -86,7 +86,7 @@ namespace Startitecture.Orm.Testing.Model
             DateTimeOffset creationTime)
             : this(uniqueName, subEntity, fakeEnumeration, createdBy, creationTime, 0)
         {
-            this.FakeComplexEntityId = null;
+            this.ComplexEntityId = null;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Startitecture.Orm.Testing.Model
         /// <param name="creationTime">
         /// The creation time.
         /// </param>
-        /// <param name="fakeComplexEntityId">
+        /// <param name="complexEntityId">
         /// The fake complex entity id.
         /// </param>
         public ComplexEntity(
@@ -116,10 +116,10 @@ namespace Startitecture.Orm.Testing.Model
             FakeEnumeration fakeEnumeration,
             CreatedBy createdBy,
             DateTimeOffset creationTime,
-            int fakeComplexEntityId)
+            int complexEntityId)
         {
             this.UniqueName = uniqueName;
-            this.FakeComplexEntityId = fakeComplexEntityId;
+            this.ComplexEntityId = complexEntityId;
             this.FakeEnumeration = fakeEnumeration;
             this.SubEntity = subEntity;
             this.CreationTime = creationTime;
@@ -173,7 +173,7 @@ namespace Startitecture.Orm.Testing.Model
         /// <summary>
         /// Gets the fake complex entity id.
         /// </summary>
-        public int? FakeComplexEntityId { get; private set; }
+        public int? ComplexEntityId { get; private set; }
 
         /// <summary>
         /// Gets the fake enumeration.
@@ -261,8 +261,8 @@ namespace Startitecture.Orm.Testing.Model
         {
             get
             {
-                // If FakeDependentEntityId hasn't been set, then use FakeComplexEntityId which is the same.
-                return this.DependentEntity == null ? null : this.DependentEntity.FakeDependentEntityId ?? this.FakeComplexEntityId;
+                // If FakeDependentEntityId hasn't been set, then use ComplexEntityId which is the same.
+                return this.DependentEntity == null ? null : this.DependentEntity.FakeDependentEntityId ?? this.ComplexEntityId;
             }
         }
 
@@ -386,7 +386,7 @@ namespace Startitecture.Orm.Testing.Model
             }
             else
             {
-                this.DependentEntity = new DependentEntity(this.FakeComplexEntityId)
+                this.DependentEntity = new DependentEntity(this.ComplexEntityId)
                                                {
                                                    DependentIntegerValue = someIntegerValue,
                                                    DependentTimeValue = someTimeValue

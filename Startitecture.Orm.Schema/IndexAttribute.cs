@@ -85,7 +85,7 @@ namespace Startitecture.Orm.Schema
         public string Name { get; }
 
         /// <summary>
-        /// Gets the order of the index.
+        /// Gets the order of the column in the index.
         /// </summary>
         public int Order { get; }
 

@@ -10,6 +10,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using System.Data;
     using System.Data.SqlClient;
 
+    using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Rhino.Mocks;
@@ -24,13 +25,31 @@ namespace Startitecture.Orm.Mapper.Tests
     public class DatabaseTests
     {
         /// <summary>
+        /// Gets or sets the test context.
+        /// </summary>
+        // ReSharper disable once MemberCanBePrivate.Global
+        // ReSharper disable once UnusedAutoPropertyAccessor.Global
+        public TestContext TestContext { get; set; }
+
+        /// <summary>
+        /// The configuration root.
+        /// </summary>
+        private IConfigurationRoot ConfigurationRoot =>
+            new ConfigurationBuilder().SetBasePath(this.TestContext.DeploymentDirectory)
+                .AddJsonFile("appSettings.json", false)
+                .Build();
+
+        /// <summary>
         /// The begin transaction test.
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
         public void BeginTransaction_SqlCommand_ExecutesNonQuery()
         {
-            using (var target = new Database("MasterDatabase", new DataAnnotationsDefinitionProvider()))
+            using (var target = new Database(
+                this.ConfigurationRoot.GetConnectionString("MasterDatabase"),
+                nameof(System.Data.SqlClient),
+                new DataAnnotationsDefinitionProvider()))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;
                 Assert.IsNotNull(transaction);
@@ -79,7 +98,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     var result = target.Insert(row);
 
                     Assert.AreEqual(Expected, result);
-                    Assert.AreEqual(Expected, row.FakeComplexEntityId);
+                    Assert.AreEqual(Expected, row.ComplexEntityId);
                 }
             }
         }

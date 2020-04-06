@@ -9,7 +9,6 @@
 
 namespace Startitecture.Orm.Testing.Entities
 {
-    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,46 +24,29 @@ namespace Startitecture.Orm.Testing.Entities
     public class ChildRaisedRow : TransactionItemBase
     {
         /// <summary>
-        /// The fake child relations.
-        /// </summary>
-        private static readonly IEnumerable<IEntityRelation> FakeChildRelations =
-            new EntityRelationSet<ChildRaisedRow>()
-                .InnerJoin(
-                    row => row.FakeComplexEntityId,
-                    row => row.ComplexEntity.FakeComplexEntityId)
-                .InnerJoin(row => row.ComplexEntity.FakeSubEntityId, row => row.ComplexEntity.SubEntity.FakeSubEntityId)
-                .InnerJoin(
-                    row => row.ComplexEntity.SubEntity.FakeSubSubEntityId,
-                    row => row.ComplexEntity.SubEntity.SubSubEntity.FakeSubSubEntityId)
-                .InnerJoin(
-                    row => row.ComplexEntity.CreatedByFakeMultiReferenceEntityId,
-                    row => row.ComplexEntity.CreatedBy.FakeMultiReferenceEntityId)
-                .InnerJoin(
-                    row => row.ComplexEntity.ModifiedByFakeMultiReferenceEntityId,
-                    row => row.ComplexEntity.ModifiedBy.FakeMultiReferenceEntityId)
-                .LeftJoin<SubChildRow>(row => row.FakeChildEntityId, row => row.FakeSubChildEntityId)
-                .Relations;
-
-        /// <summary>
         /// Gets or sets the fake child entity id.
         /// </summary>
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [Column(Order = 1)]
         public int FakeChildEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the fake complex entity id.
         /// </summary>
-        public int FakeComplexEntityId { get; set; }
+        [Column(Order = 2)]
+        public int ComplexEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the name.
         /// </summary>
+        [Column(Order = 3)]
         public string Name { get; set; }
 
         /// <summary>
         /// Gets or sets the some value.
         /// </summary>
+        [Column(Order = 4)]
         public int SomeValue { get; set; }
 
         /// <summary>
@@ -81,16 +63,5 @@ namespace Startitecture.Orm.Testing.Entities
         /// </remarks>
         [RelatedEntity(typeof(SubChildRow))]
         public int? ParentFakeChildEntityId { get; set; }
-
-        /// <summary>
-        /// Gets the entity relations.
-        /// </summary>
-        public IEnumerable<IEntityRelation> EntityRelations
-        {
-            get
-            {
-                return FakeChildRelations;
-            }
-        }
     }
 }

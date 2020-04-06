@@ -8,7 +8,7 @@
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable RedundantOverridenMember
 // ReSharper disable UseNameofExpression
-// TargetFrameworkVersion = 4.8
+// TargetFrameworkVersion = 2.1
 #pragma warning disable 1591    //  Ignore "Missing XML Comment" warning
 
 using System.ComponentModel.DataAnnotations;
@@ -48,10 +48,10 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the Value
         /// </summary>
-        [Column(@"Value", Order = 2, TypeName = "int")]
+        [Column(@"Value", Order = 2, TypeName = "bigint")]
         [Required]
         [Display(Name = "Value")]
-        public int Value { get; set; }
+        public long Value { get; set; }
     }
 
 }

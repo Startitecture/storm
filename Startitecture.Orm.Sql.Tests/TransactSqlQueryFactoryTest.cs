@@ -40,9 +40,9 @@ namespace Startitecture.Orm.Sql.Tests
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -63,9 +63,9 @@ namespace Startitecture.Orm.Sql.Tests
     [dbo].[FakeData].[AnotherValueColumn]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -101,9 +101,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -119,9 +119,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -157,9 +157,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -173,9 +173,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -210,9 +210,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -233,9 +233,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
     [dbo].[FakeData].[AnotherValueColumn]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -270,9 +270,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -288,9 +288,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -326,9 +326,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -342,9 +342,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -391,9 +391,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedProperty,
                     row => row.ParentFakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -407,9 +407,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -455,9 +455,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedProperty,
                     row => row.ParentFakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -469,9 +469,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -516,9 +516,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -539,9 +539,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
     [OtherAlias].[RelatedProperty] AS [OtherAlias.RelatedProperty]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -586,9 +586,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -602,9 +602,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -650,9 +650,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match.ValueColumn)
@@ -664,9 +664,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -736,9 +736,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
@@ -755,9 +755,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                             row => row.RelatedAlias.RelatedProperty,
                             row => row.OtherAlias.RelatedProperty)
                         .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                         .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
@@ -773,9 +773,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                                     row => row.RelatedAlias.RelatedProperty,
                                     row => row.OtherAlias.RelatedProperty)
                                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
@@ -789,9 +789,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -804,9 +804,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @5 AND
@@ -819,9 +819,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
@@ -892,9 +892,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
@@ -931,9 +931,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -1003,9 +1003,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
@@ -1022,9 +1022,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                             row => row.RelatedAlias.RelatedProperty,
                             row => row.OtherAlias.RelatedProperty)
                         .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                         .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
@@ -1041,9 +1041,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                                     row => row.RelatedAlias.RelatedProperty,
                                     row => row.OtherAlias.RelatedProperty)
                                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
@@ -1060,9 +1060,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
     [OtherAlias].[RelatedProperty] AS [OtherAlias.RelatedProperty]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -1079,9 +1079,9 @@ SELECT
     [OtherAlias].[RelatedProperty] AS [OtherAlias.RelatedProperty]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @5 AND
@@ -1098,9 +1098,9 @@ SELECT
     [OtherAlias].[RelatedProperty] AS [OtherAlias.RelatedProperty]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
@@ -1170,9 +1170,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
@@ -1189,9 +1189,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                             row => row.RelatedAlias.RelatedProperty,
                             row => row.OtherAlias.RelatedProperty)
                         .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                         .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
@@ -1208,9 +1208,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                                     row => row.RelatedAlias.RelatedProperty,
                                     row => row.OtherAlias.RelatedProperty)
                                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
@@ -1224,9 +1224,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
@@ -1239,9 +1239,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @5 AND
@@ -1254,9 +1254,9 @@ SELECT
 1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
@@ -1327,9 +1327,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                 .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
@@ -1346,9 +1346,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                             row => row.RelatedAlias.RelatedProperty,
                             row => row.OtherAlias.RelatedProperty)
                         .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                         .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                         .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
@@ -1365,9 +1365,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
                                     row => row.RelatedAlias.RelatedProperty,
                                     row => row.OtherAlias.RelatedProperty)
                                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.FakeComplexEntityId)
+                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.FakeComplexEntityId)
+                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
                                 .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
                                 .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
@@ -1379,9 +1379,9 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
-INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[FakeComplexEntityId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
 INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
 LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
 WHERE [dbo].[FakeData].[ValueColumn] = @0 AND

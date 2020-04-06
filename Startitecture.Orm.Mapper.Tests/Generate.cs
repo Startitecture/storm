@@ -134,7 +134,7 @@ namespace Startitecture.Orm.Mapper.Tests
                            FakeEnumerationId = MyInt,
                            CreationTime = MyDateTimeOffset,
                            FakeOtherEnumerationId = MyInt,
-                           FakeComplexEntityId = MyInt
+                           ComplexEntityId = MyInt
                        };
         }
 

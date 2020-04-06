@@ -19,7 +19,6 @@ namespace Startitecture.Orm.Testing.Entities
     /// The raised overridden column name row.
     /// </summary>
     [Table("overridden_column_name")]
-    [ExplicitColumns]
     public class RaisedOverriddenColumnNameRow : IEquatable<RaisedOverriddenColumnNameRow>
     {
         /// <summary>

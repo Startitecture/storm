@@ -1,76 +1,98 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="GenericSubmission.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Model
 {
+    using System;
+    using System.Collections.Generic;
+
+    using JetBrains.Annotations;
+
+    /// <summary>
+    /// The generic submission.
+    /// </summary>
     public class GenericSubmission
     {
-        private List<FieldValue> submissionValues;
+        /// <summary>
+        /// The submission values.
+        /// </summary>
+        private readonly List<FieldValue> submissionValues = new List<FieldValue>();
 
-        public GenericSubmission(string subject)
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GenericSubmission"/> class.
+        /// </summary>
+        /// <param name="subject">
+        /// The subject.
+        /// </param>
+        /// <param name="submittedBy">
+        /// The submitted by identity.
+        /// </param>
+        public GenericSubmission(string subject, DomainIdentity submittedBy)
         {
             this.Subject = subject;
+            this.SubmittedBy = submittedBy;
         }
 
+        /// <summary>
+        /// Prevents a default instance of the <see cref="GenericSubmission"/> class from being created.
+        /// </summary>
         private GenericSubmission()
         {
         }
 
+        /// <summary>
+        /// Gets the generic submission id.
+        /// </summary>
         public int? GenericSubmissionId { get; private set; }
 
+        /// <summary>
+        /// Gets the subject.
+        /// </summary>
         public string Subject { get; private set; }
 
+        /// <summary>
+        /// Gets the submitted by.
+        /// </summary>
         public DomainIdentity SubmittedBy { get; private set; }
 
+        /// <summary>
+        /// Gets the submission time.
+        /// </summary>
         public DateTimeOffset SubmissionTime { get; private set; }
 
+        /// <summary>
+        /// The submission values.
+        /// </summary>
         public IEnumerable<FieldValue> SubmissionValues => this.submissionValues;
 
-        public void SetValue(Field field, object value)
+        /// <summary>
+        /// The set value.
+        /// </summary>
+        /// <param name="field">
+        /// The field.
+        /// </param>
+        /// <param name="value">
+        /// The value.
+        /// </param>
+        public void SetValue([NotNull] Field field, object value)
         {
-            this.submissionValues.Add(new FieldValue());
+            if (field == null)
+            {
+                throw new ArgumentNullException(nameof(field));
+            }
+
+            this.submissionValues.Add(new FieldValue(field).Set(value, this.SubmittedBy));
         }
 
-        public void Submit(DomainIdentity submitter)
+        /// <summary>
+        /// Finalizes the submission.
+        /// </summary>
+        public void Submit()
         {
-            this.SubmittedBy = submitter;
             this.SubmissionTime = DateTimeOffset.Now;
         }
-    }
-
-    public class FieldValue
-    {
-        public long? FieldValueId { get; private set; }
-
-        public Field Field { get; private set; }
-
-        public DomainIdentity LastModifiiedBy { get; private set; }
-
-        public DateTimeOffset LastModifiedTime { get; private set; }
-
-        public object Value { get; set; }
-    }
-
-    public class Field
-    {
-        public int? FieldId { get; private set; }
-
-        public string Name { get; set; }
-
-        public string Description { get; set; }
-    }
-
-    public class DomainIdentity
-    {
-        public int? DomainIdentityId { get; private set; }
-
-        public string UniqueIdentifier { get; private set; }
-
-        public string FirstName { get; set; }
-
-        public string MiddleName { get; set; }
-
-        public string LastName { get; set; }
     }
 }

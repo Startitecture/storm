@@ -213,6 +213,17 @@ namespace Startitecture.Orm.Schema
         protected abstract string GetPhysicalName(PropertyInfo entityProperty);
 
         /// <summary>
+        /// Gets the ordinal of the attribute.
+        /// </summary>
+        /// <param name="entityProperty">
+        /// The entity property to evaluate.
+        /// </param>
+        /// <returns>
+        /// The ordinal of the property as an <see cref="int"/>.
+        /// </returns>
+        protected abstract int GetOrdinal(PropertyInfo entityProperty);
+
+        /// <summary>
         /// Gets the key attributes for the <paramref name="entityType"/>.
         /// </summary>
         /// <param name="entityType">
@@ -294,6 +305,7 @@ namespace Startitecture.Orm.Schema
                 var attributeName = physicalName;
                 var propertyAlias = string.Concat(relationLocation.Alias ?? relationLocation.Name, '.', propertyName);
                 var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
+                var ordinal = this.GetOrdinal(propertyInfo);
 
                 // TODO: refactor to use AttributeReferences
                 var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey && x.IsIdentity == false).Select(x => x.PhysicalName)
@@ -308,6 +320,7 @@ namespace Startitecture.Orm.Schema
                         propertyInfo,
                         attributeName,
                         EntityAttributeTypes.RelatedPrimaryKey,
+                        ordinal,
                         propertyName == propertyAlias ? null : propertyAlias);
 
                     yield return entityAttributeDefinition;
@@ -319,6 +332,7 @@ namespace Startitecture.Orm.Schema
                         propertyInfo,
                         attributeName,
                         EntityAttributeTypes.RelatedAutoNumberKey,
+                        ordinal,
                         propertyName == propertyAlias ? null : propertyAlias);
 
                     yield return entityAttributeDefinition;
@@ -331,6 +345,7 @@ namespace Startitecture.Orm.Schema
                         propertyInfo,
                         relatedPhysicalName,
                         EntityAttributeTypes.RelatedAttribute,
+                        ordinal,
                         propertyName == propertyAlias ? null : propertyAlias);
 
                     yield return entityAttributeDefinition;
@@ -362,6 +377,7 @@ namespace Startitecture.Orm.Schema
                     propertyInfo,
                     attributeName,
                     EntityAttributeTypes.RelatedAttribute,
+                    int.MaxValue,
                     attributeReference.Name == propertyAlias ? null : propertyAlias);
 
                 entityPath.RemoveLast();
@@ -379,6 +395,7 @@ namespace Startitecture.Orm.Schema
                     propertyInfo,
                     attributeName,
                     EntityAttributeTypes.Relation,
+                    int.MaxValue,
                     propertyInfo.Name);
 
                 yield return relationAttribute;
@@ -429,42 +446,8 @@ namespace Startitecture.Orm.Schema
             foreach (var attributeReference in attributeReferences)
             {
                 var physicalName = this.GetPhysicalName(attributeReference.PropertyInfo);
+                var ordinal = this.GetOrdinal(attributeReference.PropertyInfo);
                 var attributeName = physicalName;
-                ////var relatedEntity = attributeReference.GetCustomAttribute<RelatedEntityAttribute>(false);
-                ////var relation = attributeReference.GetCustomAttribute<RelationAttribute>(false);
-
-                ////if (isPrimaryKey)
-                ////{
-                ////    var entityAttributeDefinition = new EntityAttributeDefinition(
-                ////        entityPath,
-                ////        attributeReference.PropertyInfo,
-                ////        attributeName,
-                ////        EntityAttributeTypes.DirectPrimaryKey);
-
-                ////    yield return entityAttributeDefinition;
-                ////}
-                ////else if (isIdentity)
-                ////{
-                ////    var entityAttributeDefinition = new EntityAttributeDefinition(
-                ////        entityPath,
-                ////        attributeReference.PropertyInfo,
-                ////        attributeName,
-                ////        EntityAttributeTypes.DirectAutoNumberKey);
-
-                ////    yield return entityAttributeDefinition;
-                ////}
-                ////else if (attributeReference.IgnoreReference)
-                ////{
-                ////    var entityAttributeDefinition = new EntityAttributeDefinition(
-                ////        entityPath,
-                ////        attributeReference.PropertyInfo,
-                ////        attributeName,
-                ////        EntityAttributeTypes.MappedAttribute);
-
-                ////    yield return entityAttributeDefinition;
-                ////}
-                ////else
-
                 var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey).Select(x => x.PhysicalName).Contains(physicalName);
                 var isIdentity = keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
 
@@ -521,6 +504,7 @@ namespace Startitecture.Orm.Schema
                         attributeReference.PropertyInfo,
                         attributeName,
                         attributeTypes,
+                        int.MaxValue,
                         attributeAlias);
 
                     entityPath.RemoveLast();
@@ -537,6 +521,7 @@ namespace Startitecture.Orm.Schema
                         attributeReference.PropertyInfo,
                         attributeName,
                         attributeTypes,
+                        ordinal,
                         attributeReference.Name);
 
                     yield return entityAttributeDefinition;
@@ -553,7 +538,8 @@ namespace Startitecture.Orm.Schema
                         entityPath,
                         attributeReference.PropertyInfo,
                         attributeName,
-                        attributeTypes);
+                        attributeTypes,
+                        ordinal);
 
                     yield return entityAttributeDefinition;
                 }

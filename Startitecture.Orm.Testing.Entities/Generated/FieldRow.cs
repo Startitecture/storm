@@ -8,7 +8,7 @@
 // ReSharper disable RedundantNameQualifier
 // ReSharper disable RedundantOverridenMember
 // ReSharper disable UseNameofExpression
-// TargetFrameworkVersion = 4.8
+// TargetFrameworkVersion = 2.1
 #pragma warning disable 1591    //  Ignore "Missing XML Comment" warning
 
 using System.ComponentModel.DataAnnotations;
@@ -48,6 +48,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// Gets or sets the Name (length: 50)
         /// </summary>
         [Column(@"Name", Order = 2, TypeName = "nvarchar")]
+        [Index(@"UK_Field_Name", 1, IsUnique = true, IsClustered = false)]
         [Required]
         [MaxLength(50)]
         [StringLength(50)]

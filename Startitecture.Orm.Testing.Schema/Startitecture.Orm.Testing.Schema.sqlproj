@@ -72,6 +72,8 @@
     <Folder Include="Scripts\PreDeployment" />
     <Folder Include="Scripts\PostDeployment" />
     <Folder Include="dbo\Procedures" />
+    <Folder Include="dbo\Table Types" />
+    <Folder Include="Storage" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\MoneyElement.sql" />
@@ -101,6 +103,11 @@
     <Build Include="dbo\Tables\AggregateEventCompletion.sql" />
     <Build Include="dbo\Tables\DateElement.sql" />
     <Build Include="dbo\Procedures\spGenerateMergeScript.sql" />
+    <Build Include="dbo\Table Types\FieldValueDataType.sql" />
+    <Build Include="dbo\Table Types\FieldValueElementDataType.sql" />
+    <Build Include="dbo\Table Types\FieldDataType.sql" />
+    <Build Include="dbo\Tables\TextElement.sql" />
+    <Build Include="dbo\Table Types\GenericSubmissionValueTableType.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Startitecture.Orm.Testing.Schema.publish.xml" />

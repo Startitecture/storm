@@ -52,7 +52,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the fake sub entity id.
         /// </summary>
-        [Column]
+        [Column(Order = 1)]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int FakeSubEntityId { get; set; }
@@ -60,25 +60,25 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the fake sub sub entity id.
         /// </summary>
-        [Column]
+        [Column(Order = 2)]
         public int FakeSubSubEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the unique name.
         /// </summary>
-        [Column]
+        [Column(Order = 3)]
         public string UniqueName { get; set; }
 
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
-        [Column]
+        [Column(Order = 4)]
         public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets the unique other id.
         /// </summary>
-        [Column]
+        [Column(Order = 5)]
         public short UniqueOtherId { get; set; }
 
         /// <summary>

@@ -37,12 +37,13 @@ namespace Startitecture.Orm.Model.Tests
             var attributePath = new LinkedList<EntityLocation>();
             attributePath.AddLast(attributeLocation);
             var expected = new EntityAttributeDefinition(
-                               attributePath,
-                               entityReference.EntityType.GetProperty("FakeComplexEntityId", BindingFlags.Public | BindingFlags.Instance),
-                               "FakeComplexEntityId",
-                               EntityAttributeTypes.DirectAttribute);
+                attributePath,
+                entityReference.EntityType.GetProperty(nameof(ChildRaisedRow.ComplexEntityId), BindingFlags.Public | BindingFlags.Instance),
+                nameof(ChildRaisedRow.ComplexEntityId),
+                EntityAttributeTypes.DirectAttribute,
+                2);
 
-            var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.FakeComplexEntityId));
+            var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.ComplexEntityId));
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
 
@@ -61,13 +62,14 @@ namespace Startitecture.Orm.Model.Tests
             var attributePath = new LinkedList<EntityLocation>();
             attributePath.AddLast(attributeLocation);
             var expected = new EntityAttributeDefinition(
-                               attributePath,
-                               relationReference.EntityType.GetProperty("FakeComplexEntityId", BindingFlags.Public | BindingFlags.Instance),
-                               "FakeComplexEntityId",
-                               EntityAttributeTypes.RelatedAutoNumberKey,
-                               "ComplexEntity.FakeComplexEntityId");
+                attributePath,
+                relationReference.EntityType.GetProperty(nameof(ComplexRaisedRow.ComplexEntityId), BindingFlags.Public | BindingFlags.Instance),
+                nameof(ComplexRaisedRow.ComplexEntityId),
+                EntityAttributeTypes.RelatedAutoNumberKey,
+                1,
+                $"ComplexEntity.{nameof(ComplexRaisedRow.ComplexEntityId)}");
 
-            var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.ComplexEntity.FakeComplexEntityId));
+            var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.ComplexEntity.ComplexEntityId));
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
 
@@ -87,10 +89,11 @@ namespace Startitecture.Orm.Model.Tests
             attributePath.AddLast(attributeLocation);
             var expected = new EntityAttributeDefinition(
                                attributePath,
-                               relationReference.EntityType.GetProperty("FakeSubEntityId", BindingFlags.Public | BindingFlags.Instance),
-                               "FakeSubEntityId",
+                               relationReference.EntityType.GetProperty(nameof(SubRow.FakeSubEntityId), BindingFlags.Public | BindingFlags.Instance),
+                               nameof(SubRow.FakeSubEntityId),
                                EntityAttributeTypes.RelatedAutoNumberKey,
-                               "SubEntity.FakeSubEntityId");
+                               1,
+                               $"SubEntity.{nameof(SubRow.FakeSubEntityId)}");
 
             var actual = target.Find(CreateExpression<ChildRaisedRow, int>(row => row.ComplexEntity.SubEntity.FakeSubEntityId));
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));

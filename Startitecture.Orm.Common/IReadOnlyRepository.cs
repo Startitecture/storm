@@ -43,6 +43,23 @@ namespace Startitecture.Orm.Common
         bool Contains<TItem>(TItem candidate);
 
         /// <summary>
+        /// Determines whether an item exists in the repository.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to test.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item with the properties to test.
+        /// </typeparam>
+        /// <returns>
+        /// <c>true</c> if a matching item exists in the repository; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
+        bool Contains<TItem>(ItemSelection<TItem> selection);
+
+        /// <summary>
         /// Gets an item by its identifier or unique key.
         /// </summary>
         /// <typeparam name="TItem">
@@ -59,6 +76,24 @@ namespace Startitecture.Orm.Common
         /// <paramref name="candidate"/> is null.
         /// </exception>
         TEntity FirstOrDefault<TItem>(TItem candidate);
+
+        /// <summary>
+        /// Gets the first matching item of the selection. To ensure repeatable results, use unique column criteria.
+        /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item to search for.
+        /// </typeparam>
+        /// <param name="selection">
+        /// The item selection.
+        /// </param>
+        /// <returns>
+        /// The first <typeparamref name="TEntity"/> in the repository matching the candidate item's identifier or unique key, or a 
+        /// default value of the <typeparamref name="TEntity"/> type if no entity could be found using the candidate.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
+        TEntity FirstOrDefault<TItem>(ItemSelection<TItem> selection);
 
         /// <summary>
         /// Selects all items in the repository.

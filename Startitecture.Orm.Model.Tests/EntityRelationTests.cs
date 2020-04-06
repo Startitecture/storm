@@ -25,12 +25,12 @@ namespace Startitecture.Orm.Model.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var actual = new EntityRelation(EntityRelationType.InnerJoin);
-            actual.Join<ChildRaisedRow>(row => row.FakeComplexEntityId, row => row.ComplexEntity.FakeComplexEntityId);
+            actual.Join<ChildRaisedRow>(row => row.ComplexEntityId, row => row.ComplexEntity.ComplexEntityId);
 
             var childDefinition = definitionProvider.Resolve<ChildRaisedRow>();
             var childReference = new EntityReference { EntityType = typeof(ChildRaisedRow) };
             var childLocation = definitionProvider.GetEntityLocation(childReference);
-            var childAttributeLocation = new AttributeLocation(typeof(ChildRaisedRow).GetProperty("FakeComplexEntityId"), childReference);
+            var childAttributeLocation = new AttributeLocation(typeof(ChildRaisedRow).GetProperty("ComplexEntityId"), childReference);
             var childComplexIdAttribute = childDefinition.Find(childAttributeLocation);
 
             Assert.AreEqual(childLocation, childDefinition.Find(actual.SourceExpression).Entity);
@@ -39,7 +39,7 @@ namespace Startitecture.Orm.Model.Tests
             var complexDefinition = definitionProvider.Resolve<ComplexRaisedRow>();
             var complexReference = new EntityReference { EntityType = typeof(ComplexRaisedRow) };
             var complexLocation = definitionProvider.GetEntityLocation(complexReference);
-            var complexAttributeLocation = new AttributeLocation(typeof(ComplexRaisedRow).GetProperty("FakeComplexEntityId"), complexReference);
+            var complexAttributeLocation = new AttributeLocation(typeof(ComplexRaisedRow).GetProperty("ComplexEntityId"), complexReference);
             var complexIdAttribute = complexDefinition.Find(complexAttributeLocation);
 
             Assert.AreEqual(complexLocation, complexDefinition.Find(actual.RelationExpression).Entity); //// actual.RelationLocation);

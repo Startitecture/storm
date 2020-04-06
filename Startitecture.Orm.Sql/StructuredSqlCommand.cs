@@ -30,11 +30,6 @@ namespace Startitecture.Orm.Sql
     public abstract class StructuredSqlCommand<TStructure> : IStructuredCommand
     {
         /// <summary>
-        /// The structured command provider.
-        /// </summary>
-        private readonly IStructuredCommandProvider structuredCommandProvider;
-
-        /// <summary>
         /// The database transaction.
         /// </summary>
         private readonly IDbTransaction databaseTransaction;
@@ -67,12 +62,7 @@ namespace Startitecture.Orm.Sql
         /// </exception>
         protected StructuredSqlCommand([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
         {
-            if (structuredCommandProvider == null)
-            {
-                throw new ArgumentNullException(nameof(structuredCommandProvider));
-            }
-
-            this.structuredCommandProvider = structuredCommandProvider;
+            this.StructuredCommandProvider = structuredCommandProvider ?? throw new ArgumentNullException(nameof(structuredCommandProvider));
             this.databaseTransaction = databaseTransaction;
 
             var structureType = typeof(TStructure);
@@ -88,8 +78,7 @@ namespace Startitecture.Orm.Sql
 
             this.StructureTypeName = tableTypeAttribute.TypeName;
 
-            // TODO: Send in via DI
-            var structureDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = structuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
             this.Parameter = $"@{structureDefinition.EntityName}Table";
         }
 
@@ -109,6 +98,11 @@ namespace Startitecture.Orm.Sql
         public abstract string CommandText { get; }
 
         /// <summary>
+        /// Gets the structured command provider.
+        /// </summary>
+        protected IStructuredCommandProvider StructuredCommandProvider { get; }
+
+        /// <summary>
         /// Executes the current command with the specified table.
         /// </summary>
         /// <param name="dataTable">
@@ -125,7 +119,7 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(dataTable));
             }
 
-            using (var sqlCommand = this.structuredCommandProvider.CreateCommand(this, dataTable, this.databaseTransaction))
+            using (var sqlCommand = this.StructuredCommandProvider.CreateCommand(this, dataTable, this.databaseTransaction))
             {
                 sqlCommand.ExecuteNonQuery();
             }
@@ -147,9 +141,9 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(dataTable));
             }
 
-            using (var sqlCommand = this.structuredCommandProvider.CreateCommand(this, dataTable, this.databaseTransaction))
+            using (var command = this.StructuredCommandProvider.CreateCommand(this, dataTable, this.databaseTransaction))
             {
-                return sqlCommand.ExecuteReader();
+                return command.ExecuteReader();
             }
         }
     }

@@ -36,11 +36,11 @@ namespace Startitecture.Orm.Testing.Model
         /// <param name="uniqueName">
         /// The unique name.
         /// </param>
-        /// <param name="fakeComplexEntityId">
+        /// <param name="complexEntityId">
         /// The fake complex entity id.
         /// </param>
-        public DependencyEntity(string uniqueName, int? fakeComplexEntityId)
-            : this(uniqueName, fakeComplexEntityId, null)
+        public DependencyEntity(string uniqueName, int? complexEntityId)
+            : this(uniqueName, complexEntityId, null)
         {
         }
 
@@ -50,16 +50,16 @@ namespace Startitecture.Orm.Testing.Model
         /// <param name="uniqueName">
         /// The unique name.
         /// </param>
-        /// <param name="fakeComplexEntityId">
+        /// <param name="complexEntityId">
         /// The fake complex entity id.
         /// </param>
         /// <param name="fakeDependencyEntityId">
         /// The fake dependency entity id.
         /// </param>
-        public DependencyEntity(string uniqueName, int? fakeComplexEntityId, long? fakeDependencyEntityId)
+        public DependencyEntity(string uniqueName, int? complexEntityId, long? fakeDependencyEntityId)
         {
             this.UniqueName = uniqueName;
-            this.FakeComplexEntityId = fakeComplexEntityId;
+            this.ComplexEntityId = complexEntityId;
             this.FakeDependencyEntityId = fakeDependencyEntityId;
         }
 
@@ -78,7 +78,7 @@ namespace Startitecture.Orm.Testing.Model
         /// <summary>
         /// Gets the fake complex entity id.
         /// </summary>
-        public int? FakeComplexEntityId { get; private set; }
+        public int? ComplexEntityId { get; private set; }
 
         /// <summary>
         /// Gets the unique name.
@@ -100,7 +100,7 @@ namespace Startitecture.Orm.Testing.Model
         /// <paramref name="entity"/> is null.
         /// </exception>
         /// <exception cref="Startitecture.Core.BusinessException">
-        /// <see cref="ComplexEntity.FakeComplexEntityId"/> is not set in <paramref name="entity"/>.
+        /// <see cref="ComplexEntity.ComplexEntityId"/> is not set in <paramref name="entity"/>.
         /// </exception>
         public void Associate([NotNull] ComplexEntity entity)
         {
@@ -109,12 +109,12 @@ namespace Startitecture.Orm.Testing.Model
                 throw new ArgumentNullException(nameof(entity));
             }
 
-            if (entity.FakeComplexEntityId.HasValue == false)
+            if (entity.ComplexEntityId.HasValue == false)
             {
-                throw new BusinessException(entity, string.Format(ValidationMessages.PropertyMustBeSet, "FakeComplexEntityId"));
+                throw new BusinessException(entity, string.Format(ValidationMessages.PropertyMustBeSet, "ComplexEntityId"));
             }
 
-            this.FakeComplexEntityId = entity.FakeComplexEntityId;
+            this.ComplexEntityId = entity.ComplexEntityId;
         }
     }
 }

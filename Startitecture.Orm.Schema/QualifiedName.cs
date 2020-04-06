@@ -8,7 +8,6 @@ namespace Startitecture.Orm.Schema
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
 
     using Startitecture.Core;
 
@@ -17,8 +16,6 @@ namespace Startitecture.Orm.Schema
     /// </summary>
     public struct QualifiedName : IEquatable<QualifiedName>
     {
-        private readonly string toString;
-
         /// <summary>
         /// The comparison properties.
         /// </summary>
@@ -29,6 +26,11 @@ namespace Startitecture.Orm.Schema
                 item => item.Schema,
                 item => item.Database
             };
+
+        /// <summary>
+        /// The to string.
+        /// </summary>
+        private readonly string toString;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="QualifiedName"/> struct.
@@ -96,7 +98,6 @@ namespace Startitecture.Orm.Schema
         /// Gets the attribute.
         /// </summary>
         public string Attribute { get; }
-
 
         #region Equality and Comparison Methods and Operators
 

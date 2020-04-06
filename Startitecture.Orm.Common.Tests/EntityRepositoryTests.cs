@@ -54,7 +54,7 @@ namespace Startitecture.Orm.Common.Tests
                 .Returns(default(ComplexRaisedRow));
 
             repositoryProvider.Setup(provider => provider.Save(It.IsAny<ComplexRaisedRow>()))
-                .Callback((ComplexRaisedRow row) => row.FakeComplexEntityId = 43)
+                .Callback((ComplexRaisedRow row) => row.ComplexEntityId = 43)
                 .Returns((ComplexRaisedRow row) => row);
 
             using (var provider = repositoryProvider.Object)
@@ -73,7 +73,7 @@ namespace Startitecture.Orm.Common.Tests
                 Assert.AreEqual(expected.CreatedBy, actual.CreatedBy);
                 Assert.AreEqual(454, actual.ModifiedBy.FakeMultiReferenceEntityId);
                 Assert.AreEqual(expected.ModifiedBy, actual.ModifiedBy);
-                Assert.AreEqual(43, actual.FakeComplexEntityId);
+                Assert.AreEqual(43, actual.ComplexEntityId);
                 Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
             }
         }
@@ -151,7 +151,7 @@ namespace Startitecture.Orm.Common.Tests
                 Assert.AreEqual(433, actual.ModifiedBy.FakeMultiReferenceEntityId);
                 Assert.AreEqual(expected.ModifiedBy, actual.ModifiedBy);
                 Assert.AreEqual(expected.ModifiedTime, actual.ModifiedTime);
-                Assert.AreEqual(22, actual.FakeComplexEntityId);
+                Assert.AreEqual(22, actual.ComplexEntityId);
                 Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
             }
         }

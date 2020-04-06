@@ -46,7 +46,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the instance section id.
         /// </summary>
-        [Column]
+        [Column(Order = 1)]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int InstanceSectionId { get; set; }
@@ -54,25 +54,25 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the start date.
         /// </summary>
-        [Column]
+        [Column(Order = 2)]
         public DateTimeOffset StartDate { get; set; }
 
         /// <summary>
         /// Gets or sets the end date.
         /// </summary>
-        [Column]
+        [Column(Order = 3)]
         public DateTimeOffset EndDate { get; set; }
 
         /// <summary>
         /// Gets or sets the owner id.
         /// </summary>
-        [Column]
+        [Column(Order = 4)]
         public int OwnerId { get; set; }
 
         /// <summary>
         /// Gets or sets the instance id.
         /// </summary>
-        [Column]
+        [Column(Order = 5)]
         public int InstanceId { get; set; }
 
         /// <summary>
@@ -84,7 +84,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the template section id.
         /// </summary>
-        [Column]
+        [Column(Order = 6)]
         public int TemplateSectionId { get; set; }
 
         /// <summary>

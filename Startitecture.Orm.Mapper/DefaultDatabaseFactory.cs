@@ -7,13 +7,12 @@
 namespace Startitecture.Orm.Mapper
 {
     using System;
+    using System.Data.Common;
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Schema;
     using Startitecture.Resources;
 
     /// <summary>
@@ -22,9 +21,14 @@ namespace Startitecture.Orm.Mapper
     public class DefaultDatabaseFactory : IDatabaseFactory
     {
         /// <summary>
-        /// The connection name.
+        /// The connection string.
         /// </summary>
-        private readonly string connectionName;
+        private readonly string connectionString;
+
+        /// <summary>
+        /// The provider name.
+        /// </summary>
+        private readonly string providerName;
 
         /// <summary>
         /// The definition provider.
@@ -34,52 +38,43 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultDatabaseFactory"/> class.
         /// </summary>
-        /// <param name="connectionName">
-        /// The connection name.
+        /// <param name="connectionString">
+        /// The connection string.
         /// </param>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="connectionName"/> is null or whitespace.
-        /// </exception>
-        public DefaultDatabaseFactory([NotNull] string connectionName)
-            : this(connectionName, Singleton<DataAnnotationsDefinitionProvider>.Instance)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultDatabaseFactory"/> class.
-        /// </summary>
-        /// <param name="connectionName">
-        /// The connection name.
+        /// <param name="providerName">
+        /// The provider name.
         /// </param>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="connectionName"/> is null or whitespace.
+        /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null
         /// </exception>
-        public DefaultDatabaseFactory([NotNull] string connectionName, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public DefaultDatabaseFactory([NotNull] string connectionString, [NotNull] string providerName, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
-            if (string.IsNullOrWhiteSpace(connectionName))
+            if (string.IsNullOrWhiteSpace(connectionString))
             {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionName));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionString));
             }
 
-            if (definitionProvider == null)
+            if (string.IsNullOrWhiteSpace(providerName))
             {
-                throw new ArgumentNullException(nameof(definitionProvider));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
-            this.connectionName = connectionName;
-            this.definitionProvider = definitionProvider;
+            this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.connectionString = connectionString;
+            this.providerName = providerName;
         }
 
         /// <inheritdoc />
         public IDatabaseContext Create()
         {
-            return new Database(this.connectionName, this.definitionProvider);
+            var providerFactory = DbProviderFactories.GetFactory(this.providerName);
+            return new Database(this.connectionString, providerFactory, this.definitionProvider);
         }
     }
 }

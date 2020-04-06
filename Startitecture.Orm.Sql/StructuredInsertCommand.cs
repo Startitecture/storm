@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Sql
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Dynamic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
@@ -36,6 +37,11 @@ namespace Startitecture.Orm.Sql
         /// The match expressions.
         /// </summary>
         private readonly List<EntityAttributeDefinition> selectionAttributes = new List<EntityAttributeDefinition>();
+
+        /// <summary>
+        /// The items to insert.
+        /// </summary>
+        private readonly List<TStructure> items = new List<TStructure>();
 
         /// <summary>
         /// The item definition.
@@ -77,16 +83,25 @@ namespace Startitecture.Orm.Sql
         /// <summary>
         /// Declares the table to insert into.
         /// </summary>
+        /// <param name="insertItems">
+        /// The items to insert.
+        /// </param>
         /// <typeparam name="TDataItem">
         /// The type of item to insert the table into.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="StructuredInsertCommand{TStructure}" />.
+        /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
         /// </returns>
-        public StructuredInsertCommand<TStructure> InsertInto<TDataItem>()
+        public StructuredInsertCommand<TStructure> InsertInto<TDataItem>([NotNull] IEnumerable<TStructure> insertItems)
         {
-            // TODO: Get from DI
-            this.itemDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TDataItem>();
+            if (insertItems == null)
+            {
+                throw new ArgumentNullException(nameof(insertItems));
+            }
+
+            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TDataItem>();
+            this.items.Clear();
+            this.items.AddRange(insertItems);
             return this;
         }
 
@@ -105,6 +120,77 @@ namespace Startitecture.Orm.Sql
             this.selectionAttributes.Clear();
             this.selectionAttributes.AddRange(matchProperties.Select(x => new AttributeLocation(x)).Select(structureDefinition.Find));
             return this;
+        }
+
+        /// <summary>
+        /// Executes the structured command and updates identity columns.
+        /// </summary>
+        /// <param name="rowIdentity">
+        /// The row identity.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="rowIdentity"/> is null.
+        /// </exception>
+        /// <returns>
+        /// An <see cref="IEnumerable{TStructure}"/> of items returned by the command.
+        /// </returns>
+        public IEnumerable<TStructure> ExecuteWithIdentityUpdate([NotNull] Expression<Func<TStructure, object>> rowIdentity)
+        {
+            if (rowIdentity == null)
+            {
+                throw new ArgumentNullException(nameof(rowIdentity));
+            }
+
+            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.EntityDefinitionProvider);
+
+            using (var dataTable = dataTableLoader.Load(this.items))
+            using (var reader = this.ExecuteReader(dataTable))
+            {
+                while (reader.Read())
+                {
+                    var identityList = this.items.Where(x => rowIdentity.Compile().Invoke(x) == default).ToList();
+                    TStructure itemToRemove = default;
+
+                    // TODO: Build an index based on the selection values instead of this partial looping.
+                    foreach (var item in identityList)
+                    {
+                        bool isMatch = this.selectionAttributes.All(
+                            selectionAttribute =>
+                                selectionAttribute.GetValueDelegate.DynamicInvoke(item).Equals(reader.GetValue(selectionAttribute.Ordinal)));
+
+                        if (isMatch == false)
+                        {
+                            continue;
+                        }
+
+                        var attributeDefinition = this.itemDefinition.Find(rowIdentity);
+                        attributeDefinition.SetValueDelegate.DynamicInvoke(item, reader.GetValue(attributeDefinition.Ordinal));
+                        itemToRemove = item;
+                        break;
+                    }
+
+                    if (Evaluate.IsDefaultValue(itemToRemove))
+                    {
+                        dynamic rowObject = new ExpandoObject();
+                        var rowDictionary = (IDictionary<string, object>)rowObject;
+
+                        foreach (var attribute in this.itemDefinition.DirectAttributes)
+                        {
+                            rowDictionary.Add(attribute.PropertyName, reader.GetValue(attribute.Ordinal));
+                        }
+
+                        // Throw an exception if something has gone wrong.
+                        var keyValues = this.selectionAttributes.ToDictionary(definition => definition.PropertyName, definition => reader.GetValue(definition.Ordinal));
+                        var keyValuePairs = keyValues.Select(pair => $"{pair.Key}='{pair.Value}'");
+                        throw new OperationException(rowObject, $"Could not locate an item matching {string.Join(";", keyValuePairs)}");
+                    }
+
+                    // Don't re-enumerate items we've already fixed.
+                    identityList.Remove(itemToRemove);
+                }
+            }
+
+            return this.items;
         }
 
         /// <summary>

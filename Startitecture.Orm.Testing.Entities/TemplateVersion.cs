@@ -42,7 +42,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the template version id.
         /// </summary>
-        [Column]
+        [Column(Order = 1)]
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int TemplateVersionId { get; set; }
@@ -50,19 +50,19 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the description.
         /// </summary>
-        [Column]
+        [Column(Order = 2)]
         public string Description { get; set; }
 
         /// <summary>
         /// Gets or sets the revision.
         /// </summary>
-        [Column]
+        [Column(Order = 3)]
         public int Revision { get; set; }
 
         /// <summary>
         /// Gets or sets the template id.
         /// </summary>
-        [Column]
+        [Column(Order = 4)]
         public int TemplateId { get; set; }
 
         /// <summary>

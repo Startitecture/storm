@@ -34,14 +34,14 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the instance extension id.
         /// </summary>
-        [Column]
+        [Column(Order = 1)]
         [Key]
         public int InstanceExtensionId { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether enabled.
         /// </summary>
-        [Column]
+        [Column(Order = 2)]
         public bool Enabled { get; set; }
 
         #region Equality and Comparison Methods

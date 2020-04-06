@@ -51,6 +51,7 @@ namespace Startitecture.Orm.Model
             {
                 item => item.Entity, 
                 item => item.ReferenceNode?.Value,
+                item => item.Ordinal,
                 item => item.PropertyName,
                 item => item.PhysicalName, 
                 item => item.Alias,
@@ -82,15 +83,19 @@ namespace Startitecture.Orm.Model
         /// <param name="attributeTypes">
         /// The type of the attribute.
         /// </param>
+        /// <param name="ordinal">
+        /// The attribute ordinal on the entity.
+        /// </param>
         /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="propertyInfo"/> or <paramref name="physicalName"/> is null or empty or whitespace.
+        /// <paramref name="entityPath"/>, <paramref name="propertyInfo"/>, or <paramref name="physicalName"/> is null or empty or whitespace.
         /// </exception>
         public EntityAttributeDefinition(
-            LinkedList<EntityLocation> entityPath,
+            [NotNull] LinkedList<EntityLocation> entityPath,
             [NotNull] PropertyInfo propertyInfo,
             [NotNull] string physicalName,
-            EntityAttributeTypes attributeTypes)
-            : this(entityPath, propertyInfo, physicalName, attributeTypes, null)
+            EntityAttributeTypes attributeTypes,
+            int ordinal)
+            : this(entityPath, propertyInfo, physicalName, attributeTypes, ordinal, null)
         {
         }
 
@@ -109,17 +114,21 @@ namespace Startitecture.Orm.Model
         /// <param name="attributeTypes">
         /// The type of the attribute.
         /// </param>
+        /// <param name="ordinal">
+        /// The attribute ordinal on the entity.
+        /// </param>
         /// <param name="alias">
         /// The alias.
         /// </param>
         /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="propertyInfo"/> or <paramref name="physicalName"/> is null or empty or whitespace.
+        /// <paramref name="entityPath"/>, <paramref name="propertyInfo"/>, or <paramref name="physicalName"/> is null or empty or whitespace.
         /// </exception>
         public EntityAttributeDefinition(
             [NotNull] LinkedList<EntityLocation> entityPath,
             [NotNull] PropertyInfo propertyInfo,
             [NotNull] string physicalName,
             EntityAttributeTypes attributeTypes,
+            int ordinal,
             string alias)
             : this()
         {
@@ -144,6 +153,7 @@ namespace Startitecture.Orm.Model
             this.PropertyName = propertyInfo.Name;
             this.PhysicalName = physicalName;
             this.AttributeTypes = attributeTypes;
+            this.Ordinal = ordinal;
 
             // If the alias matches the physical name then it isn't an alias.
             this.Alias = this.PhysicalName == alias ? null : alias;
@@ -223,6 +233,11 @@ namespace Startitecture.Orm.Model
         /// Gets the attribute alias.
         /// </summary>
         public string Alias { get; }
+
+        /// <summary>
+        /// Gets the ordinal of the entity attribute.
+        /// </summary>
+        public int Ordinal { get; }
 
         /// <summary>
         /// Gets the name by which the column will referenced in the current instance.

@@ -83,11 +83,11 @@ namespace Startitecture.Orm.Testing.Model
         /// <summary>
         /// Gets the fake complex entity id.
         /// </summary>
-        public int? FakeComplexEntityId
+        public int? ComplexEntityId
         {
             get
             {
-                return this.ComplexEntity?.FakeComplexEntityId;
+                return this.ComplexEntity?.ComplexEntityId;
             }
         }
 
