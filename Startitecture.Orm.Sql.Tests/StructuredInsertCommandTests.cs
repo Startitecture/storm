@@ -170,18 +170,18 @@ namespace Startitecture.Orm.Sql.Tests
                 this.entityMapper.MapTo(insertedValues, expected.SubmissionValues);
 
                 // Do the field value elements
-                var elementsList = from e in expected.SubmissionValues.SelectMany(value => value.Elements)
-                                   select new FieldValueElementTableTypeRow
-                                              {
-                                                  FieldValueElementId = e.FieldValueElementId,
-                                                  FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                  Order = e.Order,
-                                                  DateElement = e.Element as DateTimeOffset?, // TODO: See if we can implicit cast instead
-                                                  FloatElement = e.Element as double?,
-                                                  IntegerElement = e.Element as long?,
-                                                  MoneyElement = e.Element as decimal?,
-                                                  TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                              };
+                var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
+                                    select new FieldValueElementTableTypeRow
+                                               {
+                                                   FieldValueElementId = e.FieldValueElementId,
+                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                   Order = e.Order,
+                                                   DateElement = e.Element as DateTimeOffset?, // TODO: See if we can implicit cast instead
+                                                   FloatElement = e.Element as double?,
+                                                   IntegerElement = e.Element as long?,
+                                                   MoneyElement = e.Element as decimal?,
+                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                               }).ToList();
 
                 var elementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<FieldValueElementRow>(elementsList)
@@ -189,7 +189,10 @@ namespace Startitecture.Orm.Sql.Tests
 
                 elementsCommand.ExecuteWithIdentityUpdate(row => row.FieldValueElementId);
 
-                // TODO: Insert our stub values for each specific type.
+                var dateElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
+                    .InsertInto<DateElementRow>(elementsList);
+
+                dateElementsCommand.Execute();
 
                 ////// Attach the values to the submission
                 ////var submissionLoader = new DataTableLoader<GenericSubmissionValueTableTypeRow>(provider.EntityDefinitionProvider);

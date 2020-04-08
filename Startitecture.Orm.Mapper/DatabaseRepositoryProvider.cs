@@ -43,10 +43,12 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private const string CacheKeyFormat = "{0}=[{1}]";
 
+/*
         /// <summary>
         /// The cache time.
         /// </summary>
         private readonly TimeSpan cacheTime = TimeSpan.FromMinutes(2);
+*/
 
         /// <summary>
         /// The repository adapter.
@@ -144,8 +146,9 @@ namespace Startitecture.Orm.Mapper
             this.DependencyContainer = new DependencyContainer();
             this.itemCache = itemCache;
 
-            ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.EnableCaching, false, bool.Parse);
-            ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.CacheExpiration, this.cacheTime, TimeSpan.Parse);
+            // TODO: Find some other way to read this from configuration
+            ////ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.EnableCaching, false, bool.Parse);
+            ////ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.CacheExpiration, this.cacheTime, TimeSpan.Parse);
 
             try
             {

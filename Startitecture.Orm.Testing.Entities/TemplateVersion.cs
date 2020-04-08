@@ -74,13 +74,15 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the fake dependent id.
         /// </summary>
-        [RelatedEntity(typeof(SubSubRow), true)]
+        [RelatedEntity(typeof(SubSubRow))]
+        [Column(nameof(SubSubRow.UniqueName))]
         public string FakeSubSubUniqueName { get; set; }
 
         /// <summary>
         /// Gets or sets the some entity unique name.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "OtherEntity")]
+        [RelatedEntity(typeof(MultiReferenceRow), "OtherEntity")]
+        [Column(nameof(MultiReferenceRow.UniqueName))]
         public string OtherEntityUniqueName { get; set; }
 
         /// <summary>

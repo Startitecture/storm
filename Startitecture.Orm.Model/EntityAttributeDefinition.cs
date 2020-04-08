@@ -165,6 +165,8 @@ namespace Startitecture.Orm.Model
             this.IsMetadata = this.AttributeTypes.HasFlag(EntityAttributeTypes.Relation)
                               || this.AttributeTypes.HasFlag(EntityAttributeTypes.MappedAttribute);
 
+            this.AbsoluteLocation = new AttributeLocation(propertyInfo, new EntityReference { EntityType = this.Entity.EntityType });
+
             // TODO: Cache methods/delegates per type/property.
             this.PropertyInfo = propertyInfo;
             var getMethodInfo = propertyInfo.GetGetMethod(true);
@@ -223,6 +225,11 @@ namespace Startitecture.Orm.Model
         /// Gets the name of the entity attribute.
         /// </summary>
         public string PhysicalName { get; }
+
+        /// <summary>
+        /// Gets the absolute location or the entity attribute without aliases.
+        /// </summary>
+        public AttributeLocation AbsoluteLocation { get; }
 
         /// <summary>
         /// Gets the property name.

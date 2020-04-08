@@ -18,6 +18,8 @@ namespace Startitecture.Orm.Mapper.Tests
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
 
+    using MockRepository = Rhino.Mocks.MockRepository;
+
     /// <summary>
     /// The database tests.
     /// </summary>
@@ -25,19 +27,9 @@ namespace Startitecture.Orm.Mapper.Tests
     public class DatabaseTests
     {
         /// <summary>
-        /// Gets or sets the test context.
-        /// </summary>
-        // ReSharper disable once MemberCanBePrivate.Global
-        // ReSharper disable once UnusedAutoPropertyAccessor.Global
-        public TestContext TestContext { get; set; }
-
-        /// <summary>
         /// The configuration root.
         /// </summary>
-        private IConfigurationRoot ConfigurationRoot =>
-            new ConfigurationBuilder().SetBasePath(this.TestContext.DeploymentDirectory)
-                .AddJsonFile("appSettings.json", false)
-                .Build();
+        private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
 
         /// <summary>
         /// The begin transaction test.
@@ -47,8 +39,8 @@ namespace Startitecture.Orm.Mapper.Tests
         public void BeginTransaction_SqlCommand_ExecutesNonQuery()
         {
             using (var target = new Database(
-                this.ConfigurationRoot.GetConnectionString("MasterDatabase"),
-                nameof(System.Data.SqlClient),
+                ConfigurationRoot.GetConnectionString("MasterDatabase"),
+                "System.Data.SqlClient",
                 new DataAnnotationsDefinitionProvider()))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;

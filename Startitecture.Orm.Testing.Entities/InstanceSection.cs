@@ -102,13 +102,15 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the fake dependent id.
         /// </summary>
-        [RelatedEntity(typeof(DependentRow), true)]
+        [RelatedEntity(typeof(DependentRow))]
+        [Column(nameof(DependentRow.DependentTimeValue))]
         public DateTimeOffset? FakeDependentEntityDependentTimeValue { get; set; }
 
         /// <summary>
         /// Gets or sets the some entity unique name.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "SomeEntity")]
+        [RelatedEntity(typeof(MultiReferenceRow), "SomeEntity")]
+        [Column(nameof(MultiReferenceRow.UniqueName))]
         public string SomeEntityUniqueName { get; set; }
 
         /// <summary>

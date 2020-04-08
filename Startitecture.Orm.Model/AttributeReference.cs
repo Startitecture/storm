@@ -57,10 +57,5 @@ namespace Startitecture.Orm.Model
         /// Gets or sets a value indicating whether to ignore the reference.
         /// </summary>
         public bool IgnoreReference { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether use attribute alias.
-        /// </summary>
-        public bool UseAttributeAlias { get; set; }
     }
 }

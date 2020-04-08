@@ -123,6 +123,19 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
+        /// Executes the the insertion without retrieving inserted values.
+        /// </summary>
+        public void Execute()
+        {
+            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.EntityDefinitionProvider);
+
+            using (var dataTable = dataTableLoader.Load(this.items))
+            {
+                this.Execute(dataTable);
+            }
+        }
+
+        /// <summary>
         /// Executes the structured command and updates identity columns.
         /// </summary>
         /// <param name="rowIdentity">
@@ -210,19 +223,19 @@ namespace Startitecture.Orm.Sql
         /// </param>
         private static void CreateOutput(
             IEntityDefinition structureDefinition,
-            List<EntityAttributeDefinition> directAttributes,
+            IReadOnlyCollection<EntityAttributeDefinition> directAttributes,
             StringBuilder commandBuilder,
             bool terminateStatement)
         {
             var outputAttributes = from tvpAttribute in structureDefinition.AllAttributes
-                                   join directAttribute in directAttributes on tvpAttribute.PhysicalName equals directAttribute.PhysicalName
-                                   orderby tvpAttribute.PhysicalName
+                                   join directAttribute in directAttributes on tvpAttribute.AbsoluteLocation equals directAttribute.AbsoluteLocation
+                                   orderby tvpAttribute.Ordinal
                                    select tvpAttribute;
 
             var statementTerminator = terminateStatement ? ";" : string.Empty;
 
-            var insertedColumns = outputAttributes.OrderBy(x => x.PhysicalName).Select(x => x.PropertyName).ToList();
-            var outputColumns = directAttributes.OrderBy(x => x.PhysicalName).Select(x => $"INSERTED.{x.PhysicalName}");
+            var insertedColumns = outputAttributes.OrderBy(x => x.Ordinal).Select(x => x.PropertyName).ToList();
+            var outputColumns = directAttributes.OrderBy(x => x.Ordinal).Select(x => $"INSERTED.{x.PhysicalName}");
             commandBuilder.AppendLine($"OUTPUT {string.Join(",", outputColumns)}")
                 .AppendLine($"INTO @inserted ({string.Join(", ", insertedColumns)}){statementTerminator}");
         }

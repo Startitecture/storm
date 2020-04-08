@@ -68,7 +68,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the related row name.
         /// </summary>
-        [RelatedEntity(typeof(RelatedRow), false, null, PhysicalName = "rr_name")]
+        [RelatedEntity(typeof(RelatedRow), null, PhysicalName = "rr_name")]
         public string RelatedRowName { get; set; }
 
         #region Equality and Comparison Methods

@@ -263,7 +263,7 @@ namespace Startitecture.Orm.Schema
                        {
                            EntityReference = relatedEntityReference,
                            Name = propertyInfo.Name,
-                           UseAttributeAlias = relatedEntity.UseAttributeAlias,
+                           ////UseAttributeAlias = relatedEntity.UseAttributeAlias,
                            PhysicalName = relatedEntity.PhysicalName
                        };
         }
@@ -367,15 +367,15 @@ namespace Startitecture.Orm.Schema
                 var propertyAlias = string.Concat(relationLocation.Alias ?? relationLocation.Name, '.', attributeReference.Name);
                 var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
 
-                var entityIdentifier = relatedLocation.Alias ?? relatedLocation.Name;
-                var attributeName = attributeReference.UseAttributeAlias && relatedPhysicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
-                                        ? relatedPhysicalName.Substring(entityIdentifier.Length)
-                                        : relatedPhysicalName;
+                ////var entityIdentifier = relatedLocation.Alias ?? relatedLocation.Name;
+                ////var attributeName = attributeReference.UseAttributeAlias && relatedPhysicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
+                ////                        ? relatedPhysicalName.Substring(entityIdentifier.Length)
+                ////                        : relatedPhysicalName;
 
                 var entityAttributeDefinition = new EntityAttributeDefinition(
                     entityPath,
                     propertyInfo,
-                    attributeName,
+                    relatedPhysicalName,
                     EntityAttributeTypes.RelatedAttribute,
                     int.MaxValue,
                     attributeReference.Name == propertyAlias ? null : propertyAlias);
@@ -485,27 +485,26 @@ namespace Startitecture.Orm.Schema
 
                     entityPath.AddLast(relatedLocation);
 
-                    var isEntityAlias = string.IsNullOrWhiteSpace(relatedLocation.Alias) == false;
-                    var entityIdentifier = isEntityAlias ? relatedLocation.Alias : relatedLocation.Name;
+                    ////var isEntityAlias = string.IsNullOrWhiteSpace(relatedLocation.Alias) == false;
+                    ////var entityIdentifier = isEntityAlias ? relatedLocation.Alias : relatedLocation.Name;
 
                     // Use the physical name if overridden.
                     physicalName = attributeReference.PhysicalName ?? physicalName; // relatedEntity.PhysicalName ?? physicalName;
 
-                    attributeName = attributeReference.UseAttributeAlias && // relatedEntity.UseAttributeAlias && 
-                                    physicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
-                                        ? physicalName.Substring(entityIdentifier.Length)
-                                        : physicalName;
+                    ////attributeName = attributeReference.UseAttributeAlias && // relatedEntity.UseAttributeAlias && 
+                    ////                physicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
+                    ////                    ? physicalName.Substring(entityIdentifier.Length)
+                    ////                    : physicalName;
 
-                    var attributeAlias = attributeReference.UseAttributeAlias ? // relatedEntity.UseAttributeAlias ? 
-                                             attributeReference.Name : null;
+                    ////var attributeAlias = attributeReference.UseAttributeAlias ? // relatedEntity.UseAttributeAlias ? 
+                    ////                         attributeReference.Name : null;
 
                     var entityAttributeDefinition = new EntityAttributeDefinition(
                         entityPath,
                         attributeReference.PropertyInfo,
-                        attributeName,
+                        physicalName,
                         attributeTypes,
-                        int.MaxValue,
-                        attributeAlias);
+                        int.MaxValue);
 
                     entityPath.RemoveLast();
 

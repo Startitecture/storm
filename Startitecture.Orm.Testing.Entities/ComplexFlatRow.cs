@@ -13,8 +13,6 @@ namespace Startitecture.Orm.Testing.Entities
 
     using Startitecture.Core;
     using Startitecture.Orm.Mapper;
-    using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
 
     /// <summary>
@@ -23,19 +21,6 @@ namespace Startitecture.Orm.Testing.Entities
     [Table("ComplexEntity")]
     public class ComplexFlatRow : TransactionItemBase, IEquatable<ComplexFlatRow>
     {
-        /// <summary>
-        /// The lazy relations.
-        /// </summary>
-        private static readonly Lazy<IEnumerable<IEntityRelation>> LazyRelations =
-            new Lazy<IEnumerable<IEntityRelation>>(
-                () =>
-                new EntityRelationSet<ComplexFlatRow>().InnerJoin<SubRow>(row => row.FakeSubEntityId, entity => entity.FakeSubEntityId)
-                    .InnerJoin<SubRow, SubSubRow>(row => row.FakeSubSubEntityId, row => row.FakeSubSubEntityId)
-                    .InnerJoin<MultiReferenceRow>(row => row.CreatedByFakeMultiReferenceEntityId, row => row.FakeMultiReferenceEntityId)
-                    .InnerJoin<MultiReferenceRow>(row => row.ModifiedByFakeMultiReferenceEntityId, row => row.FakeMultiReferenceEntityId)
-                    .LeftJoin<DependentRow>(row => row.FakeDependentEntityId, row => row.FakeDependentEntityId)
-                    .Relations);
-
         /// <summary>
         /// The comparison properties.
         /// </summary>
@@ -105,13 +90,13 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the fake sub unique name.
         /// </summary>
-        [RelatedEntity(typeof(SubRow), true)]
+        [RelatedEntity(typeof(SubRow), PhysicalName = nameof(SubRow.UniqueName))]
         public string FakeSubEntityUniqueName { get; set; }
 
         /// <summary>
         /// Gets or sets the fake sub description.
         /// </summary>
-        [RelatedEntity(typeof(SubRow), true)]
+        [RelatedEntity(typeof(SubRow), PhysicalName = nameof(SubRow.Description))]
         public string FakeSubEntityDescription { get; set; }
 
         // Here we do not need to alias the name because it is unique within the selection.
@@ -119,43 +104,43 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the unique other id.
         /// </summary>
-        [RelatedEntity(typeof(SubRow))]
+        [RelatedEntity(typeof(SubRow), PhysicalName = nameof(SubRow.UniqueOtherId))]
         public short FakeSubEntityUniqueOtherId { get; set; }
 
         /// <summary>
         /// Gets or sets the fake sub sub entity id.
         /// </summary>
-        [RelatedEntity(typeof(SubRow))]
+        [RelatedEntity(typeof(SubRow), PhysicalName = nameof(SubRow.FakeSubSubEntityId))]
         public int FakeSubSubEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the fake sub sub unique name.
         /// </summary>
-        [RelatedEntity(typeof(SubSubRow), true)]
+        [RelatedEntity(typeof(SubSubRow), PhysicalName = nameof(SubSubRow.UniqueName))]
         public string FakeSubSubEntityUniqueName { get; set; }
 
         /// <summary>
         /// Gets or sets the fake sub sub description.
         /// </summary>
-        [RelatedEntity(typeof(SubSubRow), true)]
+        [RelatedEntity(typeof(SubSubRow), PhysicalName = nameof(SubSubRow.Description))]
         public string FakeSubSubEntityDescription { get; set; }
 
         /// <summary>
         /// Gets or sets the created by fake multi reference entity id.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "CreatedBy")]
+        [RelatedEntity(typeof(MultiReferenceRow), "CreatedBy", PhysicalName = nameof(MultiReferenceRow.FakeMultiReferenceEntityId))]
         public int CreatedByFakeMultiReferenceEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the created by unique name.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "CreatedBy")]
+        [RelatedEntity(typeof(MultiReferenceRow), "CreatedBy", PhysicalName = nameof(MultiReferenceRow.UniqueName))]
         public string CreatedByUniqueName { get; set; }
 
         /// <summary>
         /// Gets or sets the created by description.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "CreatedBy")]
+        [RelatedEntity(typeof(MultiReferenceRow), "CreatedBy", PhysicalName = nameof(MultiReferenceRow.Description))]
         public string CreatedByDescription { get; set; }
 
         /// <summary>
@@ -166,19 +151,19 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the modified by fake multi reference entity id.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "ModifiedBy")]
+        [RelatedEntity(typeof(MultiReferenceRow), "ModifiedBy", PhysicalName = nameof(MultiReferenceRow.FakeMultiReferenceEntityId))]
         public int ModifiedByFakeMultiReferenceEntityId { get; set; }
 
         /// <summary>
         /// Gets or sets the modified by unique name.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "ModifiedBy")]
+        [RelatedEntity(typeof(MultiReferenceRow), "ModifiedBy", PhysicalName = nameof(MultiReferenceRow.UniqueName))]
         public string ModifiedByUniqueName { get; set; }
 
         /// <summary>
         /// Gets or sets the modified by description.
         /// </summary>
-        [RelatedEntity(typeof(MultiReferenceRow), true, "ModifiedBy")]
+        [RelatedEntity(typeof(MultiReferenceRow), "ModifiedBy", PhysicalName = nameof(MultiReferenceRow.Description))]
         public string ModifiedByDescription { get; set; }
 
         /// <summary>
@@ -195,26 +180,14 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the dependent integer value.
         /// </summary>
-        [RelatedEntity(typeof(DependentRow), true)]
+        [RelatedEntity(typeof(DependentRow), PhysicalName = nameof(DependentRow.DependentIntegerValue))]
         public int? FakeDependentEntityDependentIntegerValue { get; set; }
 
         /// <summary>
         /// Gets or sets the dependent time value.
         /// </summary>
-        [RelatedEntity(typeof(DependentRow), true)]
+        [RelatedEntity(typeof(DependentRow), PhysicalName = nameof(DependentRow.DependentTimeValue))]
         public DateTimeOffset? FakeDependentEntityDependentTimeValue { get; set; }
-
-        /// <summary>
-        /// Gets the entity relations.
-        /// </summary>
-        [Ignore]
-        public IEnumerable<IEntityRelation> EntityRelations
-        {
-            get
-            {
-                return LazyRelations.Value;
-            }
-        }
 
         /// <summary>
         /// Determines if two values of the same type are equal.
