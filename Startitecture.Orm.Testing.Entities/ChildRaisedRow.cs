@@ -14,7 +14,6 @@ namespace Startitecture.Orm.Testing.Entities
 
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
 
     /// <summary>

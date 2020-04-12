@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="AttributeLocation.cs" company="Startitecture">
+// <copyright file="ResolvedAttributeLocation.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -8,91 +8,59 @@ namespace Startitecture.Orm.Model
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq.Expressions;
-    using System.Reflection;
-
-    using JetBrains.Annotations;
 
     using Startitecture.Core;
 
     /// <summary>
-    /// The attribute location.
+    /// The resolved attribute location.
     /// </summary>
-    public class AttributeLocation : IEquatable<AttributeLocation>
+    public struct ResolvedAttributeLocation : IEquatable<ResolvedAttributeLocation>
     {
         /// <summary>
         /// The comparison properties.
         /// </summary>
-        private static readonly Func<AttributeLocation, object>[] ComparisonProperties =
+        private static readonly Func<ResolvedAttributeLocation, object>[] ComparisonProperties =
             {
-                item => item.PropertyInfo?.Name,
-                item => item.EntityReference
+                item => item.Schema,
+                item => item.EntityName,
+                item => item.AttributeName
             };
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AttributeLocation"/> class.
+        /// Initializes a new instance of the <see cref="ResolvedAttributeLocation"/> struct.
         /// </summary>
-        /// <param name="expression">
-        /// The attribute expression.
+        /// <param name="schema">
+        /// The schema.
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="expression"/> is null.
-        /// </exception>
-        public AttributeLocation([NotNull] LambdaExpression expression)
+        /// <param name="entityName">
+        /// The entity name.
+        /// </param>
+        /// <param name="attributeName">
+        /// The attribute name.
+        /// </param>
+        public ResolvedAttributeLocation(string schema, string entityName, string attributeName)
         {
-            if (expression == null)
-            {
-                throw new ArgumentNullException(nameof(expression));
-            }
-
-            var member = expression.GetMember();
-            var property = expression.GetProperty();
-            this.EntityReference = new EntityReference
-                                       {
-                                           EntityType = member.Expression.Type,
-                                           EntityAlias = (member.Expression as MemberExpression)?.Member.Name
-                                       };
-
-            this.PropertyInfo = property;
+            this.Schema = schema;
+            this.EntityName = entityName;
+            this.AttributeName = attributeName;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AttributeLocation"/> class.
+        /// Gets the schema.
         /// </summary>
-        /// <param name="propertyInfo">
-        /// The attribute name.
-        /// </param>
-        /// <param name="entityReference">
-        /// The entity reference.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="propertyInfo"/> or <paramref name="entityReference"/> is null.
-        /// </exception>
-        public AttributeLocation([NotNull] PropertyInfo propertyInfo, [NotNull] EntityReference entityReference)
-        {
-            if (propertyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(propertyInfo));
-            }
+        public string Schema { get; private set; }
 
-            if (entityReference == null)
-            {
-                throw new ArgumentNullException(nameof(entityReference));
-            }
-
-            this.PropertyInfo = propertyInfo;
-            this.EntityReference = entityReference;
-        }
+        /// <summary>
+        /// Gets the entity name.
+        /// </summary>
+        public string EntityName { get; private set; }
 
         /// <summary>
         /// Gets the attribute name.
         /// </summary>
-        public PropertyInfo PropertyInfo { get; }
+        public string AttributeName { get; private set; }
 
-        /// <summary>
-        /// Gets the entity reference.
-        /// </summary>
-        public EntityReference EntityReference { get; }
+        #region Equality and Comparison Methods and Operators
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -106,9 +74,9 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(AttributeLocation valueA, AttributeLocation valueB)
+        public static bool operator ==(ResolvedAttributeLocation valueA, ResolvedAttributeLocation valueB)
         {
-            return EqualityComparer<AttributeLocation>.Default.Equals(valueA, valueB);
+            return EqualityComparer<ResolvedAttributeLocation>.Default.Equals(valueA, valueB);
         }
 
         /// <summary>
@@ -123,7 +91,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(AttributeLocation valueA, AttributeLocation valueB)
+        public static bool operator !=(ResolvedAttributeLocation valueA, ResolvedAttributeLocation valueB)
         {
             return !(valueA == valueB);
         }
@@ -137,7 +105,7 @@ namespace Startitecture.Orm.Model
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return $"{this.EntityReference}/{this.PropertyInfo.Name}";
+            return $"{this.Schema}.{this.EntityName}.{this.AttributeName}";
         }
 
         /// <summary>
@@ -176,9 +144,11 @@ namespace Startitecture.Orm.Model
         /// <param name="other">
         /// An object to compare with this object.
         /// </param>
-        public bool Equals(AttributeLocation other)
+        public bool Equals(ResolvedAttributeLocation other)
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
+
+        #endregion
     }
 }

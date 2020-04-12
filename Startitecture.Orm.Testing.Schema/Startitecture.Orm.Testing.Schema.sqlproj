@@ -103,9 +103,9 @@
     <Build Include="dbo\Tables\AggregateEventCompletion.sql" />
     <Build Include="dbo\Tables\DateElement.sql" />
     <Build Include="dbo\Procedures\spGenerateMergeScript.sql" />
-    <Build Include="dbo\Table Types\FieldValueDataType.sql" />
-    <Build Include="dbo\Table Types\FieldValueElementDataType.sql" />
-    <Build Include="dbo\Table Types\FieldDataType.sql" />
+    <Build Include="dbo\Table Types\FieldValueTableType.sql" />
+    <Build Include="dbo\Table Types\FieldValueElementTableType.sql" />
+    <Build Include="dbo\Table Types\FieldTableType.sql" />
     <Build Include="dbo\Tables\TextElement.sql" />
     <Build Include="dbo\Table Types\GenericSubmissionValueTableType.sql" />
   </ItemGroup>

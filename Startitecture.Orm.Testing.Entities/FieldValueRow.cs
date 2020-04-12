@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GenericSubmissionValueRow.cs" company="Startitecture">
+// <copyright file="FieldValueRow.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -9,20 +9,20 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// The generic submission value row.
+    /// The field value row.
     /// </summary>
-    public partial class GenericSubmissionValueRow
+    public partial class FieldValueRow
     {
-        /// <summary>
-        /// Gets or sets the generic submission.
-        /// </summary>
-        [Relation]
-        public GenericSubmissionRow GenericSubmission { get; set; } = new GenericSubmissionRow();
-
         /// <summary>
         /// Gets or sets the field.
         /// </summary>
         [Relation]
-        public FieldRow Field { get; set; } = new FieldRow();
+        public FieldRow Field { get; set; }
+
+        /// <summary>
+        /// Gets or sets the last modified by domain identity.
+        /// </summary>
+        [Relation]
+        public DomainIdentityRow LastModifiedBy { get; set; }
     }
 }

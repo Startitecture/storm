@@ -500,4 +500,7 @@
   <data name="MatchingKeyPropertyNotFound" xml:space="preserve">
     <value>{0} does not have matching key property for {1}.{2}</value>
   </data>
+  <data name="DelegateCouldNotBeCreatedWithReader" xml:space="preserve">
+    <value>A delegate could not be created for {0} with the current reader.</value>
+  </data>
 </root>

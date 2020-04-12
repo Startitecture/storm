@@ -212,7 +212,7 @@ namespace Startitecture.Orm.Sql
             var mergeStatementBuilder =
                 new StringBuilder().AppendLine($"DECLARE @inserted {tableTypeName};")
                     .AppendLine($"MERGE [{this.itemDefinition.EntityContainer}].[{this.itemDefinition.EntityName}] AS [Target]")
-                    .AppendLine($"USING {this.Parameter} AS [Source]")
+                    .AppendLine($"USING @{this.Parameter} AS [Source]")
                     .AppendLine($"ON ({string.Join(" AND ", mergeMatchClauses)})")
                     .AppendLine("WHEN MATCHED THEN")
                     .AppendLine(
@@ -232,7 +232,7 @@ namespace Startitecture.Orm.Sql
                                     .FirstOrDefault(a => a.PhysicalName == sourceAttribute.PhysicalName)
                                     .PhysicalName;
 
-                                return $"AND [Target].{itemPhysicalName} IN (SELECT [{tablePhysicalName}] FROM {this.Parameter})";
+                                return $"AND [Target].{itemPhysicalName} IN (SELECT [{tablePhysicalName}] FROM @{this.Parameter})";
                             })
                     .ToList();
 
@@ -279,7 +279,7 @@ namespace Startitecture.Orm.Sql
                     .AppendLine($"INTO @inserted ({string.Join(", ", insertedColumns)});")
                     .AppendLine($"SELECT {string.Join(", ", selectedColumns)}")
                     .AppendLine("FROM @inserted AS i")
-                    .AppendLine($"INNER JOIN {this.Parameter} AS tvp")
+                    .AppendLine($"INNER JOIN @{this.Parameter} AS tvp")
                     .AppendLine($"ON {string.Join(" AND ", selectionJoinMatchColumns)};");
             }
             else

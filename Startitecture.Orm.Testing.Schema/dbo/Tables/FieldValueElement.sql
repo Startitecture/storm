@@ -1,5 +1,5 @@
 ﻿CREATE TABLE [dbo].[FieldValueElement] (
-    [FieldValueElementId] BIGINT NOT NULL,
+    [FieldValueElementId] BIGINT IDENTITY (1, 1) NOT NULL,
     [FieldValueId]        BIGINT NOT NULL,
     [Order]               INT    NOT NULL,
     CONSTRAINT [PK_FieldValueElement] PRIMARY KEY CLUSTERED ([FieldValueElementId] ASC),

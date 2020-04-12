@@ -25,7 +25,6 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Orm.Mapper.Internal;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
     /// <summary>
@@ -116,10 +115,13 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The entity definition provider.
         /// </param>
+        /// <param name="nameQualifier">
+        /// The name qualifier for the target connection.
+        /// </param>
         /// <remarks>
         /// The supplied IDbConnection will not be closed/disposed - that remains the responsibility of the caller.
         /// </remarks>
-        public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
         {
             if (connection == null)
             {
@@ -131,6 +133,11 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
+            if (nameQualifier == null)
+            {
+                throw new ArgumentNullException(nameof(nameQualifier));
+            }
+
             this.DefinitionProvider = definitionProvider;
 
             // TODO: This seems to fail with SqlConnection.
@@ -140,7 +147,7 @@ namespace Startitecture.Orm.Mapper
             this.CommonConstruct();
 
             // TODO: Make other qualifiers based on database type
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider, nameQualifier);
         }
 
         /// <summary>
@@ -156,10 +163,17 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The entity definition provider.
         /// </param>
+        /// <param name="nameQualifier">
+        /// The name qualifier for the connection.
+        /// </param>
         /// <remarks>
         /// This class will automatically close and dispose any connections it creates.
         /// </remarks>
-        public Database([NotNull] string connectionString, [NotNull] string providerName, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public Database(
+            [NotNull] string connectionString,
+            [NotNull] string providerName,
+            [NotNull] IEntityDefinitionProvider definitionProvider,
+            [NotNull] INameQualifier nameQualifier)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -176,13 +190,17 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
+            if (nameQualifier == null)
+            {
+                throw new ArgumentNullException(nameof(nameQualifier));
+            }
+
             this.connectionString = connectionString;
             this.providerName = providerName;
             this.DefinitionProvider = definitionProvider;
             this.CommonConstruct();
 
-            // TODO: Make other qualifiers based on database type
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider, nameQualifier);
         }
 
         /// <summary>
@@ -198,10 +216,14 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The entity definition provider.
         /// </param>
+        /// <param name="nameQualifier">
+        /// The name qualifier for the connection.
+        /// </param>
         public Database(
             [NotNull] string connectionString,
             [NotNull] DbProviderFactory provider,
-            [NotNull] IEntityDefinitionProvider definitionProvider)
+            [NotNull] IEntityDefinitionProvider definitionProvider,
+            [NotNull] INameQualifier nameQualifier)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -218,13 +240,17 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
+            if (nameQualifier == null)
+            {
+                throw new ArgumentNullException(nameof(nameQualifier));
+            }
+
             this.connectionString = connectionString;
             this.factory = provider;
             this.DefinitionProvider = definitionProvider;
             this.CommonConstruct();
 
-            // TODO: Make other qualifiers based on database type
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier());
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider, nameQualifier);
         }
 
         #endregion
@@ -446,7 +472,7 @@ namespace Startitecture.Orm.Mapper
 
                     if (underlyingType != null && result == null)
                     {
-                        return default(T);
+                        return default;
                     }
 
                     return (T)Convert.ChangeType(result, underlyingType ?? typeof(T), CultureInfo.CurrentCulture);
@@ -503,9 +529,10 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(args));
             }
 
+            var entityDefinition = this.DefinitionProvider.Resolve<T>();
+
             if (this.EnableAutoSelect)
             {
-                var entityDefinition = this.DefinitionProvider.Resolve<T>();
                 var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
                 sql = autoSelectHelper.AddSelectClause(sql);
             }
@@ -544,9 +571,8 @@ namespace Startitecture.Orm.Mapper
                                 yield break;
                             }
 
-                            var pocoDataRequest = new PocoDataRequest(dataReader, typeof(T), this.DefinitionProvider)
+                            var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition)
                                                       {
-                                                          FieldCount = dataReader.FieldCount,
                                                           FirstColumn = 0
                                                       };
 

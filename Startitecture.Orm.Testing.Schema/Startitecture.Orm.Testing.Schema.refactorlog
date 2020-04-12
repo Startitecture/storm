@@ -14,4 +14,25 @@
     <Property Name="ParentElementType" Value="SqlTable" />
     <Property Name="NewName" Value="TextElementId" />
   </Operation>
+  <Operation Name="Rename Refactor" Key="2a300736-d9a7-4a82-92b9-1f696192043a" ChangeDateTime="04/12/2020 02:52:00">
+    <Property Name="ElementName" Value="[dbo].[FieldValueElementDataType]" />
+    <Property Name="ElementType" Value="SqlTableType" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[FieldValueElementTableType]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="4ec4721e-217f-4d44-9123-51cc1c46556e" ChangeDateTime="04/12/2020 02:53:13">
+    <Property Name="ElementName" Value="[dbo].[FieldValueDataType]" />
+    <Property Name="ElementType" Value="SqlTableType" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[FieldValueTableType]" />
+  </Operation>
+  <Operation Name="Rename Refactor" Key="e3c4ea9b-c53c-4c4b-bf65-b7a062ce2aaf" ChangeDateTime="04/12/2020 02:54:25">
+    <Property Name="ElementName" Value="[dbo].[FieldDataType]" />
+    <Property Name="ElementType" Value="SqlTableType" />
+    <Property Name="ParentElementName" Value="[dbo]" />
+    <Property Name="ParentElementType" Value="SqlSchema" />
+    <Property Name="NewName" Value="[FieldTableType]" />
+  </Operation>
 </Operations>

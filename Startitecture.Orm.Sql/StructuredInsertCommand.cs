@@ -9,7 +9,7 @@ namespace Startitecture.Orm.Sql
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Dynamic;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
@@ -17,8 +17,10 @@ namespace Startitecture.Orm.Sql
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The structured insert command.
@@ -44,6 +46,21 @@ namespace Startitecture.Orm.Sql
         private readonly List<TStructure> items = new List<TStructure>();
 
         /// <summary>
+        /// The name qualifier.
+        /// </summary>
+        private readonly INameQualifier nameQualifier;
+
+        /// <summary>
+        /// The values expression.
+        /// </summary>
+        private readonly List<LambdaExpression> insertColumnExpressions = new List<LambdaExpression>();
+
+        /// <summary>
+        /// The from expressions.
+        /// </summary>
+        private readonly List<LambdaExpression> fromColumnExpressions = new List<LambdaExpression>();
+
+        /// <summary>
         /// The item definition.
         /// </summary>
         private IEntityDefinition itemDefinition;
@@ -58,6 +75,7 @@ namespace Startitecture.Orm.Sql
             : base(structuredCommandProvider)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
+            this.nameQualifier = this.StructuredCommandProvider.NameQualifier;
         }
 
         /// <summary>
@@ -73,6 +91,7 @@ namespace Startitecture.Orm.Sql
             : base(structuredCommandProvider, databaseTransaction)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
+            this.nameQualifier = this.StructuredCommandProvider.NameQualifier;
         }
 
         /// <summary>
@@ -86,13 +105,18 @@ namespace Startitecture.Orm.Sql
         /// <param name="insertItems">
         /// The items to insert.
         /// </param>
+        /// <param name="targetColumns">
+        /// The target columns of the insert table.
+        /// </param>
         /// <typeparam name="TDataItem">
         /// The type of item to insert the table into.
         /// </typeparam>
         /// <returns>
         /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
         /// </returns>
-        public StructuredInsertCommand<TStructure> InsertInto<TDataItem>([NotNull] IEnumerable<TStructure> insertItems)
+        public StructuredInsertCommand<TStructure> InsertInto<TDataItem>(
+            [NotNull] IEnumerable<TStructure> insertItems,
+            params Expression<Func<TDataItem, object>>[] targetColumns)
         {
             if (insertItems == null)
             {
@@ -102,6 +126,32 @@ namespace Startitecture.Orm.Sql
             this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TDataItem>();
             this.items.Clear();
             this.items.AddRange(insertItems);
+            this.insertColumnExpressions.Clear();
+            this.insertColumnExpressions.AddRange(targetColumns);
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies the columns to select into the table.
+        /// </summary>
+        /// <param name="fromColumns">
+        /// The columns to select into the table. These must be the same number of columns as target columns..
+        /// </param>
+        /// <returns>
+        /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="fromColumns"/> is null.
+        /// </exception>
+        public StructuredInsertCommand<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
+        {
+            if (fromColumns == null)
+            {
+                throw new ArgumentNullException(nameof(fromColumns));
+            }
+
+            this.fromColumnExpressions.Clear();
+            this.fromColumnExpressions.AddRange(fromColumns);
             return this;
         }
 
@@ -155,55 +205,32 @@ namespace Startitecture.Orm.Sql
             }
 
             var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.EntityDefinitionProvider);
+            var returnList = new List<TStructure>();
 
             using (var dataTable = dataTableLoader.Load(this.items))
             using (var reader = this.ExecuteReader(dataTable))
             {
+                var entityDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+
                 while (reader.Read())
                 {
-                    var identityList = this.items.Where(x => rowIdentity.Compile().Invoke(x) == default).ToList();
-                    TStructure itemToRemove = default;
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var mappingDelegate = FlatPocoFactory.ReturnableFactory.CreateDelegate<TStructure>(pocoDataRequest).MappingDelegate;
+                    var pocoDelegate = mappingDelegate as Func<IDataReader, TStructure>;
 
-                    // TODO: Build an index based on the selection values instead of this partial looping.
-                    foreach (var item in identityList)
+                    if (pocoDelegate == null)
                     {
-                        bool isMatch = this.selectionAttributes.All(
-                            selectionAttribute =>
-                                selectionAttribute.GetValueDelegate.DynamicInvoke(item).Equals(reader.GetValue(selectionAttribute.Ordinal)));
-
-                        if (isMatch == false)
-                        {
-                            continue;
-                        }
-
-                        var attributeDefinition = this.itemDefinition.Find(rowIdentity);
-                        attributeDefinition.SetValueDelegate.DynamicInvoke(item, reader.GetValue(attributeDefinition.Ordinal));
-                        itemToRemove = item;
-                        break;
+                        throw new OperationException(
+                            pocoDataRequest,
+                            string.Format(CultureInfo.CurrentCulture, ErrorMessages.DelegateCouldNotBeCreatedWithReader, pocoDataRequest));
                     }
 
-                    if (Evaluate.IsDefaultValue(itemToRemove))
-                    {
-                        dynamic rowObject = new ExpandoObject();
-                        var rowDictionary = (IDictionary<string, object>)rowObject;
-
-                        foreach (var attribute in this.itemDefinition.DirectAttributes)
-                        {
-                            rowDictionary.Add(attribute.PropertyName, reader.GetValue(attribute.Ordinal));
-                        }
-
-                        // Throw an exception if something has gone wrong.
-                        var keyValues = this.selectionAttributes.ToDictionary(definition => definition.PropertyName, definition => reader.GetValue(definition.Ordinal));
-                        var keyValuePairs = keyValues.Select(pair => $"{pair.Key}='{pair.Value}'");
-                        throw new OperationException(rowObject, $"Could not locate an item matching {string.Join(";", keyValuePairs)}");
-                    }
-
-                    // Don't re-enumerate items we've already fixed.
-                    identityList.Remove(itemToRemove);
+                    var poco = pocoDelegate.Invoke(reader);
+                    returnList.Add(poco);
                 }
             }
 
-            return this.items;
+            return returnList;
         }
 
         /// <summary>
@@ -221,21 +248,22 @@ namespace Startitecture.Orm.Sql
         /// <param name="terminateStatement">
         /// A value indicating whether to terminate the statement.
         /// </param>
-        private static void CreateOutput(
+        private void CreateOutput(
             IEntityDefinition structureDefinition,
             IReadOnlyCollection<EntityAttributeDefinition> directAttributes,
             StringBuilder commandBuilder,
             bool terminateStatement)
         {
             var outputAttributes = from tvpAttribute in structureDefinition.AllAttributes
-                                   join directAttribute in directAttributes on tvpAttribute.AbsoluteLocation equals directAttribute.AbsoluteLocation
+                                   join attribute in directAttributes on tvpAttribute.ResolvedLocation equals attribute.ResolvedLocation
                                    orderby tvpAttribute.Ordinal
                                    select tvpAttribute;
 
             var statementTerminator = terminateStatement ? ";" : string.Empty;
 
-            var insertedColumns = outputAttributes.OrderBy(x => x.Ordinal).Select(x => x.PropertyName).ToList();
-            var outputColumns = directAttributes.OrderBy(x => x.Ordinal).Select(x => $"INSERTED.{x.PhysicalName}");
+            var insertedColumns = outputAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PropertyName)).ToList();
+            var outputColumns = directAttributes.OrderBy(x => x.Ordinal).Select(x => $"INSERTED.{this.nameQualifier.Escape(x.PhysicalName)}");
+
             commandBuilder.AppendLine($"OUTPUT {string.Join(",", outputColumns)}")
                 .AppendLine($"INTO @inserted ({string.Join(", ", insertedColumns)}){statementTerminator}");
         }
@@ -250,18 +278,20 @@ namespace Startitecture.Orm.Sql
         {
             var structureDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TStructure>();
             var directAttributes = this.itemDefinition.DirectAttributes.ToList();
-            var insertAttributes = this.itemDefinition.DirectAttributes.Any(x => x.IsIdentityColumn)
-                                       ? this.itemDefinition.UpdateableAttributes.ToList()
-                                       : directAttributes;
+            var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.itemDefinition.Find) :
+                                    this.itemDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.itemDefinition.UpdateableAttributes :
+                                    directAttributes).ToList();
 
-            var targetColumns = insertAttributes.OrderBy(x => x.PhysicalName).Select(x => x.PhysicalName);
+            var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PhysicalName));
 
-            var sourceAttributes = (from tvpAttribute in structureDefinition.AllAttributes
-                                    join insertAttribute in insertAttributes on tvpAttribute.PhysicalName equals insertAttribute.PhysicalName
-                                    orderby tvpAttribute.PhysicalName
-                                    select tvpAttribute).ToList();
+            var sourceAttributes = (this.fromColumnExpressions.Any()
+                                        ? this.fromColumnExpressions.Select(structureDefinition.Find)
+                                        : from tvpAttribute in structureDefinition.AllAttributes
+                                          join insertAttribute in insertAttributes on tvpAttribute.PhysicalName equals insertAttribute.PhysicalName
+                                          orderby tvpAttribute.Ordinal
+                                          select tvpAttribute).ToList();
 
-            var sourceColumns = sourceAttributes.Select(x => x.PhysicalName);
+            var sourceColumns = sourceAttributes.Select(x => this.nameQualifier.Escape(x.PhysicalName));
 
             var commandBuilder = new StringBuilder();
 
@@ -272,16 +302,17 @@ namespace Startitecture.Orm.Sql
                 commandBuilder.AppendLine($"DECLARE @inserted {this.StructureTypeName};");
             }
 
-            commandBuilder.AppendLine($"INSERT INTO [{this.itemDefinition.EntityContainer}].[{this.itemDefinition.EntityName}]")
+            commandBuilder.AppendLine(
+                    $"INSERT INTO {this.nameQualifier.Escape(this.itemDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.itemDefinition.EntityName)}")
                 .AppendLine($"({string.Join(", ", targetColumns)})");
 
             if (selectResults)
             {
                 // In an INSERT we do not terminate this statement with a semi-colon. However in a MERGE we would do that.
-                CreateOutput(structureDefinition, directAttributes, commandBuilder, false);
+                this.CreateOutput(structureDefinition, directAttributes, commandBuilder, false);
             }
 
-            commandBuilder.AppendLine($"SELECT {string.Join(", ", sourceColumns)} FROM {this.Parameter} AS tvp;");
+            commandBuilder.AppendLine($"SELECT {string.Join(", ", sourceColumns)} FROM @{this.Parameter} AS tvp;");
 
             if (selectResults)
             {
@@ -313,27 +344,27 @@ namespace Startitecture.Orm.Sql
 
             var selectionJoinMatchColumns =
                 (matchAttributes.Any() ? matchAttributes : keyAttributes).Select(
-                    x => $"i.[{x.SourceKey.PropertyName}] = tvp.[{x.SourceKey.PropertyName}]");
+                    x => $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)} = tvp.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}");
 
             // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original
             // table valued parameter.
             var selectedKeyAttributes =
-                keyAttributes.Select(x => new { Column = $"i.[{x.SourceKey.PropertyName}]", Attribute = x.SourceKey }).ToList();
+                keyAttributes.Select(x => new { Column = $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}", Attribute = x.SourceKey }).ToList();
 
             // Everything for selecting from the TVP uses property name in order to match UDTT columns.
             var nonKeyAttributes = structureDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute))
                 .Select(
                     x => new
                              {
-                                 Column = $"tvp.[{x.PropertyName}]",
+                                 Column = $"tvp.{this.nameQualifier.Escape(x.PropertyName)}",
                                  Attribute = x
                              });
 
-            var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.PropertyName).Select(x => x.Column);
+            var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.Ordinal).Select(x => x.Column);
 
             commandBuilder.AppendLine($"SELECT {string.Join(", ", selectedColumns)}")
                 .AppendLine("FROM @inserted AS i")
-                .AppendLine($"INNER JOIN {this.Parameter} AS tvp")
+                .AppendLine($"INNER JOIN @{this.Parameter} AS tvp")
                 .AppendLine($"ON {string.Join(" AND ", selectionJoinMatchColumns)};");
         }
     }

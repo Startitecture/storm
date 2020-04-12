@@ -42,31 +42,24 @@ namespace Startitecture.Orm.Mapper
         /// <param name="dataReader">
         /// The data record.
         /// </param>
-        /// <param name="pocoType">
-        /// The POCO data type for the data record.
+        /// <param name="entityDefinition">
+        /// The definition of the type represented by the <paramref name="dataReader"/>.
         /// </param>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
-        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] Type pocoType, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] IEntityDefinition entityDefinition)
         {
             if (dataReader == null)
             {
                 throw new ArgumentNullException(nameof(dataReader));
             }
 
-            if (pocoType == null)
+            if (entityDefinition == null)
             {
-                throw new ArgumentNullException(nameof(pocoType));
-            }
-
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
+                throw new ArgumentNullException(nameof(entityDefinition));
             }
 
             this.DataReader = dataReader;
-            this.EntityDefinition = definitionProvider.Resolve(pocoType);
+            this.FieldCount = dataReader.FieldCount;
+            this.EntityDefinition = entityDefinition ?? throw new ArgumentNullException(nameof(entityDefinition));
 
             // We need a unique hash for each query formation.
             this.hashObjects = this.GetHashObjects();
@@ -86,9 +79,9 @@ namespace Startitecture.Orm.Mapper
         public IEntityDefinition EntityDefinition { get; }
 
         /// <summary>
-        /// Gets or sets the field count.
+        /// Gets the field count.
         /// </summary>
-        public int FieldCount { get; set; }
+        public int FieldCount { get; }
 
         /// <summary>
         /// Gets or sets the first column to read.

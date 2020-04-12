@@ -1,4 +1,4 @@
-﻿CREATE TYPE [dbo].[FieldDataType] AS TABLE
+﻿CREATE TYPE [dbo].[FieldTableType] AS TABLE
 (
 	[FieldId] INT NULL,
 	[Name] NVARCHAR(50) NOT NULL,

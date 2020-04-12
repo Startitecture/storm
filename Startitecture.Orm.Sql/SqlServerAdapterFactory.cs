@@ -1,31 +1,22 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlServerRepositoryAdapterFactory.cs" company="Startitecture">
+// <copyright file="SqlServerAdapterFactory.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
-// <summary>
-//   The query repository adapter factory.
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Mapper
+namespace Startitecture.Orm.Sql
 {
-    using System;
-
-    using Common;
+    using Startitecture.Orm.Common;
 
     /// <summary>
-    /// The query repository adapter factory.
+    /// The SQL Server adapter factory.
     /// </summary>
-    public class SqlServerRepositoryAdapterFactory : IRepositoryAdapterFactory
+    public class SqlServerAdapterFactory : IRepositoryAdapterFactory
     {
-        #region Public Methods and Operators
-
         /// <inheritdoc />
         public IRepositoryAdapter Create(IDatabaseContext dataContext)
         {
-            return new SqlServerRepositoryAdapter(dataContext);
+            return new SqlServerAdapter(dataContext);
         }
-
-        #endregion
     }
 }

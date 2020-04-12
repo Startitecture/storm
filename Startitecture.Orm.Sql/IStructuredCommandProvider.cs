@@ -24,6 +24,11 @@ namespace Startitecture.Orm.Sql
         IEntityDefinitionProvider EntityDefinitionProvider { get; }
 
         /// <summary>
+        /// Gets the name qualifier.
+        /// </summary>
+        INameQualifier NameQualifier { get; }
+
+        /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>
         /// <param name="structuredCommand">

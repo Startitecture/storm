@@ -47,7 +47,7 @@ namespace Startitecture.Orm.Sql
 
             this.propertyDictionary = new Lazy<Dictionary<string, PropertyInfo>>(
                 () => definitionProvider.Resolve<T>()
-                    .DirectAttributes.OrderBy(definition => definition.Ordinal)
+                    .AllAttributes.OrderBy(definition => definition.Ordinal)
                     .ToDictionary(definition => definition.PropertyInfo.Name, definition => definition.PropertyInfo));
         }
 

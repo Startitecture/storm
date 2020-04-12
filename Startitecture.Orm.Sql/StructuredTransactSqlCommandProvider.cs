@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredSqlCommandProvider.cs" company="Startitecture">
+// <copyright file="StructuredTransactSqlCommandProvider.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -21,7 +21,7 @@ namespace Startitecture.Orm.Sql
     /// <summary>
     /// The structured SQL command provider.
     /// </summary>
-    public class StructuredSqlCommandProvider : IStructuredCommandProvider
+    public class StructuredTransactSqlCommandProvider : IStructuredCommandProvider
     {
         /// <summary>
         /// The context provider.
@@ -29,19 +29,23 @@ namespace Startitecture.Orm.Sql
         private readonly IDatabaseContextProvider contextProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StructuredSqlCommandProvider"/> class.
+        /// Initializes a new instance of the <see cref="StructuredTransactSqlCommandProvider"/> class.
         /// </summary>
         /// <param name="contextProvider">
         /// The context provider.
         /// </param>
-        public StructuredSqlCommandProvider([NotNull] IDatabaseContextProvider contextProvider)
+        public StructuredTransactSqlCommandProvider([NotNull] IDatabaseContextProvider contextProvider)
         {
             this.contextProvider = contextProvider ?? throw new ArgumentNullException(nameof(contextProvider));
             this.EntityDefinitionProvider = contextProvider.DatabaseContext.DefinitionProvider;
+            this.NameQualifier = new TransactSqlQualifier();
         }
 
         /// <inheritdoc />
         public IEntityDefinitionProvider EntityDefinitionProvider { get; }
+
+        /// <inheritdoc />
+        public INameQualifier NameQualifier { get; }
 
         /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
@@ -61,12 +65,11 @@ namespace Startitecture.Orm.Sql
         /// <exception cref="Startitecture.Core.OperationException">
         /// The underlying <see cref="IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2100:Review SQL queries for security vulnerabilities",
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Microsoft.Security",
+            "CA2100:Review SQL queries for security vulnerabilities",
             Justification = "structuredCommand.CommandText is built with parameterized input.")]
-        public IDbCommand CreateCommand(
-            [NotNull] IStructuredCommand structuredCommand,
-            [NotNull] DataTable dataTable,
-            [NotNull] IDbTransaction transaction)
+        public IDbCommand CreateCommand([NotNull] IStructuredCommand structuredCommand, [NotNull] DataTable dataTable, IDbTransaction transaction)
         {
             if (structuredCommand == null)
             {
@@ -76,11 +79,6 @@ namespace Startitecture.Orm.Sql
             if (dataTable == null)
             {
                 throw new ArgumentNullException(nameof(dataTable));
-            }
-
-            if (transaction == null)
-            {
-                throw new ArgumentNullException(nameof(transaction));
             }
 
             if (!(this.contextProvider.DatabaseContext.Connection is SqlConnection sqlConnection))
@@ -94,7 +92,7 @@ namespace Startitecture.Orm.Sql
 
             try
             {
-                var tableParameter = sqlCommand.Parameters.AddWithValue(structuredCommand.Parameter, dataTable);
+                var tableParameter = sqlCommand.Parameters.AddWithValue($@"{structuredCommand.Parameter}", dataTable);
                 tableParameter.SqlDbType = SqlDbType.Structured;
                 tableParameter.TypeName = structuredCommand.StructureTypeName;
             }

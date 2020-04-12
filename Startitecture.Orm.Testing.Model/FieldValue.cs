@@ -9,6 +9,9 @@ namespace Startitecture.Orm.Testing.Model
     using System;
     using System.Collections;
     using System.Collections.Generic;
+    using System.Linq;
+
+    using JetBrains.Annotations;
 
     /// <summary>
     /// The field value.
@@ -26,9 +29,16 @@ namespace Startitecture.Orm.Testing.Model
         /// <param name="field">
         /// The field.
         /// </param>
-        public FieldValue(Field field)
+        public FieldValue([NotNull] Field field)
         {
-            this.Field = field;
+            this.Field = field ?? throw new ArgumentNullException(nameof(field));
+        }
+
+        /// <summary>
+        /// Prevents a default instance of the <see cref="FieldValue"/> class from being created.
+        /// </summary>
+        private FieldValue()
+        {
         }
 
         /// <summary>
@@ -76,7 +86,7 @@ namespace Startitecture.Orm.Testing.Model
             {
                 foreach (var item in list)
                 {
-                    var element = new FieldValueElement(value);
+                    var element = new FieldValueElement(item);
                     this.elements.Add(element);
                     element.AddToValue(this);
                 }
@@ -91,6 +101,13 @@ namespace Startitecture.Orm.Testing.Model
             this.LastModifiedBy = identity;
             this.LastModifiedTime = DateTimeOffset.Now;
             return this;
+        }
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            var elementString = string.Join(";", this.elements.OrderBy(element => element.Order).Select(element => $"'{element}'"));
+            return $"{this.Field} = {elementString}";
         }
     }
 }

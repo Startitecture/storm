@@ -36,7 +36,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <summary>
         /// Gets or sets the FieldValueElementId (Primary key)
         /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         [Column(@"FieldValueElementId", Order = 1, TypeName = "bigint")]
         [Index(@"PK_FieldValueElement", 1, IsUnique = true, IsClustered = true)]
         [Required]

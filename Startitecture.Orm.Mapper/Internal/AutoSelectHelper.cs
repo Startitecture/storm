@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Mapper.Internal
 
     using Startitecture.Orm.Mapper.DatabaseTypes;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The auto select helper.
@@ -107,7 +106,7 @@ namespace Startitecture.Orm.Mapper.Internal
             var queryColumns = from c in this.entityDefinition.DirectAttributes
                                select tableName + "." + this.databaseType.EscapeSqlIdentifier(c.PhysicalName);
 
-            string columns = this.entityDefinition.DirectAttributes.Any() ? "NULL" : string.Join(", ", Enumerable.ToArray<string>(queryColumns));
+            string columns = this.entityDefinition.DirectAttributes.Any() ? "NULL" : string.Join(", ", queryColumns.ToArray<string>());
 
             return FromRegex.IsMatch(sql) ? $"SELECT {columns} {sql}" : $"SELECT {columns} FROM {tableName} {sql}";
         }

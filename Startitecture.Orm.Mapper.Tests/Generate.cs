@@ -269,11 +269,11 @@ namespace Startitecture.Orm.Mapper.Tests
                 ordinal++;
             }
 
-            var pocoDataRequest =
-                new PocoDataRequest(dataReader, typeof(T), definitionProvider)
-                    {
-                        FieldCount = attributeDefinitions.Count, FirstColumn = 0
-                    };
+            var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition)
+                                      {
+                                          ////FieldCount = attributeDefinitions.Count,
+                                          FirstColumn = 0
+                                      };
 
             return pocoDataRequest;
         }

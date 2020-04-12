@@ -1,4 +1,4 @@
-﻿CREATE TYPE [dbo].[FieldValueElementDataType] AS TABLE
+﻿CREATE TYPE [dbo].[FieldValueElementTableType] AS TABLE
 (
     [FieldValueElementId] BIGINT NULL,
     [FieldValueId]        BIGINT NOT NULL,

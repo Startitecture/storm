@@ -30,11 +30,6 @@ namespace Startitecture.Orm.Common
         event EventHandler Disposed;
 
         /// <summary>
-        /// Gets the entity mapper.
-        /// </summary>
-        IEntityMapper EntityMapper { get; }
-
-        /// <summary>
         /// Gets the entity definition provider.
         /// </summary>
         IEntityDefinitionProvider EntityDefinitionProvider { get; }

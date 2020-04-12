@@ -165,7 +165,7 @@ namespace Startitecture.Orm.Model
             this.IsMetadata = this.AttributeTypes.HasFlag(EntityAttributeTypes.Relation)
                               || this.AttributeTypes.HasFlag(EntityAttributeTypes.MappedAttribute);
 
-            this.AbsoluteLocation = new AttributeLocation(propertyInfo, new EntityReference { EntityType = this.Entity.EntityType });
+            this.ResolvedLocation = new ResolvedAttributeLocation(this.Entity.Container, this.Entity.Name, this.PhysicalName);
 
             // TODO: Cache methods/delegates per type/property.
             this.PropertyInfo = propertyInfo;
@@ -227,9 +227,9 @@ namespace Startitecture.Orm.Model
         public string PhysicalName { get; }
 
         /// <summary>
-        /// Gets the absolute location or the entity attribute without aliases.
+        /// Gets the resolved location of the entity attribute without aliases.
         /// </summary>
-        public AttributeLocation AbsoluteLocation { get; }
+        public ResolvedAttributeLocation ResolvedLocation { get; }
 
         /// <summary>
         /// Gets the property name.

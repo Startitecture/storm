@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Mapper
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -239,6 +240,8 @@ namespace Startitecture.Orm.Mapper
 #if DEBUG
             try
             {
+                var recordItems = Enumerable.Range(0, record.FieldCount).Select(i => $"{record.GetName(i)}='{record.GetValue(i)}'");
+                Trace.WriteLine($"Getting data from record {string.Join(",", recordItems)}");
 #endif
                 poco = (T)basePocoDelegate.MappingDelegate.DynamicInvoke(record);
 #if DEBUG

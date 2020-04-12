@@ -36,6 +36,11 @@ namespace Startitecture.Orm.Mapper
         private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
+        /// The name qualifier.
+        /// </summary>
+        private readonly INameQualifier nameQualifier;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="DefaultDatabaseFactory"/> class.
         /// </summary>
         /// <param name="connectionString">
@@ -47,13 +52,20 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
+        /// <param name="nameQualifier">
+        /// The name Qualifier.
+        /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null
         /// </exception>
-        public DefaultDatabaseFactory([NotNull] string connectionString, [NotNull] string providerName, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public DefaultDatabaseFactory(
+            [NotNull] string connectionString,
+            [NotNull] string providerName,
+            [NotNull] IEntityDefinitionProvider definitionProvider,
+            [NotNull] INameQualifier nameQualifier)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -65,7 +77,13 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
+            if (nameQualifier == null)
+            {
+                throw new ArgumentNullException(nameof(nameQualifier));
+            }
+
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.nameQualifier = nameQualifier;
             this.connectionString = connectionString;
             this.providerName = providerName;
         }
@@ -74,7 +92,7 @@ namespace Startitecture.Orm.Mapper
         public IDatabaseContext Create()
         {
             var providerFactory = DbProviderFactories.GetFactory(this.providerName);
-            return new Database(this.connectionString, providerFactory, this.definitionProvider);
+            return new Database(this.connectionString, providerFactory, this.definitionProvider, this.nameQualifier);
         }
     }
 }

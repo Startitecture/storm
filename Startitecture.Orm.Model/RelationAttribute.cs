@@ -9,7 +9,7 @@ namespace Startitecture.Orm.Model
     using System;
 
     /// <summary>
-    /// The relation attribute.
+    /// Declares that this property is a relation to the current entity.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class RelationAttribute : Attribute

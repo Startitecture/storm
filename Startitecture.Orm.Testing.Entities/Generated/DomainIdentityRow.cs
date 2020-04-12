@@ -48,6 +48,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// Gets or sets the UniqueIdentifier (length: 254)
         /// </summary>
         [Column(@"UniqueIdentifier", Order = 2, TypeName = "nvarchar")]
+        [Index(@"UK_DomainIdentity_UniqueIdentifier", 1, IsUnique = true, IsClustered = false)]
         [Required]
         [MaxLength(254)]
         [StringLength(254)]

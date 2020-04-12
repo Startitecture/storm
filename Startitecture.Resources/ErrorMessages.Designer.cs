@@ -322,6 +322,15 @@ namespace Startitecture.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A delegate could not be created for {0} with the current reader..
+        /// </summary>
+        public static string DelegateCouldNotBeCreatedWithReader {
+            get {
+                return ResourceManager.GetString("DelegateCouldNotBeCreatedWithReader", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Delivery of the message was administratively canceled..
         /// </summary>
         public static string DeliveryAdministrativelyCanceled {

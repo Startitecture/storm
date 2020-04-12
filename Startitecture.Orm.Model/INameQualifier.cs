@@ -6,6 +6,10 @@
 
 namespace Startitecture.Orm.Model
 {
+    using System;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// The NameQualifier interface.
     /// </summary>
@@ -79,5 +83,19 @@ namespace Startitecture.Orm.Model
         /// The <see cref="string"/> reference for the <paramref name="location"/>.
         /// </returns>
         string GetReferenceName(EntityLocation location);
+
+        /// <summary>
+        /// Escapes an identifier.
+        /// </summary>
+        /// <param name="identifier">
+        /// The identifier to escape.
+        /// </param>
+        /// <returns>
+        /// The escaped identifier as a <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        /// <paramref name="identifier"/> is null or whitespace.
+        /// </exception>
+        string Escape([NotNull] string identifier);
     }
 }

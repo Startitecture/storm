@@ -79,7 +79,7 @@ namespace Startitecture.Orm.Sql
             this.StructureTypeName = tableTypeAttribute.TypeName;
 
             var structureDefinition = structuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
-            this.Parameter = $"@{structureDefinition.EntityName}Table";
+            this.Parameter = $"{structureDefinition.EntityName}Table";
         }
 
         /// <summary>
@@ -112,7 +112,7 @@ namespace Startitecture.Orm.Sql
         /// The underlying <see cref="IDatabaseContextProvider"/> does not have a connection of the type
         /// <see cref="SqlConnection"/>.
         /// </exception>
-        public void Execute([NotNull] DataTable dataTable)
+        protected void Execute([NotNull] DataTable dataTable)
         {
             if (dataTable == null)
             {
@@ -134,7 +134,7 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The <see cref="IDataReader"/> associated with the command.
         /// </returns>
-        public IDataReader ExecuteReader([NotNull] DataTable dataTable)
+        protected IDataReader ExecuteReader([NotNull] DataTable dataTable)
         {
             if (dataTable == null)
             {

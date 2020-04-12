@@ -61,7 +61,7 @@ namespace Startitecture.Orm.Testing.Model
         /// <summary>
         /// Gets the submission time.
         /// </summary>
-        public DateTimeOffset SubmissionTime { get; private set; }
+        public DateTimeOffset SubmittedTime { get; private set; }
 
         /// <summary>
         /// The submission values.
@@ -92,7 +92,7 @@ namespace Startitecture.Orm.Testing.Model
         /// </summary>
         public void Submit()
         {
-            this.SubmissionTime = DateTimeOffset.Now;
+            this.SubmittedTime = DateTimeOffset.Now;
         }
     }
 }

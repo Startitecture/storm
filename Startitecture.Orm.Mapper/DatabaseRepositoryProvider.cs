@@ -11,9 +11,8 @@ namespace Startitecture.Orm.Mapper
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
     using System.Data;
-    using System.Data.SqlClient;
+    using System.Data.Common;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -71,33 +70,13 @@ namespace Startitecture.Orm.Mapper
         /// <param name="databaseFactory">
         /// The database factory.
         /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        public DatabaseRepositoryProvider(
-            [NotNull] IDatabaseFactory databaseFactory,
-            [NotNull] IEntityMapper entityMapper)
-            : this(databaseFactory, entityMapper, Singleton<SqlServerRepositoryAdapterFactory>.Instance)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
-        /// </summary>
-        /// <param name="databaseFactory">
-        /// The database factory.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
         /// <param name="adapterFactory">
         /// The repository adapter.
         /// </param>
         public DatabaseRepositoryProvider(
             [NotNull] IDatabaseFactory databaseFactory,
-            [NotNull] IEntityMapper entityMapper,
             [NotNull] IRepositoryAdapterFactory adapterFactory)
-            : this(databaseFactory, entityMapper, adapterFactory, MemoryCache.Default)
+            : this(databaseFactory, adapterFactory, MemoryCache.Default)
         {
         }
 
@@ -106,9 +85,6 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         /// <param name="databaseFactory">
         /// The database factory.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
         /// </param>
         /// <param name="adapterFactory">
         /// The repository adapter.
@@ -118,7 +94,6 @@ namespace Startitecture.Orm.Mapper
         /// </param>
         public DatabaseRepositoryProvider(
             [NotNull] IDatabaseFactory databaseFactory,
-            [NotNull] IEntityMapper entityMapper,
             [NotNull] IRepositoryAdapterFactory adapterFactory,
             [NotNull] ObjectCache itemCache)
         {
@@ -137,18 +112,8 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(databaseFactory));
             }
 
-            if (entityMapper == null)
-            {
-                throw new ArgumentNullException(nameof(entityMapper));
-            }
-
-            this.EntityMapper = entityMapper;
             this.DependencyContainer = new DependencyContainer();
             this.itemCache = itemCache;
-
-            // TODO: Find some other way to read this from configuration
-            ////ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.EnableCaching, false, bool.Parse);
-            ////ConfigurationManager.AppSettings.ApplySetting(this, provider => provider.CacheExpiration, this.cacheTime, TimeSpan.Parse);
 
             try
             {
@@ -164,7 +129,7 @@ namespace Startitecture.Orm.Mapper
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
-            catch (SqlException ex)
+            catch (DbException ex)
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
@@ -172,9 +137,6 @@ namespace Startitecture.Orm.Mapper
 
         /// <inheritdoc />
         public event EventHandler Disposed;
-
-        /// <inheritdoc />
-        public IEntityMapper EntityMapper { get; }
 
         /// <inheritdoc />
         public IEntityDefinitionProvider EntityDefinitionProvider { get; }
@@ -249,7 +211,7 @@ namespace Startitecture.Orm.Mapper
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
-            catch (SqlException ex)
+            catch (DbException ex)
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
@@ -271,7 +233,7 @@ namespace Startitecture.Orm.Mapper
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
-            catch (SqlException ex)
+            catch (DbException ex)
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
@@ -292,7 +254,7 @@ namespace Startitecture.Orm.Mapper
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
-            catch (SqlException ex)
+            catch (DbException ex)
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
@@ -313,7 +275,7 @@ namespace Startitecture.Orm.Mapper
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
-            catch (SqlException ex)
+            catch (DbException ex)
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
@@ -341,7 +303,7 @@ namespace Startitecture.Orm.Mapper
             {
                 throw new RepositoryException(selection, ex.Message, ex);
             }
-            catch (SqlException ex)
+            catch (DbException ex)
             {
                 throw new RepositoryException(selection, ex.Message, ex);
             }
@@ -524,8 +486,6 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
-            // PetaPoco sees only one primary key. Obviously this is a problem as we do not want to update based on primary key 
-            // alone. So we generate a unique selection.
             this.CheckDisposed();
             var selection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, dataItem);
             this.repositoryAdapter.Update(dataItem, selection, setExpressions);
@@ -553,8 +513,6 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
-            // PetaPoco sees only one primary key. Obviously this is a problem as we do not want to update based on primary key 
-            // alone. So we generate a unique selection.
             this.CheckDisposed();
             return this.repositoryAdapter.Update(dataItem, selection, setExpressions);
         }

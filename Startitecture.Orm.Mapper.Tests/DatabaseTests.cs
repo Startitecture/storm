@@ -16,6 +16,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using Rhino.Mocks;
 
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
 
     using MockRepository = Rhino.Mocks.MockRepository;
@@ -41,7 +42,8 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = new Database(
                 ConfigurationRoot.GetConnectionString("MasterDatabase"),
                 "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider()))
+                new DataAnnotationsDefinitionProvider(),
+                new TransactSqlQualifier()))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;
                 Assert.IsNotNull(transaction);
@@ -67,7 +69,7 @@ namespace Startitecture.Orm.Mapper.Tests
             const int Expected = 423;
 
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
-            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider()))
+            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
             {
                 using (var command = CreateMockCommand(connection))
                 {
@@ -104,7 +106,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var expected = 423;
 
             using (var connection = MockRepository.GenerateMock<IDbConnection>())
-            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider()))
+            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
             {
                 using (var command = CreateMockCommand(connection))
                 {

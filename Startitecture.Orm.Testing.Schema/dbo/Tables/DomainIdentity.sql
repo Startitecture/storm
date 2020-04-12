@@ -4,6 +4,7 @@
     [FirstName]        NVARCHAR (50)  NOT NULL,
     [MiddleName]       NVARCHAR (50)  NULL,
     [LastName]         NVARCHAR (50)  NOT NULL,
-    CONSTRAINT [PK_DomainIdentity] PRIMARY KEY CLUSTERED ([DomainIdentityId] ASC)
+    CONSTRAINT [PK_DomainIdentity] PRIMARY KEY CLUSTERED ([DomainIdentityId] ASC), 
+    CONSTRAINT [UK_DomainIdentity_UniqueIdentifier] UNIQUE ([UniqueIdentifier])
 );
 

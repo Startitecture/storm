@@ -1,9 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlServerRepositoryAdapter.cs" company="Startitecture">
+// <copyright file="SqlServerAdapter.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-namespace Startitecture.Orm.Mapper
+namespace Startitecture.Orm.Sql
 {
     using System;
     using System.Collections.Generic;
@@ -13,19 +13,17 @@ namespace Startitecture.Orm.Mapper
     using System.Linq;
     using System.Linq.Expressions;
 
-    using Common;
-
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
     /// <summary>
     /// Implements the <see cref="IRepositoryAdapter"/> interface using parameterized queries.
     /// </summary>
-    public class SqlServerRepositoryAdapter : IRepositoryAdapter
+    public class SqlServerAdapter : IRepositoryAdapter
     {
         /// <summary>
         /// The data context.
@@ -38,12 +36,12 @@ namespace Startitecture.Orm.Mapper
         private readonly IQueryFactory queryFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlServerRepositoryAdapter"/> class.
+        /// Initializes a new instance of the <see cref="SqlServerAdapter"/> class.
         /// </summary>
         /// <param name="dataContext">
         /// The data context.
         /// </param>
-        public SqlServerRepositoryAdapter([NotNull] IDatabaseContext dataContext)
+        public SqlServerAdapter([NotNull] IDatabaseContext dataContext)
         {
             if (dataContext == null)
             {

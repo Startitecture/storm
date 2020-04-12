@@ -49,7 +49,7 @@ namespace Startitecture.Orm.Sql.Tests
     ////                var databaseContextProvider = provider as IDatabaseContextProvider;
 
     ////                Assert.IsNotNull(databaseContextProvider);
-    ////                var structuredCommandProvider = new StructuredSqlCommandProvider(databaseContextProvider);
+    ////                var structuredCommandProvider = new StructuredTransactSqlCommandProvider(databaseContextProvider);
 
     ////                var valueTableLoader = Singleton<DataTableLoader<FormSubmissionValueRow>>.Instance;
     ////                var detailRowConverter = Singleton<FormSubmissionValueDetailRowConverter>.Instance;

@@ -28,6 +28,13 @@ namespace Startitecture.Orm.Testing.Model
         }
 
         /// <summary>
+        /// Prevents a default instance of the <see cref="FieldValueElement"/> class from being created.
+        /// </summary>
+        private FieldValueElement()
+        {
+        }
+
+        /// <summary>
         /// Gets the field value element ID.
         /// </summary>
         public long? FieldValueElementId { get; private set; }
@@ -47,6 +54,12 @@ namespace Startitecture.Orm.Testing.Model
         /// </summary>
         public int Order { get; private set; }
 
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            return $"{this.Element}";
+        }
+
         /// <summary>
         /// Adds the element to a value.
         /// </summary>
@@ -64,6 +77,7 @@ namespace Startitecture.Orm.Testing.Model
             }
 
             this.Order = fieldValue.Elements.Count();
+            this.FieldValue = fieldValue;
         }
     }
 }

@@ -15,8 +15,8 @@ namespace Startitecture.Orm.Mapper.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
@@ -31,11 +31,6 @@ namespace Startitecture.Orm.Mapper.Tests
         private static readonly Random Generator = new Random();
 
         /// <summary>
-        /// The entity mapper.
-        /// </summary>
-        private readonly AutoMapperEntityMapper entityMapper = new AutoMapperEntityMapper();
-
-        /// <summary>
         /// The configuration root.
         /// </summary>
         private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
@@ -47,12 +42,9 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void Save_NewField_IdSet()
         {
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory,  this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 target.StartTransaction();
 
@@ -78,12 +70,9 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow item;
 
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 item = new FieldRow
                            {
@@ -96,7 +85,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             // Completely new context to test that caching is not involved.
             FieldRow expected;
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
                              {
@@ -109,7 +98,7 @@ namespace Startitecture.Orm.Mapper.Tests
             }
 
             // New context again
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
                 Assert.IsNotNull(actual);
@@ -127,12 +116,9 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             List<DomainAggregateRow> expected;
 
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var topContainer2 = new TopContainerRow
                                         {
@@ -291,7 +277,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                };
             }
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var itemSelection = Select.From<DomainAggregateRow>()
                     .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
@@ -324,12 +310,9 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow expected;
 
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
                            {
@@ -341,7 +324,7 @@ namespace Startitecture.Orm.Mapper.Tests
             }
 
             // New context again
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsNotNull(actual);
@@ -357,13 +340,11 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void GetFirstOrDefault_ExistingDomainAggregate_ExpectedPropertiesAreNull()
         {
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             DomainAggregateRow expected;
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+
+            using (var target = providerFactory.Create())
             {
                 var topContainer2 = new TopContainerRow
                                         {
@@ -454,7 +435,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 ////target.Save(aggregateOption1);
             }
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var itemSelection = Select.From<DomainAggregateRow>()
                     .WhereEqual(row => row.DomainAggregateId, expected.DomainAggregateId)
@@ -483,12 +464,9 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void GetFirstOrDefault_NonExistentField_ReturnsNull()
         {
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsNull(actual);
@@ -504,12 +482,9 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow expected;
 
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
                                {
@@ -521,7 +496,7 @@ namespace Startitecture.Orm.Mapper.Tests
             }
 
             // New context again
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsTrue(actual);
@@ -535,12 +510,9 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void Contains_NonExistentField_ReturnsFalse()
         {
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsFalse(actual);
@@ -556,12 +528,9 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow expected;
 
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
                                {
@@ -575,7 +544,7 @@ namespace Startitecture.Orm.Mapper.Tests
             Assert.AreNotEqual(0, expected.FieldId);
 
             // New context again
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 target.DeleteItems(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
 
@@ -593,12 +562,9 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var description = $"Mah Field Description {nameof(this.DeleteItems_ExistingSetOfFields_ItemsDeleted)}";
 
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var field1 = new FieldRow
                                  {
@@ -626,7 +592,7 @@ namespace Startitecture.Orm.Mapper.Tests
             }
 
             // New context again
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var itemSelection = Select.From<FieldRow>().WhereEqual(row => row.Description, description);
                 var affected = target.DeleteItems(itemSelection);
@@ -645,12 +611,9 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void InsertItem_NewField_MatchesExpected()
         {
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 target.StartTransaction();
 
@@ -676,12 +639,9 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow item;
 
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 item = new FieldRow
                            {
@@ -694,7 +654,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             // Completely new context to test that caching is not involved.
             FieldRow expected;
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
                                {
@@ -707,7 +667,7 @@ namespace Startitecture.Orm.Mapper.Tests
             }
 
             // New context again
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var target = providerFactory.Create())
             {
                 var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
                 Assert.IsNotNull(actual);
@@ -722,12 +682,9 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCleanup]
         public void DeleteUnitTestItems()
         {
-            var databaseFactory = new DefaultDatabaseFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
+            using (var provider = providerFactory.Create())
             {
                 // Delete the attachment documents based on finding their versions.
                 provider.DeleteItems(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));

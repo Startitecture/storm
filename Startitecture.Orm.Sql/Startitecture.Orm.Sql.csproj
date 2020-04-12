@@ -28,6 +28,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />

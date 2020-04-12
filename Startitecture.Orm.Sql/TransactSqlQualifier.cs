@@ -6,13 +6,29 @@
 
 namespace Startitecture.Orm.Sql
 {
+    using System;
+
+    using JetBrains.Annotations;
+
     using Startitecture.Orm.Model;
+    using Startitecture.Resources;
 
     /// <summary>
     /// Qualifies an <see cref="EntityAttributeDefinition"/> for Transact-SQL.
     /// </summary>
     public class TransactSqlQualifier : INameQualifier
     {
+        /// <inheritdoc />
+        public string Escape(string identifier)
+        {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(identifier));
+            }
+
+            return $"[{identifier}]";
+        }
+
         /// <inheritdoc />
         public string Qualify(EntityAttributeDefinition attribute)
         {

@@ -41,7 +41,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// </summary>
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
         [Column(@"OperationKey", Order = 1, TypeName = "uniqueidentifier")]
-        [Index(@"PK____Refact__D3AEFFDBDA866624", 1, IsUnique = true, IsClustered = true)]
+        [Index(@"PK____Refact__D3AEFFDBFDCAD88B", 1, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
         [Display(Name = "Operation key")]
