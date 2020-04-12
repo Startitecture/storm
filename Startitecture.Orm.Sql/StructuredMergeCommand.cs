@@ -26,13 +26,8 @@ namespace Startitecture.Orm.Sql
     /// <typeparam name="TStructure">
     /// The type of structure to use as the source of the merge.
     /// </typeparam>
-    public class StructuredMergeCommand<TStructure> : StructuredSqlCommand<TStructure>
+    public class StructuredMergeCommand<TStructure> : StructuredCommand<TStructure>
     {
-        /// <summary>
-        /// The transact SQL qualifier.
-        /// </summary>
-        private static readonly TransactSqlQualifier TransactSqlQualifier = Singleton<TransactSqlQualifier>.Instance;
-
         /// <summary>
         /// The direct attributes.
         /// </summary>
@@ -99,6 +94,9 @@ namespace Startitecture.Orm.Sql
         /// <summary>
         /// Merges a structured table value into the specified data item.
         /// </summary>
+        /// <param name="mergeItems">
+        /// The items to merge.
+        /// </param>
         /// <param name="mergeMatchExpressions">
         /// The merge match expressions to match columns on.
         /// </param>
@@ -108,8 +106,15 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The current <see cref="StructuredMergeCommand{TStructure}"/>.
         /// </returns>
-        public StructuredMergeCommand<TStructure> MergeInto<TDataItem>([NotNull] params Expression<Func<TDataItem, object>>[] mergeMatchExpressions)
+        public StructuredMergeCommand<TStructure> MergeInto<TDataItem>(
+            [NotNull] IEnumerable<TStructure> mergeItems,
+            [NotNull] params Expression<Func<TDataItem, object>>[] mergeMatchExpressions)
         {
+            if (mergeItems == null)
+            {
+                throw new ArgumentNullException(nameof(mergeItems));
+            }
+
             if (mergeMatchExpressions == null)
             {
                 throw new ArgumentNullException(nameof(mergeMatchExpressions));
@@ -180,6 +185,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private string CompileCommandText()
         {
+            var qualifier = this.StructuredCommandProvider.NameQualifier;
             var structureDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TStructure>();
             var allAttributes = structureDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
@@ -207,19 +213,26 @@ namespace Startitecture.Orm.Sql
             var tableTypeName = typeof(TStructure).GetCustomAttributes<TableTypeAttribute>().First().TypeName;
 
             // Always use the primary key for merge match.
-            var mergeMatchClauses = keyAttributes.Select(x => $"[Target].[{x.TargetKey.PhysicalName}] = [Source].[{x.SourceKey.PhysicalName}]");
+            var mergeMatchClauses = keyAttributes.Select(
+                x => $"{qualifier.Escape("Target")}.{qualifier.Escape(x.TargetKey.PhysicalName)} = "
+                     + $"{qualifier.Escape("Source")}.{qualifier.Escape(x.SourceKey.PhysicalName)}");
 
-            var mergeStatementBuilder =
-                new StringBuilder().AppendLine($"DECLARE @inserted {tableTypeName};")
-                    .AppendLine($"MERGE [{this.itemDefinition.EntityContainer}].[{this.itemDefinition.EntityName}] AS [Target]")
-                    .AppendLine($"USING @{this.Parameter} AS [Source]")
-                    .AppendLine($"ON ({string.Join(" AND ", mergeMatchClauses)})")
-                    .AppendLine("WHEN MATCHED THEN")
-                    .AppendLine(
-                        $"UPDATE SET {string.Join(", ", updateClauses.Distinct().Select(x => $"[{x.TargetColumn}] = [Source].[{x.SourceColumn}]"))}")
-                    .AppendLine("WHEN NOT MATCHED BY TARGET THEN")
-                    .AppendLine($"INSERT ({string.Join(", ", targetColumns.Select(x => $"[{x}]"))})")
-                    .AppendLine($"VALUES ({string.Join(", ", sourceColumns.Distinct().Select(x => $"[Source].[{x}]"))})");
+            var updateClause = string.Join(
+                ", ",
+                updateClauses.Distinct()
+                    .Select(x => $"{qualifier.Escape(x.TargetColumn)} = {qualifier.Escape("Source")}.{qualifier.Escape(x.SourceColumn)}"));
+
+            var mergeStatementBuilder = new StringBuilder().AppendLine($"DECLARE @inserted {tableTypeName};")
+                .AppendLine(
+                    $"MERGE {qualifier.Escape(this.itemDefinition.EntityContainer)}.{qualifier.Escape(this.itemDefinition.EntityName)} AS {qualifier.Escape("Target")}")
+                .AppendLine($"USING @{this.Parameter} AS {qualifier.Escape("Source")}")
+                .AppendLine($"ON ({string.Join(" AND ", mergeMatchClauses)})")
+                .AppendLine("WHEN MATCHED THEN")
+                .AppendLine($"UPDATE SET {updateClause}")
+                .AppendLine("WHEN NOT MATCHED BY TARGET THEN")
+                .AppendLine($"INSERT ({string.Join(", ", targetColumns.Select(x => $"{qualifier.Escape(x)}"))})")
+                .AppendLine(
+                    $"VALUES ({string.Join(", ", sourceColumns.Distinct().Select(x => $"{qualifier.Escape("Source")}.{qualifier.Escape(x)}"))})");
 
             if (this.deleteUnmatchedInSource)
             {
@@ -232,7 +245,7 @@ namespace Startitecture.Orm.Sql
                                     .FirstOrDefault(a => a.PhysicalName == sourceAttribute.PhysicalName)
                                     .PhysicalName;
 
-                                return $"AND [Target].{itemPhysicalName} IN (SELECT [{tablePhysicalName}] FROM @{this.Parameter})";
+                                return $"AND {qualifier.Escape("Target")}.{itemPhysicalName} IN (SELECT {qualifier.Escape(tablePhysicalName)} FROM @{this.Parameter})";
                             })
                     .ToList();
 
@@ -245,24 +258,29 @@ namespace Startitecture.Orm.Sql
             if (this.selectionMatchAttributes.Any())
             {
                 // These will be the column names from the table.
-                var outputColumns = this.directAttributes.OrderBy(x => x.PhysicalName).Select(x => $"INSERTED.[{x.PhysicalName}]");
+                var outputColumns = this.directAttributes.OrderBy(x => x.PhysicalName).Select(x => $"INSERTED.{qualifier.Escape(x.PhysicalName)}");
 
                 // Here we use property name because the assumption is the UDTT uses aliases, not physical names.
                 var insertedColumns =
                     allAttributes.Join(
                         this.directAttributes,
-                        tvp => TransactSqlQualifier.Qualify(tvp),
-                        i => TransactSqlQualifier.GetCanonicalName(i), //// i.GetCanonicalName(),
-                        (structure, entity) => structure).OrderBy(x => x.PhysicalName).Select(x => $"[{x.PropertyName}]").ToList();
+                        tvp => qualifier.Qualify(tvp),
+                        i => qualifier.GetCanonicalName(i), //// i.GetCanonicalName(),
+                        (structure, entity) => structure).OrderBy(x => x.PhysicalName).Select(x => $"{qualifier.Escape(x.PropertyName)}").ToList();
 
                 // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original
                 // table valued parameter.
                 var selectedKeyAttributes =
-                    this.directAttributes.Where(x => x.IsIdentityColumn).Select(x => new { Column = $"i.[{x.PropertyName}]", Attribute = x }).ToList();
+                    this.directAttributes.Where(x => x.IsIdentityColumn).Select(x => new { Column = $"i.{qualifier.Escape(x.PropertyName)}", Attribute = x }).ToList();
 
                 // Everything for selecting from the TVP uses property name in order to match UDTT columns.
-                var nonKeyAttributes =
-                    allAttributes.Where(definition => definition.IsIdentityColumn == false).Select(x => new { Column = $"tvp.[{x.PropertyName}]", Attribute = x });
+                var nonKeyAttributes = allAttributes.Where(definition => definition.IsIdentityColumn == false)
+                    .Select(
+                        x => new
+                                 {
+                                     Column = $"tvp.{qualifier.Escape(x.PropertyName)}",
+                                     Attribute = x
+                                 });
 
                 var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.PropertyName).Select(x => x.Column);
 
@@ -273,7 +291,7 @@ namespace Startitecture.Orm.Sql
                 // If there are match attributes use those instead of the primary key.
                 var selectionJoinMatchColumns =
                     (matchAttributes.Any() ? matchAttributes : keyAttributes).Select(
-                        x => $"i.[{x.SourceKey.PropertyName}] = tvp.[{x.SourceKey.PropertyName}]");
+                        x => $"i.{qualifier.Escape(x.SourceKey.PropertyName)} = tvp.{qualifier.Escape(x.SourceKey.PropertyName)}");
 
                 mergeStatementBuilder.AppendLine($"OUTPUT {string.Join(", ", outputColumns)}")
                     .AppendLine($"INTO @inserted ({string.Join(", ", insertedColumns)});")

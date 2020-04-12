@@ -248,7 +248,7 @@ namespace Startitecture.Orm.Sql.Tests
                         .InsertInto<FieldValueRow>(valuesList)
                         .SelectResults(row => row.FieldId);
 
-                var insertedValues = valuesCommand.ExecuteWithIdentityUpdate(row => row.FieldValueId).ToList();
+                var insertedValues = valuesCommand.ExecuteForResults().ToList();
 
                 // Map back to the domain object.
                 foreach (var value in expected.SubmissionValues)
@@ -277,7 +277,7 @@ namespace Startitecture.Orm.Sql.Tests
 
                 // Reassign with our added identities
                 // TODO: create dictionary for seeks
-                elementsList = elementsCommand.ExecuteWithIdentityUpdate(row => row.FieldValueElementId).ToList();
+                elementsList = elementsCommand.ExecuteForResults().ToList();
 
                 foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
                 {

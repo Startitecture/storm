@@ -28,7 +28,7 @@ namespace Startitecture.Orm.Sql
     /// <typeparam name="TStructure">
     /// The type of structure that is the source of the command data.
     /// </typeparam>
-    public class StructuredInsertCommand<TStructure> : StructuredSqlCommand<TStructure>
+    public class StructuredInsertCommand<TStructure> : StructuredCommand<TStructure>
     {
         /// <summary>
         /// The command text.
@@ -39,11 +39,6 @@ namespace Startitecture.Orm.Sql
         /// The match expressions.
         /// </summary>
         private readonly List<EntityAttributeDefinition> selectionAttributes = new List<EntityAttributeDefinition>();
-
-        /// <summary>
-        /// The items to insert.
-        /// </summary>
-        private readonly List<TStructure> items = new List<TStructure>();
 
         /// <summary>
         /// The name qualifier.
@@ -124,8 +119,8 @@ namespace Startitecture.Orm.Sql
             }
 
             this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TDataItem>();
-            this.items.Clear();
-            this.items.AddRange(insertItems);
+            this.Items.Clear();
+            this.Items.AddRange(insertItems);
             this.insertColumnExpressions.Clear();
             this.insertColumnExpressions.AddRange(targetColumns);
             return this;
@@ -170,67 +165,6 @@ namespace Startitecture.Orm.Sql
             this.selectionAttributes.Clear();
             this.selectionAttributes.AddRange(matchProperties.Select(x => new AttributeLocation(x)).Select(structureDefinition.Find));
             return this;
-        }
-
-        /// <summary>
-        /// Executes the the insertion without retrieving inserted values.
-        /// </summary>
-        public void Execute()
-        {
-            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.EntityDefinitionProvider);
-
-            using (var dataTable = dataTableLoader.Load(this.items))
-            {
-                this.Execute(dataTable);
-            }
-        }
-
-        /// <summary>
-        /// Executes the structured command and updates identity columns.
-        /// </summary>
-        /// <param name="rowIdentity">
-        /// The row identity.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="rowIdentity"/> is null.
-        /// </exception>
-        /// <returns>
-        /// An <see cref="IEnumerable{TStructure}"/> of items returned by the command.
-        /// </returns>
-        public IEnumerable<TStructure> ExecuteWithIdentityUpdate([NotNull] Expression<Func<TStructure, object>> rowIdentity)
-        {
-            if (rowIdentity == null)
-            {
-                throw new ArgumentNullException(nameof(rowIdentity));
-            }
-
-            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.EntityDefinitionProvider);
-            var returnList = new List<TStructure>();
-
-            using (var dataTable = dataTableLoader.Load(this.items))
-            using (var reader = this.ExecuteReader(dataTable))
-            {
-                var entityDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
-
-                while (reader.Read())
-                {
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
-                    var mappingDelegate = FlatPocoFactory.ReturnableFactory.CreateDelegate<TStructure>(pocoDataRequest).MappingDelegate;
-                    var pocoDelegate = mappingDelegate as Func<IDataReader, TStructure>;
-
-                    if (pocoDelegate == null)
-                    {
-                        throw new OperationException(
-                            pocoDataRequest,
-                            string.Format(CultureInfo.CurrentCulture, ErrorMessages.DelegateCouldNotBeCreatedWithReader, pocoDataRequest));
-                    }
-
-                    var poco = pocoDelegate.Invoke(reader);
-                    returnList.Add(poco);
-                }
-            }
-
-            return returnList;
         }
 
         /// <summary>

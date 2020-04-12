@@ -29,11 +29,11 @@ namespace Startitecture.Orm.Sql
         /// <summary>
         /// Gets the command text.
         /// </summary>
-        public string Text { get; private set; }
+        public string Text { get; }
 
         /// <summary>
         /// Gets the parameter name.
         /// </summary>
-        public string ParameterName { get; private set; }
+        public string ParameterName { get; }
     }
 }
