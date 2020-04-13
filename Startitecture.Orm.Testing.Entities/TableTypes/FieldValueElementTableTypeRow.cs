@@ -23,6 +23,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
         /// Gets or sets the field value element ID.
         /// </summary>
         [Column(Order = 1)]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long? FieldValueElementId { get; set; }
 
         /// <summary>

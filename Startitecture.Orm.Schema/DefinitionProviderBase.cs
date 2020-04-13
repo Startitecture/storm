@@ -224,17 +224,6 @@ namespace Startitecture.Orm.Schema
         protected abstract int GetOrdinal(PropertyInfo entityProperty);
 
         /// <summary>
-        /// Gets the key attributes for the <paramref name="entityType"/>.
-        /// </summary>
-        /// <param name="entityType">
-        /// The entity type.
-        /// </param>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of attribute references for the <paramref name="entityType"/>.
-        /// </returns>
-        protected abstract IEnumerable<AttributeReference> GetKeyAttributes(Type entityType);
-
-        /// <summary>
         /// Gets the attribute references for the <paramref name="entityType"/>.
         /// </summary>
         /// <param name="entityType">
@@ -244,6 +233,28 @@ namespace Startitecture.Orm.Schema
         /// An <see cref="IEnumerable{T}"/> of attribute references for the <paramref name="entityType"/>.
         /// </returns>
         protected abstract IEnumerable<AttributeReference> GetAttributes(Type entityType);
+
+        /// <summary>
+        /// Determines whether the property is a key or not.
+        /// </summary>
+        /// <param name="entityProperty">
+        /// The property info to evaluate.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the property is a key; otherwise, <c>false</c>.
+        /// </returns>
+        protected abstract bool IsKey(PropertyInfo entityProperty);
+
+        /// <summary>
+        /// Determines whether the property is an identity column or not.
+        /// </summary>
+        /// <param name="entityProperty">
+        /// The property info to evaluate.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the property is an identity column; otherwise, <c>false</c>.
+        /// </returns>
+        protected abstract bool IsIdentity(PropertyInfo entityProperty);
 
         /// <summary>
         /// Gets the related entity attribute reference for the specified <paramref name="propertyInfo"/>.
@@ -283,7 +294,7 @@ namespace Startitecture.Orm.Schema
         private IEnumerable<EntityAttributeDefinition> GetEntityDefinitions(LinkedList<EntityLocation> entityPath, PropertyInfo entityProperty)
         {
             var entityType = entityProperty.PropertyType;
-            var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
+            ////var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
             var relationReference = new EntityReference
                                         {
                                             EntityType = entityType,
@@ -306,12 +317,8 @@ namespace Startitecture.Orm.Schema
                 var propertyAlias = string.Concat(relationLocation.Alias ?? relationLocation.Name, '.', propertyName);
                 var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
                 var ordinal = this.GetOrdinal(propertyInfo);
-
-                // TODO: refactor to use AttributeReferences
-                var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey && x.IsIdentity == false).Select(x => x.PhysicalName)
-                    .Contains(physicalName);
-
-                var isIdentity = keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
+                var isPrimaryKey = this.IsKey(propertyInfo); ////keyAttributeReferences.Where(x => x.IsPrimaryKey && x.IsIdentity == false).Select(x => x.PhysicalName).Contains(physicalName);
+                var isIdentity = this.IsIdentity(propertyInfo); //// keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
 
                 if (isPrimaryKey)
                 {
@@ -441,15 +448,15 @@ namespace Startitecture.Orm.Schema
             entityPath.AddLast(entityLocation);
 
             var attributeReferences = this.GetAttributes(entityType);
-            var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
+            ////var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
 
             foreach (var attributeReference in attributeReferences)
             {
                 var physicalName = this.GetPhysicalName(attributeReference.PropertyInfo);
                 var ordinal = this.GetOrdinal(attributeReference.PropertyInfo);
                 var attributeName = physicalName;
-                var isPrimaryKey = keyAttributeReferences.Where(x => x.IsPrimaryKey).Select(x => x.PhysicalName).Contains(physicalName);
-                var isIdentity = keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
+                var isPrimaryKey = this.IsKey(attributeReference.PropertyInfo); //// keyAttributeReferences.Where(x => x.IsPrimaryKey).Select(x => x.PhysicalName).Contains(physicalName);
+                var isIdentity = this.IsIdentity(attributeReference.PropertyInfo); //// keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
 
                 var attributeTypes = EntityAttributeTypes.None;
 

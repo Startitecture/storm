@@ -169,7 +169,7 @@ namespace Startitecture.Orm.Sql
         /// The underlying <see cref="IDatabaseContextProvider"/> does not have a connection of the type
         /// <see cref="SqlConnection"/>.
         /// </exception>
-        protected void Execute([NotNull] DataTable dataTable)
+        private void Execute([NotNull] DataTable dataTable)
         {
             if (dataTable == null)
             {
@@ -191,7 +191,7 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The <see cref="IDataReader"/> associated with the command.
         /// </returns>
-        protected IDataReader ExecuteReader([NotNull] DataTable dataTable)
+        private IDataReader ExecuteReader([NotNull] DataTable dataTable)
         {
             if (dataTable == null)
             {

@@ -25,14 +25,25 @@ namespace Startitecture.Orm.Testing.Model
                 item => item.Description
             };
 
-       /// <summary>
-        /// Initializes a new instance of the <see cref="Field"/> class.
-        /// </summary>
-        public Field()
-        {
-        }
+         /// <summary>
+         /// Initializes a new instance of the <see cref="Field"/> class.
+         /// </summary>
+         /// <param name="fieldId">
+         /// The field ID.
+         /// </param>
+         public Field(int fieldId)
+         {
+             this.FieldId = fieldId;
+         }
 
-        /// <summary>
+         /// <summary>
+         /// Initializes a new instance of the <see cref="Field"/> class.
+         /// </summary>
+         public Field()
+         {
+         }
+
+         /// <summary>
         /// Gets the field ID.
         /// </summary>
         public int? FieldId { get; private set; }

@@ -168,13 +168,26 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
+        protected override bool IsKey(PropertyInfo entityProperty)
+        {
+            return entityProperty.GetCustomAttribute<KeyAttribute>() != null;
+        }
+
+        /// <inheritdoc />
+        protected override bool IsIdentity(PropertyInfo entityProperty)
+        {
+            return entityProperty.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity;
+        }
+
+        /// <inheritdoc />
         protected override int GetOrdinal(PropertyInfo entityProperty)
         {
             return entityProperty.GetCustomAttribute<ColumnAttribute>()?.Order ?? int.MaxValue;
         }
 
+/*
         /// <inheritdoc />
-        protected override IEnumerable<AttributeReference> GetKeyAttributes([NotNull] Type entityType)
+        protected virtual IEnumerable<AttributeReference> GetKeyAttributes([NotNull] Type entityType)
         {
             if (entityType == null)
             {
@@ -194,6 +207,7 @@ namespace Startitecture.Orm.Schema
                                   IsPrimaryKey = true
                               };
         }
+*/
 
         /// <inheritdoc />
         protected override IEnumerable<AttributeReference> GetAttributes([NotNull] Type entityType)

@@ -6,7 +6,6 @@
 
 namespace Startitecture.Orm.Testing.Entities.TableTypes
 {
-    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Schema;

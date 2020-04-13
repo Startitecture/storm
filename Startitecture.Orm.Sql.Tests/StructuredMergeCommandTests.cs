@@ -3,273 +3,117 @@
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace Startitecture.Orm.Sql.Tests
 {
-    /////// <summary>
-    /////// The structured SQL command tests.
-    /////// </summary>
-    ////[TestClass]
-    ////public class StructuredMergeCommandTests
-    ////{
-    ////    /// <summary>
-    ////    /// The entity mapper.
-    ////    /// </summary>
-    ////    private readonly IEntityMapper entityMapper = RepositoryMockFactory.CreateEntityMapper(
-    ////        expression =>
-    ////            {
-    ////                expression.AddProfile<FormSubmissionMappingProfile>();
-    ////                expression.AddProfile<FormSubmissionValueMappingProfile>();
-    ////                expression.AddProfile<PersonMappingProfile>();
-    ////                expression.AddProfile<UnifiedFieldMappingProfile>();
-    ////            });
+    using System.Collections.Generic;
+    using System.Linq;
 
-    ////    /// <summary>
-    ////    /// The execute test.
-    ////    /// </summary>
-    ////    [TestMethod]
-    ////    [TestCategory("Integration")]
-    ////    public void Execute_StructuredMergeCommandDraftWithDetailMerge_DoesNotThrowException()
-    ////    {
-    ////        long submissionId = 0;
+    using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    ////        var databaseFactory = new DefaultDatabaseFactory("OrmTestingContext");
-    ////        using (var provider = new DatabaseRepositoryProvider(databaseFactory, this.entityMapper))
-    ////        {
-    ////            provider.ChangeDatabase("DEVTEST01");
+    using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Testing.Entities;
+    using Startitecture.Orm.Testing.Entities.TableTypes;
+    using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Moq;
 
-    ////            try
-    ////            {
-    ////                var transaction = provider.StartTransaction();
-    ////                var expected = Generate.CreateFormSubmission(this.entityMapper, provider);
+    /// <summary>
+    /// The structured merge command tests.
+    /// </summary>
+    [TestClass]
+    public class StructuredMergeCommandTests
+    {
+        /// <summary>
+        /// The merge into test.
+        /// </summary>
+        [TestMethod]
+        public void MergeInto_StructuredMergeCommandForFields_InsertsAndUpdatesExpectedFields()
+        {
+            var internalId = new Field(421)
+                                 {
+                                     Name = "MERGE_Internal ID",
+                                     Description = "Unique ID used internally"
+                                 };
 
-    ////                submissionId = expected.FormSubmissionId.GetValueOrDefault();
+            var firstName = new Field(66)
+                                {
+                                    Name = "MERGE_First Name",
+                                    Description = "The person's first name"
+                                };
 
-    ////                // Step #1, don't bother unless we have a database context provider.
-    ////                var databaseContextProvider = provider as IDatabaseContextProvider;
+            var lastName = new Field(7887)
+                               {
+                                   Name = "MERGE_Last Name",
+                                   Description = "The person's last name"
+                               };
 
-    ////                Assert.IsNotNull(databaseContextProvider);
-    ////                var structuredCommandProvider = new StructuredTransactSqlCommandProvider(databaseContextProvider);
+            var yearlyWage = new Field(82328)
+                                 {
+                                     Name = "MERGE_Yearly Wage",
+                                     Description = "The base wage paid year over year."
+                                 };
 
-    ////                var valueTableLoader = Singleton<DataTableLoader<FormSubmissionValueRow>>.Instance;
-    ////                var detailRowConverter = Singleton<FormSubmissionValueDetailRowConverter>.Instance;
-    ////                var detailTableLoader = Singleton<DataTableLoader<FormSubmissionValueDetailRow>>.Instance;
+            var hireDate = new Field
+                               {
+                                   Name = "MERGE_Hire Date",
+                                   Description = "The date and time of hire for the person"
+                               };
 
-    ////                expected.RefreshValues();
+            var bonusTarget = new Field
+                                  {
+                                      Name = "MERGE_Bonus Target",
+                                      Description = "The target bonus for the person"
+                                  };
 
-    ////                var valueDataTable = valueTableLoader.Load(expected.FormSubmissionValues, this.entityMapper);
+            var contactNumbers = new Field
+                                     {
+                                         Name = "MERGE_Contact Numbers",
+                                         Description = "A list of contact numbers for the person in order of preference"
+                                     };
 
-    ////                // First save the unified field values and apply the output to source values. We don't delete unmatched as this 
-    ////                // would also delete current values in ProcessWorkflowFieldValue. We are going to match our return selection on 
-    ////                // UnifiedFieldId because that is the natural key of each submission value.
-    ////                var mergeUnifiedValueCommand =
-    ////                    new StructuredMergeCommand<FormSubmissionValueRow>(structuredCommandProvider, transaction).MergeInto<UnifiedFieldValueRow>()
-    ////                        .SelectFromInserted(row => row.UnifiedFieldId);
+            var fields = new List<Field>
+                             {
+                                 internalId,
+                                 firstName,
+                                 lastName,
+                                 yearlyWage,
+                                 hireDate,
+                                 bonusTarget,
+                                 contactNumbers
+                             };
 
-    ////                using (var dataReader = mergeUnifiedValueCommand.ExecuteReader(valueDataTable))
-    ////                {
-    ////                    var unifiedFieldIdOrdinal = dataReader.GetOrdinal("UnifiedFieldId");
-    ////                    var unifiedFieldValueIdOrdinal = dataReader.GetOrdinal("UnifiedFieldValueId");
+            var mergeItems = (from f in fields
+                             select new FieldTableTypeRow
+                                        {
+                                            FieldId = f.FieldId,
+                                            Name = f.Name,
+                                            Description = f.Description
+                                        }).ToList();
 
-    ////                    while (dataReader.Read())
-    ////                    {
-    ////                        // We need this ID to associate the unsaved values with the saved ones.
-    ////                        var unifiedFieldId = dataReader.GetInt32(unifiedFieldIdOrdinal);
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var structureDefinition = definitionProvider.Resolve<FieldTableTypeRow>();
+            var orderedAttributes = structureDefinition.ReturnableAttributes.OrderBy(definition => definition.Ordinal).ToList();
 
-    ////                        // We'll apply this ID to our existing values.
-    ////                        var unifiedFieldValueId = dataReader.GetInt64(unifiedFieldValueIdOrdinal);
+            var commandProvider = mergeItems.MockCommandProvider(orderedAttributes, definitionProvider);
 
-    ////                        // Find the entity and map to that. Mapping to the row will not work because the ID is ignored by default.
-    ////                        var formSubmissionValue = expected.FormSubmissionValues.First(x => x.UnifiedFieldId == unifiedFieldId);
-    ////                        this.entityMapper.MapTo(unifiedFieldValueId, formSubmissionValue);
-    ////                    }
-    ////                }
+            var target = new StructuredMergeCommand<FieldTableTypeRow>(commandProvider.Object);
+            var typeRows = target.MergeInto<FieldRow>(mergeItems, row => row.Name).SelectFromInserted(row => row.Name).ExecuteForResults();
 
-    ////                // We need to refresh the data table now to merge in the FormSubmissionValues. 
-    ////                valueTableLoader.Refresh(expected.FormSubmissionValues, valueDataTable, this.entityMapper);
+            Assert.IsNotNull(typeRows);
+            var actual = typeRows.Select(
+                row => row.FieldId.HasValue
+                           ? new Field(row.FieldId.GetValueOrDefault())
+                                 {
+                                     Name = row.Name,
+                                     Description = row.Description
+                                 }
+                           : new Field
+                                 {
+                                     Name = row.Name,
+                                     Description = row.Description
+                                 }).ToList();
 
-    ////                // Now, we need to create another command in order to merge the form submission values. In this case we don't need
-    ////                // to get the values back as we already have the IDs we need.
-    ////                var mergeFormSubmissionValueCommand =
-    ////                    new StructuredMergeCommand<FormSubmissionValueRow>(structuredCommandProvider, transaction).MergeInto<FormSubmissionValueRow>();
-
-    ////                mergeFormSubmissionValueCommand.Execute(valueDataTable);
-
-    ////                // Having applied the IDs to each of the values, we can now save all the details.
-    ////                var integerDetailRows =
-    ////                    detailRowConverter.Convert(expected.FormSubmissionValues.Where(x => x.UnifiedField.IsUserSourcedField == false)).ToList();
-
-    ////                if (integerDetailRows.Any())
-    ////                {
-    ////                    // Before we can insert the value instances, we must first delete them. TODO: Update UDTT to support merge here as well. 
-    ////                    var deleteIntegerQuery =
-    ////                        Select.From<UnifiedIntegerValueRow>()
-    ////                            .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
-    ////                            .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
-
-    ////                    provider.DeleteItems(deleteIntegerQuery);
-
-    ////                    ExecuteInsert<UnifiedIntegerValueRow, FormSubmissionValueDetailRow>(
-    ////                        detailTableLoader,
-    ////                        integerDetailRows,
-    ////                        structuredCommandProvider,
-    ////                        transaction);
-    ////                }
-
-    ////                // The other values are user-sourced and we'll add them by type.
-    ////                var userSourcedValues = expected.FormSubmissionValues.Where(x => x.UnifiedField.IsUserSourcedField).ToList();
-
-    ////                var numericDetailRows =
-    ////                    detailRowConverter.Convert(
-    ////                        userSourcedValues.Where(
-    ////                            x =>
-    ////                                x.UnifiedValueType == UnifiedValueType.Decimal || x.UnifiedValueType == UnifiedValueType.Currency
-    ////                                || x.UnifiedValueType == UnifiedValueType.Integer)).ToList();
-
-    ////                if (numericDetailRows.Any())
-    ////                {
-    ////                    var deleteNumericQuery =
-    ////                        Select.From<UnifiedNumericValueRow>()
-    ////                            .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
-    ////                            .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
-
-    ////                    provider.DeleteItems(deleteNumericQuery);
-
-    ////                    ExecuteInsert<UnifiedNumericValueRow, FormSubmissionValueDetailRow>(
-    ////                        detailTableLoader,
-    ////                        numericDetailRows,
-    ////                        structuredCommandProvider,
-    ////                        transaction);
-    ////                }
-
-    ////                var dateDetailRows =
-    ////                    detailRowConverter.Convert(userSourcedValues.Where(x => x.UnifiedValueType == UnifiedValueType.Date)).ToList();
-
-    ////                if (dateDetailRows.Any())
-    ////                {
-    ////                    var deleteDateQuery =
-    ////                        Select.From<UnifiedDateValueRow>()
-    ////                            .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
-    ////                            .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
-
-    ////                    provider.DeleteItems(deleteDateQuery);
-
-    ////                    ExecuteInsert<UnifiedDateValueRow, FormSubmissionValueDetailRow>(
-    ////                        detailTableLoader,
-    ////                        dateDetailRows,
-    ////                        structuredCommandProvider,
-    ////                        transaction);
-    ////                }
-
-    ////                var stringDetailRows =
-    ////                    detailRowConverter.Convert(userSourcedValues.Where(x => x.UnifiedValueType == UnifiedValueType.Text)).ToList();
-
-    ////                if (stringDetailRows.Any())
-    ////                {
-    ////                    var deleteStringQuery =
-    ////                        Select.From<UnifiedStringValueRow>()
-    ////                            .Matching(new FormSubmissionValueRow { FormSubmissionId = submissionId }, row => row.FormSubmissionId)
-    ////                            .InnerJoin<FormSubmissionValueRow>(row => row.UnifiedFieldValueId, row => row.FormSubmissionValueId);
-
-    ////                    provider.DeleteItems(deleteStringQuery);
-
-    ////                    ExecuteInsert<UnifiedStringValueRow, FormSubmissionValueDetailRow>(
-    ////                        detailTableLoader,
-    ////                        stringDetailRows,
-    ////                        structuredCommandProvider,
-    ////                        transaction);
-    ////                }
-
-    ////                provider.AbortTransaction();
-    ////            }
-    ////            finally
-    ////            {
-    ////                Generate.CleanupData(provider, submissionId);
-    ////            }
-    ////        }
-    ////    }
-
-    ////    /// <summary>
-    ////    /// The execute reader_ structured sql command with mocked provider_ matches expected.
-    ////    /// </summary>
-    ////    [TestMethod]
-    ////    public void ExecuteReader_StructuredMergeCommandWithMockedProvider_MatchesExpected()
-    ////    {
-    ////        var actionPrincipal = new ActionPrincipal("someguy", 43587, 438) { FirstName = "some", LastName = "guy" };
-    ////        var formSubmission = Generate.CreateFormSubmission(actionPrincipal, true, false);
-
-    ////        var formSubmissionValueRows = this.entityMapper.Map<List<FormSubmissionValueRow>>(formSubmission.FormSubmissionValues);
-
-    ////        // Create the provider and stub out the list for the current values.
-    ////        var structuredCommandProvider = RepositoryMockFactory.CreateStructuredCommandProvider();
-    ////        structuredCommandProvider.StubForList(formSubmissionValueRows);
-
-    ////        var target = new StructuredMergeCommand<FormSubmissionValueRow>(structuredCommandProvider);
-
-    ////        var dataTableLoader = new DataTableLoader<FormSubmissionValueRow>();
-    ////        var dataTable = dataTableLoader.Load(formSubmissionValueRows);
-
-    ////        var properties = from p in typeof(FormSubmissionValueRow).GetProperties(BindingFlags.Instance | BindingFlags.Public)
-    ////                         where p.CanWrite
-    ////                         orderby p.Name //// Skip stuff like TransactionProvider
-    ////                         select p;
-
-    ////        var propertyOrdinals = properties.Select((info, i) => new { Ordinal = i, Property = info }).ToList();
-
-    ////        using (var reader = target.ExecuteReader(dataTable))
-    ////        using (var enumerator = formSubmissionValueRows.GetEnumerator())
-    ////        {
-    ////            // The mocked reader will do this once per value.
-    ////            while (reader.Read())
-    ////            {
-    ////                // Walk through the rows, assuming they are all in the same order.
-    ////                enumerator.MoveNext();
-    ////                var items = new object[reader.FieldCount];
-    ////                var count = reader.GetValues(items);
-
-    ////                Assert.AreEqual<int>(items.Length, count);
-
-    ////                // Test each property.
-    ////                foreach (var propertyOrdinal in propertyOrdinals)
-    ////                {
-    ////                    var expected = items[propertyOrdinal.Ordinal];
-    ////                    var actual = propertyOrdinal.Property.GetMethod.Invoke(enumerator.Current, null);
-    ////                    Assert.AreEqual(expected, actual);
-    ////                }
-    ////            }
-    ////        }
-    ////    }
-
-    ////    /// <summary>
-    ////    /// Executes an insert.
-    ////    /// </summary>
-    ////    /// <param name="detailTableLoader">
-    ////    /// The detail table loader.
-    ////    /// </param>
-    ////    /// <param name="integerDetailRows">
-    ////    /// The integer detail rows.
-    ////    /// </param>
-    ////    /// <param name="structuredCommandProvider">
-    ////    /// The database context provider.
-    ////    /// </param>
-    ////    /// <param name="transaction">
-    ////    /// The transaction.
-    ////    /// </param>
-    ////    /// <typeparam name="TDataItem">
-    ////    /// The type of data item that will be inserted into.
-    ////    /// </typeparam>
-    ////    /// <typeparam name="TStructure">
-    ////    /// The type of data structure that contains the items to insert.
-    ////    /// </typeparam>
-    ////    private static void ExecuteInsert<TDataItem, TStructure>(
-    ////        DataTableLoader<TStructure> detailTableLoader,
-    ////        IEnumerable<TStructure> integerDetailRows,
-    ////        IStructuredCommandProvider structuredCommandProvider,
-    ////        IDbTransaction transaction)
-    ////    {
-    ////        var detailDataTable = detailTableLoader.Load(integerDetailRows);
-    ////        var detailInsertCommand = new StructuredInsertCommand<TStructure>(structuredCommandProvider, transaction).InsertInto<TDataItem>();
-    ////        detailInsertCommand.Execute(detailDataTable);
-    ////    }
-    ////}
+            Assert.IsTrue(actual.All(field => field.FieldId.HasValue));
+            CollectionAssert.AreEqual(fields, actual);
+        }
+    }
 }
