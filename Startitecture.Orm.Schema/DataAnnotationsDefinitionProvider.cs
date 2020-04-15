@@ -105,8 +105,6 @@ namespace Startitecture.Orm.Schema
                 sourceTableNameAttribute?.Schema ?? entityType.Namespace,
                 sourceTableNameAttribute?.Name ?? entityType.Name,
                 null);
-
-            ////return sourceTableNameAttribute == null ? entityType.Name : $"[{sourceTableNameAttribute.Schema}].[{sourceTableNameAttribute.Name}]";
         }
 
         /// <inheritdoc />
@@ -149,6 +147,7 @@ namespace Startitecture.Orm.Schema
             }
 
             var columnAttribute = entityProperty.GetCustomAttribute<ColumnAttribute>();
+            var relatedEntityAttribute = entityProperty.GetCustomAttribute<RelatedEntityAttribute>();
             var relationAttribute = entityProperty.GetCustomAttribute<RelationAttribute>();
 
             var physicalName = entityProperty.Name;
@@ -156,6 +155,10 @@ namespace Startitecture.Orm.Schema
             if (string.IsNullOrWhiteSpace(columnAttribute?.Name) == false)
             {
                 physicalName = columnAttribute.Name;
+            }
+            else if (string.IsNullOrWhiteSpace(relatedEntityAttribute?.PhysicalName) == false)
+            {
+                ////physicalName = relatedEntityAttribute.PhysicalName;
             }
             else if (relationAttribute != null)
             {
@@ -184,30 +187,6 @@ namespace Startitecture.Orm.Schema
         {
             return entityProperty.GetCustomAttribute<ColumnAttribute>()?.Order ?? int.MaxValue;
         }
-
-/*
-        /// <inheritdoc />
-        protected virtual IEnumerable<AttributeReference> GetKeyAttributes([NotNull] Type entityType)
-        {
-            if (entityType == null)
-            {
-                throw new ArgumentNullException(nameof(entityType));
-            }
-
-            return from propertyInfo in entityType.GetProperties().Where(x => x.GetCustomAttribute<KeyAttribute>() != null)
-                   let isIdentity =
-                       propertyInfo.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption == DatabaseGeneratedOption.Identity
-                   select new AttributeReference
-                              {
-                                  EntityReference = new EntityReference { EntityType = entityType },
-                                  Name = propertyInfo.Name,
-                                  PropertyInfo = propertyInfo,
-                                  PhysicalName = propertyInfo.GetCustomAttribute<ColumnAttribute>()?.Name ?? propertyInfo.Name,
-                                  IsIdentity = isIdentity,
-                                  IsPrimaryKey = true
-                              };
-        }
-*/
 
         /// <inheritdoc />
         protected override IEnumerable<AttributeReference> GetAttributes([NotNull] Type entityType)

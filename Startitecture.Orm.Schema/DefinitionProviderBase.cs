@@ -26,13 +26,6 @@ namespace Startitecture.Orm.Schema
     /// </summary>
     public abstract class DefinitionProviderBase : IEntityDefinitionProvider
     {
-/*
-        /// <summary>
-        /// The cache key format.
-        /// </summary>
-        private const string CacheKeyFormat = "{0}:{1}:{2}";
-*/
-
         /// <summary>
         /// The cache lock.
         /// </summary>
@@ -91,7 +84,6 @@ namespace Startitecture.Orm.Schema
 
             var listName = typeof(List<EntityAttributeDefinition>).ToRuntimeName();
             var cacheKey = $"{this.GetType().FullName}:{entityType.FullName}:{listName}";
-            ////string.Format(CacheKeyFormat, this.GetType().FullName, entityType.FullName, listName);
             var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, entityType, this.GetRelationAttributes, ItemPolicy);
 
             return result.Item;
@@ -258,8 +250,7 @@ namespace Startitecture.Orm.Schema
                        {
                            EntityReference = relatedEntityReference,
                            Name = propertyInfo.Name,
-                           ////UseAttributeAlias = relatedEntity.UseAttributeAlias,
-                           PhysicalName = relatedEntity.PhysicalName
+                           PhysicalName = relatedEntity.PhysicalName ?? propertyInfo.Name
                        };
         }
 
@@ -278,7 +269,6 @@ namespace Startitecture.Orm.Schema
         private IEnumerable<EntityAttributeDefinition> GetEntityDefinitions(LinkedList<EntityLocation> entityPath, PropertyInfo entityProperty)
         {
             var entityType = entityProperty.PropertyType;
-            ////var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
             var relationReference = new EntityReference
                                         {
                                             EntityType = entityType,
@@ -338,12 +328,11 @@ namespace Startitecture.Orm.Schema
 
                 // Adding the dot avoids collisions with FKs.
                 var propertyAlias = string.Concat(relationLocation.Alias ?? relationLocation.Name, '.', attributeReference.Name);
-                var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
 
                 var entityAttributeDefinition = new EntityAttributeDefinition(
                     entityPath,
                     propertyInfo,
-                    relatedPhysicalName,
+                    attributeReference.PhysicalName,
                     EntityAttributeTypes.RelatedAttribute,
                     int.MaxValue,
                     attributeReference.Name == propertyAlias ? null : propertyAlias);
@@ -409,15 +398,14 @@ namespace Startitecture.Orm.Schema
             entityPath.AddLast(entityLocation);
 
             var attributeReferences = this.GetAttributes(entityType);
-            ////var keyAttributeReferences = this.GetKeyAttributes(entityType).ToList();
 
             foreach (var attributeReference in attributeReferences)
             {
                 var physicalName = this.GetPhysicalName(attributeReference.PropertyInfo);
                 var ordinal = this.GetOrdinal(attributeReference.PropertyInfo);
                 var attributeName = physicalName;
-                var isPrimaryKey = this.IsKey(attributeReference.PropertyInfo); //// keyAttributeReferences.Where(x => x.IsPrimaryKey).Select(x => x.PhysicalName).Contains(physicalName);
-                var isIdentity = this.IsIdentity(attributeReference.PropertyInfo); //// keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
+                var isPrimaryKey = this.IsKey(attributeReference.PropertyInfo);
+                var isIdentity = this.IsIdentity(attributeReference.PropertyInfo);
 
                 var attributeTypes = EntityAttributeTypes.None;
 
@@ -441,9 +429,9 @@ namespace Startitecture.Orm.Schema
                     attributeTypes |= EntityAttributeTypes.ExplicitRelatedAttribute;
                     var relatedEntityReference = new EntityReference
                                                      {
-                                                         EntityType = attributeReference.EntityReference.EntityType, // relatedEntity.EntityType,
+                                                         EntityType = attributeReference.EntityReference.EntityType,
                                                          ContainerType = entityType,
-                                                         EntityAlias = attributeReference.EntityReference.EntityAlias // relatedEntity.EntityAlias
+                                                         EntityAlias = attributeReference.EntityReference.EntityAlias
                                                      };
 
                     var relatedLocation = this.GetEntityLocation(relatedEntityReference);
@@ -453,19 +441,8 @@ namespace Startitecture.Orm.Schema
 
                     entityPath.AddLast(relatedLocation);
 
-                    ////var isEntityAlias = string.IsNullOrWhiteSpace(relatedLocation.Alias) == false;
-                    ////var entityIdentifier = isEntityAlias ? relatedLocation.Alias : relatedLocation.Name;
-
                     // Use the physical name if overridden.
-                    physicalName = attributeReference.PhysicalName ?? physicalName; // relatedEntity.PhysicalName ?? physicalName;
-
-                    ////attributeName = attributeReference.UseAttributeAlias && // relatedEntity.UseAttributeAlias && 
-                    ////                physicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
-                    ////                    ? physicalName.Substring(entityIdentifier.Length)
-                    ////                    : physicalName;
-
-                    ////var attributeAlias = attributeReference.UseAttributeAlias ? // relatedEntity.UseAttributeAlias ? 
-                    ////                         attributeReference.Name : null;
+                    physicalName = attributeReference.PhysicalName ?? physicalName;
 
                     var entityAttributeDefinition = new EntityAttributeDefinition(
                         entityPath,

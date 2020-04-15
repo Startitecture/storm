@@ -117,6 +117,8 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(mergeMatchExpressions));
             }
 
+            this.Items.Clear();
+            this.Items.AddRange(mergeItems);
             this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TDataItem>();
             this.directAttributes.AddRange(this.itemDefinition.DirectAttributes);
             this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
@@ -200,7 +202,8 @@ namespace Startitecture.Orm.Sql
                                  join fk in allAttributes on key.ResolvedLocation equals fk.ResolvedLocation
                                  select new { TargetKey = key, SourceKey = fk }).ToList();
 
-            var updateAttributes = this.itemDefinition.UpdateableAttributes.Except(keyAttributes.Select(x => x.TargetKey));
+            // If all elements are part of the match attributes then this will end up blank. TODO: Skip update if update attributes has no items?
+            var updateAttributes = this.itemDefinition.UpdateableAttributes; ////.Except(keyAttributes.Select(x => x.TargetKey)); 
 
             var updateClauses = from targetColumn in updateAttributes
                                 join sourceColumn in allAttributes on targetColumn.ResolvedLocation equals sourceColumn.ResolvedLocation

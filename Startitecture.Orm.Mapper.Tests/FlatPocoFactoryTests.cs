@@ -58,7 +58,7 @@ namespace Startitecture.Orm.Mapper.Tests
             stopwatch.Reset();
 
             Assert.IsNotNull(actual);
-            Assert.AreEqual<int>(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
+            Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
 
             stopwatch.Start();
@@ -104,7 +104,7 @@ namespace Startitecture.Orm.Mapper.Tests
             stopwatch.Reset();
 
             Assert.IsNotNull(actual);
-            Assert.AreEqual<int>(expected.OverriddenColumnNameId, actual.OverriddenColumnNameId);
+            Assert.AreEqual(expected.OverriddenColumnNameId, actual.OverriddenColumnNameId);
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
 
             stopwatch.Start();

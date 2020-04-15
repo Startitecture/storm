@@ -174,7 +174,7 @@ namespace Startitecture.Orm.Common
             }
 
             var item = this.RepositoryProvider.GetFirstOrDefault(selection.MapTo<TDataItem>());
-            return this.EntityMapper.Map<TEntity>(item);
+            return item != null ? this.EntityMapper.Map<TEntity>(item) : default;
         }
 
         /// <inheritdoc />

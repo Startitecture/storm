@@ -37,6 +37,8 @@ namespace Startitecture.Orm.Sql.Tests
             this.CreateMap<Field, FieldRow>().ForMember(row => row.TransactionProvider, expression => expression.Ignore());
             this.CreateMap<FieldRow, Field>();
 
+            this.CreateMap<FieldTableTypeRow, Field>();
+
             this.CreateMap<FieldValueTableTypeRow, FieldValue>()
                 .ForMember(value => value.Field, expression => expression.Ignore())
                 .ForMember(value => value.LastModifiedBy, expression => expression.Ignore());

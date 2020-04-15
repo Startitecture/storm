@@ -6,7 +6,6 @@
 
 namespace Startitecture.Orm.Testing.Entities.TableTypes
 {
-    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Schema;
@@ -15,6 +14,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     /// The field data type row.
     /// </summary>
     [TableType("FieldTableType")]
+    [Table("Field", Schema = "dbo")]
     public class FieldTableTypeRow
     {
         /// <summary>
