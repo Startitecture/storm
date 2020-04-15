@@ -37,6 +37,24 @@ namespace Startitecture.Orm.Testing.Model
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="GenericSubmission"/> class.
+        /// </summary>
+        /// <param name="subject">
+        /// The subject.
+        /// </param>
+        /// <param name="submittedBy">
+        /// The submitted by identity.
+        /// </param>
+        /// <param name="genericSubmissionId">
+        /// The generic Submission ID.
+        /// </param>
+        public GenericSubmission(string subject, DomainIdentity submittedBy, int genericSubmissionId)
+            : this(subject, submittedBy)
+        {
+            this.GenericSubmissionId = genericSubmissionId;
+        }
+
+        /// <summary>
         /// Prevents a default instance of the <see cref="GenericSubmission"/> class from being created.
         /// </summary>
         private GenericSubmission()
@@ -93,6 +111,26 @@ namespace Startitecture.Orm.Testing.Model
         public void Submit()
         {
             this.SubmittedTime = DateTimeOffset.Now;
+        }
+
+        /// <summary>
+        /// Loads existing values into the submission values collection.
+        /// </summary>
+        /// <param name="fieldValues">
+        /// The field values to load.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="fieldValues"/> is null.
+        /// </exception>
+        public void Load([NotNull] List<FieldValue> fieldValues)
+        {
+            if (fieldValues == null)
+            {
+                throw new ArgumentNullException(nameof(fieldValues));
+            }
+
+            this.submissionValues.Clear();
+            this.submissionValues.AddRange(fieldValues);
         }
     }
 }

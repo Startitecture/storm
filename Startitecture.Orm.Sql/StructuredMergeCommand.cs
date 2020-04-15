@@ -11,14 +11,11 @@ namespace Startitecture.Orm.Sql
     using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
-    using System.Reflection;
     using System.Text;
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The structured merge command.
@@ -49,6 +46,11 @@ namespace Startitecture.Orm.Sql
         private readonly List<EntityAttributeDefinition> selectionMatchAttributes = new List<EntityAttributeDefinition>();
 
         /// <summary>
+        /// The delete constraints.
+        /// </summary>
+        private readonly List<Expression<Func<TStructure, object>>> deleteConstraints = new List<Expression<Func<TStructure, object>>>();
+
+        /// <summary>
         /// The delete unmatched in source.
         /// </summary>
         private bool deleteUnmatchedInSource;
@@ -57,11 +59,6 @@ namespace Startitecture.Orm.Sql
         /// The item definition.
         /// </summary>
         private IEntityDefinition itemDefinition;
-
-        /// <summary>
-        /// The delete constraints.
-        /// </summary>
-        private List<Expression<Func<TStructure, object>>> deleteConstraints;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="StructuredMergeCommand{TStructure}"/> class.
@@ -120,18 +117,15 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(mergeMatchExpressions));
             }
 
-            // TODO: Send this in with DI
-            var entityDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TDataItem>();
-            this.itemDefinition = entityDefinition;
-            this.directAttributes.AddRange(entityDefinition.DirectAttributes);
-            this.insertAttributes.AddRange(
-                entityDefinition.AutoNumberPrimaryKey.HasValue ? this.itemDefinition.UpdateableAttributes : this.directAttributes);
+            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TDataItem>();
+            this.directAttributes.AddRange(this.itemDefinition.DirectAttributes);
+            this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
 
             // Use the expressions provided if any.
             this.mergeMatchAttributes.AddRange(
                 mergeMatchExpressions.Any()
-                    ? mergeMatchExpressions.Select(x => new AttributeLocation(x)).Select(entityDefinition.Find)
-                    : entityDefinition.PrimaryKeyAttributes);
+                    ? mergeMatchExpressions.Select(this.itemDefinition.Find)
+                    : this.itemDefinition.PrimaryKeyAttributes);
 
             return this;
         }
@@ -152,7 +146,8 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(constraints));
             }
 
-            this.deleteConstraints = constraints.ToList();
+            this.deleteConstraints.Clear();
+            this.deleteConstraints.AddRange(constraints);
             this.deleteUnmatchedInSource = true;
             return this;
         }
@@ -173,7 +168,8 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(matchKeys));
             }
 
-            this.selectionMatchAttributes.AddRange(matchKeys.Select(x => this.itemDefinition.Find(new AttributeLocation(x))));
+            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+            this.selectionMatchAttributes.AddRange(matchKeys.Select(structureDefinition.Find));
             return this;
         }
 
@@ -186,31 +182,29 @@ namespace Startitecture.Orm.Sql
         private string CompileCommandText()
         {
             var qualifier = this.StructuredCommandProvider.NameQualifier;
-            var structureDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
             var allAttributes = structureDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
             // If there's an auto number primary key, then don't try to insert it. Only use the updateable attributes.
-            var targetColumns = this.insertAttributes.OrderBy(x => x.PhysicalName).Select(x => x.PhysicalName);
+            var targetColumns = this.insertAttributes.OrderBy(x => x.Ordinal).Select(x => x.PhysicalName);
 
             var sourceAttributes = (from tvpAttribute in allAttributes
-                                    join insertAttribute in this.insertAttributes on tvpAttribute.PhysicalName equals insertAttribute.PhysicalName
-                                    orderby tvpAttribute.PhysicalName
+                                    join insertAttribute in this.insertAttributes on tvpAttribute.ResolvedLocation equals insertAttribute
+                                        .ResolvedLocation
+                                    orderby tvpAttribute.Ordinal
                                     select tvpAttribute).ToList();
 
             var sourceColumns = sourceAttributes.Select(x => x.PhysicalName);
 
             var keyAttributes = (from key in this.mergeMatchAttributes
-                                 join fk in allAttributes on key.PhysicalName equals fk.PhysicalName
+                                 join fk in allAttributes on key.ResolvedLocation equals fk.ResolvedLocation
                                  select new { TargetKey = key, SourceKey = fk }).ToList();
 
             var updateAttributes = this.itemDefinition.UpdateableAttributes.Except(keyAttributes.Select(x => x.TargetKey));
 
             var updateClauses = from targetColumn in updateAttributes
-                                join sourceColumn in allAttributes on targetColumn.PhysicalName equals sourceColumn.PhysicalName
+                                join sourceColumn in allAttributes on targetColumn.ResolvedLocation equals sourceColumn.ResolvedLocation
                                 select new { TargetColumn = targetColumn.PhysicalName, SourceColumn = sourceColumn.PhysicalName };
-
-            // Throws an error if there's not a table type attribute.
-            var tableTypeName = typeof(TStructure).GetCustomAttributes<TableTypeAttribute>().First().TypeName;
 
             // Always use the primary key for merge match.
             var mergeMatchClauses = keyAttributes.Select(
@@ -222,7 +216,7 @@ namespace Startitecture.Orm.Sql
                 updateClauses.Distinct()
                     .Select(x => $"{qualifier.Escape(x.TargetColumn)} = {qualifier.Escape("Source")}.{qualifier.Escape(x.SourceColumn)}"));
 
-            var mergeStatementBuilder = new StringBuilder().AppendLine($"DECLARE @inserted {tableTypeName};")
+            var mergeStatementBuilder = new StringBuilder().AppendLine($"DECLARE @inserted {this.StructureTypeName};")
                 .AppendLine(
                     $"MERGE {qualifier.Escape(this.itemDefinition.EntityContainer)}.{qualifier.Escape(this.itemDefinition.EntityName)} AS {qualifier.Escape("Target")}")
                 .AppendLine($"USING @{this.Parameter} AS {qualifier.Escape("Source")}")
@@ -258,7 +252,7 @@ namespace Startitecture.Orm.Sql
             if (this.selectionMatchAttributes.Any())
             {
                 // These will be the column names from the table.
-                var outputColumns = this.directAttributes.OrderBy(x => x.PhysicalName).Select(x => $"INSERTED.{qualifier.Escape(x.PhysicalName)}");
+                var outputColumns = this.directAttributes.OrderBy(x => x.Ordinal).Select(x => $"INSERTED.{qualifier.Escape(x.PhysicalName)}");
 
                 // Here we use property name because the assumption is the UDTT uses aliases, not physical names.
                 var insertedColumns =
@@ -266,7 +260,7 @@ namespace Startitecture.Orm.Sql
                         this.directAttributes,
                         tvp => qualifier.Qualify(tvp),
                         i => qualifier.GetCanonicalName(i), //// i.GetCanonicalName(),
-                        (structure, entity) => structure).OrderBy(x => x.PhysicalName).Select(x => $"{qualifier.Escape(x.PropertyName)}").ToList();
+                        (structure, entity) => structure).OrderBy(x => x.Ordinal).Select(x => $"{qualifier.Escape(x.PropertyName)}").ToList();
 
                 // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original
                 // table valued parameter.
@@ -282,7 +276,7 @@ namespace Startitecture.Orm.Sql
                                      Attribute = x
                                  });
 
-                var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.PropertyName).Select(x => x.Column);
+                var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.Ordinal).Select(x => x.Column);
 
                 var matchAttributes = (from key in this.selectionMatchAttributes
                                        join fk in allAttributes on key.PhysicalName equals fk.PhysicalName

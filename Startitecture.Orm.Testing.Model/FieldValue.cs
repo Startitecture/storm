@@ -35,6 +35,21 @@ namespace Startitecture.Orm.Testing.Model
         }
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="FieldValue"/> class.
+        /// </summary>
+        /// <param name="field">
+        /// The field.
+        /// </param>
+        /// <param name="fieldValueId">
+        /// The field value ID.
+        /// </param>
+        public FieldValue([NotNull] Field field, long fieldValueId)
+            : this(field)
+        {
+            this.FieldValueId = fieldValueId;
+        }
+
+        /// <summary>
         /// Prevents a default instance of the <see cref="FieldValue"/> class from being created.
         /// </summary>
         private FieldValue()

@@ -122,28 +122,12 @@ namespace Startitecture.Orm.Schema
             var entityType = entityReference.EntityType;
             var entityQualifiedName = this.GetEntityQualifiedName(entityType);
 
-            ////// Here we assume no servers are included.
-            ////var locationTokens = entityQualifiedName.Split(new[] { '.' }, 2, StringSplitOptions.RemoveEmptyEntries);
-
-            ////// Remove delimiters so we can expect consistent names.
-            ////var nameToken = locationTokens.Last().Trim('[', ']');
-
             // Only set the alias if it doesn't match the name.
             var entityAlias = string.Equals(entityReference.EntityAlias, entityQualifiedName.Entity, StringComparison.OrdinalIgnoreCase)
                                   ? null
                                   : entityReference.EntityAlias;
 
-            ////var schema = string.IsNullOrWhiteSpace(entityQualifiedName.Schema) ? DefaultSchema : entityQualifiedName.Schema;
             return new EntityLocation(entityReference.EntityType, entityQualifiedName.Schema, entityQualifiedName.Entity, entityAlias);
-
-            ////switch (locationTokens.Length)
-            ////{
-            ////    case 2:
-            ////        return new EntityLocation(entityReference.EntityType, locationTokens.First().Trim('[', ']'), nameToken, entityAlias);
-
-            ////    default:
-            ////        return new EntityLocation(entityReference.EntityType, DefaultSchema, nameToken, entityAlias);
-            ////}
         }
 
         /// <summary>
@@ -313,50 +297,32 @@ namespace Startitecture.Orm.Schema
             {
                 var propertyName = propertyInfo.Name;
                 var physicalName = this.GetPhysicalName(propertyInfo);
-                var attributeName = physicalName;
                 var propertyAlias = string.Concat(relationLocation.Alias ?? relationLocation.Name, '.', propertyName);
-                var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
                 var ordinal = this.GetOrdinal(propertyInfo);
-                var isPrimaryKey = this.IsKey(propertyInfo); ////keyAttributeReferences.Where(x => x.IsPrimaryKey && x.IsIdentity == false).Select(x => x.PhysicalName).Contains(physicalName);
-                var isIdentity = this.IsIdentity(propertyInfo); //// keyAttributeReferences.Where(x => x.IsIdentity).Select(x => x.PhysicalName).Contains(physicalName);
+                var isPrimaryKey = this.IsKey(propertyInfo);
+                var isIdentity = this.IsIdentity(propertyInfo);
+
+                var attributeTypes = EntityAttributeTypes.RelatedAttribute;
 
                 if (isPrimaryKey)
                 {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                        entityPath,
-                        propertyInfo,
-                        attributeName,
-                        EntityAttributeTypes.RelatedPrimaryKey,
-                        ordinal,
-                        propertyName == propertyAlias ? null : propertyAlias);
-
-                    yield return entityAttributeDefinition;
+                    attributeTypes |= EntityAttributeTypes.PrimaryKey;
                 }
-                else if (isIdentity)
+
+                if (isIdentity)
                 {
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                        entityPath,
-                        propertyInfo,
-                        attributeName,
-                        EntityAttributeTypes.RelatedAutoNumberKey,
-                        ordinal,
-                        propertyName == propertyAlias ? null : propertyAlias);
-
-                    yield return entityAttributeDefinition;
+                    attributeTypes |= EntityAttributeTypes.IdentityColumn;
                 }
-                else
-                {
-                    // Adding the dot avoids collisions with FKs.
-                    var entityAttributeDefinition = new EntityAttributeDefinition(
-                        entityPath,
-                        propertyInfo,
-                        relatedPhysicalName,
-                        EntityAttributeTypes.RelatedAttribute,
-                        ordinal,
-                        propertyName == propertyAlias ? null : propertyAlias);
 
-                    yield return entityAttributeDefinition;
-                }
+                var entityAttributeDefinition = new EntityAttributeDefinition(
+                    entityPath,
+                    propertyInfo,
+                    physicalName,
+                    attributeTypes,
+                    ordinal,
+                    propertyName == propertyAlias ? null : propertyAlias);
+
+                yield return entityAttributeDefinition;
             }
 
             // Next, handle direct related entity attributes.
@@ -373,11 +339,6 @@ namespace Startitecture.Orm.Schema
                 // Adding the dot avoids collisions with FKs.
                 var propertyAlias = string.Concat(relationLocation.Alias ?? relationLocation.Name, '.', attributeReference.Name);
                 var relatedPhysicalName = this.GetPhysicalName(propertyInfo);
-
-                ////var entityIdentifier = relatedLocation.Alias ?? relatedLocation.Name;
-                ////var attributeName = attributeReference.UseAttributeAlias && relatedPhysicalName.StartsWith(entityIdentifier, StringComparison.Ordinal)
-                ////                        ? relatedPhysicalName.Substring(entityIdentifier.Length)
-                ////                        : relatedPhysicalName;
 
                 var entityAttributeDefinition = new EntityAttributeDefinition(
                     entityPath,

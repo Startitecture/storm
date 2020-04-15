@@ -9,18 +9,13 @@ namespace Startitecture.Orm.Sql
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
-    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Schema;
-    using Startitecture.Resources;
 
     /// <summary>
     /// The structured insert command.
@@ -161,9 +156,9 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         public StructuredInsertCommand<TStructure> SelectResults(params Expression<Func<TStructure, object>>[] matchProperties)
         {
-            var structureDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
             this.selectionAttributes.Clear();
-            this.selectionAttributes.AddRange(matchProperties.Select(x => new AttributeLocation(x)).Select(structureDefinition.Find));
+            this.selectionAttributes.AddRange(matchProperties.Select(structureDefinition.Find));
             return this;
         }
 
@@ -210,7 +205,7 @@ namespace Startitecture.Orm.Sql
         /// </returns>
         private string CompileCommandText()
         {
-            var structureDefinition = Singleton<DataAnnotationsDefinitionProvider>.Instance.Resolve<TStructure>();
+            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
             var directAttributes = this.itemDefinition.DirectAttributes.ToList();
             var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.itemDefinition.Find) :
                                     this.itemDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.itemDefinition.UpdateableAttributes :

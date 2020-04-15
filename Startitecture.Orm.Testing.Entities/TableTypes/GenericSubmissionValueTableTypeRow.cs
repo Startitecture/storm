@@ -14,6 +14,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     /// The generic submission value table type row.
     /// </summary>
     [TableType("GenericSubmissionValueTableType")]
+    [Table("GenericSubmissionValue", Schema = "dbo")]
     public class GenericSubmissionValueTableTypeRow
     {
         /// <summary>

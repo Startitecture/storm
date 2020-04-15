@@ -14,6 +14,8 @@ namespace Startitecture.Orm.Testing.Moq
 
     using Castle.DynamicProxy.Internal;
 
+    using JetBrains.Annotations;
+
     using global::Moq;
 
     using Startitecture.Core;
@@ -36,9 +38,6 @@ namespace Startitecture.Orm.Testing.Moq
         /// <param name="items">
         /// The merge items.
         /// </param>
-        /// <param name="orderedAttributes">
-        /// The ordered attributes.
-        /// </param>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
@@ -49,10 +48,22 @@ namespace Startitecture.Orm.Testing.Moq
         /// The <see cref="Mock"/>.
         /// </returns>
         public static Mock<IStructuredCommandProvider> MockCommandProvider<T>(
-            this IReadOnlyCollection<T> items,
-            IReadOnlyCollection<EntityAttributeDefinition> orderedAttributes,
-            IEntityDefinitionProvider definitionProvider)
+            [NotNull] this IReadOnlyCollection<T> items,
+            [NotNull] IEntityDefinitionProvider definitionProvider)
         {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            if (definitionProvider == null)
+            {
+                throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            var structureDefinition = definitionProvider.Resolve<T>();
+            var orderedAttributes = structureDefinition.ReturnableAttributes.OrderBy(definition => definition.Ordinal).ToList();
+
             var reader = new Mock<IDataReader>();
             var fieldCount = orderedAttributes.Count();
             reader.Setup(dataReader => dataReader.FieldCount).Returns(fieldCount);
