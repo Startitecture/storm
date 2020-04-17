@@ -220,7 +220,7 @@ namespace Startitecture.Orm.Sql
                                           orderby tvpAttribute.Ordinal
                                           select tvpAttribute).ToList();
 
-            var sourceColumns = sourceAttributes.Select(x => this.nameQualifier.Escape(x.PhysicalName));
+            var sourceColumns = sourceAttributes.Select(x => this.nameQualifier.Escape(x.PropertyName));
 
             var commandBuilder = new StringBuilder();
 

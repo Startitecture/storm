@@ -1046,6 +1046,26 @@ namespace Startitecture.Orm.Query
         }
 
         /// <summary>
+        /// Adds a relation to the selection.
+        /// </summary>
+        /// <param name="relation">
+        /// The relation to add.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        public ItemSelection<TItem> AddRelation([NotNull] IEntityRelation relation)
+        {
+            if (relation == null)
+            {
+                throw new ArgumentNullException(nameof(relation));
+            }
+
+            this.relations.Add(relation);
+            return this;
+        }
+
+        /// <summary>
         /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
         /// </summary>
         /// <returns>
@@ -1077,63 +1097,6 @@ namespace Startitecture.Orm.Query
             }
 
             this.valueFilters.Add(valueFilter);
-            return this;
-        }
-
-        /// <summary>
-        /// Adds a match filter for the specified example item.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item to match.
-        /// </typeparam>
-        /// <param name="example">
-        /// The example to match.
-        /// </param>
-        /// <param name="propertyExpressions">
-        /// The property names to include in the filter.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
-        /// </returns>
-        protected ItemSelection<TItem> Matching<TDataItem>(TDataItem example, IEnumerable<LambdaExpression> propertyExpressions)
-        {
-            if (Evaluate.IsNull(example))
-            {
-                throw new ArgumentNullException(nameof(example));
-            }
-
-            if (propertyExpressions == null)
-            {
-                throw new ArgumentNullException(nameof(propertyExpressions));
-            }
-
-            foreach (var propertyName in propertyExpressions)
-            {
-                // Note: this will obviously cause an exception if the property expression is not valid for the TDataItem type.
-                var value = propertyName.Compile().DynamicInvoke(example); ////example.GetPropertyValue(propertyName);
-                this.valueFilters.Add(new ValueFilter(propertyName, FilterType.Equality, value));
-            }
-
-            return this;
-        }
-
-        /// <summary>
-        /// Adds a relation to the selection.
-        /// </summary>
-        /// <param name="relation">
-        /// The relation to add.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
-        /// </returns>
-        protected ItemSelection<TItem> AddRelation([NotNull] IEntityRelation relation)
-        {
-            if (relation == null)
-            {
-                throw new ArgumentNullException(nameof(relation));
-            }
-
-            this.relations.Add(relation);
             return this;
         }
 

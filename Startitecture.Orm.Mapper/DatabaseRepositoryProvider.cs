@@ -365,52 +365,47 @@ namespace Startitecture.Orm.Mapper
 
             var uniqueSelection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, item).Select(selectExpressions);
 
-            // If caching is enabled, incoming items will be compared against the cache. This will catch forward changes (A1 -> A2) but 
-            // will ignore reverse changes (A2 -> A1) until the cached item expires.
-            var existingItem = this.FirstOrDefault(uniqueSelection, this.EnableCaching);
+            ////// If caching is enabled, incoming items will be compared against the cache. This will catch forward changes (A1 -> A2) but 
+            ////// will ignore reverse changes (A2 -> A1) until the cached item expires.
+            ////var existingItem = this.FirstOrDefault(uniqueSelection, this.EnableCaching);
 
             var savePolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) };
 
-            if (Evaluate.IsSet(existingItem))
+            if (this.Contains(uniqueSelection))
             {
-                // This needs to be done prior to the mapping so we know what is in the database.
-                var existingValues = from a in attributeDefinitions
-                                     select a.GetValueDelegate.DynamicInvoke(existingItem);
-                ////existingItem.ToValueCollection();
+                ////// This needs to be done prior to the mapping so we know what is in the database.
+                ////var existingValues = from a in attributeDefinitions
+                ////                     select a.GetValueDelegate.DynamicInvoke(existingItem);
 
-                // Now apply the auto-number key from the existing item to the incoming item if necessary. This is for cases when the 
-                // unique key is used rather than an auto-number ID. 
-                var primaryKey = entityDefinition.AutoNumberPrimaryKey;
-                var keyCompare = new Lazy<bool>(
-                    () => primaryKey?.GetValueDelegate.DynamicInvoke(item) == primaryKey?.GetValueDelegate.DynamicInvoke(existingItem));
+                ////// Now apply the auto-number key from the existing item to the incoming item if necessary. This is for cases when the 
+                ////// unique key is used rather than an auto-number ID. 
+                ////var primaryKey = entityDefinition.AutoNumberPrimaryKey;
+                ////var keyCompare = new Lazy<bool>(
+                ////    () => primaryKey?.GetValueDelegate.DynamicInvoke(item) == primaryKey?.GetValueDelegate.DynamicInvoke(existingItem));
 
-                if (primaryKey != null && keyCompare.Value == false)
-                {
-                    var existingKey = primaryKey.Value.GetValueDelegate.DynamicInvoke(existingItem);
-                    primaryKey.Value.SetValueDelegate.DynamicInvoke(item, existingKey);
-                }
+                ////if (primaryKey != null && keyCompare.Value == false)
+                ////{
+                ////    var existingKey = primaryKey.Value.GetValueDelegate.DynamicInvoke(existingItem);
+                ////    primaryKey.Value.SetValueDelegate.DynamicInvoke(item, existingKey);
+                ////}
 
-                ////// When the item already exists, we use the data item mapping to merge fields. The data item mapping should ensure that
-                ////// primary keys are ignored so that the merged item contains the primary key from the existing entity.
-                ////// TODO: To eliminate mapping at this layer, eliminate write-once and use an internal mapper.
-                ////var mergedItem = this.EntityMapper.MapTo(item, existingItem);
-                var mergedValues = from a in attributeDefinitions
-                                   select a.GetValueDelegate.DynamicInvoke(item);
+                ////var mergedValues = from a in attributeDefinitions
+                ////                   select a.GetValueDelegate.DynamicInvoke(item);
 
-                // Do not update unless needed. // TODO: Is this wise?
-                if (existingValues.SequenceEqual(mergedValues))
-                {
-                    if (this.EnableCaching)
-                    {
-                        lock (this.itemLock)
-                        {
-                            this.itemCache.Set(CreateCacheKey(uniqueSelection), item, savePolicy);
-                        }
-                    }
+                ////// Do not update unless needed. // TODO: Is this wise?
+                ////if (existingValues.SequenceEqual(mergedValues))
+                ////{
+                ////    if (this.EnableCaching)
+                ////    {
+                ////        lock (this.itemLock)
+                ////        {
+                ////            this.itemCache.Set(CreateCacheKey(uniqueSelection), item, savePolicy);
+                ////        }
+                ////    }
 
-                    item.SetTransactionProvider(this);
-                    return item;
-                }
+                ////    item.SetTransactionProvider(this);
+                ////    return item;
+                ////}
 
                 this.Update(item, uniqueSelection);
 

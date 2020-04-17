@@ -11,11 +11,24 @@ namespace Startitecture.Orm.Testing.Model
 
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
+
     /// <summary>
     /// The generic submission.
     /// </summary>
-    public class GenericSubmission
+    public class GenericSubmission : IEquatable<GenericSubmission>
     {
+        /// <summary>
+        /// The comparison properties.
+        /// </summary>
+        private static readonly Func<GenericSubmission, object>[] ComparisonProperties =
+            {
+                item => item.Subject,
+                item => item.SubmittedBy,
+                item => item.SubmittedTime,
+                item => item.SubmissionValues
+            };
+
         /// <summary>
         /// The submission values.
         /// </summary>
@@ -86,6 +99,97 @@ namespace Startitecture.Orm.Testing.Model
         /// </summary>
         public IEnumerable<FieldValue> SubmissionValues => this.submissionValues;
 
+        #region Equality and Comparison Methods and Operators
+
+        /// <summary>
+        /// Determines if two values of the same type are equal.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator ==(GenericSubmission valueA, GenericSubmission valueB)
+        {
+            return EqualityComparer<GenericSubmission>.Default.Equals(valueA, valueB);
+        }
+
+        /// <summary>
+        /// Determines if two values of the same type are not equal.
+        /// </summary>
+        /// <param name="valueA">
+        /// The first value to compare.
+        /// </param>
+        /// <param name="valueB">
+        /// The second value to compare.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
+        /// </returns>
+        public static bool operator !=(GenericSubmission valueA, GenericSubmission valueB)
+        {
+            return !(valueA == valueB);
+        }
+
+        /// <summary>
+        /// Returns a string that represents the current object.
+        /// </summary>
+        /// <returns>
+        /// A string that represents the current object.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
+        public override string ToString()
+        {
+            return $"'{this.Subject}' by {this.SubmittedBy} at {this.SubmittedTime}";
+        }
+
+        /// <summary>
+        /// Serves as the default hash function.
+        /// </summary>
+        /// <returns>
+        /// A hash code for the current object.
+        /// </returns>
+        /// <filterpriority>2</filterpriority>
+        public override int GetHashCode()
+        {
+            return Evaluate.GenerateHashCode(this, ComparisonProperties);
+        }
+
+        /// <summary>
+        /// Determines whether the specified object is equal to the current object.
+        /// </summary>
+        /// <returns>
+        /// true if the specified object  is equal to the current object; otherwise, false.
+        /// </returns>
+        /// <param name="obj">
+        /// The object to compare with the current object. 
+        /// </param>
+        /// <filterpriority>2</filterpriority>
+        public override bool Equals(object obj)
+        {
+            return Evaluate.Equals(this, obj);
+        }
+
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <returns>
+        /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
+        /// </returns>
+        /// <param name="other">
+        /// An object to compare with this object.
+        /// </param>
+        public bool Equals(GenericSubmission other)
+        {
+            return Evaluate.Equals(this, other, ComparisonProperties);
+        }
+
+        #endregion
+
         /// <summary>
         /// The set value.
         /// </summary>
@@ -122,7 +226,7 @@ namespace Startitecture.Orm.Testing.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="fieldValues"/> is null.
         /// </exception>
-        public void Load([NotNull] List<FieldValue> fieldValues)
+        public void Load([NotNull] IEnumerable<FieldValue> fieldValues)
         {
             if (fieldValues == null)
             {

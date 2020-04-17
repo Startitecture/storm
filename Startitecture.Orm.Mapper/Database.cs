@@ -147,7 +147,7 @@ namespace Startitecture.Orm.Mapper
             this.CommonConstruct();
 
             // TODO: Make other qualifiers based on database type
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider, nameQualifier);
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Startitecture.Orm.Mapper
             this.DefinitionProvider = definitionProvider;
             this.CommonConstruct();
 
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider, nameQualifier);
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
         }
 
         /// <summary>
@@ -250,7 +250,7 @@ namespace Startitecture.Orm.Mapper
             this.DefinitionProvider = definitionProvider;
             this.CommonConstruct();
 
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider, nameQualifier);
+            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
         }
 
         #endregion
@@ -531,11 +531,11 @@ namespace Startitecture.Orm.Mapper
 
             var entityDefinition = this.DefinitionProvider.Resolve<T>();
 
-            if (this.EnableAutoSelect)
-            {
-                var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
-                sql = autoSelectHelper.AddSelectClause(sql);
-            }
+            ////if (this.EnableAutoSelect)
+            ////{
+            ////    var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
+            ////    sql = autoSelectHelper.AddSelectClause(sql);
+            ////}
 
             this.OpenSharedConnection();
 
@@ -1351,13 +1351,13 @@ namespace Startitecture.Orm.Mapper
         /// </param>
         private void BuildPageQueries<T>(long skip, long take, string sql, ref object[] args, out string sqlCount, out string sqlPage)
         {
-            // Add auto select clause
-            if (this.EnableAutoSelect)
-            {
-                var entityDefinition = this.DefinitionProvider.Resolve<T>();
-                var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
-                sql = autoSelectHelper.AddSelectClause(sql);
-            }
+            ////// Add auto select clause
+            ////if (this.EnableAutoSelect)
+            ////{
+            ////    var entityDefinition = this.DefinitionProvider.Resolve<T>();
+            ////    var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
+            ////    sql = autoSelectHelper.AddSelectClause(sql);
+            ////}
 
             // Split the SQL
             SqlPageStatement pageStatement;

@@ -168,12 +168,7 @@ namespace Startitecture.Orm.Sql
         /// </param>
         public TransactSqlQueryFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
-            this.definitionProvider = definitionProvider;
+            this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.transactSqlJoin = new TransactSqlJoin(this.definitionProvider);
         }
 
@@ -228,27 +223,6 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
-        /// The get column selection.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to create a column selection for.
-        /// </param>
-        /// <returns>
-        /// The column selection as a <see cref="string"/>.
-        /// </returns>
-        private static string GetQualifiedColumnName(EntityAttributeDefinition attribute)
-        {
-            var qualifiedName = SqlQualifier.Qualify(attribute);
-            var referenceName = SqlQualifier.GetReferenceName(attribute);
-
-            var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
-                                          ? string.Format(CultureInfo.InvariantCulture, SelectColumnFormat, qualifiedName)
-                                          : string.Format(CultureInfo.InvariantCulture, AliasColumnFormat, referenceName, attribute.Alias);
-
-            return qualifiedColumnName;
-        }
-
-        /// <summary>
         /// Creates a selection link statement for the specified type.
         /// </summary>
         /// <param name="linkType">
@@ -280,6 +254,37 @@ namespace Startitecture.Orm.Sql
             }
 
             return linkStatement;
+        }
+
+        /// <summary>
+        /// Gets a reference name from an <paramref name="location"/>.
+        /// </summary>
+        /// <param name="location">
+        /// The location to get the reference name from.
+        /// </param>
+        /// <returns>
+        /// The reference name as a <see cref="string"/>.
+        /// </returns>
+        private static string GetReferenceName(EntityLocation location)
+        {
+            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
+            return isEntityAliased
+                       ? string.Concat('[', location.Alias, ']')
+                       : string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
+        }
+
+        /// <summary>
+        /// Gets a reference name from an <paramref name="attribute"/>.
+        /// </summary>
+        /// <param name="attribute">
+        /// The attribute to get the reference name from.
+        /// </param>
+        /// <returns>
+        /// The reference name as a <see cref="string"/>.
+        /// </returns>
+        private static string GetReferenceName(EntityAttributeDefinition attribute)
+        {
+            return $"{GetReferenceName(attribute.Entity)}.[{attribute.PhysicalName}]";
         }
 
         /// <summary>
@@ -361,6 +366,27 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
+        /// The get column selection.
+        /// </summary>
+        /// <param name="attribute">
+        /// The attribute to create a column selection for.
+        /// </param>
+        /// <returns>
+        /// The column selection as a <see cref="string"/>.
+        /// </returns>
+        private string GetQualifiedColumnName(EntityAttributeDefinition attribute)
+        {
+            var qualifiedName = SqlQualifier.Qualify(attribute);
+            var referenceName = GetReferenceName(attribute);
+
+            var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
+                                          ? string.Format(CultureInfo.InvariantCulture, SelectColumnFormat, qualifiedName)
+                                          : string.Format(CultureInfo.InvariantCulture, AliasColumnFormat, referenceName, attribute.Alias);
+
+            return qualifiedColumnName;
+        }
+
+        /// <summary>
         /// Creates a filter for the current selection.
         /// </summary>
         /// <param name="entityDefinition">
@@ -397,7 +423,7 @@ namespace Startitecture.Orm.Sql
                     filter.AttributeLocation.EntityReference.EntityAlias ?? entityLocation.Alias ?? entityLocation.Name,
                     filter.AttributeLocation.PropertyInfo.Name);
 
-                var referenceName = SqlQualifier.GetReferenceName(attribute);
+                var referenceName = GetReferenceName(attribute);
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
                 index = AddTokens(filter.FilterType, filter.FilterValues.First(), filterTokens, referenceName, setValues, index);
@@ -480,7 +506,7 @@ namespace Startitecture.Orm.Sql
 
             string selectColumns = isContains
                                        ? '1'.ToString(CultureInfo.InvariantCulture)
-                                       : string.Join(string.Concat(",", Environment.NewLine), selectAttributes.Select(GetQualifiedColumnName));
+                                       : string.Join(string.Concat(",", Environment.NewLine), selectAttributes.Select(this.GetQualifiedColumnName));
 
             ////if (selection.SelectionSource == selection.ItemDefinition.EntityName)
             ////{

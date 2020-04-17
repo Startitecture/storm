@@ -57,6 +57,11 @@ namespace Startitecture.Orm.Model
         private readonly Lazy<EntityLocation> entityLocation;
 
         /// <summary>
+        /// The default relations.
+        /// </summary>
+        private readonly Lazy<List<IEntityRelation>> defaultRelations;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="EntityDefinition"/> class.
         /// </summary>
         /// <param name="definitionProvider">
@@ -96,6 +101,19 @@ namespace Startitecture.Orm.Model
                 new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Except(this.primaryKeyAttributes.Value).ToList);
 
             this.entityLocation = new Lazy<EntityLocation>(() => definitionProvider.GetEntityLocation(entityReference));
+            this.defaultRelations = new Lazy<List<IEntityRelation>>(
+                () =>
+                    {
+                        if (typeof(IEntityAggregate).IsAssignableFrom(type) && type.GetConstructor(Array.Empty<Type>()) != null)
+                        {
+                            // We have to make an instance to get the relations.
+                            // TODO: Use T4 template in conjunction with property declarations to build this without instantiation
+                            var entity = Activator.CreateInstance(type);
+                            return ((IEntityAggregate)entity).EntityRelations.ToList();
+                        }
+
+                        return new List<IEntityRelation>();
+                    });
         }
 
         /// <summary>
@@ -137,6 +155,21 @@ namespace Startitecture.Orm.Model
                 new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Except(this.primaryKeyAttributes.Value).ToList);
 
             this.entityLocation = new Lazy<EntityLocation>(() => definitionProvider.GetEntityLocation(entityReference));
+
+            var type = entityReference.EntityType;
+            this.defaultRelations = new Lazy<List<IEntityRelation>>(
+                () =>
+                    {
+                        if (typeof(IEntityAggregate).IsAssignableFrom(type) && type.GetConstructor(Array.Empty<Type>()) != null)
+                        {
+                            // We have to make an instance to get the relations.
+                            // TODO: Use T4 template in conjunction with property declarations to build this without instantiation
+                            var entity = Activator.CreateInstance(type);
+                            return ((IEntityAggregate)entity).EntityRelations.ToList();
+                        }
+
+                        return new List<IEntityRelation>();
+                    });
         }
 
         /// <summary>
@@ -166,7 +199,10 @@ namespace Startitecture.Orm.Model
 
         /// <inheritdoc />
         /// TODO: Use a more generic representation
-        public string QualifiedName => $"[{this.EntityContainer}].[{this.EntityName}]";
+        public string QualifiedName => $"{this.EntityContainer}.{this.EntityName}";
+
+        /// <inheritdoc />
+        public IEnumerable<IEntityRelation> DefaultRelations => this.defaultRelations.Value;
 
         /// <summary>
         /// Gets the updateable attributes of the data item.

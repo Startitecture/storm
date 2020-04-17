@@ -41,6 +41,11 @@ namespace Startitecture.Orm.Sql
         private readonly List<EntityAttributeDefinition> mergeMatchAttributes = new List<EntityAttributeDefinition>();
 
         /// <summary>
+        /// The from expressions.
+        /// </summary>
+        private readonly List<LambdaExpression> fromColumnExpressions = new List<LambdaExpression>();
+
+        /// <summary>
         /// The selection match attributes.
         /// </summary>
         private readonly List<EntityAttributeDefinition> selectionMatchAttributes = new List<EntityAttributeDefinition>();
@@ -49,6 +54,8 @@ namespace Startitecture.Orm.Sql
         /// The delete constraints.
         /// </summary>
         private readonly List<Expression<Func<TStructure, object>>> deleteConstraints = new List<Expression<Func<TStructure, object>>>();
+
+        private readonly EntityRelationSet<TStructure> explicitRelationSet = new EntityRelationSet<TStructure>();
 
         /// <summary>
         /// The delete unmatched in source.
@@ -133,6 +140,66 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
+        /// Specifies the columns to select into the table.
+        /// </summary>
+        /// <param name="fromColumns">
+        /// The columns to select into the table. These must be the same number of columns as target columns..
+        /// </param>
+        /// <returns>
+        /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="fromColumns"/> is null.
+        /// </exception>
+        public StructuredMergeCommand<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
+        {
+            if (fromColumns == null)
+            {
+                throw new ArgumentNullException(nameof(fromColumns));
+            }
+
+            this.fromColumnExpressions.Clear();
+            this.fromColumnExpressions.AddRange(fromColumns);
+            return this;
+        }
+
+        /// <summary>
+        /// The on.
+        /// </summary>
+        /// <param name="sourceExpression">
+        /// An expression that selects the key on the table value parameter.
+        /// </param>
+        /// <param name="targetExpression">
+        /// An expression that selects the matching key on the target table.
+        /// </param>
+        /// <typeparam name="TDataItem">
+        /// The type of item representing the target table of the merge.
+        /// </typeparam>
+        /// <returns>
+        /// The current <see cref="StructuredMergeCommand{TStructure}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="sourceExpression"/> or <paramref name="targetExpression"/> is null.
+        /// </exception>
+        public StructuredMergeCommand<TStructure> On<TDataItem>(
+            [NotNull] Expression<Func<TStructure, object>> sourceExpression,
+            [NotNull] Expression<Func<TDataItem, object>> targetExpression)
+        {
+            if (sourceExpression == null)
+            {
+                throw new ArgumentNullException(nameof(sourceExpression));
+            }
+
+            if (targetExpression == null)
+            {
+                throw new ArgumentNullException(nameof(targetExpression));
+            }
+
+            this.explicitRelationSet.InnerJoin<TDataItem>(sourceExpression, targetExpression);
+            return this;
+        }
+
+        /// <summary>
         /// Deletes items that are unmatched in the source. Use with caution.
         /// </summary>
         /// <param name="constraints">
@@ -190,29 +257,42 @@ namespace Startitecture.Orm.Sql
             // If there's an auto number primary key, then don't try to insert it. Only use the updateable attributes.
             var targetColumns = this.insertAttributes.OrderBy(x => x.Ordinal).Select(x => x.PhysicalName);
 
-            var sourceAttributes = (from tvpAttribute in allAttributes
-                                    join insertAttribute in this.insertAttributes on tvpAttribute.ResolvedLocation equals insertAttribute
-                                        .ResolvedLocation
-                                    orderby tvpAttribute.Ordinal
-                                    select tvpAttribute).ToList();
+            var sourceAttributes = this.fromColumnExpressions.Any()
+                                       ? this.fromColumnExpressions.Select(structureDefinition.Find)
+                                       : (from tvpAttribute in allAttributes
+                                          join insertAttribute in this.insertAttributes on tvpAttribute.ResolvedLocation equals insertAttribute
+                                              .ResolvedLocation
+                                          orderby tvpAttribute.Ordinal
+                                          select tvpAttribute).ToList();
 
-            var sourceColumns = sourceAttributes.Select(x => x.PhysicalName);
+            var sourceColumns = sourceAttributes.Select(x => x.PropertyName);
 
-            var keyAttributes = (from key in this.mergeMatchAttributes
-                                 join fk in allAttributes on key.ResolvedLocation equals fk.ResolvedLocation
-                                 select new { TargetKey = key, SourceKey = fk }).ToList();
+            var keyAttributes = this.explicitRelationSet.Relations.Any()
+                                    ? (from r in this.explicitRelationSet.Relations
+                                       select new
+                                                  {
+                                                      TargetKey = this.itemDefinition.Find(r.RelationExpression),
+                                                      SourceKey = structureDefinition.Find(r.SourceExpression)
+                                                  }).ToList()
+                                    : (from key in this.mergeMatchAttributes
+                                       join fk in allAttributes on key.ResolvedLocation equals fk.ResolvedLocation
+                                       select new
+                                                  {
+                                                      TargetKey = key,
+                                                      SourceKey = fk
+                                                  }).ToList();
+
+            // Always use the primary key for merge match.
+            var mergeMatchClauses = keyAttributes.Select(
+                x => $"{qualifier.Escape("Target")}.{qualifier.Escape(x.TargetKey.PhysicalName)} = "
+                     + $"{qualifier.Escape("Source")}.{qualifier.Escape(x.SourceKey.PropertyName)}");
 
             // If all elements are part of the match attributes then this will end up blank. TODO: Skip update if update attributes has no items?
             var updateAttributes = this.itemDefinition.UpdateableAttributes; ////.Except(keyAttributes.Select(x => x.TargetKey)); 
 
             var updateClauses = from targetColumn in updateAttributes
                                 join sourceColumn in allAttributes on targetColumn.ResolvedLocation equals sourceColumn.ResolvedLocation
-                                select new { TargetColumn = targetColumn.PhysicalName, SourceColumn = sourceColumn.PhysicalName };
-
-            // Always use the primary key for merge match.
-            var mergeMatchClauses = keyAttributes.Select(
-                x => $"{qualifier.Escape("Target")}.{qualifier.Escape(x.TargetKey.PhysicalName)} = "
-                     + $"{qualifier.Escape("Source")}.{qualifier.Escape(x.SourceKey.PhysicalName)}");
+                                select new { TargetColumn = targetColumn.PhysicalName, SourceColumn = sourceColumn.PropertyName };
 
             var updateClause = string.Join(
                 ", ",
@@ -237,12 +317,12 @@ namespace Startitecture.Orm.Sql
                         x =>
                             {
                                 var sourceAttribute = structureDefinition.Find(x);
-                                var tablePhysicalName = sourceAttribute.PhysicalName;
-                                var itemPhysicalName = this.itemDefinition.DirectAttributes
+                                var tableReferenceName = sourceAttribute.PropertyName; // TODO: Reference by alias?
+                                var itemReferenceName = this.itemDefinition.DirectAttributes
                                     .FirstOrDefault(a => a.PhysicalName == sourceAttribute.PhysicalName)
                                     .PhysicalName;
 
-                                return $"AND {qualifier.Escape("Target")}.{itemPhysicalName} IN (SELECT {qualifier.Escape(tablePhysicalName)} FROM @{this.Parameter})";
+                                return $"AND {qualifier.Escape("Target")}.{itemReferenceName} IN (SELECT {qualifier.Escape(tableReferenceName)} FROM @{this.Parameter})";
                             })
                     .ToList();
 
@@ -257,7 +337,7 @@ namespace Startitecture.Orm.Sql
                 // These will be the column names from the table.
                 var outputColumns = this.directAttributes.OrderBy(x => x.Ordinal).Select(x => $"INSERTED.{qualifier.Escape(x.PhysicalName)}");
 
-                // Here we use property name because the assumption is the UDTT uses aliases, not physical names.
+                // Here we use property name because the assumption is the UDTT uses aliases, not physical names. TODO: Use aliases?
                 var insertedColumns =
                     allAttributes.Join(
                         this.directAttributes,

@@ -141,6 +141,13 @@ namespace Startitecture.Orm.Common
 
             var selectionItem = this.GetExampleItem(candidate);
             var uniqueItemSelection = this.GetUniqueItemSelection(selectionItem);
+
+            // Because we want to hydrate the entire entity, we need to add joins if available.
+            foreach (var relation in this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>().DefaultRelations)
+            {
+                uniqueItemSelection.AddRelation(relation);
+            }
+
             var cacheResult = this.QueryCache(uniqueItemSelection);
 
             if (cacheResult.Hit)

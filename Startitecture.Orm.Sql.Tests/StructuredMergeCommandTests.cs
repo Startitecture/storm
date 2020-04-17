@@ -280,17 +280,6 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                                          Name = "MERGE_NonExisting_Contact Numbers",
                                          Description = "A list of contact numbers for the person in order of preference"
                                      };
-
-            var baselineFields = new List<Field>
-                                     {
-                                         internalId,
-                                         firstName,
-                                         lastName,
-                                         yearlyWage,
-                                         hireDate,
-                                         bonusTarget,
-                                         contactNumbers
-                                     };
                 
             var providerFactory = new SqlServerProviderFactory(
                 ConfigurationRoot.GetConnectionString("OrmTestDb"),
@@ -324,46 +313,6 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                                               LastName = "Bar"
                                           });
 
-                // Stage fields that we want to update
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.entityMapper);
-
-                // Delete all "non-existing" fields.
-                fieldRepository.Delete(Select.From<Field>().WhereEqual(field => field.Name, "MERGE_NonExisting_%"));
-                
-                // Merge in the field values.
-                var commandProvider = new StructuredTransactSqlCommandProvider((IDatabaseContextProvider)provider);
-
-                var transaction = provider.StartTransaction();
-
-                // Merge our existing fields
-                var fieldItems = from f in baselineFields.Where(field => field.Name.StartsWith("MERGE_Existing_"))
-                                 select new FieldTableTypeRow
-                                            {
-                                                Name = f.Name,
-                                                Description = f.Description
-                                            };
-
-                var fieldsCommand = new StructuredMergeCommand<FieldTableTypeRow>(commandProvider, transaction);
-                var mergedFields = fieldsCommand
-                    .MergeInto<FieldRow>(fieldItems, row => row.Name)
-                    .SelectFromInserted(row => row.Name)
-                    .ExecuteForResults()
-                    .ToList();
-
-                foreach (var field in baselineFields)
-                {
-                    var input = mergedFields.FirstOrDefault(f => string.Equals(f.Name, field.Name));
-
-                    // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
-                    // aren't IDs for baseline fields.
-                    if (input == null)
-                    {
-                        continue;
-                    }
-
-                    this.entityMapper.MapTo(input, field);
-                }
-
                 // We will add to this submission later.
                 baselineSubmission = new GenericSubmission("My MERGE Submission", domainIdentity);
                 baselineSubmission.SetValue(internalId, 9234);
@@ -372,252 +321,237 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                 baselineSubmission.SetValue(yearlyWage, 72150.35m); // gonna get updated so lets check that this value got scrapped
                 baselineSubmission.Submit();
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.entityMapper);
-                submissionRepository.Save(baselineSubmission);
-
-                Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
-
-                // Could be mapped as well.
-                var fieldValues = from v in baselineSubmission.SubmissionValues
-                                              select new FieldValueTableTypeRow
-                                                         {
-                                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                                             LastModifiedTime = v.LastModifiedTime
-                                                         };
-
-                // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
-                // only inserted rows matched back to their original fields.
-                var fieldValueCommand = new StructuredMergeCommand<FieldValueTableTypeRow>(commandProvider, transaction);
-                var mergedFieldValues = fieldValueCommand
-                    .MergeInto<FieldValueRow>(fieldValues, row => row.FieldValueId)
-                    .SelectFromInserted(row => row.FieldId)
-                    .ExecuteForResults()
-                    .ToList();
-
-                Assert.IsTrue(mergedFieldValues.All(row => row.FieldValueId.HasValue));
-
-                // Map back to the domain object. TODO: Automate?
-                foreach (var value in baselineSubmission.SubmissionValues)
-                {
-                    var input = mergedFieldValues.First(row => row.FieldId == value.Field.FieldId);
-                    this.entityMapper.MapTo(input, value);
-                    Assert.IsTrue(value.FieldValueId.HasValue);
-                }
-
-                // Now merge in the field value elements.
-                // Do the field value elements
-                var valueElements = (from e in baselineSubmission.SubmissionValues.SelectMany(value => value.Elements)
-                                     select new FieldValueElementTableTypeRow
-                                                {
-                                                    FieldValueElementId = e.FieldValueElementId,
-                                                    FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                    Order = e.Order,
-                                                    DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                    FloatElement = e.Element as double? ?? e.Element as float?,
-                                                    IntegerElement =
-                                                        e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                    MoneyElement = e.Element as decimal?,
-                                                    TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                                }).ToList();
-
-                var elementMergeCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction);
-                var mergedValueElements = elementMergeCommand
-                    .MergeInto<FieldValueElementRow>(valueElements, row => row.FieldValueId, row => row.Order)
-                    .DeleteUnmatchedInSource(row => row.FieldValueId) // Get rid of extraneous elements
-                    .SelectFromInserted(row => row.FieldValueId, row => row.Order) // Generally this is the same as the MERGE INTO 
-                    .ExecuteForResults()
-                    .ToList();
-
-                foreach (var element in baselineSubmission.SubmissionValues.SelectMany(value => value.Elements))
-                {
-                    var input = mergedValueElements.First(row => row.FieldValueId == element.FieldValue.FieldValueId && row.Order == element.Order);
-                    this.entityMapper.MapTo(input, element);
-                    Assert.IsTrue(element.FieldValueElementId.HasValue);
-                }
-
-                var dateElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
-                    .MergeInto<DateElementRow>(mergedValueElements.Where(row => row.DateElement.HasValue), row => row.DateElementId, row => row.Value);
-                    ////.From(row => row.FieldValueElementId, row => row.DateElement);
-
-                dateElementsCommand.Execute();
-
-                var floatElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
-                    .MergeInto<FloatElementRow>(mergedValueElements.Where(row => row.FloatElement.HasValue), row => row.FloatElementId, row => row.Value);
-                    ////.From(row => row.FieldValueElementId, row => row.FloatElement);
-
-                floatElementsCommand.Execute();
-
-                var integerElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
-                    .MergeInto<IntegerElementRow>(
-                        mergedValueElements.Where(row => row.IntegerElement.HasValue),
-                        row => row.IntegerElementId,
-                        row => row.Value);
-                    ////.From(row => row.FieldValueElementId, row => row.IntegerElement);
-
-                integerElementsCommand.Execute();
-
-                var moneyElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
-                    .MergeInto<MoneyElementRow>(mergedValueElements.Where(row => row.MoneyElement.HasValue), row => row.MoneyElementId, row => row.Value);
-                    ////.From(row => row.FieldValueElementId, row => row.MoneyElement);
-
-                moneyElementsCommand.Execute();
-
-                var textElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
-                    .MergeInto<TextElementRow>(mergedValueElements.Where(row => row.TextElement != null), row => row.TextElementId, row => row.Value);
-                    ////.From(row => row.FieldValueElementId, row => row.TextElement);
-
-                textElementsCommand.Execute();
-
-                // Attach the values to the submission
-                var genericValueSubmissions = from v in mergedFieldValues
-                                              select new GenericSubmissionValueTableTypeRow
-                                              {
-                                                  GenericSubmissionId = baselineSubmission.GenericSubmissionId.GetValueOrDefault(),
-                                                  GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                              };
-
-                var submissionCommand = new StructuredMergeCommand<GenericSubmissionValueTableTypeRow>(commandProvider, transaction)
-                    .MergeInto<GenericSubmissionValueRow>(genericValueSubmissions);
-
-                submissionCommand.Execute();
-                transaction.Commit();
+                this.MergeSubmission(baselineSubmission, provider);
             }
+
+            Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
+
+            // Reusing the key lets us test whether updates are in fact working as expected.
+            var expected = new GenericSubmission("My Final MERGE Submission", domainIdentity2, baselineSubmission.GenericSubmissionId.GetValueOrDefault());
+
+            expected.SetValue(yearlyWage, 75100.35m);
+            expected.SetValue(hireDate, DateTimeOffset.Now);
+            expected.SetValue(bonusTarget, 1.59834578934);
+            expected.SetValue(
+                contactNumbers,
+                new List<string>
+                    {
+                        "423-222-2252",
+                        "615-982-0012",
+                        "+1-555-252-5521"
+                    });
+
+            expected.Submit();
+
+            GenericSubmission actual;
 
             // Using a new provider clears any provider-level caches
             using (var provider = providerFactory.Create())
             {
-                // Reusing the key lets us test whether updates are in fact working as expected.
-                var expected = new GenericSubmission("My Final MERGE Submission", domainIdentity2, baselineSubmission.GenericSubmissionId.GetValueOrDefault());
-
-                expected.SetValue(yearlyWage, 75100.35m);
-                expected.SetValue(hireDate, DateTimeOffset.Now);
-                expected.SetValue(bonusTarget, 1.59834578934);
-                expected.SetValue(
-                    contactNumbers,
-                    new List<string>
-                        {
-                            "423-222-2252",
-                            "615-982-0012",
-                            "+1-555-252-5521"
-                        });
-
-                expected.Submit();
-
-                var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
-                var inclusionValues = fields.Keys.ToArray();
+                this.MergeSubmission(expected, provider);
 
                 var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.entityMapper);
+                actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
-                var transaction = provider.StartTransaction();
-                submissionRepository.Save(expected);
+                var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.entityMapper);
+                var values = fieldValueRepository.Select(
+                        Select.From<GenericSubmissionValueRow>()
+                            .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
+                            .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
+                            .InnerJoin(row => row.FieldValue.LastModifiedByDomainIdentifierId, row => row.FieldValue.LastModifiedBy.DomainIdentityId)
+                            .WhereEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault()))
+                    .ToDictionary(value => value.FieldValueId.GetValueOrDefault(), value => value);
 
-                var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
-                Assert.AreNotEqual(0, submissionId);
+                actual.Load(values.Values);
 
-                // Set up the structured command provider.
-                var databaseContextProvider = (IDatabaseContextProvider)provider;
-                var structuredCommandProvider = new StructuredTransactSqlCommandProvider(databaseContextProvider);
+                var valueElementRows = provider.GetSelection(
+                        Select.From<FieldValueElementTableTypeRow>()
+                            .LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
+                            .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
+                            .LeftJoin<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
+                            .LeftJoin<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
+                            .LeftJoin<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId)
+                            .Include(row => row.FieldValueId, values.Keys.ToArray()))
+                    .ToList();
 
-                // Do the field values
-                var valuesList = from v in expected.SubmissionValues
-                                 select new FieldValueTableTypeRow
-                                            {
-                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                                LastModifiedByDomainIdentifierId = domainIdentity2.DomainIdentityId.GetValueOrDefault(),
-                                                LastModifiedTime = expected.SubmittedTime
-                                            };
-
-                var valuesCommand = new StructuredInsertCommand<FieldValueTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<FieldValueRow>(valuesList)
-                    .SelectResults(row => row.FieldId);
-
-                var insertedValues = valuesCommand.ExecuteForResults().ToList();
-
-                // Map back to the domain object.
-                foreach (var value in expected.SubmissionValues)
+                foreach (var key in values.Keys)
                 {
-                    var input = insertedValues.FirstOrDefault(row => row.FieldId == value.Field.FieldId);
-                    this.entityMapper.MapTo(input, value);
+                    values[key]
+                        .Load(
+                            from e in valueElementRows
+                            where e.FieldValueId == key
+                            orderby e.Order
+                            select new FieldValueElement(
+                                e.DateElement ?? e.FloatElement ?? e.IntegerElement ?? e.MoneyElement ?? e.TextElement as object,
+                                e.FieldValueElementId.GetValueOrDefault()));
                 }
-
-                // Do the field value elements
-                var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
-                                    select new FieldValueElementTableTypeRow
-                                               {
-                                                   FieldValueElementId = e.FieldValueElementId,
-                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                   Order = e.Order,
-                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                   FloatElement = e.Element as double? ?? e.Element as float?,
-                                                   IntegerElement =
-                                                       e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                   MoneyElement = e.Element as decimal?,
-                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                               }).ToList();
-
-                var elementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<FieldValueElementRow>(elementsList)
-                    .SelectResults(row => row.FieldValueId, row => row.Order);
-
-                // Reassign with our added identities
-                // TODO: create dictionary for seeks
-                elementsList = elementsCommand.ExecuteForResults().ToList();
-
-                foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
-                {
-                    var input = elementsList.First(row => row.FieldValueId == element.FieldValue.FieldValueId && row.Order == element.Order);
-                    this.entityMapper.MapTo(input, element);
-                }
-
-                var dateElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<DateElementRow>(elementsList.Where(row => row.DateElement.HasValue), row => row.DateElementId, row => row.Value)
-                    .From(row => row.FieldValueElementId, row => row.DateElement);
-
-                dateElementsCommand.Execute();
-
-                var floatElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<FloatElementRow>(elementsList.Where(row => row.FloatElement.HasValue), row => row.FloatElementId, row => row.Value)
-                    .From(row => row.FieldValueElementId, row => row.FloatElement);
-
-                floatElementsCommand.Execute();
-
-                var integerElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<IntegerElementRow>(
-                        elementsList.Where(row => row.IntegerElement.HasValue),
-                        row => row.IntegerElementId,
-                        row => row.Value)
-                    .From(row => row.FieldValueElementId, row => row.IntegerElement);
-
-                integerElementsCommand.Execute();
-
-                var moneyElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<MoneyElementRow>(elementsList.Where(row => row.MoneyElement.HasValue), row => row.MoneyElementId, row => row.Value)
-                    .From(row => row.FieldValueElementId, row => row.MoneyElement);
-
-                moneyElementsCommand.Execute();
-
-                var textElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<TextElementRow>(elementsList.Where(row => row.TextElement != null), row => row.TextElementId, row => row.Value)
-                    .From(row => row.FieldValueElementId, row => row.TextElement);
-
-                textElementsCommand.Execute();
-
-                // Attach the values to the submission
-                var genericValueSubmissions = from v in insertedValues
-                                              select new GenericSubmissionValueTableTypeRow
-                                                         {
-                                                             GenericSubmissionId = submissionId,
-                                                             GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                                         };
-
-                var submissionCommand = new StructuredInsertCommand<GenericSubmissionValueTableTypeRow>(structuredCommandProvider, transaction)
-                    .InsertInto<GenericSubmissionValueRow>(genericValueSubmissions);
-
-                submissionCommand.Execute();
-
-                transaction.Commit();
             }
+
+            Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
+            CollectionAssert.AreEqual(
+                expected.SubmissionValues.OrderBy(x => x.FieldValueId).ToList(),
+                actual.SubmissionValues.OrderBy(x => x.FieldValueId).ToList());
+
+            var expectedElements = expected.SubmissionValues.SelectMany(value => value.Elements).OrderBy(element => element.FieldValueElementId).ToList();
+            var actualElements = actual.SubmissionValues.SelectMany(value => value.Elements).OrderBy(element => element.FieldValueElementId).ToList();
+            CollectionAssert.AreEqual(expectedElements, actualElements);
+        }
+
+        /// <summary>
+        /// Merges the specified <paramref name="submission"/> into the repository backed by the <paramref name="provider"/>.
+        /// </summary>
+        /// <param name="submission">
+        /// The submission.
+        /// </param>
+        /// <param name="provider">
+        /// The provider.
+        /// </param>
+        private void MergeSubmission(
+            GenericSubmission submission,
+            IRepositoryProvider provider)
+        {
+            // Merge our existing fields
+            var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
+            var fieldItems = from f in fields
+                             select new FieldTableTypeRow
+                                        {
+                                            Name = f.Name,
+                                            Description = f.Description
+                                        };
+
+            // Merge in the field values.
+            var commandProvider = new StructuredTransactSqlCommandProvider((IDatabaseContextProvider)provider);
+            var transaction = provider.StartTransaction();
+
+            var fieldsCommand = new StructuredMergeCommand<FieldTableTypeRow>(commandProvider, transaction);
+            var mergedFields = fieldsCommand
+                .MergeInto<FieldRow>(fieldItems, row => row.Name)
+                .SelectFromInserted(row => row.Name)
+                .ExecuteForResults()
+                .ToList();
+
+            foreach (var field in fields)
+            {
+                var input = mergedFields.FirstOrDefault(f => string.Equals(f.Name, field.Name));
+
+                // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
+                // aren't IDs for baseline fields.
+                if (input == null)
+                {
+                    continue;
+                }
+
+                this.entityMapper.MapTo(input, field);
+            }
+
+            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.entityMapper);
+            submissionRepository.Save(submission);
+
+            // Could be mapped as well.
+            var fieldValues = from v in submission.SubmissionValues
+                              select new FieldValueTableTypeRow
+                                         {
+                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                             LastModifiedTime = v.LastModifiedTime
+                                         };
+
+            // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
+            // only inserted rows matched back to their original fields.
+            var fieldValueCommand = new StructuredMergeCommand<FieldValueTableTypeRow>(commandProvider, transaction);
+            var mergedFieldValues = fieldValueCommand.MergeInto<FieldValueRow>(fieldValues, row => row.FieldValueId)
+                .SelectFromInserted(row => row.FieldId)
+                .ExecuteForResults()
+                .ToList();
+
+            Assert.IsTrue(mergedFieldValues.All(row => row.FieldValueId.HasValue));
+
+            // Map back to the domain object. TODO: Automate?
+            foreach (var value in submission.SubmissionValues)
+            {
+                var input = mergedFieldValues.First(row => row.FieldId == value.Field.FieldId);
+                this.entityMapper.MapTo(input, value);
+                Assert.IsTrue(value.FieldValueId.HasValue);
+            }
+
+            // Now merge in the field value elements.
+            // Do the field value elements
+            var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
+                                 select new FieldValueElementTableTypeRow
+                                            {
+                                                FieldValueElementId = e.FieldValueElementId,
+                                                FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                Order = e.Order,
+                                                DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                FloatElement = e.Element as double? ?? e.Element as float?,
+                                                IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                MoneyElement = e.Element as decimal?,
+                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                            }).ToList();
+
+            var elementMergeCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction);
+            var mergedValueElements = elementMergeCommand.MergeInto<FieldValueElementRow>(valueElements, row => row.FieldValueId, row => row.Order)
+                .DeleteUnmatchedInSource(row => row.FieldValueId) // Get rid of extraneous elements
+                .SelectFromInserted(row => row.FieldValueId, row => row.Order) // Generally this is the same as the MERGE INTO 
+                .ExecuteForResults()
+                .ToList();
+
+            foreach (var element in submission.SubmissionValues.SelectMany(value => value.Elements))
+            {
+                var input = mergedValueElements.First(row => row.FieldValueId == element.FieldValue.FieldValueId && row.Order == element.Order);
+                this.entityMapper.MapTo(input, element);
+                Assert.IsTrue(element.FieldValueElementId.HasValue);
+            }
+
+            var dateElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+                .MergeInto<DateElementRow>(mergedValueElements.Where(row => row.DateElement.HasValue))
+                .On<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
+                .From(row => row.FieldValueElementId, row => row.DateElement);
+
+            dateElementsCommand.Execute();
+
+            var floatElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+                .MergeInto<FloatElementRow>(mergedValueElements.Where(row => row.FloatElement.HasValue))
+                .On<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
+                .From(row => row.FieldValueElementId, row => row.FloatElement);
+
+            floatElementsCommand.Execute();
+
+            var integerElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+                .MergeInto<IntegerElementRow>(mergedValueElements.Where(row => row.IntegerElement.HasValue))
+                .On<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
+                .From(row => row.FieldValueElementId, row => row.IntegerElement);
+
+            integerElementsCommand.Execute();
+
+            var moneyElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+                .MergeInto<MoneyElementRow>(mergedValueElements.Where(row => row.MoneyElement.HasValue))
+                .On<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
+                .From(row => row.FieldValueElementId, row => row.MoneyElement);
+
+            moneyElementsCommand.Execute();
+
+            var textElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+                .MergeInto<TextElementRow>(mergedValueElements.Where(row => row.TextElement != null))
+                .On<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId)
+                .From(row => row.FieldValueElementId, row => row.TextElement);
+
+            textElementsCommand.Execute();
+
+            // Attach the values to the submission
+            var genericValueSubmissions = from v in mergedFieldValues
+                                          select new GenericSubmissionValueTableTypeRow
+                                                     {
+                                                         GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                                     };
+
+            var submissionCommand = new StructuredMergeCommand<GenericSubmissionValueTableTypeRow>(commandProvider, transaction)
+                .MergeInto<GenericSubmissionValueRow>(genericValueSubmissions, row => row.GenericSubmissionValueId)
+                .DeleteUnmatchedInSource(row => row.GenericSubmissionId);
+
+            submissionCommand.Execute();
+            transaction.Commit();
         }
     }
 }

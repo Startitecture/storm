@@ -8,8 +8,6 @@ namespace Startitecture.Orm.Sql
 {
     using System;
 
-    using JetBrains.Annotations;
-
     using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
@@ -55,21 +53,6 @@ namespace Startitecture.Orm.Sql
         public string GetCanonicalName(EntityLocation location)
         {
             return string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
-        }
-
-        /// <inheritdoc />
-        public string GetReferenceName(EntityAttributeDefinition attribute)
-        {
-            return $"{this.GetReferenceName(attribute.Entity)}.[{attribute.PhysicalName}]";
-        }
-
-        /// <inheritdoc />
-        public string GetReferenceName(EntityLocation location)
-        {
-            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
-            return isEntityAliased
-                       ? string.Concat('[', location.Alias, ']')
-                       : string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
         }
     }
 }

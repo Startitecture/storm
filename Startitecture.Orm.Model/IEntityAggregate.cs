@@ -1,22 +1,21 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="GenericSubmissionValueRow.cs" company="Startitecture">
+// <copyright file="IEntityAggregate.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Testing.Entities
+namespace Startitecture.Orm.Model
 {
-    using Startitecture.Orm.Model;
+    using System.Collections.Generic;
 
     /// <summary>
-    /// The generic submission value row.
+    /// Provides an interface to entity aggregates that are composed of relations to other entities.
     /// </summary>
-    public partial class GenericSubmissionValueRow
+    public interface IEntityAggregate
     {
         /// <summary>
-        /// Gets or sets the field.
+        /// Gets the entity relations.
         /// </summary>
-        [Relation]
-        public FieldValueRow FieldValue { get; set; } = new FieldValueRow();
+        IEnumerable<IEntityRelation> EntityRelations { get; }
     }
 }

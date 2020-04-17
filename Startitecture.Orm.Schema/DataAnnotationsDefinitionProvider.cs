@@ -158,7 +158,7 @@ namespace Startitecture.Orm.Schema
             }
             else if (string.IsNullOrWhiteSpace(relatedEntityAttribute?.PhysicalName) == false)
             {
-                ////physicalName = relatedEntityAttribute.PhysicalName;
+                physicalName = relatedEntityAttribute.PhysicalName;
             }
             else if (relationAttribute != null)
             {

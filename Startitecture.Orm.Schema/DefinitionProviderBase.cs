@@ -449,7 +449,8 @@ namespace Startitecture.Orm.Schema
                         attributeReference.PropertyInfo,
                         physicalName,
                         attributeTypes,
-                        int.MaxValue);
+                        int.MaxValue,
+                        attributeReference.PropertyInfo.Name == physicalName ? null : attributeReference.PropertyInfo.Name);
 
                     entityPath.RemoveLast();
 

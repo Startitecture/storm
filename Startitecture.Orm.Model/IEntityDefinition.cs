@@ -9,7 +9,6 @@
 
 namespace Startitecture.Orm.Model
 {
-    using System;
     using System.Collections.Generic;
     using System.Linq.Expressions;
 
@@ -64,6 +63,11 @@ namespace Startitecture.Orm.Model
         /// Gets the qualified name of the entity.
         /// </summary>
         string QualifiedName { get; }
+
+        /// <summary>
+        /// Gets the default relations for the entity.
+        /// </summary>
+        IEnumerable<IEntityRelation> DefaultRelations { get; }
 
         /////// <summary>
         /////// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name.

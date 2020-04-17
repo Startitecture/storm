@@ -95,7 +95,7 @@ namespace Startitecture.Core
             {
                 if (this.cacheMap.TryGetValue(key, out value))
                 {
-                    Trace.TraceInformation($"{key}: Got '{value}' from cache.");
+                    ////Trace.TraceInformation($"{key}: Got '{value}' from cache.");
                     return value;
                 }
             }
@@ -112,7 +112,7 @@ namespace Startitecture.Core
                 // Check again
                 if (this.cacheMap.TryGetValue(key, out value))
                 {
-                    Trace.TraceInformation($"{key}: Got '{value}' from cache (attempt 2).");
+                    ////Trace.TraceInformation($"{key}: Got '{value}' from cache (attempt 2).");
                     return value;
                 }
 

@@ -19,26 +19,11 @@ namespace Startitecture.Orm.Mapper.Tests
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
-    /// The raised poco factory tests.
+    /// The raised POCO factory tests.
     /// </summary>
     [TestClass]
     public class RaisedPocoFactoryTests
     {
-        /////// <summary>
-        /////// The create delegate test.
-        /////// </summary>
-        ////[TestMethod]
-        ////public void CreateDelegate_RaisedPocoFactoryForFlatComplexRow_IsNotNull()
-        ////{
-        ////    using (var target = new RaisedPocoFactory())
-        ////    {
-        ////        var fakeComplexRow = Generate.CreateFakeComplexRow();
-        ////        var pocoDataRequest = Generate.CreatePocoDataRequest(fakeComplexRow);
-        ////        var actual = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest);
-        ////        Assert.IsNotNull(actual);
-        ////    }
-        ////}
-
         /// <summary>
         /// The create delegate test.
         /// </summary>
@@ -47,7 +32,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
+            using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var expected = Generate.CreateFakeComplexRow();
 
@@ -83,7 +68,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
+            using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var pocoDataRequest = Generate.CreatePocoDataRequest(Generate.CreateFakeRaisedComplexRow(true), definitionProvider);
                 var actual = target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
@@ -99,7 +84,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
+            using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var expected = Generate.CreateFakeRaisedComplexRow(true);
 
@@ -145,7 +130,7 @@ namespace Startitecture.Orm.Mapper.Tests
         public void CreateDelegate_RaisedPocoFactoryForDomainAggregateList_SharedEntitiesHaveReferenceEquality()
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
+            using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var aggregateOptionRow =
                     new AggregateOptionRow { AggregateOptionId = 3, AggregateOptionTypeId = 4, Name = "Slim Shady", Value = 324.10m };
@@ -358,7 +343,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
 
-            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
+            using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var expected = Generate.CreateFakeRaisedComplexRow(false);
 
@@ -475,7 +460,7 @@ namespace Startitecture.Orm.Mapper.Tests
             Trace.TraceInformation($"{stopwatch.Elapsed} Create data request");
             stopwatch.Reset();
 
-            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
+            using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 stopwatch.Start();
                 var actual = target.CreatePoco<InstanceSection>(pocoDataRequest);
@@ -521,7 +506,7 @@ namespace Startitecture.Orm.Mapper.Tests
         public void CreateDelegate_RaisedPocoFactoryForRaisedPhysicalNameOverriddenRow_DelegateSetsPocoAsExpected()
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            using (var target = new RaisedPocoFactory(definitionProvider, new TransactSqlQualifier()))
+            using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var expected = new RaisedOverriddenColumnNameRow
                                    {

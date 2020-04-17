@@ -6,17 +6,24 @@
 
 namespace Startitecture.Orm.Testing.Entities
 {
+    using System.Collections.Generic;
+
     using Startitecture.Orm.Model;
 
     /// <summary>
     /// The generic submission row.
     /// </summary>
-    public partial class GenericSubmissionRow
+    public partial class GenericSubmissionRow : IEntityAggregate
     {
         /// <summary>
         /// Gets or sets the submitted by.
         /// </summary>
         [Relation]
         public DomainIdentityRow SubmittedBy { get; set; }
+
+        /// <inheritdoc />
+        public IEnumerable<IEntityRelation> EntityRelations =>
+            new EntityRelationSet<GenericSubmissionRow>().InnerJoin(row => row.SubmittedByDomainIdentifierId, row => row.SubmittedBy.DomainIdentityId)
+                .Relations;
     }
 }

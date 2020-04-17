@@ -55,12 +55,12 @@ namespace Startitecture.Orm.Testing.Entities
         public string Subject { get; set; }
 
         /// <summary>
-        /// Gets or sets the SubmittedByDomainIdentiferId
+        /// Gets or sets the SubmittedByDomainIdentifierId
         /// </summary>
-        [Column(@"SubmittedByDomainIdentiferId", Order = 3, TypeName = "int")]
+        [Column(@"SubmittedByDomainIdentifierId", Order = 3, TypeName = "int")]
         [Required]
-        [Display(Name = "Submitted by domain identifer ID")]
-        public int SubmittedByDomainIdentiferId { get; set; }
+        [Display(Name = "Submitted by domain identifier ID")]
+        public int SubmittedByDomainIdentifierId { get; set; }
 
         /// <summary>
         /// Gets or sets the SubmittedTime

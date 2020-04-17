@@ -10,6 +10,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Schema;
 
     /// <summary>
@@ -17,12 +18,13 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     /// </summary>
     [TableType("FieldValueElementTableType")]
     [Table("FieldValueElement", Schema = "dbo")]
-    public class FieldValueElementTableTypeRow
+    public class FieldValueElementTableTypeRow : TransactionItemBase
     {
         /// <summary>
         /// Gets or sets the field value element ID.
         /// </summary>
         [Column(Order = 1)]
+        [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long? FieldValueElementId { get; set; }
 

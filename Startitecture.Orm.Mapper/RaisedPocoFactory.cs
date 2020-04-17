@@ -9,7 +9,6 @@ namespace Startitecture.Orm.Mapper
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -54,36 +53,22 @@ namespace Startitecture.Orm.Mapper
         private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
-        /// The name qualifier.
-        /// </summary>
-        private readonly INameQualifier nameQualifier;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="RaisedPocoFactory"/> class.
         /// </summary>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <param name="nameQualifier">
-        /// The name qualifier.
-        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is not null.
         /// </exception>
-        public RaisedPocoFactory([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
+        public RaisedPocoFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (definitionProvider == null)
             {
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
-            if (nameQualifier == null)
-            {
-                throw new ArgumentNullException(nameof(nameQualifier));
-            }
-
             this.definitionProvider = definitionProvider;
-            this.nameQualifier = nameQualifier;
         }
 
         /// <inheritdoc />
@@ -126,11 +111,13 @@ namespace Startitecture.Orm.Mapper
                 // TODO: Change this brittle code. We need to match on aliases to get the right IDs.
                 var relatedDefinition = this.definitionProvider.Resolve(relationAttribute.PropertyInfo.PropertyType);
                 var relationReferenceName = string.IsNullOrWhiteSpace(relationAttribute.Alias)
-                                                ? relatedDefinition.QualifiedName
-                                                : $"[{relationAttribute.Alias}]";
+                                                ? $"{relatedDefinition.EntityContainer}.{relatedDefinition.EntityName}"
+                                                : relationAttribute.Alias;
 
-                var keyDefinitions = entityDefinition.ReturnableAttributes
-                    .Where(x => this.nameQualifier.GetReferenceName(x.Entity) == relationReferenceName && x.IsPrimaryKey).OrderBy(x => x.PhysicalName);
+                var keyDefinitions = entityDefinition.ReturnableAttributes.Where(
+                        x => (string.IsNullOrWhiteSpace(x.Entity.Alias) ? $"{x.Entity.Container}.{x.Entity.Name}" : x.Entity.Alias)
+                             == relationReferenceName && x.IsPrimaryKey)
+                    .OrderBy(x => x.PhysicalName);
 
                 var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions.ToList());
 
@@ -198,7 +185,17 @@ namespace Startitecture.Orm.Mapper
 
             foreach (var definition in keyDefinitions)
             {
-                pocoKeyBuilder.Append($".{definition.PhysicalName}.{record.GetValue(record.GetOrdinal(definition.ReferenceName))}");
+                try
+                {
+                    pocoKeyBuilder.Append($".{definition.PhysicalName}.{record.GetValue(record.GetOrdinal(definition.ReferenceName))}");
+                }
+                catch (IndexOutOfRangeException ex)
+                {
+                    var message = $"The data reader did not have a column for '{definition.ReferenceName}'. "
+                                  + "Check that the query has JOINs for all relations";
+
+                    throw new OperationException(definition, message, ex);
+                }
             }
 
             var pocoKey = pocoKeyBuilder.ToString();
@@ -240,8 +237,8 @@ namespace Startitecture.Orm.Mapper
 #if DEBUG
             try
             {
-                var recordItems = Enumerable.Range(0, record.FieldCount).Select(i => $"{record.GetName(i)}='{record.GetValue(i)}'");
-                Trace.WriteLine($"Getting data from record {string.Join(",", recordItems)}");
+                ////var recordItems = Enumerable.Range(0, record.FieldCount).Select(i => $"{record.GetName(i)}='{record.GetValue(i)}'");
+                ////Trace.WriteLine($"Getting data from record {string.Join(",", recordItems)}");
 #endif
                 poco = (T)basePocoDelegate.MappingDelegate.DynamicInvoke(record);
 #if DEBUG
@@ -370,7 +367,10 @@ namespace Startitecture.Orm.Mapper
             EntityReference entityReference)
         {
             var relatedEntityLocation = this.definitionProvider.GetEntityLocation(entityReference);
-            var relatedQualifiedName = this.nameQualifier.GetReferenceName(relatedEntityLocation);
+            var relatedQualifiedName = string.IsNullOrWhiteSpace(relatedEntityLocation.Alias)
+                                           ? $"{relatedEntityLocation.Container}.{relatedEntityLocation.Name}"
+                                           : relatedEntityLocation.Alias;
+
             var relatedKey = new Tuple<string, string, PocoDataRequest>(typeQualifiedName, relatedQualifiedName, dataRequest);
 
             // TODO: Cache attributes with their locations, or build explicitly.

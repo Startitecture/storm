@@ -27,7 +27,7 @@ namespace Startitecture.Orm.Sql.Tests
 
             this.CreateMap<GenericSubmission, GenericSubmissionRow>()
                 .ForMember(
-                    row => row.SubmittedByDomainIdentiferId,
+                    row => row.SubmittedByDomainIdentifierId,
                     expression => expression.MapFrom(submission => submission.SubmittedBy.DomainIdentityId.GetValueOrDefault()))
                 .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
 
@@ -42,6 +42,12 @@ namespace Startitecture.Orm.Sql.Tests
             this.CreateMap<FieldValueTableTypeRow, FieldValue>()
                 .ForMember(value => value.Field, expression => expression.Ignore())
                 .ForMember(value => value.LastModifiedBy, expression => expression.Ignore());
+
+            this.CreateMap<GenericSubmissionValueRow, FieldValue>()
+                .ForMember(value => value.Field, expression => expression.MapFrom(row => row.FieldValue.Field))
+                .ForMember(value => value.LastModifiedBy, expression => expression.MapFrom(row => row.FieldValue.LastModifiedBy))
+                .ForMember(value => value.LastModifiedTime, expression => expression.MapFrom(row => row.FieldValue.LastModifiedTime))
+                .ForMember(value => value.FieldValueId, expression => expression.MapFrom(row => row.FieldValue.FieldValueId));
 
             this.CreateMap<FieldValueElementTableTypeRow, FieldValueElement>()
                 .ForMember(element => element.FieldValue, expression => expression.Ignore());
