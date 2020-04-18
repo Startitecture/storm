@@ -1,4 +1,5 @@
 # Starter pipeline
+
 # Start with a minimal pipeline that you can customize to build and deploy your code.
 # Add steps that build, run tests, deploy, and more:
 # https://aka.ms/yaml
@@ -24,7 +25,7 @@ steps:
   inputs:
     restoreSolution: '$(solution)'
      
-- task: DotNetCoreCLI@2
+- task: VSBuild@1
   inputs:
-    command: 'build'
-    projects: '**/*.sln'
+    solution: '**\*.sln'
+    restoreNugetPackages: true
