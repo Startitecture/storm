@@ -7,10 +7,10 @@ trigger:
 - master
 
 pool:
-  vmImage: 'ubuntu-latest'
+  vmImage: 'windows-latest'
 
 steps:
-- script: echo Hello, world!
+- script: echo Startitecture.ORM build (storm)!
   displayName: 'Run a one-line script'
 
 - script: |
@@ -18,6 +18,12 @@ steps:
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
 
+- task: NuGetInstaller@0
+
+- task: NuGetCommand@2
+  inputs:
+    restoreSolution: '$(solution)'
+     
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
