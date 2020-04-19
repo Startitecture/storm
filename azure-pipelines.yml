@@ -19,9 +19,12 @@ steps:
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
 
-- task: NuGetInstaller@0
+- task: DownloadSecureFile@1
+  name: coreSignCertificate
+  displayName: 'Download Startitecture.Core signing certificate'
+  inputs:
+    secureFile: 'Startitecture.Core.pfx'
 
-- task: NuGetCommand@2
 - task: PowerShell@2
   inputs:
     targetType: 'inline'
@@ -30,7 +33,7 @@ steps:
       $pwd = ConvertTo-SecureString -String $(CoreCertificate-Password) -Force -AsPlainText
       
       #Create PFX file from Certificate Variable
-      New-Item Temp-Certificate.pfx -Value $(CoreCertificate)
+      New-Item Temp-Certificate.pfx -Value $(coreSignCertificate.secureFilePath)
       
       #Import the PFX certificate from the newly created file and password. Read the thumbprint into variable
       $Thumbprint = (Import-PfxCertificate -CertStoreLocation Cert:\CurrentUser\My -FilePath Temp-Certificate.pfx -Password $pwd).Thumbprint
@@ -39,6 +42,11 @@ steps:
       
       #Rest of Script below or set environment variable for rest of Pipeline
       Write-Host "##vso[task.setvariable variable=Thumbprint]$Thumbprint"
+
+- task: NuGetInstaller@0
+
+- task: NuGetCommand@2
+
 - task: VSBuild@1
   inputs:
     solution: '**\*.sln'
