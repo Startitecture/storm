@@ -1,9 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlServerAdapter.cs" company="Startitecture">
+// <copyright file="SqlClientAdapter.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
@@ -13,17 +13,19 @@ namespace Startitecture.Orm.Sql
     using System.Linq;
     using System.Linq.Expressions;
 
+    using Common;
+
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
     /// <summary>
-    /// Implements the <see cref="IRepositoryAdapter"/> interface using parameterized queries.
+    /// Implements the <see cref="IRepositoryAdapter"/> interface for SQL Server connections.
     /// </summary>
-    public class SqlServerAdapter : IRepositoryAdapter
+    public class SqlClientAdapter : IRepositoryAdapter
     {
         /// <summary>
         /// The data context.
@@ -36,19 +38,14 @@ namespace Startitecture.Orm.Sql
         private readonly IQueryFactory queryFactory;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlServerAdapter"/> class.
+        /// Initializes a new instance of the <see cref="SqlClientAdapter"/> class.
         /// </summary>
         /// <param name="dataContext">
         /// The data context.
         /// </param>
-        public SqlServerAdapter([NotNull] IDatabaseContext dataContext)
+        public SqlClientAdapter([NotNull] IDatabaseContext dataContext)
         {
-            if (dataContext == null)
-            {
-                throw new ArgumentNullException(nameof(dataContext));
-            }
-
-            this.dataContext = dataContext;
+            this.dataContext = dataContext ?? throw new ArgumentNullException(nameof(dataContext));
             this.queryFactory = new TransactSqlQueryFactory(dataContext.DefinitionProvider);
         }
 
@@ -128,7 +125,7 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// A collection of items that match the filter.
         /// </returns>
-        /// <exception cref="System.InvalidOperationException">
+        /// <exception cref="InvalidOperationException">
         /// The repository could not be queried.
         /// </exception>
         public IEnumerable<TDataItem> SelectItems<TDataItem>(ItemSelection<TDataItem> selection)
@@ -177,7 +174,7 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// A collection of items that match the filter.
         /// </returns>
-        /// <exception cref="System.InvalidOperationException">
+        /// <exception cref="InvalidOperationException">
         /// The repository could not be queried.
         /// </exception>
         public Page<TDataItem> SelectItems<TDataItem>(ItemSelection<TDataItem> selection, long pageSize, long page)
@@ -230,7 +227,7 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The inserted <typeparamref name="TDataItem"/>.
         /// </returns>
-        /// <exception cref="Startitecture.Orm.Common.RepositoryException">
+        /// <exception cref="RepositoryException">
         /// The insert operation failed, or there was an error mapping between the model and the data item.
         /// </exception>
         public TDataItem Insert<TDataItem>(TDataItem dataItem)
@@ -307,7 +304,7 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
-            var transactSqlUpdate = new SqlUpdate<TDataItem>(this.dataContext.DefinitionProvider, selection);
+            var transactSqlUpdate = new UpdateStatement<TDataItem>(this.dataContext.DefinitionProvider, this.queryFactory, new TransactSqlQualifier(), selection);
             var updateOperation = setExpressions.Any() ? transactSqlUpdate.Set(dataItem, setExpressions) : transactSqlUpdate.Set(dataItem);
 
             try

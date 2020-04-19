@@ -266,28 +266,6 @@ namespace Startitecture.Orm.Testing.Model
         #endregion
 
         /// <summary>
-        /// Loads document versions into the current document.
-        /// </summary>
-        /// <param name="documentVersionService">
-        /// A document version service to retrieve the versions.
-        /// </param>
-        public void Load([NotNull] IDocumentVersionService documentVersionService)
-        {
-            if (documentVersionService == null)
-            {
-                throw new ArgumentNullException(nameof(documentVersionService));
-            }
-
-            var versions = documentVersionService.GetAllVersions(this);
-            this.documentVersions.Clear();
-
-            foreach (var version in versions)
-            {
-                this.AddVersion(version);
-            }
-        }
-
-        /// <summary>
         /// Adds a document version to the internal linked list.
         /// </summary>
         /// <param name="version">

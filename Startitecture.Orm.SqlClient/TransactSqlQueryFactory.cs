@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
@@ -13,9 +13,11 @@ namespace Startitecture.Orm.Sql
 
     using JetBrains.Annotations;
 
+    using Query;
+
     using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The Transact-SQL statement factory.
@@ -158,7 +160,7 @@ namespace Startitecture.Orm.Sql
         /// <summary>
         /// The transact SQL join.
         /// </summary>
-        private readonly TransactSqlJoin transactSqlJoin;
+        private readonly JoinClause joinClause;
 
         /// <summary>
         /// The name qualifier.
@@ -175,7 +177,7 @@ namespace Startitecture.Orm.Sql
         public TransactSqlQueryFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.transactSqlJoin = new TransactSqlJoin(this.definitionProvider);
+            this.joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
         }
 
         /// <inheritdoc />
@@ -237,7 +239,7 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The selection link statement as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="ArgumentOutOfRangeException">
+        /// <exception cref="System.ArgumentOutOfRangeException">
         /// <paramref name="linkType"/> is not one of the named enumerations.
         /// </exception>
         private static string CreateLinkStatement(SelectionLinkType linkType)
@@ -286,11 +288,11 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The current index as an <see cref="int"/>.
         /// </returns>
-        /// <exception cref="NotImplementedException">
+        /// <exception cref="System.NotImplementedException">
         /// <paramref name="filterType"/> is a value that is not supported by this operation.
         /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="filterType"/> is outside the range of values for <see cref="FilterType"/>.
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <paramref name="filterType"/> is outside the range of values for <see cref="Startitecture.Orm.Query.FilterType"/>.
         /// </exception>
         private static int AddTokens(
             FilterType filterType,
@@ -407,7 +409,7 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The filter clause as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="IndexOutOfRangeException">
+        /// <exception cref="System.IndexOutOfRangeException">
         /// The number of filter values is outside the range handled by the method.
         /// </exception>
         private string CreateFilter(IEntityDefinition entityDefinition, IEnumerable<ValueFilter> filters, int indexOffset)
@@ -514,21 +516,8 @@ namespace Startitecture.Orm.Sql
                                        ? '1'.ToString(CultureInfo.InvariantCulture)
                                        : string.Join(string.Concat(",", Environment.NewLine), selectAttributes.Select(this.GetQualifiedColumnName));
 
-            ////if (selection.SelectionSource == selection.ItemDefinition.EntityName)
-            ////{
-            // Select as we normally would. Do not add delimiters for tables.
             var fromClause = string.Concat(FromStatement, $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
-
-            ////}
-            ////else
-            ////{
-            ////    // Select the derived table as the current entity name.
-            ////    fromClause = string.Concat(
-            ////        FromStatement,
-            ////        Environment.NewLine,
-            ////        string.Format(DerivedTableStatement, selection.SelectionSource, selection.ItemDefinition.EntityName));
-            ////}
-            var joinClause = this.transactSqlJoin.Create(selection); //// selection.Relations.CreateJoinClause();
+            var joinClauseText = this.joinClause.Create(selection);
             var filter = selection.Filters.Any()
                              ? string.Concat(
                                  Environment.NewLine,
@@ -541,7 +530,7 @@ namespace Startitecture.Orm.Sql
                 selectColumns,
                 Environment.NewLine,
                 fromClause,
-                selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClause) : string.Empty,
+                selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClauseText) : string.Empty,
                 filter);
         }
 
@@ -566,8 +555,8 @@ namespace Startitecture.Orm.Sql
         /// <returns>
         /// The query as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="StatementOutputType"/>.
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="Startitecture.Orm.Query.StatementOutputType"/>.
         /// </exception>
         private string CompleteStatement<TItem>(
             QueryContext<TItem> queryContext,
@@ -606,7 +595,7 @@ namespace Startitecture.Orm.Sql
                         FromStatement,
                         primaryTableName,
                         Environment.NewLine,
-                        this.transactSqlJoin.Create(selection), //// selection.Relations.CreateJoinClause(),
+                        this.joinClause.Create(selection), //// selection.Relations.CreateJoinClause(),
                         filter);
 
                 default:

@@ -15,7 +15,6 @@ namespace Startitecture.Orm.Mapper.Tests
 
     using Startitecture.Core;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
@@ -526,7 +525,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 stopwatch.Reset();
 
                 Assert.IsNotNull(actual);
-                Assert.AreEqual<int>(expected.OverriddenColumnNameId, actual.OverriddenColumnNameId);
+                Assert.AreEqual(expected.OverriddenColumnNameId, actual.OverriddenColumnNameId);
 
                 Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
 

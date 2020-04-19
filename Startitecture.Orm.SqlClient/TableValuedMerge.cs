@@ -1,10 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredMergeCommand.cs" company="Startitecture">
+// <copyright file="TableValuedMerge.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace Startitecture.Orm.Sql
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The structured merge command.
@@ -23,7 +24,7 @@ namespace Startitecture.Orm.Sql
     /// <typeparam name="TStructure">
     /// The type of structure to use as the source of the merge.
     /// </typeparam>
-    public class StructuredMergeCommand<TStructure> : StructuredCommand<TStructure>
+    public class TableValuedMerge<TStructure> : StructuredCommand<TStructure>
     {
         /// <summary>
         /// The direct attributes.
@@ -55,6 +56,9 @@ namespace Startitecture.Orm.Sql
         /// </summary>
         private readonly List<Expression<Func<TStructure, object>>> deleteConstraints = new List<Expression<Func<TStructure, object>>>();
 
+        /// <summary>
+        /// The explicit relation set.
+        /// </summary>
         private readonly EntityRelationSet<TStructure> explicitRelationSet = new EntityRelationSet<TStructure>();
 
         /// <summary>
@@ -68,18 +72,18 @@ namespace Startitecture.Orm.Sql
         private IEntityDefinition itemDefinition;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StructuredMergeCommand{TStructure}"/> class.
+        /// Initializes a new instance of the <see cref="TableValuedMerge{TStructure}"/> class.
         /// </summary>
         /// <param name="structuredCommandProvider">
         /// The structured command provider.
         /// </param>
-        public StructuredMergeCommand([NotNull] IStructuredCommandProvider structuredCommandProvider)
+        public TableValuedMerge([NotNull] IStructuredCommandProvider structuredCommandProvider)
             : base(structuredCommandProvider)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StructuredMergeCommand{TStructure}"/> class.
+        /// Initializes a new instance of the <see cref="TableValuedMerge{TStructure}"/> class.
         /// </summary>
         /// <param name="structuredCommandProvider">
         /// The structured command provider.
@@ -87,7 +91,7 @@ namespace Startitecture.Orm.Sql
         /// <param name="databaseTransaction">
         /// The database transaction.
         /// </param>
-        public StructuredMergeCommand([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
+        public TableValuedMerge([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
             : base(structuredCommandProvider, databaseTransaction)
         {
         }
@@ -108,9 +112,9 @@ namespace Startitecture.Orm.Sql
         /// The type of the data item to merge into.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="StructuredMergeCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedMerge{TStructure}"/>.
         /// </returns>
-        public StructuredMergeCommand<TStructure> MergeInto<TDataItem>(
+        public TableValuedMerge<TStructure> MergeInto<TDataItem>(
             [NotNull] IEnumerable<TStructure> mergeItems,
             [NotNull] params Expression<Func<TDataItem, object>>[] mergeMatchExpressions)
         {
@@ -146,12 +150,12 @@ namespace Startitecture.Orm.Sql
         /// The columns to select into the table. These must be the same number of columns as target columns..
         /// </param>
         /// <returns>
-        /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="fromColumns"/> is null.
         /// </exception>
-        public StructuredMergeCommand<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
+        public TableValuedMerge<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
         {
             if (fromColumns == null)
             {
@@ -176,12 +180,12 @@ namespace Startitecture.Orm.Sql
         /// The type of item representing the target table of the merge.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="StructuredMergeCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedMerge{TStructure}"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="sourceExpression"/> or <paramref name="targetExpression"/> is null.
         /// </exception>
-        public StructuredMergeCommand<TStructure> On<TDataItem>(
+        public TableValuedMerge<TStructure> On<TDataItem>(
             [NotNull] Expression<Func<TStructure, object>> sourceExpression,
             [NotNull] Expression<Func<TDataItem, object>> targetExpression)
         {
@@ -206,9 +210,9 @@ namespace Startitecture.Orm.Sql
         /// The delete constraints to filter which rows to delete.
         /// </param>
         /// <returns>
-        /// The current <see cref="StructuredMergeCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedMerge{TStructure}"/>.
         /// </returns>
-        public StructuredMergeCommand<TStructure> DeleteUnmatchedInSource([NotNull] params Expression<Func<TStructure, object>>[] constraints)
+        public TableValuedMerge<TStructure> DeleteUnmatchedInSource([NotNull] params Expression<Func<TStructure, object>>[] constraints)
         {
             if (constraints == null)
             {
@@ -228,9 +232,9 @@ namespace Startitecture.Orm.Sql
         /// The keys to match the original table value parameter with the output.
         /// </param>
         /// <returns>
-        /// The current <see cref="StructuredMergeCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedMerge{TStructure}"/>.
         /// </returns>
-        public StructuredMergeCommand<TStructure> SelectFromInserted([NotNull] params Expression<Func<TStructure, object>>[] matchKeys)
+        public TableValuedMerge<TStructure> SelectFromInserted([NotNull] params Expression<Func<TStructure, object>>[] matchKeys)
         {
             if (matchKeys == null)
             {
@@ -351,13 +355,12 @@ namespace Startitecture.Orm.Sql
                     this.directAttributes.Where(x => x.IsIdentityColumn).Select(x => new { Column = $"i.{qualifier.Escape(x.PropertyName)}", Attribute = x }).ToList();
 
                 // Everything for selecting from the TVP uses property name in order to match UDTT columns.
-                var nonKeyAttributes = allAttributes.Where(definition => definition.IsIdentityColumn == false)
-                    .Select(
-                        x => new
-                                 {
-                                     Column = $"tvp.{qualifier.Escape(x.PropertyName)}",
-                                     Attribute = x
-                                 });
+                var nonKeyAttributes = allAttributes.Where(definition => definition.IsIdentityColumn == false).Select(
+                    x => new
+                             {
+                                 Column = $"tvp.{qualifier.Escape(x.PropertyName)}",
+                                 Attribute = x
+                             });
 
                 var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.Ordinal).Select(x => x.Column);
 

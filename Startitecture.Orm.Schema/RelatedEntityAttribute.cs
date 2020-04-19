@@ -57,14 +57,14 @@ namespace Startitecture.Orm.Schema
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the entity type to which the attribute is related.
+        /// Gets the entity type to which the attribute is related.
         /// </summary>
-        public Type EntityType { get; set; }
+        public Type EntityType { get; }
 
         /// <summary>
-        /// Gets or sets the entity alias for the attribute, if any.
+        /// Gets the entity alias for the attribute, if any.
         /// </summary>
-        public string EntityAlias { get; set; }
+        public string EntityAlias { get; }
 
         /// <summary>
         /// Gets or sets the physical name of the associated column, if different from the property name.

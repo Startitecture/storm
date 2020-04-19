@@ -7,11 +7,11 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Repository
+namespace Startitecture.Orm.AutoMapper
 {
     using System;
 
-    using AutoMapper;
+    using global::AutoMapper;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
@@ -33,7 +33,7 @@ namespace Startitecture.Orm.Repository
         /// The AutoMapper configuration action to apply.
         /// </param>
         /// <returns>
-        /// The current <see cref="IEntityMapper"/>.
+        /// The current <see cref="Startitecture.Orm.Common.IEntityMapper"/>.
         /// </returns>
         public IEntityMapper Initialize(Action<IMapperConfigurationExpression> configAction)
         {
@@ -61,10 +61,10 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The mapped object as a <typeparamref name="TOutput"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="input"/> was null.
         /// </exception>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
         /// </exception>
         public TOutput Map<TOutput>(object input)
@@ -87,10 +87,10 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The mapped object as a <typeparamref name="TOutput"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="input"/> was null.
         /// </exception>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
         /// </exception>
         public TOutput Map<TOutput>(object input, Func<Type, object> serviceConstructor)
@@ -130,10 +130,10 @@ namespace Startitecture.Orm.Repository
         /// <returns>
         /// The mapped object as a <typeparamref name="TOutput"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="input"/> is null.
         /// </exception>
-        /// <exception cref="OperationException">
+        /// <exception cref="Startitecture.Core.OperationException">
         /// The mapping could not be performed because a supported mapping has not been configured.
         /// </exception>
         public TOutput MapTo<TInput, TOutput>(TInput input, TOutput output)

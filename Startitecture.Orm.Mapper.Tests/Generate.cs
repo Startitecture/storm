@@ -13,7 +13,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using System.Globalization;
     using System.Reflection;
 
-    using Rhino.Mocks;
+    using Moq;
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Testing.Entities;
@@ -169,8 +169,8 @@ namespace Startitecture.Orm.Mapper.Tests
                 attributeDefinitions.AddOrUpdate(attributeDefinition.ReferenceName, attributeDefinition, (s, column) => attributeDefinition);
             }
 
-            var dataReader = MockRepository.GenerateMock<IDataReader>();
-            dataReader.Stub(reader => reader.FieldCount).Return(attributeDefinitions.Count);
+            var dataReader = new Mock<IDataReader>();
+            dataReader.Setup(reader => reader.FieldCount).Returns(attributeDefinitions.Count);
             int ordinal = 0;
 
             foreach (var attribute in attributeDefinitions)
@@ -213,12 +213,12 @@ namespace Startitecture.Orm.Mapper.Tests
                 // NOTE: All this stubbin' makes the tests slower. Baseline after each change.
                 // Need a local variable inside the closure for this to work.
                 var localOrdinal = ordinal;
-                dataReader.Stub(reader => reader.GetName(Arg<int>.Matches(i => i == localOrdinal))).Return(attribute.Key);
-                dataReader.Stub(reader => reader.GetOrdinal(Arg<string>.Matches(s => s == attribute.Key))).Return(localOrdinal);
+                dataReader.Setup(reader => reader.GetName(It.Is<int>(i => i == localOrdinal))).Returns(attribute.Key);
+                dataReader.Setup(reader => reader.GetOrdinal(It.Is<string>(s => s == attribute.Key))).Returns(localOrdinal);
 
                 var propertyType = attribute.Value.PropertyInfo.PropertyType;
-                dataReader.Stub(reader => reader.GetFieldType(Arg<int>.Matches(i => i == localOrdinal))).Return(propertyType);
-                dataReader.Stub(reader => reader.IsDBNull(Arg<int>.Matches(i => i == localOrdinal))).Return(value == null);
+                dataReader.Setup(reader => reader.GetFieldType(It.Is<int>(i => i == localOrdinal))).Returns(propertyType);
+                dataReader.Setup(reader => reader.IsDBNull(It.Is<int>(i => i == localOrdinal))).Returns(value == null);
 
                 if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
                 {
@@ -226,50 +226,49 @@ namespace Startitecture.Orm.Mapper.Tests
 
                     if (typeOfNullable == typeof(DateTimeOffset))
                     {
-                        dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
+                        dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
                     }
                     else if (typeOfNullable == typeof(int))
                     {
-                        dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
-                        dataReader.Stub(reader => reader.GetInt32(Arg<int>.Matches(i => i == localOrdinal))).Return((int?)value ?? default);
+                        dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                        dataReader.Setup(reader => reader.GetInt32(It.Is<int>(i => i == localOrdinal))).Returns((int?)value ?? default);
                     }
                 }
                 else if (propertyType == typeof(int))
                 {
-                    dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
-                    dataReader.Stub(reader => reader.GetInt32(Arg<int>.Matches(i => i == localOrdinal))).Return((int?)value ?? default);
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetInt32(It.Is<int>(i => i == localOrdinal))).Returns((int?)value ?? default);
                 }
                 else if (propertyType == typeof(short))
                 {
-                    dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
-                    dataReader.Stub(reader => reader.GetInt16(Arg<int>.Matches(i => i == localOrdinal))).Return((short?)value ?? default);
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetInt16(It.Is<int>(i => i == localOrdinal))).Returns((short?)value ?? default);
                 }
                 else if (propertyType == typeof(bool))
                 {
-                    dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
-                    dataReader.Stub(reader => reader.GetBoolean(Arg<int>.Matches(i => i == localOrdinal))).Return((bool?)value ?? default);
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetBoolean(It.Is<int>(i => i == localOrdinal))).Returns((bool?)value ?? default);
                 }
                 else if (propertyType == typeof(string))
                 {
-                    dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
-                    dataReader.Stub(reader => reader.GetString(Arg<int>.Matches(i => i == localOrdinal))).Return(Convert.ToString(value, CultureInfo.CurrentCulture));
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetString(It.Is<int>(i => i == localOrdinal))).Returns(Convert.ToString(value, CultureInfo.CurrentCulture));
                 }
                 else if (propertyType == typeof(DateTimeOffset))
                 {
-                    dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal)))
-                        .Return((DateTimeOffset?)value ?? default);
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal)))
+                        .Returns((DateTimeOffset?)value ?? default);
                 }
                 else if (propertyType == typeof(decimal))
                 {
-                    dataReader.Stub(reader => reader.GetValue(Arg<int>.Matches(i => i == localOrdinal))).Return(value);
-                    dataReader.Stub(reader => reader.GetDecimal(Arg<int>.Matches(i => i == localOrdinal)))
-                        .Return((decimal?)value ?? default);
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetDecimal(It.Is<int>(i => i == localOrdinal))).Returns((decimal?)value ?? default);
                 }   
 
                 ordinal++;
             }
 
-            var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition)
+            var pocoDataRequest = new PocoDataRequest(dataReader.Object, entityDefinition)
                                       {
                                           ////FieldCount = attributeDefinitions.Count,
                                           FirstColumn = 0

@@ -18,7 +18,6 @@ namespace Startitecture.Core.Tests
     /// to contain all EvaluateTest Unit Tests
     /// </summary>
     [TestClass]
-    [ExcludeFromCodeCoverage]
     public class EvaluateTest
     {
         #region Public Methods and Operators

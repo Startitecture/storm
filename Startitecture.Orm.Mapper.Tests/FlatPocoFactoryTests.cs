@@ -17,7 +17,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
-    /// The flat poco factory tests.
+    /// The flat POCO factory tests.
     /// </summary>
     [TestClass]
     public class FlatPocoFactoryTests

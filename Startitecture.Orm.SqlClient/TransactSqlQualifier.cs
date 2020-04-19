@@ -4,15 +4,16 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
 
-    using Startitecture.Orm.Model;
+    using Model;
+
     using Startitecture.Resources;
 
     /// <summary>
-    /// Qualifies an <see cref="EntityAttributeDefinition"/> for Transact-SQL.
+    /// Qualifies an <see cref="Startitecture.Orm.Model.EntityAttributeDefinition"/> for Transact-SQL.
     /// </summary>
     public class TransactSqlQualifier : INameQualifier
     {

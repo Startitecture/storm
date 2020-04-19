@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlUpdateTest.cs" company="Startitecture">
+// <copyright file="UpdateStatementTest.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -8,22 +8,36 @@ namespace Startitecture.Orm.Sql.Tests
 {
     using System;
     using System.Diagnostics;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
     /// The update operation test.
     /// </summary>
     [TestClass]
-    [ExcludeFromCodeCoverage]
-    public class SqlUpdateTest
+    public class UpdateStatementTest
     {
+        /// <summary>
+        /// The definition provider.
+        /// </summary>
+        private static readonly DataAnnotationsDefinitionProvider DefinitionProvider = new DataAnnotationsDefinitionProvider();
+
+        /// <summary>
+        /// The query factory.
+        /// </summary>
+        private static readonly TransactSqlQueryFactory QueryFactory = new TransactSqlQueryFactory(DefinitionProvider);
+
+        /// <summary>
+        /// The name qualifier.
+        /// </summary>
+        private static readonly TransactSqlQualifier NameQualifier = new TransactSqlQualifier();
+
         #region Public Methods and Operators
 
         /// <summary>
@@ -61,7 +75,7 @@ namespace Startitecture.Orm.Sql.Tests
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(match);
 
             var statement = updateOperation.ExecutionStatement;
             var expected = new object[]
@@ -146,7 +160,7 @@ WHERE
                 .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(match);
 
             var statement = updateOperation.ExecutionStatement;
             var expected = new object[]
@@ -236,7 +250,7 @@ WHERE
                 .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -320,7 +334,7 @@ WHERE
                 .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
                 .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(match);
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(match);
             var expected = new object[] { "NormalColumn", "CouldHaveBeenNull", 2, 12, "Some Other Value", 2, "CouldHaveBeenNull", "Related", 10, 20 };
             var actual = updateOperation.ExecutionParameters.ToArray();
 
@@ -392,7 +406,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -456,7 +470,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -534,7 +548,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);
@@ -601,7 +615,7 @@ WHERE
                 .Between(baseline, boundary, row => row.FakeDataId);
 
             var target = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateOperation = new SqlUpdate<DataRow>(new DataAnnotationsDefinitionProvider(), selection).Set(
+            var updateOperation = new UpdateStatement<DataRow>(DefinitionProvider, QueryFactory, NameQualifier, selection).Set(
                 target,
                 row => row.NormalColumn,
                 row => row.NullableColumn);

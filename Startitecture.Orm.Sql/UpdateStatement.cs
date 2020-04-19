@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlUpdate.cs" company="Startitecture">
+// <copyright file="UpdateStatement.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ namespace Startitecture.Orm.Sql
     /// <typeparam name="TItem">
     /// The type of item that is being updated.
     /// </typeparam>
-    public class SqlUpdate<TItem>
+    public class UpdateStatement<TItem>
     {
         #region Constants
 
@@ -78,13 +78,16 @@ SET
         /// <summary>
         /// The query factory.
         /// </summary>
-        private readonly TransactSqlQueryFactory queryFactory;
+        private readonly IQueryFactory queryFactory;
 
         /// <summary>
         /// The transact SQL join.
         /// </summary>
-        private readonly TransactSqlJoin transactSqlJoin;
+        private readonly JoinClause joinClause;
 
+        /// <summary>
+        /// The name qualifier.
+        /// </summary>
         private readonly INameQualifier nameQualifier;
 
         #endregion
@@ -92,31 +95,36 @@ SET
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlUpdate{TItem}"/> class.
+        /// Initializes a new instance of the <see cref="UpdateStatement{TItem}"/> class.
         /// </summary>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
+        /// <param name="queryFactory">
+        /// The query factory.
+        /// </param>
+        /// <param name="nameQualifier">
+        /// The name qualifier.
+        /// </param>
         /// <param name="selection">
         /// The selection of items to update.
         /// </param>
-        public SqlUpdate([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] ItemSelection<TItem> selection)
+        public UpdateStatement(
+            [NotNull] IEntityDefinitionProvider definitionProvider,
+            [NotNull] IQueryFactory queryFactory,
+            [NotNull] INameQualifier nameQualifier,
+            [NotNull] ItemSelection<TItem> selection)
         {
             if (definitionProvider == null)
             {
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            this.selection = selection;
-            this.queryFactory = new TransactSqlQueryFactory(definitionProvider);
+            this.selection = selection ?? throw new ArgumentNullException(nameof(selection));
+            this.queryFactory = queryFactory ?? throw new ArgumentNullException(nameof(queryFactory));
             this.itemDefinition = definitionProvider.Resolve<TItem>();
-            this.transactSqlJoin = new TransactSqlJoin(definitionProvider);
-            this.nameQualifier = new TransactSqlQualifier();
+            this.nameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
+            this.joinClause = new JoinClause(definitionProvider, this.nameQualifier);
         }
 
         #endregion
@@ -156,9 +164,9 @@ SET
         /// The item containing the target values.
         /// </param>
         /// <returns>
-        /// The current <see cref="SqlUpdate{TItem}"/>.
+        /// The current <see cref="UpdateStatement{TItem}"/>.
         /// </returns>
-        public SqlUpdate<TItem> Set(TItem item)
+        public UpdateStatement<TItem> Set(TItem item)
         {
             return this.Set(item, this.itemDefinition.UpdateableAttributes.ToArray());
         }
@@ -173,9 +181,9 @@ SET
         /// The attributes to update.
         /// </param>
         /// <returns>
-        /// The current <see cref="SqlUpdate{TItem}"/>.
+        /// The current <see cref="UpdateStatement{TItem}"/>.
         /// </returns>
-        public SqlUpdate<TItem> Set(TItem item, params EntityAttributeDefinition[] attributes)
+        public UpdateStatement<TItem> Set(TItem item, params EntityAttributeDefinition[] attributes)
         {
             this.attributesToSet.Clear();
             this.attributesToSet.AddRange(attributes.Select(x => CreateAttributeInstance(item, x)));
@@ -192,9 +200,9 @@ SET
         /// The properties to update.
         /// </param>
         /// <returns>
-        /// The current <see cref="SqlUpdate{TItem}"/>.
+        /// The current <see cref="UpdateStatement{TItem}"/>.
         /// </returns>
-        public SqlUpdate<TItem> Set(TItem item, params Expression<Func<TItem, object>>[] properties)
+        public UpdateStatement<TItem> Set(TItem item, params Expression<Func<TItem, object>>[] properties)
         {
             this.attributesToSet.Clear();
             this.attributesToSet.AddRange(properties.Select(x => this.CreateAttributeInstance(item, x)));
@@ -236,7 +244,7 @@ SET
             foreach (var attributeInstance in this.attributesToSet)
             {
                 var attributeDefinition = attributeInstance.AttributeDefinition;
-                var qualifiedName = Singleton<TransactSqlQualifier>.Instance.Qualify(attributeDefinition);
+                var qualifiedName = this.nameQualifier.Qualify(attributeDefinition);
                 setItems.Add(
                     attributeInstance.Value == null
                         ? string.Format(CultureInfo.CurrentCulture, NullParameterFormat, qualifiedName)
@@ -251,13 +259,13 @@ SET
             var entityName =
                 $"{this.nameQualifier.Escape(this.itemDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.itemDefinition.EntityName)}";
 
-            string joinClause = this.selection.Relations.Any()
+            string joinClauseText = this.selection.Relations.Any()
                                     ? string.Concat(
                                         Environment.NewLine,
                                         FromClause,
                                         entityName,
                                         Environment.NewLine,
-                                        this.transactSqlJoin.Create(this.selection)) ////.Relations.CreateJoinClause())
+                                        this.joinClause.Create(this.selection)) ////.Relations.CreateJoinClause())
                                     : string.Empty;
 
             var setClause = string.Join(string.Concat(',', Environment.NewLine), setItems);
@@ -265,7 +273,7 @@ SET
 
             return string.Concat(
                 string.Format(CultureInfo.InvariantCulture, SqlUpdateClause, entityName, setClause),
-                joinClause,
+                joinClauseText,
                 Environment.NewLine,
                 WhereClause,
                 Environment.NewLine,

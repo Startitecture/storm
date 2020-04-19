@@ -41,6 +41,9 @@ namespace Startitecture.Orm.Testing.Moq
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
+        /// <param name="nameQualifier">
+        /// The name qualifier.
+        /// </param>
         /// <typeparam name="T">
         /// The type of item in the list to create an <see cref="IStructuredCommandProvider"/> mock for.
         /// </typeparam>
@@ -49,7 +52,8 @@ namespace Startitecture.Orm.Testing.Moq
         /// </returns>
         public static Mock<IStructuredCommandProvider> MockCommandProvider<T>(
             [NotNull] this IReadOnlyCollection<T> items,
-            [NotNull] IEntityDefinitionProvider definitionProvider)
+            [NotNull] IEntityDefinitionProvider definitionProvider,
+            [NotNull] INameQualifier nameQualifier)
         {
             if (items == null)
             {
@@ -59,6 +63,11 @@ namespace Startitecture.Orm.Testing.Moq
             if (definitionProvider == null)
             {
                 throw new ArgumentNullException(nameof(definitionProvider));
+            }
+
+            if (nameQualifier == null)
+            {
+                throw new ArgumentNullException(nameof(nameQualifier));
             }
 
             var structureDefinition = definitionProvider.Resolve<T>();
@@ -180,7 +189,7 @@ namespace Startitecture.Orm.Testing.Moq
             command.Setup(dbCommand => dbCommand.ExecuteReader()).Returns(reader.Object);
 
             var commandProvider = new Mock<IStructuredCommandProvider>();
-            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+            commandProvider.Setup(provider => provider.NameQualifier).Returns(nameQualifier);
             commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
             commandProvider
                 .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))

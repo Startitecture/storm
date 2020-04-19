@@ -1,27 +1,29 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredTransactSqlCommandProvider.cs" company="Startitecture">
+// <copyright file="TableValuedCommandProvider.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Data;
     using System.Data.SqlClient;
 
+    using Common;
+
     using Core;
 
     using JetBrains.Annotations;
 
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
     /// <summary>
     /// The structured SQL command provider.
     /// </summary>
-    public class StructuredTransactSqlCommandProvider : IStructuredCommandProvider
+    public class TableValuedCommandProvider : IStructuredCommandProvider
     {
         /// <summary>
         /// The context provider.
@@ -29,12 +31,12 @@ namespace Startitecture.Orm.Sql
         private readonly IDatabaseContextProvider contextProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StructuredTransactSqlCommandProvider"/> class.
+        /// Initializes a new instance of the <see cref="TableValuedCommandProvider"/> class.
         /// </summary>
         /// <param name="contextProvider">
         /// The context provider.
         /// </param>
-        public StructuredTransactSqlCommandProvider([NotNull] IDatabaseContextProvider contextProvider)
+        public TableValuedCommandProvider([NotNull] IDatabaseContextProvider contextProvider)
         {
             this.contextProvider = contextProvider ?? throw new ArgumentNullException(nameof(contextProvider));
             this.EntityDefinitionProvider = contextProvider.DatabaseContext.DefinitionProvider;
@@ -48,7 +50,7 @@ namespace Startitecture.Orm.Sql
         public INameQualifier NameQualifier { get; }
 
         /// <summary>
-        /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
+        /// Creates an <see cref="System.Data.IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>
         /// <param name="structuredCommand">
         /// The structured command.
@@ -60,10 +62,10 @@ namespace Startitecture.Orm.Sql
         /// The transaction to use with the command.
         /// </param>
         /// <returns>
-        /// An <see cref="IDbCommand"/> that will execute the structured command.
+        /// An <see cref="System.Data.IDbCommand"/> that will execute the structured command.
         /// </returns>
         /// <exception cref="Startitecture.Core.OperationException">
-        /// The underlying <see cref="IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
+        /// The underlying <see cref="Startitecture.Orm.Common.IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="System.Data.SqlClient.SqlConnection"/>.
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",

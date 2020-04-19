@@ -4,9 +4,9 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql.Tests
+namespace Startitecture.Orm.SqlClient.Tests
 {
-    using AutoMapper;
+    using global::AutoMapper;
 
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;

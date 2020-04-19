@@ -16,7 +16,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using Startitecture.Core;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
+    using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
@@ -42,7 +42,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void Save_NewField_IdSet()
         {
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -70,7 +70,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow item;
 
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -116,7 +116,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             List<DomainAggregateRow> expected;
 
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -310,7 +310,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow expected;
 
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -340,7 +340,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void GetFirstOrDefault_ExistingDomainAggregate_ExpectedPropertiesAreNull()
         {
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             DomainAggregateRow expected;
 
@@ -464,7 +464,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void GetFirstOrDefault_NonExistentField_ReturnsNull()
         {
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -482,7 +482,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow expected;
 
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -510,7 +510,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void Contains_NonExistentField_ReturnsFalse()
         {
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -528,7 +528,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow expected;
 
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -562,7 +562,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var description = $"Mah Field Description {nameof(this.DeleteItems_ExistingSetOfFields_ItemsDeleted)}";
 
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -611,7 +611,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void InsertItem_NewField_MatchesExpected()
         {
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -639,7 +639,7 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             FieldRow item;
 
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create())
             {
@@ -682,7 +682,7 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCleanup]
         public void DeleteUnitTestItems()
         {
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create())
             {

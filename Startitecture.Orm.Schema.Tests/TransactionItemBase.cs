@@ -9,15 +9,12 @@
 
 namespace Startitecture.Orm.Schema.Tests
 {
-    using System.Diagnostics.CodeAnalysis;
-
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The transaction item base.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public class TransactionItemBase : ITransactionContext
     {
         /// <summary>

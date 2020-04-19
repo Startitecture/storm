@@ -1,10 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredInsertCommand.cs" company="Startitecture">
+// <copyright file="TableValuedInsert.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
@@ -16,6 +16,7 @@ namespace Startitecture.Orm.Sql
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The structured insert command.
@@ -23,7 +24,7 @@ namespace Startitecture.Orm.Sql
     /// <typeparam name="TStructure">
     /// The type of structure that is the source of the command data.
     /// </typeparam>
-    public class StructuredInsertCommand<TStructure> : StructuredCommand<TStructure>
+    public class TableValuedInsert<TStructure> : StructuredCommand<TStructure>
     {
         /// <summary>
         /// The command text.
@@ -56,12 +57,12 @@ namespace Startitecture.Orm.Sql
         private IEntityDefinition itemDefinition;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StructuredInsertCommand{TStructure}"/> class.
+        /// Initializes a new instance of the <see cref="TableValuedInsert{TStructure}"/> class.
         /// </summary>
         /// <param name="structuredCommandProvider">
         /// The structured command provider.
         /// </param>
-        public StructuredInsertCommand([NotNull] IStructuredCommandProvider structuredCommandProvider)
+        public TableValuedInsert([NotNull] IStructuredCommandProvider structuredCommandProvider)
             : base(structuredCommandProvider)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
@@ -69,7 +70,7 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StructuredInsertCommand{TStructure}"/> class.
+        /// Initializes a new instance of the <see cref="TableValuedInsert{TStructure}"/> class.
         /// </summary>
         /// <param name="structuredCommandProvider">
         /// The structured command provider.
@@ -77,7 +78,7 @@ namespace Startitecture.Orm.Sql
         /// <param name="databaseTransaction">
         /// The database transaction.
         /// </param>
-        public StructuredInsertCommand([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
+        public TableValuedInsert([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
             : base(structuredCommandProvider, databaseTransaction)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
@@ -102,9 +103,9 @@ namespace Startitecture.Orm.Sql
         /// The type of item to insert the table into.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        public StructuredInsertCommand<TStructure> InsertInto<TDataItem>(
+        public TableValuedInsert<TStructure> InsertInto<TDataItem>(
             [NotNull] IEnumerable<TStructure> insertItems,
             params Expression<Func<TDataItem, object>>[] targetColumns)
         {
@@ -128,12 +129,12 @@ namespace Startitecture.Orm.Sql
         /// The columns to select into the table. These must be the same number of columns as target columns..
         /// </param>
         /// <returns>
-        /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="fromColumns"/> is null.
         /// </exception>
-        public StructuredInsertCommand<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
+        public TableValuedInsert<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
         {
             if (fromColumns == null)
             {
@@ -152,9 +153,9 @@ namespace Startitecture.Orm.Sql
         /// The match properties.
         /// </param>
         /// <returns>
-        /// The current <see cref="StructuredInsertCommand{TStructure}"/>.
+        /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        public StructuredInsertCommand<TStructure> SelectResults(params Expression<Func<TStructure, object>>[] matchProperties)
+        public TableValuedInsert<TStructure> SelectResults(params Expression<Func<TStructure, object>>[] matchProperties)
         {
             var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
             this.selectionAttributes.Clear();
@@ -281,13 +282,12 @@ namespace Startitecture.Orm.Sql
                 keyAttributes.Select(x => new { Column = $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}", Attribute = x.SourceKey }).ToList();
 
             // Everything for selecting from the TVP uses property name in order to match UDTT columns.
-            var nonKeyAttributes = structureDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute))
-                .Select(
-                    x => new
-                             {
-                                 Column = $"tvp.{this.nameQualifier.Escape(x.PropertyName)}",
-                                 Attribute = x
-                             });
+            var nonKeyAttributes = structureDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute)).Select(
+                x => new
+                         {
+                             Column = $"tvp.{this.nameQualifier.Escape(x.PropertyName)}",
+                             Attribute = x
+                         });
 
             var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.Ordinal).Select(x => x.Column);
 

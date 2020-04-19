@@ -13,13 +13,11 @@ namespace Startitecture.Orm.Mapper.Tests
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using Rhino.Mocks;
+    using Moq;
 
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
+    using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
-
-    using MockRepository = Rhino.Mocks.MockRepository;
 
     /// <summary>
     /// The database tests.
@@ -68,13 +66,16 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             const int Expected = 423;
 
-            using (var connection = MockRepository.GenerateMock<IDbConnection>())
+            var mockConnection = new Mock<IDbConnection>();
+
+            using (var connection = mockConnection.Object)
             using (var target = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
             {
-                using (var command = CreateMockCommand(connection))
+                var mockCommand = CreateMockCommand(mockConnection);
+                using (mockCommand.Object)
                 {
-                    command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(Expected);
-                    command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(Expected);
+                    mockCommand.Setup(dbCommand => dbCommand.ExecuteNonQuery()).Returns(Expected);
+                    mockCommand.Setup(dbCommand => dbCommand.ExecuteScalar()).Returns(Expected);
 
                     var row = new ComplexRaisedRow
                                   {
@@ -103,15 +104,18 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void Insert_NewDependentRow_PrimaryKeyIsSet()
         {
-            var expected = 423;
+            var expected = 234;
+            var mockConnection = new Mock<IDbConnection>();
 
-            using (var connection = MockRepository.GenerateMock<IDbConnection>())
+            using (var connection = mockConnection.Object)
             using (var target = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
             {
-                using (var command = CreateMockCommand(connection))
+                var mockCommand = CreateMockCommand(mockConnection);
+
+                using (mockCommand.Object)
                 {
-                    command.Stub(dbCommand => dbCommand.ExecuteNonQuery()).Return(expected);
-                    command.Stub(dbCommand => dbCommand.ExecuteScalar()).Return(expected);
+                    mockCommand.Setup(dbCommand => dbCommand.ExecuteNonQuery()).Returns(expected);
+                    mockCommand.Setup(dbCommand => dbCommand.ExecuteScalar()).Returns(expected);
 
                     var row = new DependentRow
                                   {
@@ -136,17 +140,16 @@ namespace Startitecture.Orm.Mapper.Tests
         /// <returns>
         /// The <see cref="IDbCommand"/>.
         /// </returns>
-        private static IDbCommand CreateMockCommand(IDbConnection connection)
+        private static Mock<IDbCommand> CreateMockCommand(Mock<IDbConnection> connection)
         {
-            var command = MockRepository.GenerateMock<IDbCommand>();
-            connection.Stub(dbConnection => dbConnection.CreateCommand()).Return(command);
+            var command = new Mock<IDbCommand>();
+            connection.Setup(dbConnection => dbConnection.CreateCommand()).Returns(command.Object);
 
-            var dataParameterCollection = MockRepository.GenerateMock<IDataParameterCollection>();
-            command.Stub(dbCommand => dbCommand.Parameters).Return(dataParameterCollection);
+            var dataParameterCollection = new Mock<IDataParameterCollection>();
+            command.Setup(dbCommand => dbCommand.Parameters).Returns(dataParameterCollection.Object);
 
-            command.Stub(dbCommand => dbCommand.CreateParameter())
-                .WhenCalled(invocation => invocation.ReturnValue = MockRepository.GenerateMock<IDbDataParameter>())
-                .Return(null);
+            command.Setup(dbCommand => dbCommand.CreateParameter())
+                .Returns(new Mock<IDbDataParameter>().Object);
 
             return command;
         }

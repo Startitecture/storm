@@ -19,9 +19,9 @@ namespace Startitecture.Orm.Common.Tests
     using Moq;
 
     using Startitecture.Core;
+    using Startitecture.Orm.AutoMapper;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;

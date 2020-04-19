@@ -9,7 +9,7 @@
 
 namespace Startitecture.Orm.Common.Tests
 {
-    using AutoMapper;
+    using global::AutoMapper;
 
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;

@@ -1,9 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredMergeCommandTests.cs" company="Startitecture">
+// <copyright file="TableValuedMergeTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-namespace Startitecture.Orm.Sql.Tests
+namespace Startitecture.Orm.SqlClient.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -13,10 +13,11 @@ namespace Startitecture.Orm.Sql.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Core;
+    using Startitecture.Orm.AutoMapper;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
     using Startitecture.Orm.Testing.Model;
@@ -26,7 +27,7 @@ namespace Startitecture.Orm.Sql.Tests
     /// The structured merge command tests.
     /// </summary>
     [TestClass]
-    public class StructuredMergeCommandTests
+    public class TableValuedMergeTests
     {
         /// <summary>
         /// The entity mapper.
@@ -107,8 +108,8 @@ namespace Startitecture.Orm.Sql.Tests
                                         }).ToList();
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var commandProvider = mergeItems.MockCommandProvider(definitionProvider);
-            var target = new StructuredMergeCommand<FieldTableTypeRow>(commandProvider.Object);
+            var commandProvider = mergeItems.MockCommandProvider(definitionProvider, new TransactSqlQualifier());
+            var target = new TableValuedMerge<FieldTableTypeRow>(commandProvider.Object);
             var typeRows = target.MergeInto<FieldRow>(mergeItems, row => row.Name).SelectFromInserted(row => row.Name).ExecuteForResults();
 
             Assert.IsNotNull(typeRows);
@@ -205,9 +206,9 @@ namespace Startitecture.Orm.Sql.Tests
                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault() 
                                          }).ToList();
 
-            var commandProvider = mergeItems.MockCommandProvider(new DataAnnotationsDefinitionProvider());
+            var commandProvider = mergeItems.MockCommandProvider(new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier());
 
-            var target = new StructuredMergeCommand<GenericSubmissionValueTableTypeRow>(commandProvider.Object);
+            var target = new TableValuedMerge<GenericSubmissionValueTableTypeRow>(commandProvider.Object);
             target.MergeInto<GenericSubmissionValueRow>(mergeItems, row => row.GenericSubmissionValueId)
                 .SelectFromInserted(row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource(row => row.GenericSubmissionId);
@@ -281,7 +282,7 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                                          Description = "A list of contact numbers for the person in order of preference"
                                      };
                 
-            var providerFactory = new SqlServerProviderFactory(
+            var providerFactory = new SqlClientProviderFactory(
                 ConfigurationRoot.GetConnectionString("OrmTestDb"),
                 new DataAnnotationsDefinitionProvider());
 
@@ -420,10 +421,10 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                                         };
 
             // Merge in the field values.
-            var commandProvider = new StructuredTransactSqlCommandProvider((IDatabaseContextProvider)provider);
+            var commandProvider = new TableValuedCommandProvider((IDatabaseContextProvider)provider);
             var transaction = provider.StartTransaction();
 
-            var fieldsCommand = new StructuredMergeCommand<FieldTableTypeRow>(commandProvider, transaction);
+            var fieldsCommand = new TableValuedMerge<FieldTableTypeRow>(commandProvider, transaction);
             var mergedFields = fieldsCommand
                 .MergeInto<FieldRow>(fieldItems, row => row.Name)
                 .SelectFromInserted(row => row.Name)
@@ -432,7 +433,7 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
 
             foreach (var field in fields)
             {
-                var input = mergedFields.FirstOrDefault(f => string.Equals(f.Name, field.Name));
+                var input = mergedFields.FirstOrDefault(f => string.Equals(f.Name, field.Name, StringComparison.Ordinal));
 
                 // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
                 // aren't IDs for baseline fields.
@@ -458,7 +459,7 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
-            var fieldValueCommand = new StructuredMergeCommand<FieldValueTableTypeRow>(commandProvider, transaction);
+            var fieldValueCommand = new TableValuedMerge<FieldValueTableTypeRow>(commandProvider, transaction);
             var mergedFieldValues = fieldValueCommand.MergeInto<FieldValueRow>(fieldValues, row => row.FieldValueId)
                 .SelectFromInserted(row => row.FieldId)
                 .ExecuteForResults()
@@ -489,7 +490,7 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                                                 TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                             }).ToList();
 
-            var elementMergeCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction);
+            var elementMergeCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider, transaction);
             var mergedValueElements = elementMergeCommand.MergeInto<FieldValueElementRow>(valueElements, row => row.FieldValueId, row => row.Order)
                 .DeleteUnmatchedInSource(row => row.FieldValueId) // Get rid of extraneous elements
                 .SelectFromInserted(row => row.FieldValueId, row => row.Order) // Generally this is the same as the MERGE INTO 
@@ -503,35 +504,35 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 
-            var dateElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+            var dateElementsCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider, transaction)
                 .MergeInto<DateElementRow>(mergedValueElements.Where(row => row.DateElement.HasValue))
                 .On<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
                 .From(row => row.FieldValueElementId, row => row.DateElement);
 
             dateElementsCommand.Execute();
 
-            var floatElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+            var floatElementsCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider, transaction)
                 .MergeInto<FloatElementRow>(mergedValueElements.Where(row => row.FloatElement.HasValue))
                 .On<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
                 .From(row => row.FieldValueElementId, row => row.FloatElement);
 
             floatElementsCommand.Execute();
 
-            var integerElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+            var integerElementsCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider, transaction)
                 .MergeInto<IntegerElementRow>(mergedValueElements.Where(row => row.IntegerElement.HasValue))
                 .On<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
                 .From(row => row.FieldValueElementId, row => row.IntegerElement);
 
             integerElementsCommand.Execute();
 
-            var moneyElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+            var moneyElementsCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider, transaction)
                 .MergeInto<MoneyElementRow>(mergedValueElements.Where(row => row.MoneyElement.HasValue))
                 .On<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
                 .From(row => row.FieldValueElementId, row => row.MoneyElement);
 
             moneyElementsCommand.Execute();
 
-            var textElementsCommand = new StructuredMergeCommand<FieldValueElementTableTypeRow>(commandProvider, transaction)
+            var textElementsCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider, transaction)
                 .MergeInto<TextElementRow>(mergedValueElements.Where(row => row.TextElement != null))
                 .On<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId)
                 .From(row => row.FieldValueElementId, row => row.TextElement);
@@ -546,7 +547,7 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
                                                          GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
                                                      };
 
-            var submissionCommand = new StructuredMergeCommand<GenericSubmissionValueTableTypeRow>(commandProvider, transaction)
+            var submissionCommand = new TableValuedMerge<GenericSubmissionValueTableTypeRow>(commandProvider, transaction)
                 .MergeInto<GenericSubmissionValueRow>(genericValueSubmissions, row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource(row => row.GenericSubmissionId);
 

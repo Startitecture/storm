@@ -8,7 +8,6 @@ namespace Startitecture.Core.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.Linq;
 
@@ -18,7 +17,6 @@ namespace Startitecture.Core.Tests
     /// The extension methods test.
     /// </summary>
     [TestClass]
-    [ExcludeFromCodeCoverage]
     public class ExtensionMethodsTest
     {
         #region Public Methods and Operators

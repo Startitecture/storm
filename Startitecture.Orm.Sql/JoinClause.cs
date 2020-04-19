@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlJoin.cs" company="Startitecture">
+// <copyright file="JoinClause.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -22,12 +22,12 @@ namespace Startitecture.Orm.Sql
     /// <summary>
     /// Represents a Transact-SQL join.
     /// </summary>
-    public class TransactSqlJoin
+    public class JoinClause
     {
         /// <summary>
         /// The aliased relation statement format.
         /// </summary>
-        private const string AliasedRelationStatementFormat = "{0} {1} AS [{2}] ON {3} = {4}";
+        private const string AliasedRelationStatementFormat = "{0} {1} AS {2} ON {3} = {4}";
 
         /// <summary>
         /// The relation statement format.
@@ -45,32 +45,31 @@ namespace Startitecture.Orm.Sql
         private const string LeftJoinClause = "LEFT JOIN";
 
         /// <summary>
-        /// The transact SQL qualifier.
-        /// </summary>
-        private static readonly TransactSqlQualifier TransactSqlQualifier = Singleton<TransactSqlQualifier>.Instance;
-
-        /// <summary>
         /// The definition provider.
         /// </summary>
         private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactSqlJoin"/> class.
+        /// The name qualifier.
+        /// </summary>
+        private readonly INameQualifier nameQualifier;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JoinClause"/> class.
         /// </summary>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
+        /// <param name="nameQualifier">
+        /// The SQL name qualifier.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="definitionProvider"/> is null.
+        /// <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
         /// </exception>
-        public TransactSqlJoin([NotNull] IEntityDefinitionProvider definitionProvider)
+        public JoinClause([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
         {
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
-            this.definitionProvider = definitionProvider;
+            this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.nameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
         }
 
         /// <summary>
@@ -148,7 +147,7 @@ namespace Startitecture.Orm.Sql
                 this.definitionProvider.Resolve(sourceReference.EntityType)
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == entityRelation.SourceExpression.GetPropertyName());
 
-            var sourceName = TransactSqlQualifier.Qualify(sourceAttribute, sourceLocation);
+            var sourceName = this.nameQualifier.Qualify(sourceAttribute, sourceLocation);
 
             var relationReference = this.definitionProvider.GetEntityReference(entityRelation.RelationExpression);
             relationReference.EntityAlias = entityRelation.RelationEntityAlias ?? relationReference.EntityAlias;
@@ -158,8 +157,8 @@ namespace Startitecture.Orm.Sql
                 this.definitionProvider.Resolve(relationLocation.EntityType)
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == entityRelation.RelationExpression.GetPropertyName());
 
-            var relationEntity = TransactSqlQualifier.GetCanonicalName(relationAttribute.Entity); 
-            var relationName = TransactSqlQualifier.Qualify(relationAttribute, relationLocation); 
+            var relationEntity = this.nameQualifier.GetCanonicalName(relationAttribute.Entity); 
+            var relationName = this.nameQualifier.Qualify(relationAttribute, relationLocation); 
 
             if (string.IsNullOrWhiteSpace(relationLocation.Alias))
             {
@@ -173,7 +172,7 @@ namespace Startitecture.Orm.Sql
                 AliasedRelationStatementFormat,
                 joinType,
                 relationEntity,
-                relationLocation.Alias,
+                this.nameQualifier.Escape(relationLocation.Alias),
                 sourceName,
                 relationName);
         }

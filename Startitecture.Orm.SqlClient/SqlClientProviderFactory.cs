@@ -1,12 +1,16 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlServerProviderFactory.cs" company="Startitecture">
+// <copyright file="SqlClientProviderFactory.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
+    using System.Data.Common;
+    using System.Data.SqlClient;
+    using System.Diagnostics;
+    using System.Linq;
 
     using JetBrains.Annotations;
 
@@ -19,8 +23,13 @@ namespace Startitecture.Orm.Sql
     /// <summary>
     /// The SQL Server provider factory.
     /// </summary>
-    public class SqlServerProviderFactory : IRepositoryProviderFactory
+    public class SqlClientProviderFactory : IRepositoryProviderFactory
     {
+        /// <summary>
+        /// The provider invariant name.
+        /// </summary>
+        private const string ProviderInvariantName = "System.Data.SqlClient";
+
         /// <summary>
         /// The connection string.
         /// </summary>
@@ -32,7 +41,7 @@ namespace Startitecture.Orm.Sql
         private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlServerProviderFactory"/> class.
+        /// Initializes a new instance of the <see cref="SqlClientProviderFactory"/> class.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string.
@@ -40,13 +49,13 @@ namespace Startitecture.Orm.Sql
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="System.ArgumentException">
         /// <paramref name="connectionString"/> is null or whitespace.
         /// </exception>
-        public SqlServerProviderFactory([NotNull] string connectionString, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public SqlClientProviderFactory([NotNull] string connectionString, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -60,13 +69,20 @@ namespace Startitecture.Orm.Sql
         /// <inheritdoc />
         public IRepositoryProvider Create()
         {
+#if !NET472
+            if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, ProviderInvariantName, StringComparison.Ordinal)) == false)
+            {
+                Trace.WriteLine($"Registering {ProviderInvariantName} factory");
+                DbProviderFactories.RegisterFactory(ProviderInvariantName, SqlClientFactory.Instance);
+            }
+#endif
             var databaseFactory = new DefaultDatabaseFactory(
                 this.connectionString,
-                "System.Data.SqlClient",
+                ProviderInvariantName,
                 this.definitionProvider,
                 Singleton<TransactSqlQualifier>.Instance);
 
-            return new DatabaseRepositoryProvider(databaseFactory, Singleton<SqlServerAdapterFactory>.Instance);
+            return new DatabaseRepositoryProvider(databaseFactory, Singleton<SqlClientAdapterFactory>.Instance);
         }
     }
 }

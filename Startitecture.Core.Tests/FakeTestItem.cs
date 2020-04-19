@@ -8,13 +8,11 @@ namespace Startitecture.Core.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Xml.Serialization;
 
     /// <summary>
     /// The fake test item.
     /// </summary>
-    [ExcludeFromCodeCoverage]
     public class FakeTestItem : IEquatable<FakeTestItem>
     {
         /// <summary>

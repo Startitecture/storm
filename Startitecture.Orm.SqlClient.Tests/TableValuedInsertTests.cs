@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StructuredInsertCommandTests.cs" company="Startitecture">
+// <copyright file="TableValuedInsertTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -7,19 +7,23 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql.Tests
+namespace Startitecture.Orm.SqlClient.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.Common;
+    using System.Data.SqlClient;
+    using System.Diagnostics;
     using System.Linq;
 
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Startitecture.Orm.AutoMapper;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
-    using Startitecture.Orm.Repository;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
     using Startitecture.Orm.Testing.Model;
@@ -28,7 +32,7 @@ namespace Startitecture.Orm.Sql.Tests
     /// The structured insert command tests
     /// </summary>
     [TestClass]
-    public class StructuredInsertCommandTests
+    public class TableValuedInsertTests
     {
         /// <summary>
         /// The entity mapper.
@@ -48,7 +52,7 @@ namespace Startitecture.Orm.Sql.Tests
         [TestCategory("Integration")]
         public void Execute_StructuredInsertCommandForFields_MatchesExpected()
         {
-            var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create())
             {
@@ -109,13 +113,13 @@ namespace Startitecture.Orm.Sql.Tests
 
                 // Set up the structured command provider.
                 var databaseContextProvider = (IDatabaseContextProvider)provider;
-                var structuredCommandProvider = new StructuredTransactSqlCommandProvider(databaseContextProvider);
+                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.entityMapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
 
-                var fieldInsertCommand = new StructuredInsertCommand<FieldTableTypeRow>(structuredCommandProvider, transaction).InsertInto<FieldRow>(
+                var fieldInsertCommand = new TableValuedInsert<FieldTableTypeRow>(structuredCommandProvider, transaction).InsertInto<FieldRow>(
                     fields.Select(
                         field => new FieldTableTypeRow
                                      {
@@ -135,7 +139,7 @@ namespace Startitecture.Orm.Sql.Tests
         [TestCategory("Integration")]
         public void ExecuteWithIdentityUpdate_StructuredInsertCommandForGenericSubmission_DoesNotThrowException()
         {
-           var providerFactory = new SqlServerProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider()); 
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider()); 
 
             using (var provider = providerFactory.Create())
             {
@@ -232,7 +236,7 @@ namespace Startitecture.Orm.Sql.Tests
 
                 // Set up the structured command provider.
                 var databaseContextProvider = (IDatabaseContextProvider)provider;
-                var structuredCommandProvider = new StructuredTransactSqlCommandProvider(databaseContextProvider);
+                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider);
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
@@ -244,7 +248,7 @@ namespace Startitecture.Orm.Sql.Tests
                                             };
 
                 var valuesCommand =
-                    new StructuredInsertCommand<FieldValueTableTypeRow>(structuredCommandProvider, transaction)
+                    new TableValuedInsert<FieldValueTableTypeRow>(structuredCommandProvider, transaction)
                         .InsertInto<FieldValueRow>(valuesList)
                         .SelectResults(row => row.FieldId);
 
@@ -271,7 +275,7 @@ namespace Startitecture.Orm.Sql.Tests
                                                    TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                                }).ToList();
 
-                var elementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
+                var elementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<FieldValueElementRow>(elementsList)
                     .SelectResults(row => row.FieldValueId, row => row.Order);
 
@@ -285,31 +289,31 @@ namespace Startitecture.Orm.Sql.Tests
                     this.entityMapper.MapTo(input, element);
                 }
 
-                var dateElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
+                var dateElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<DateElementRow>(elementsList.Where(row => row.DateElement.HasValue), row => row.DateElementId, row => row.Value)
                     .From(row => row.FieldValueElementId, row => row.DateElement);
 
                 dateElementsCommand.Execute();
 
-                var floatElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
+                var floatElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<FloatElementRow>(elementsList.Where(row => row.FloatElement.HasValue), row => row.FloatElementId, row => row.Value)
                     .From(row => row.FieldValueElementId, row => row.FloatElement);
 
                 floatElementsCommand.Execute();
 
-                var integerElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
+                var integerElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<IntegerElementRow>(elementsList.Where(row => row.IntegerElement.HasValue), row => row.IntegerElementId, row => row.Value)
                     .From(row => row.FieldValueElementId, row => row.IntegerElement);
 
                 integerElementsCommand.Execute();
 
-                var moneyElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
+                var moneyElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<MoneyElementRow>(elementsList.Where(row => row.MoneyElement.HasValue), row => row.MoneyElementId, row => row.Value)
                     .From(row => row.FieldValueElementId, row => row.MoneyElement);
 
                 moneyElementsCommand.Execute();
 
-                var textElementsCommand = new StructuredInsertCommand<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
+                var textElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<TextElementRow>(elementsList.Where(row => row.TextElement != null), row => row.TextElementId, row => row.Value)
                     .From(row => row.FieldValueElementId, row => row.TextElement);
 
@@ -323,7 +327,7 @@ namespace Startitecture.Orm.Sql.Tests
                                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
                                                          };
 
-                var submissionCommand = new StructuredInsertCommand<GenericSubmissionValueTableTypeRow>(structuredCommandProvider, transaction)
+                var submissionCommand = new TableValuedInsert<GenericSubmissionValueTableTypeRow>(structuredCommandProvider, transaction)
                     .InsertInto<GenericSubmissionValueRow>(genericValueSubmissions);
 
                 submissionCommand.Execute();
