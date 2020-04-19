@@ -27,13 +27,14 @@ steps:
 
 - task: PowerShell@2
   inputs:
+    
     targetType: 'inline'
     script: |
       #Convert the Secure password that's presented as plain text back into a secure string
-      $pwd = ConvertTo-SecureString -String $(CoreCertificate-Password) -Force -AsPlainText
+      $pwd = ConvertTo-SecureString -String "$(CoreCertificate-Password)" -Force -AsPlainText
       
       #Create PFX file from Certificate Variable
-      New-Item Temp-Certificate.pfx -Value $(coreSignCertificate.secureFilePath)
+      New-Item Temp-Certificate.pfx -Value "$(coreSignCertificate.secureFilePath)"
       
       #Import the PFX certificate from the newly created file and password. Read the thumbprint into variable
       $Thumbprint = (Import-PfxCertificate -CertStoreLocation Cert:\CurrentUser\My -FilePath Temp-Certificate.pfx -Password $pwd).Thumbprint
