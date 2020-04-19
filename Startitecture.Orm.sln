@@ -24,8 +24,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildUtilities", "BuildUtil
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Certificates", "Certificates", "{49232085-0E64-41CA-AA00-8840D2219579}"
 	ProjectSection(SolutionItems) = preProject
-		Certificates\Startitecture.Core.pfx = Certificates\Startitecture.Core.pfx
-		Certificates\Startitecture.Orm.snk = Certificates\Startitecture.Orm.snk
+		Certificates\Startitecture-Public.snk = Certificates\Startitecture-Public.snk
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Common", "Startitecture.Orm.Common\Startitecture.Orm.Common.csproj", "{5643589D-8D46-4717-AE66-994173F3D671}"
@@ -605,8 +604,8 @@ Global
 		{628FE999-E820-466C-BB85-96EFF48FA58F} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
+		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi
