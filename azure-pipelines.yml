@@ -36,6 +36,8 @@ steps:
       !**\obj\**
     searchFolder: '$(System.DefaultWorkingDirectory)'
     testFiltercriteria: 'TestCategory!="Integration"'
+    codeCoverageEnabled: true
+    runOnlyImpactedTests: true
 
 - task: PublishTestResults@2
   inputs:
