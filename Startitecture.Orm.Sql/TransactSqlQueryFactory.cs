@@ -161,6 +161,12 @@ namespace Startitecture.Orm.Sql
         private readonly TransactSqlJoin transactSqlJoin;
 
         /// <summary>
+        /// The name qualifier.
+        /// TODO: Create a base class with this concrete definition providing context
+        /// </summary>
+        private readonly INameQualifier nameQualifier = new TransactSqlQualifier();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TransactSqlQueryFactory"/> class.
         /// </summary>
         /// <param name="definitionProvider">
@@ -257,37 +263,6 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
-        /// Gets a reference name from an <paramref name="location"/>.
-        /// </summary>
-        /// <param name="location">
-        /// The location to get the reference name from.
-        /// </param>
-        /// <returns>
-        /// The reference name as a <see cref="string"/>.
-        /// </returns>
-        private static string GetReferenceName(EntityLocation location)
-        {
-            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
-            return isEntityAliased
-                       ? string.Concat('[', location.Alias, ']')
-                       : string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
-        }
-
-        /// <summary>
-        /// Gets a reference name from an <paramref name="attribute"/>.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to get the reference name from.
-        /// </param>
-        /// <returns>
-        /// The reference name as a <see cref="string"/>.
-        /// </returns>
-        private static string GetReferenceName(EntityAttributeDefinition attribute)
-        {
-            return $"{GetReferenceName(attribute.Entity)}.[{attribute.PhysicalName}]";
-        }
-
-        /// <summary>
         /// Adds tokens to the <paramref name="filterTokens"/> list.
         /// </summary>
         /// <param name="filterType">
@@ -366,6 +341,37 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
+        /// Gets a reference name from an <paramref name="location"/>.
+        /// </summary>
+        /// <param name="location">
+        /// The location to get the reference name from.
+        /// </param>
+        /// <returns>
+        /// The reference name as a <see cref="string"/>.
+        /// </returns>
+        private string GetReferenceName(EntityLocation location)
+        {
+            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
+            return isEntityAliased
+                       ? this.nameQualifier.Escape(location.Alias)
+                       : string.Concat(this.nameQualifier.Escape(location.Container), '.', this.nameQualifier.Escape(location.Name));
+        }
+
+        /// <summary>
+        /// Gets a reference name from an <paramref name="attribute"/>.
+        /// </summary>
+        /// <param name="attribute">
+        /// The attribute to get the reference name from.
+        /// </param>
+        /// <returns>
+        /// The reference name as a <see cref="string"/>.
+        /// </returns>
+        private string GetReferenceName(EntityAttributeDefinition attribute)
+        {
+            return $"{this.GetReferenceName(attribute.Entity)}.[{attribute.PhysicalName}]";
+        }
+
+        /// <summary>
         /// The get column selection.
         /// </summary>
         /// <param name="attribute">
@@ -377,7 +383,7 @@ namespace Startitecture.Orm.Sql
         private string GetQualifiedColumnName(EntityAttributeDefinition attribute)
         {
             var qualifiedName = SqlQualifier.Qualify(attribute);
-            var referenceName = GetReferenceName(attribute);
+            var referenceName = this.GetReferenceName(attribute);
 
             var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
                                           ? string.Format(CultureInfo.InvariantCulture, SelectColumnFormat, qualifiedName)
@@ -423,7 +429,7 @@ namespace Startitecture.Orm.Sql
                     filter.AttributeLocation.EntityReference.EntityAlias ?? entityLocation.Alias ?? entityLocation.Name,
                     filter.AttributeLocation.PropertyInfo.Name);
 
-                var referenceName = GetReferenceName(attribute);
+                var referenceName = this.GetReferenceName(attribute);
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
                 index = AddTokens(filter.FilterType, filter.FilterValues.First(), filterTokens, referenceName, setValues, index);
@@ -511,7 +517,7 @@ namespace Startitecture.Orm.Sql
             ////if (selection.SelectionSource == selection.ItemDefinition.EntityName)
             ////{
             // Select as we normally would. Do not add delimiters for tables.
-            var fromClause = string.Concat(FromStatement, entityDefinition.QualifiedName);
+            var fromClause = string.Concat(FromStatement, $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
 
             ////}
             ////else
@@ -581,7 +587,7 @@ namespace Startitecture.Orm.Sql
                     return completeStatement;
                 case StatementOutputType.Delete:
                     // Rely on the underlying entity definition for delimiters.
-                    var primaryTableName = entityDefinition.QualifiedName;
+                    var primaryTableName = $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
                     var filter = selection.Filters.Any()
                                      ? string.Concat(
                                          Environment.NewLine,

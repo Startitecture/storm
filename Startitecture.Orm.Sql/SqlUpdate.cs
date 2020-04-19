@@ -85,6 +85,8 @@ SET
         /// </summary>
         private readonly TransactSqlJoin transactSqlJoin;
 
+        private readonly INameQualifier nameQualifier;
+
         #endregion
 
         #region Constructors and Destructors
@@ -114,6 +116,7 @@ SET
             this.queryFactory = new TransactSqlQueryFactory(definitionProvider);
             this.itemDefinition = definitionProvider.Resolve<TItem>();
             this.transactSqlJoin = new TransactSqlJoin(definitionProvider);
+            this.nameQualifier = new TransactSqlQualifier();
         }
 
         #endregion
@@ -245,7 +248,9 @@ SET
                 }
             }
 
-            var entityName = this.itemDefinition.QualifiedName;
+            var entityName =
+                $"{this.nameQualifier.Escape(this.itemDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.itemDefinition.EntityName)}";
+
             string joinClause = this.selection.Relations.Any()
                                     ? string.Concat(
                                         Environment.NewLine,
