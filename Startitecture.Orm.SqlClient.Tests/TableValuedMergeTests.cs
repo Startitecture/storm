@@ -12,11 +12,14 @@ namespace Startitecture.Orm.SqlClient.Tests
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Moq;
+
     using Startitecture.Core;
     using Startitecture.Orm.AutoMapper;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
     using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
@@ -41,10 +44,10 @@ namespace Startitecture.Orm.SqlClient.Tests
         private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
 
         /// <summary>
-        /// The merge into test.d
+        /// The merge into test.
         /// </summary>
         [TestMethod]
-        public void MergeInto_FieldsTable_ReturnedItemsMatchExpected()
+        public void SelectFromInserted_ItemsWithIdentityColumn_ReturnedItemsMatchExpected()
         {
             var internalId = new Field(421)
                                  {
@@ -134,82 +137,89 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The merge into test.
         /// </summary>
         [TestMethod]
-        public void DeleteUnmatchedInSource_GenericSubmissionValueTable_CommandTextMatchesExpected()
+        public void SelectFromInserted_ItemsWithIdentityColumn_CommandTextMatchesExpected()
         {
-            var internalId = new Field(421)
-                                 {
-                                     Name = "MERGE_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            var commandProvider = new Mock<IStructuredCommandProvider>();
+            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
 
-            var firstName = new Field(66)
-                                {
-                                    Name = "MERGE_First Name",
-                                    Description = "The person's first name"
-                                };
+            var fieldValueCommand = new TableValuedMerge<FieldValueTableTypeRow>(commandProvider.Object);
 
-            var lastName = new Field(7887)
-                               {
-                                   Name = "MERGE_Last Name",
-                                   Description = "The person's last name"
-                               };
+            const string Expected = @"DECLARE @inserted FieldValueTableType;
+MERGE [dbo].[FieldValue] AS [Target]
+USING @FieldValueTable AS [Source]
+ON ([Target].[FieldValueId] = [Source].[FieldValueId])
+WHEN MATCHED THEN
+UPDATE SET [FieldId] = [Source].[FieldId], [LastModifiedByDomainIdentifierId] = [Source].[LastModifiedByDomainIdentifierId], [LastModifiedTime] = [Source].[LastModifiedTime]
+WHEN NOT MATCHED BY TARGET THEN
+INSERT ([FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
+VALUES ([Source].[FieldId], [Source].[LastModifiedByDomainIdentifierId], [Source].[LastModifiedTime])
+OUTPUT INSERTED.[FieldValueId], INSERTED.[FieldId], INSERTED.[LastModifiedByDomainIdentifierId], INSERTED.[LastModifiedTime]
+INTO @inserted ([FieldValueId], [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime]);
+SELECT i.[FieldValueId], tvp.[FieldId], tvp.[LastModifiedByDomainIdentifierId], tvp.[LastModifiedTime]
+FROM @inserted AS i
+INNER JOIN @FieldValueTable AS tvp
+ON i.[FieldId] = tvp.[FieldId];
+";
 
-            var yearlyWage = new Field(82328)
-                                 {
-                                     Name = "MERGE_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            var actual = fieldValueCommand.MergeInto<FieldValueRow>(new List<FieldValueTableTypeRow>(), row => row.FieldValueId)
+                .SelectFromInserted(row => row.FieldId)
+                .CommandText;
 
-            var hireDate = new Field(7721123)
-                               {
-                                   Name = "MERGE_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            Assert.AreEqual(Expected, actual);
+        }
 
-            var bonusTarget = new Field(928373)
-                                  {
-                                      Name = "MERGE_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+        /// <summary>
+        /// The merge into test.
+        /// </summary>
+        [TestMethod]
+        public void DeleteUnmatchedInSource_ItemsWithIdentityColumn_CommandTextMatchesExpected()
+        {
+            var commandProvider = new Mock<IStructuredCommandProvider>();
+            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
 
-            var contactNumbers = new Field(667237)
-                                     {
-                                         Name = "MERGE_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            var elementMergeCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider.Object);
 
-            var domainIdentity = new DomainIdentity(Environment.UserName) { FirstName = "foo", LastName = "bar" };
-            var submission = new GenericSubmission("Merge Test", domainIdentity, 678);
-            submission.Load(
-                new List<FieldValue>
-                    {
-                        new FieldValue(internalId, 239487).Set(34, domainIdentity),
-                        new FieldValue(firstName, 3984).Set("Tim", domainIdentity),
-                        new FieldValue(lastName, 439875).Set("bob", domainIdentity),
-                        new FieldValue(yearlyWage, 98374).Set(75000.00m, domainIdentity),
-                        new FieldValue(hireDate, 773839).Set(DateTimeOffset.Now.Date, domainIdentity),
-                        new FieldValue(bonusTarget, 3543287).Set(1.103839, domainIdentity),
-                        new FieldValue(contactNumbers, 77223).Set(new List<string> { "423-555-2212", "615.999.8888", "123-456-7890" }, domainIdentity),
-                        new FieldValue(
-                            new Field(777282)
-                                {
-                                    Name = "Deleted",
-                                    Description = "Chuffed"
-                                },
-                            43543534).Set("DELETE_ME", domainIdentity)
-                    });
+            const string Expected = @"DECLARE @inserted FieldValueElementTableType;
+MERGE [dbo].[FieldValueElement] AS [Target]
+USING @FieldValueElementTable AS [Source]
+ON ([Target].[FieldValueId] = [Source].[FieldValueId] AND [Target].[Order] = [Source].[Order])
+WHEN MATCHED THEN
+UPDATE SET [FieldValueId] = [Source].[FieldValueId], [Order] = [Source].[Order]
+WHEN NOT MATCHED BY TARGET THEN
+INSERT ([FieldValueId], [Order])
+VALUES ([Source].[FieldValueId], [Source].[Order])
+WHEN NOT MATCHED BY SOURCE AND [Target].FieldValueId IN (SELECT [FieldValueId] FROM @FieldValueElementTable) THEN DELETE
+OUTPUT INSERTED.[FieldValueElementId], INSERTED.[FieldValueId], INSERTED.[Order]
+INTO @inserted ([FieldValueElementId], [FieldValueId], [Order]);
+SELECT i.[FieldValueElementId], tvp.[FieldValueId], tvp.[Order], tvp.[DateElement], tvp.[FloatElement], tvp.[IntegerElement], tvp.[MoneyElement], tvp.[TextElement]
+FROM @inserted AS i
+INNER JOIN @FieldValueElementTable AS tvp
+ON i.[FieldValueId] = tvp.[FieldValueId] AND i.[Order] = tvp.[Order];
+";
 
-            var mergeItems = (from v in submission.SubmissionValues
-                              select new GenericSubmissionValueTableTypeRow
-                                         {
-                                             GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                             GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault() 
-                                         }).ToList();
+            var actual = elementMergeCommand
+                .MergeInto<FieldValueElementRow>(new List<FieldValueElementTableTypeRow>(), row => row.FieldValueId, row => row.Order)
+                .DeleteUnmatchedInSource(row => row.FieldValueId)
+                .SelectFromInserted(row => row.FieldValueId, row => row.Order)
+                .CommandText;
 
-            var commandProvider = mergeItems.MockCommandProvider(new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier());
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The merge into test.
+        /// </summary>
+        [TestMethod]
+        public void DeleteUnmatchedInSource_ItemsWithoutIdentityColumn_CommandTextMatchesExpected()
+        {
+            var commandProvider = new Mock<IStructuredCommandProvider>();
+            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
 
             var target = new TableValuedMerge<GenericSubmissionValueTableTypeRow>(commandProvider.Object);
-            target.MergeInto<GenericSubmissionValueRow>(mergeItems, row => row.GenericSubmissionValueId)
+            target.MergeInto<GenericSubmissionValueRow>(new List<GenericSubmissionValueTableTypeRow>(), row => row.GenericSubmissionValueId)
                 .SelectFromInserted(row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource(row => row.GenericSubmissionId);
 
@@ -231,6 +241,36 @@ INNER JOIN @GenericSubmissionValueTable AS tvp
 ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment.NewLine;
 
             Assert.AreEqual(expected, target.CommandText);
+        }
+
+        /// <summary>
+        /// The merge into test.
+        /// </summary>
+        [TestMethod]
+        public void OnFrom_RelatedItems_CommandTextMatchesExpected()
+        {
+            var commandProvider = new Mock<IStructuredCommandProvider>();
+            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+
+            const string Expected = @"DECLARE @inserted FieldValueElementTableType;
+MERGE [dbo].[DateElement] AS [Target]
+USING @FieldValueElementTable AS [Source]
+ON ([Target].[DateElementId] = [Source].[FieldValueElementId])
+WHEN MATCHED THEN
+UPDATE SET [Value] = [Source].[DateElement]
+WHEN NOT MATCHED BY TARGET THEN
+INSERT ([DateElementId], [Value])
+VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
+;
+";
+            var actual = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider.Object)
+                .MergeInto<DateElementRow>(new List<FieldValueElementTableTypeRow>())
+                .On<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
+                .From(row => row.FieldValueElementId, row => row.DateElement)
+                .CommandText;
+
+            Assert.AreEqual(Expected, actual);
         }
 
         /// <summary>
