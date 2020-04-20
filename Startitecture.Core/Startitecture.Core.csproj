@@ -31,6 +31,7 @@
     <RepositoryUrl>https://github.com/Startitecture/Core</RepositoryUrl>
     <RepositoryType>Git</RepositoryType>
     <ApplicationIcon>startitecture_new_logo.ico</ApplicationIcon>
+    <Authors>Startitecture, LLC</Authors>
   </PropertyGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">

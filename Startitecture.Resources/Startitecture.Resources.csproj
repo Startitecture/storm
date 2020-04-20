@@ -21,6 +21,16 @@
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <Authors>Startitecture, LLC</Authors>
+    <Description>Resource file for Startitecture and ST/orm error, validation and action messages.</Description>
+    <Copyright>© 2020, Startitecture, LLC</Copyright>
+    <PackageProjectUrl>https://github.com/Startitecture/Core</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Startitecture/Core</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <PackageIcon>Startitecture New Logo.png</PackageIcon>
+    <PackageTags>#framework #library</PackageTags>
+    <Version>1.0.0-alpha</Version>
+    <ApplicationIcon>startitecture_new_logo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Compile Update="ActionMessages.Designer.cs">
@@ -70,5 +80,11 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Properties\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Logos\Startitecture New Logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 </Project>
