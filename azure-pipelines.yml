@@ -10,6 +10,9 @@ trigger:
 pool:
   vmImage: 'windows-latest'
 
+variables:
+  buildConfiguration: 'Release'
+
 steps:
 
 - task: NuGetInstaller@0
@@ -19,7 +22,7 @@ steps:
 - task: VSBuild@1
   inputs:
     solution: '**\*.sln'
-    configuration: 'release'
+    configuration: $(buildConfiguration)
     platform: 'any cpu'
 
 - task: VisualStudioTestPlatformInstaller@1
@@ -46,11 +49,10 @@ steps:
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
 
-- task: NuGetCommand@2
+- task: DotNetCoreCLI@2
   inputs:
     command: 'pack'
     packagesToPack: '**/Startitecture.Core.csproj;**/Startitecture.Resources.csproj'
+    includesymbols: true
+    includesource: true
     versioningScheme: 'off'
-    includeReferencedProjects: true
-    includeSymbols: true
-    configuration: 'release'
