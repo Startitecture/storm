@@ -45,3 +45,11 @@ steps:
     testResultsFiles: '**/TEST-*.xml'
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/Startitecture.Core.csproj;**/Startitecture.Resources.csproj'
+    versioningScheme: 'off'
+    includeReferencedProjects: true
+    includeSymbols: true
