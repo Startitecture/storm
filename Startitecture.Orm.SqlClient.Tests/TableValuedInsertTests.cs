@@ -11,22 +11,23 @@ namespace Startitecture.Orm.SqlClient.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Data.Common;
-    using System.Data.SqlClient;
-    using System.Diagnostics;
     using System.Linq;
 
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Moq;
+
     using Startitecture.Orm.AutoMapper;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Query;
     using Startitecture.Orm.Schema;
+    using Startitecture.Orm.Sql;
     using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
     using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Moq;
 
     /// <summary>
     /// The structured insert command tests
@@ -50,7 +51,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void Execute_StructuredInsertCommandForFields_MatchesExpected()
+        public void Execute_TableValueInsertForFields_MatchesExpected()
         {
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
@@ -137,7 +138,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void ExecuteWithIdentityUpdate_StructuredInsertCommandForGenericSubmission_DoesNotThrowException()
+        public void ExecuteWithIdentityUpdate_TableValuedInsertForGenericSubmission_DoesNotThrowException()
         {
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider()); 
 
@@ -333,6 +334,101 @@ namespace Startitecture.Orm.SqlClient.Tests
                 submissionCommand.Execute();
 
                 transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// The execute test.
+        /// </summary>
+        [TestMethod]
+        public void SelectResults_TableValuedInsertWithIdentityColumn_CommandTextMatchesExpected()
+        {
+            var mockProvider = new Mock<IRepositoryProvider>();
+
+            using (mockProvider.Object)
+            {
+                var structuredCommandProvider = new Mock<IStructuredCommandProvider>();
+                structuredCommandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+                structuredCommandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+
+                var valuesCommand = new TableValuedInsert<FieldValueTableTypeRow>(structuredCommandProvider.Object)
+                    .InsertInto<FieldValueRow>(new List<FieldValueTableTypeRow>())
+                    .SelectResults(row => row.FieldId);
+
+                const string Expected = @"DECLARE @inserted FieldValueTableType;
+INSERT INTO [dbo].[FieldValue]
+([FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
+OUTPUT INSERTED.[FieldValueId],INSERTED.[FieldId],INSERTED.[LastModifiedByDomainIdentifierId],INSERTED.[LastModifiedTime]
+INTO @inserted ([FieldValueId], [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
+SELECT [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime] FROM @FieldValueTable AS tvp;
+SELECT i.[FieldValueId], i.[FieldId], tvp.[LastModifiedByDomainIdentifierId], tvp.[LastModifiedTime]
+FROM @inserted AS i
+INNER JOIN @FieldValueTable AS tvp
+ON i.[FieldId] = tvp.[FieldId];
+";
+                var actual = valuesCommand.CommandText;
+                Assert.AreEqual(Expected, actual);
+            }
+        }
+
+        /// <summary>
+        /// The execute test.
+        /// </summary>
+        [TestMethod]
+        public void From_TableValuedInsertForRelatedRow_MatchesExpected()
+        {
+            var mockProvider = new Mock<IRepositoryProvider>();
+
+            using (mockProvider.Object)
+            {
+                var structuredCommandProvider = new Mock<IStructuredCommandProvider>();
+                structuredCommandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+                structuredCommandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+
+                var dateElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider.Object)
+                    .InsertInto<DateElementRow>(new List<FieldValueElementTableTypeRow>(), row => row.DateElementId, row => row.Value)
+                    .From(row => row.FieldValueElementId, row => row.DateElement);
+
+                const string Expected = @"INSERT INTO [dbo].[DateElement]
+([DateElementId], [Value])
+SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementTable AS tvp;
+";
+                var actual = dateElementsCommand.CommandText;
+                Assert.AreEqual(Expected, actual);
+            }
+        }
+
+        /// <summary>
+        /// The execute test.
+        /// </summary>
+        [TestMethod]
+        public void InsertInto_TableValueInsertForNonIdentityKey_CommandTextMatchesExpected()
+        {
+            var mockProvider = new Mock<IRepositoryProvider>();
+
+            using (mockProvider.Object)
+            {
+                // Attach the values to the submission
+                var genericValueSubmissions = (from v in Enumerable.Range(1, 5)
+                                               select new GenericSubmissionValueTableTypeRow
+                                                          {
+                                                              GenericSubmissionId = 6,
+                                                              GenericSubmissionValueId = v
+                                                          }).ToList();
+
+                var structuredCommandProvider = genericValueSubmissions.MockCommandProvider(
+                    new DataAnnotationsDefinitionProvider(),
+                    new TransactSqlQualifier());
+
+                var submissionCommand = new TableValuedInsert<GenericSubmissionValueTableTypeRow>(structuredCommandProvider.Object)
+                    .InsertInto<GenericSubmissionValueRow>(genericValueSubmissions);
+
+                const string Expected = @"INSERT INTO [dbo].[GenericSubmissionValue]
+([GenericSubmissionValueId], [GenericSubmissionId])
+SELECT [GenericSubmissionValueId], [GenericSubmissionId] FROM @GenericSubmissionValueTable AS tvp;
+";
+                var actual = submissionCommand.CommandText;
+                Assert.AreEqual(Expected, actual);
             }
         }
     }
