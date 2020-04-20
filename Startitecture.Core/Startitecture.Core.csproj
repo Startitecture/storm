@@ -20,6 +20,17 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Company>Startitecture, LLC</Company>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <PackageTags>#framework #library</PackageTags>
+    <Version>1.0.0-alpha</Version>
+    <Description>Core methods and functionality for Startitecture, LLC packages.</Description>
+    <Copyright>© 2020, Startitecture, LLC</Copyright>
+    <PackageProjectUrl>https://github.com/Startitecture/Core</PackageProjectUrl>
+    <PackageIcon>Startitecture New Logo.png</PackageIcon>
+    <RepositoryUrl>https://github.com/Startitecture/Core</RepositoryUrl>
+    <RepositoryType>Git</RepositoryType>
+    <ApplicationIcon>startitecture_new_logo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
@@ -38,5 +49,11 @@
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Logos\Startitecture New Logo.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 </Project>
