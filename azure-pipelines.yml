@@ -51,10 +51,9 @@ steps:
 
 - task: CopyFiles@2
   inputs:
-    Contents: '**\*.nupkg;**\*.snupkg'
-    TargetFolder: '$(build.artifactstagingdirectory)\Packages'
+    Contents: '**\bin**'
+    TargetFolder: '$(build.artifactstagingdirectory)'
     CleanTargetFolder: true
-    flattenFolders: true
 
 - task: NuGetCommand@2
   inputs:
