@@ -16,21 +16,26 @@ variables:
 steps:
 
 - task: NuGetInstaller@0
+  displayName: 'Nuget Installer'
 
 - task: NuGetCommand@2
+  displayName: 'Nuget Restore'
 
 - task: VSBuild@1
+  displayName: 'VS Build'
   inputs:
     solution: '**\*.sln'
     configuration: $(buildConfiguration)
     platform: 'any cpu'
 
 - task: VisualStudioTestPlatformInstaller@1
+  displayName: 'Set up VS Test Platform'
   inputs:
     packageFeedSelector: 'nugetOrg'
     versionSelector: 'latestStable'
 
 - task: VSTest@2
+  displayName: 'Run VS Tests'
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: |
@@ -43,6 +48,7 @@ steps:
     runOnlyImpactedTests: true
 
 - task: PublishTestResults@2
+  displayName: 'Publish Test Results'
   inputs:
     testResultsFormat: 'VSTest'
     testResultsFiles: '**/TEST-*.xml'
@@ -50,12 +56,15 @@ steps:
     testRunTitle: 'Storm-CI'
 
 - task: CopyFiles@2
+  displayName: 'Copy NuGet Packages'
   inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)'
     Contents: '**\bin**'
     TargetFolder: '$(build.artifactstagingdirectory)'
     CleanTargetFolder: true
 
 - task: NuGetCommand@2
+  displayName: 'Push NuGet Packages'
   inputs:
     command: 'push'
     packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.snupkg'
