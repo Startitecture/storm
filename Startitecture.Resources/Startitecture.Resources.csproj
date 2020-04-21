@@ -1,24 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Debug\Startitecture.Resources.xml</DocumentationFile>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <CodeAnalysisRuleSet>ExtendedDesignGuidelineRules.ruleset</CodeAnalysisRuleSet>
-    <DocumentationFile>bin\Release\Startitecture.Resources.xml</DocumentationFile>
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
-  </PropertyGroup>
-  <PropertyGroup>
     <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Startitecture, LLC</Authors>
