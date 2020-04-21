@@ -49,14 +49,12 @@ steps:
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
 
-- task: DotNetCoreCLI@2
+- task: CopyFiles@2
   inputs:
-    command: 'pack'
-    packagesToPack: '**/Startitecture.Resources.csproj;**/Startitecture.Core.csproj'
-    nobuild: true
-    includesymbols: true
-    includesource: true
-    versioningScheme: 'off'
+    Contents: '**\*.nupkg;**\*.snupkg'
+    TargetFolder: '$(build.artifactstagingdirectory)\Packages'
+    CleanTargetFolder: true
+    flattenFolders: true
 
 - task: NuGetCommand@2
   inputs:
