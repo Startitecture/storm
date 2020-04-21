@@ -49,6 +49,15 @@ steps:
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
 
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'pack'
+    packagesToPack: '**/Startitecture.Resources.csproj;**/Startitecture.Core.csproj'
+    nobuild: true
+    includesymbols: true
+    includesource: true
+    versioningScheme: 'off'
+
 - task: NuGetCommand@2
   inputs:
     command: 'push'
