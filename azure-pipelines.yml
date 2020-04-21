@@ -52,8 +52,16 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'pack'
-    packagesToPack: '**/Startitecture.Core.csproj;**/Startitecture.Resources.csproj'
+    packagesToPack: '**/Startitecture.Resources.csproj;**/Startitecture.Core.csproj'
+    nobuild: true
     includesymbols: true
     includesource: true
-    nobuild: true
     versioningScheme: 'off'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.snupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+    allowPackageConflicts: true
