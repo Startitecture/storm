@@ -49,11 +49,10 @@ steps:
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
 
-- task: DotNetCoreCLI@2
+- task: NuGetCommand@2
   inputs:
-    command: 'pack'
-    packagesToPack: '**/Startitecture.Core.csproj;**/Startitecture.Resources.csproj'
-    includesymbols: true
-    includesource: true
-    nobuild: true
-    versioningScheme: 'off'
+    command: 'push'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.snupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+    allowPackageConflicts: true
