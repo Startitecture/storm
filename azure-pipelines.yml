@@ -56,9 +56,9 @@ steps:
     testRunTitle: 'Storm-CI'
 
 - task: CopyFiles@2
-  displayName: 'Copy NuGet Packages'
+  displayName: 'Copy Build Output'
   inputs:
-    Contents: '**/*.nupkg;**/*.snupkg'
+    Contents: '**/bin**'
     TargetFolder: '$(build.artifactstagingdirectory)'
     CleanTargetFolder: true
 
