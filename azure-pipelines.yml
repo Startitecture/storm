@@ -16,21 +16,26 @@ variables:
 steps:
 
 - task: NuGetInstaller@0
+  displayName: 'Nuget Installer'
 
 - task: NuGetCommand@2
+  displayName: 'Nuget Restore'
 
 - task: VSBuild@1
+  displayName: 'VS Build'
   inputs:
     solution: '**\*.sln'
     configuration: $(buildConfiguration)
     platform: 'any cpu'
 
 - task: VisualStudioTestPlatformInstaller@1
+  displayName: 'Set up VS Test Platform'
   inputs:
     packageFeedSelector: 'nugetOrg'
     versionSelector: 'latestStable'
 
 - task: VSTest@2
+  displayName: 'Run VS Tests'
   inputs:
     testSelector: 'testAssemblies'
     testAssemblyVer2: |
@@ -43,25 +48,25 @@ steps:
     runOnlyImpactedTests: true
 
 - task: PublishTestResults@2
+  displayName: 'Publish Test Results'
   inputs:
     testResultsFormat: 'VSTest'
     testResultsFiles: '**/TEST-*.xml'
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
 
-- task: DotNetCoreCLI@2
+- task: CopyFiles@2
+  displayName: 'Copy Build Output'
   inputs:
-    command: 'pack'
-    packagesToPack: '**/Startitecture.Resources.csproj;**/Startitecture.Core.csproj'
-    nobuild: true
-    includesymbols: true
-    includesource: true
-    versioningScheme: 'off'
+    Contents: '**\*'
+    TargetFolder: '$(build.artifactstagingdirectory)'
+    CleanTargetFolder: true
 
 - task: NuGetCommand@2
+  displayName: 'Push NuGet Packages'
   inputs:
     command: 'push'
-    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.snupkg'
+    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;$(Build.ArtifactStagingDirectory)/**/*.snupkg'
     nuGetFeedType: 'internal'
     publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
     allowPackageConflicts: true
