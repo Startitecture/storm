@@ -117,281 +117,21 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="DataSourceDoesNotExist" xml:space="preserve">
-    <value>The data source location must exist.</value>
-    <comment>Specifies that the file specified by the data source does not exist.</comment>
-  </data>
-  <data name="DataSourceLocationNotSet" xml:space="preserve">
-    <value>The data source location must be set.</value>
-    <comment>Specifies that the File property of the data source cannot be null.</comment>
-  </data>
-  <data name="PostalCodeInvalidFormat" xml:space="preserve">
-    <value>The specified postal code string was not in a recognizable format.</value>
-    <comment>Specifies that a postal code string was not in a recognizable format.</comment>
-  </data>
-  <data name="SeparatedValuesFileNotInProperFormat" xml:space="preserve">
-    <value>The separated values stream is not in the proper format.</value>
-    <comment>Specifies that the separated values stream is in an invalid format.</comment>
-  </data>
-  <data name="XmlCouldNotBeDeserialized" xml:space="preserve">
-    <value>The XML stream could not be deserialized.</value>
-    <comment>Specifies that the XML stream could not be deserialized by the reader.</comment>
-  </data>
-  <data name="ActionToCompleteNotFound" xml:space="preserve">
-    <value>An attempt was made to complete action '{0}' that could not be found.</value>
-    <comment>Indicates that the specified action could not be completed as it was not found.</comment>
-  </data>
-  <data name="ActionCouldNotBeInitiated" xml:space="preserve">
-    <value>The action '{0}' could not be initiated.</value>
-    <comment>Inidicates that the specified action could not be initiated.</comment>
-  </data>
-  <data name="FaultRepositoryFailureOnSave" xml:space="preserve">
-    <value>Unable to save fault '{0}' to the repository: {1}</value>
-    <comment>Indicates that the specified fault was not saved to the repository becuase of an error.</comment>
-  </data>
-  <data name="FaultRepositoryFaultAlreadySaved" xml:space="preserve">
-    <value>Fault '{0}' has already been saved to the repository.</value>
-    <comment>Indicates that the specified fault has already been saved.</comment>
-  </data>
-  <data name="FaultContractNotSpecified" xml:space="preserve">
-    <value>A FaultContractAttribute was not found on a user-defined operation method.</value>
-  </data>
-  <data name="EventRepositoryNotConfigured" xml:space="preserve">
-    <value>The event repository has not been configured in the configuration file.</value>
-    <comment>Indicates that no configuration information can be found to configure an event repository.</comment>
-  </data>
-  <data name="InnerExceptionMessage" xml:space="preserve">
-    <value>A(n) {0} (message: {1}) resulted in the following {2}: {3}</value>
-    <comment>Indicates that an inner exception resulted in the topmost exception.</comment>
-  </data>
-  <data name="DependencyNotConfigured" xml:space="preserve">
-    <value>A dependency for type '{0}' has not been configured.</value>
-    <comment>Indicates that the specified type does not have a dependency configured for it.</comment>
-  </data>
   <data name="ComparisonValuesMustBeSameType" xml:space="preserve">
     <value>The second value must be the same type as the first value.</value>
     <comment>Indicates that the second value must be the same type as the first value.</comment>
-  </data>
-  <data name="DictionaryValueNotOfExpectedType" xml:space="preserve">
-    <value>The value at '{0}' was not of type '{1}' (actual: '{2}').</value>
-    <comment>Indicates that the specified key did not contain a value of the expected type.</comment>
-  </data>
-  <data name="ComponentExitingWithUnhandledError" xml:space="preserve">
-    <value>The component '{0}' has encountered an unhandled exception and will exit: {1}</value>
-    <comment>Indicates that the component is exiting with an unhandled exception.</comment>
-  </data>
-  <data name="ComponentAbortedAndRefusingRequests" xml:space="preserve">
-    <value>The component '{0}' has been aborted and cannot accept any further requests.</value>
-    <comment>Indicates that the specified component has aborted and will no longer be accepting requests.</comment>
-  </data>
-  <data name="NoProfilesSpecified" xml:space="preserve">
-    <value>No profiles were specified.</value>
-    <comment>Indicates that no profiles were specified in the parameter.</comment>
-  </data>
-  <data name="UnhandledExceptionFromCallerMethod" xml:space="preserve">
-    <value>The caller's {0} method threw an exception: {1}</value>
-    <comment>Indicates that the caller's method threw an unhandled exception in a background thread.</comment>
-  </data>
-  <data name="AuditConfigurationNotFound" xml:space="preserve">
-    <value>The audit configuration element '{0}' was not found.</value>
-    <comment>Indicates that the entity configuration was not found at the speciifed path.</comment>
-  </data>
-  <data name="EventSubscriberThrewExceptionInBackgroundThread" xml:space="preserve">
-    <value>Event subscriber of '{0}' threw exception in background thread: {1}</value>
-    <comment>Indicates that an event subscriber of the specified object threw an exception in a background thread.</comment>
-  </data>
-  <data name="UnhandledExceptionDuringMessageDelivery" xml:space="preserve">
-    <value>Fatal error processing message delivery for '{0}': {1}</value>
-    <comment>Indicates that an unhandled exception occurred while processing the message delivery.</comment>
-  </data>
-  <data name="MessageNotAcceptedByRoute" xml:space="preserve">
-    <value>The message was not accepted by route '{0}': {1}</value>
-    <comment>Indicates that the current message was not accepted by the specified route.</comment>
-  </data>
-  <data name="UnexpectedNumberOfRequestsRemoved" xml:space="preserve">
-    <value>{0} {1} requests were removed by their ID.</value>
-    <comment>Indicates that the number of requests removed was unexpected.</comment>
-  </data>
-  <data name="RequestNotFound" xml:space="preserve">
-    <value>Request '{0}' with ID {1} could not be found in router {2}.</value>
-    <comment>Indicates that the specified request could not be found in the internal dictionary of active requests.</comment>
-  </data>
-  <data name="RoutingInformationAlreadyRemoved" xml:space="preserve">
-    <value>The routing information for request '{0}' with ID {1} was already removed.</value>
-    <comment>Indicates that routing information for the speciifed request has been removed.</comment>
-  </data>
-  <data name="FailureRouteInformationAlreadyRemoved" xml:space="preserve">
-    <value>The failure route for request '{0}' with ID {1} was already removed.</value>
-    <comment>Indicates that the failure route information for the specified request has already been removed.</comment>
-  </data>
-  <data name="EventSourceNotOfExpectedType" xml:space="preserve">
-    <value>The sender of event '{0}' was of type {1} (expected {2}).</value>
-    <comment>Indicates that the source of the event was not of the specified type.</comment>
-  </data>
-  <data name="FileNotFoundAtPath" xml:space="preserve">
-    <value>The file '{0}' was not found at path '{1}'.</value>
-    <comment>Indicates that the specified file could not be found at the path.</comment>
-  </data>
-  <data name="RelativeFileCouldNotBeFound" xml:space="preserve">
-    <value>The file '{0}' could not be located by configuration settings, relative search path or executing assembly.</value>
-    <comment>Indicates that the speciifed file could not be found using a variety of approaches to determining relative location.</comment>
-  </data>
-  <data name="NoProviderAvailable" xml:space="preserve">
-    <value>No provider is available to save {0} '{1}'.</value>
-    <comment>Indicates that no provider is available, either internally or from the item, to save the specified item.</comment>
-  </data>
-  <data name="SaveEventFailed" xml:space="preserve">
-    <value>Unable to save event '{0}': {1}</value>
-    <comment>Indicates that the specified event could not be saved.</comment>
-  </data>
-  <data name="EventIdentifierCollision" xml:space="preserve">
-    <value>Unable to start new event '{0}' because the same identifier is in use.</value>
-    <comment>Indicates that an existing event has the same identifier as the new event.</comment>
-  </data>
-  <data name="EventFailedValidation" xml:space="preserve">
-    <value>Unable to start new event '{0}' because the action event failed validation.</value>
-    <comment>Indicates that the specified event failed to validate.</comment>
-  </data>
-  <data name="ActionIdentifierNotFound" xml:space="preserve">
-    <value>The action identifier '{0}' for action '{1}' could not be found.</value>
-    <comment>Indicates that the identifier for the specified action request could not be found in order to complete the request.</comment>
-  </data>
-  <data name="SourcePathDoesNotExist" xml:space="preserve">
-    <value>The source path '{0}' does not exist.</value>
-    <comment>Indicates that the specified source path does not exist.</comment>
-  </data>
-  <data name="ServiceConfigurationNotFound" xml:space="preserve">
-    <value>A service configuration with the name '{0}' was not found.</value>
-    <comment>Indicates that the specified service configuration was not found in the dictionary.</comment>
-  </data>
-  <data name="ServiceElementsNotLoaded" xml:space="preserve">
-    <value>No service elements have been loaded.</value>
-    <comment>Indicates that the service elements have not been loaded into the service balancer.</comment>
-  </data>
-  <data name="ServiceRequestStatusNotFound" xml:space="preserve">
-    <value>A service status with ID '{0}' for configuration '{1}' could not be found.</value>
-    <comment>Indicates that a service request status could not be found for the specified configuration.</comment>
-  </data>
-  <data name="RoutingConfigurationNotFound" xml:space="preserve">
-    <value>The routing request did not contain a routing configuration.</value>
-    <comment>Indicates that no routing configuration can be found for the specified request.</comment>
   </data>
   <data name="ItemCouldNotBeAddedToCollection" xml:space="preserve">
     <value>The item could not be added to the collection.</value>
     <comment>Indicates that an item could not be added to the collection.</comment>
   </data>
-  <data name="StoppedProcessCannotBeCanceled" xml:space="preserve">
-    <value>Cannot cancel a process when it is not running.</value>
-    <comment>Indicates that a stopped process cannot be canceled.</comment>
-  </data>
-  <data name="ClientProxyCouldNotBeClosed" xml:space="preserve">
-    <value>Unable to close client for '{0}': {1}</value>
-    <comment>Indicates that the specified client proxy could not be closed.</comment>
-  </data>
-  <data name="DelayedRoutingError" xml:space="preserve">
-    <value>Delayed routing of '{0}' failed: {1}</value>
-    <comment>Indicates that delayed routing of the specified message failed.</comment>
-  </data>
-  <data name="MessageCouldNotBeFinalized" xml:space="preserve">
-    <value>{0} could not finalize '{1}' with ID {2}.</value>
-    <comment>Indicates that a message could not be finalized by the message router.
-</comment>
-  </data>
-  <data name="SortedSetItemNotFoundForRemoval" xml:space="preserve">
-    <value>Unable to remove '{0}' from the sorted set.</value>
-    <comment>Indicates that the specified item could not be removed from the internal sorted set.</comment>
-  </data>
-  <data name="EventRepositoryTypeNotFound" xml:space="preserve">
-    <value>The specified event repository type '{0}' does not exist.</value>
-    <comment>Indicates that the specified event repository type does not exist.</comment>
-  </data>
-  <data name="TokenRequestWebException" xml:space="preserve">
-    <value>The remote server responded with the following status: {0} [code: {1}]</value>
-    <comment>Indicates that the remote server did not respond with a 200 OK code.</comment>
-  </data>
-  <data name="TokenRequestProtocolViolation" xml:space="preserve">
-    <value>The request was not valid for the specified protocol.</value>
-    <comment>Indicates that the request body was not valid for the specified protocol.</comment>
-  </data>
-  <data name="TokenRequestNotSupported" xml:space="preserve">
-    <value>The request is not supported.</value>
-    <comment>Indicates that the request is not supported.</comment>
-  </data>
   <data name="HttpWebRequestNotReturned" xml:space="preserve">
     <value>The token request returned was null or not an HttpWebRequest.</value>
     <comment>Indicates that the expected return value was not an HttpWebRequest.</comment>
   </data>
-  <data name="RepositoryDependencyDoesNotExist" xml:space="preserve">
-    <value>The dependent {0} item '{1}' does not exist in the repository.</value>
-    <comment>Indicates that the specified dependency does not exist in the repository.</comment>
-  </data>
-  <data name="ProcessCanceledAndCannotBeRestarted" xml:space="preserve">
-    <value>The process '{0}' has been canceled and cannot be started again.</value>
-    <comment>Indicates that the specified process has been canceled and cannot be restarted.</comment>
-  </data>
   <data name="DataItemInsertionFailed" xml:space="preserve">
     <value>The insertion of {0} '{1}' failed.</value>
     <comment>Indicates that insertion of the specified data item failed.</comment>
-  </data>
-  <data name="DataItemUpdateAffectedMultipleRows" xml:space="preserve">
-    <value>The update of {0} '{1}' affected multiple rows.</value>
-    <comment>Indicates that the update of the specified item affected multiple rows when only one row should have been affected.</comment>
-  </data>
-  <data name="DataItemUpdateNotApplied" xml:space="preserve">
-    <value>The update of {0} '{1}' was not applied.</value>
-    <comment>Indicates that the update of the specified item was not applied as expected.</comment>
-  </data>
-  <data name="NetworkShareNotAvailable" xml:space="preserve">
-    <value>Unable to connect to the remote share.</value>
-    <comment>Indicates that the service could not connect to the remote share.</comment>
-  </data>
-  <data name="RoutingNotificationNotFound" xml:space="preserve">
-    <value>The routing request did not contain a notification.</value>
-    <comment>Indicates that the required routing notification was not found.</comment>
-  </data>
-  <data name="MessageRequestAlreadyComplete" xml:space="preserve">
-    <value>Received a message that is already complete.</value>
-    <comment>Indicates that the message has already been to the last route in the routing configuration and does not have an error.</comment>
-  </data>
-  <data name="CurrentRoutingStatusRequired" xml:space="preserve">
-    <value>The current status of the message is required for action '{0}'.</value>
-    <comment>Indicates that the current routing status is required for the specified action to complete.</comment>
-  </data>
-  <data name="MessageCanceledByNewerMessage" xml:space="preserve">
-    <value>Delivery of the message was canceled because a newer message supersedes it.</value>
-    <comment>Indicates that the message was canceled because a newer message superseded it.</comment>
-  </data>
-  <data name="DeliveryAdministrativelyCanceled" xml:space="preserve">
-    <value>Delivery of the message was administratively canceled.</value>
-    <comment>Indicates that a message was canceled by an administrator.</comment>
-  </data>
-  <data name="CurrentRouteNotFound" xml:space="preserve">
-    <value>The current status of the routing request did not contain a current route.</value>
-    <comment>Indicates that the expected current route was not found in the routing status.</comment>
-  </data>
-  <data name="ItemSelectionTypeNotSupported" xml:space="preserve">
-    <value>ItemSelections of type {0} are not supported.</value>
-    <comment>Indicates that the type of ItemSelection used is not supported.</comment>
-  </data>
-  <data name="DistributionChannelsNotAvailable" xml:space="preserve">
-    <value>No distribution channels are currently available.</value>
-    <comment>Indicates that no distribution channels are currently available.</comment>
-  </data>
-  <data name="ComponentFailureCouldNotBeRecorded" xml:space="preserve">
-    <value>Item '{0}' failing {1} with error {2} could not be recorded. The original error is:{3}{4}{3}The recording error is:{3}{5}</value>
-    <comment>Indicates that the error that failed the component could not be recorded using the action event proxy.</comment>
-  </data>
-  <data name="TransactionContextNotSet" xml:space="preserve">
-    <value>The item's transaction context was not set.</value>
-    <comment>Indicates that an item's transaction context was not set.</comment>
-  </data>
-  <data name="KeyTypeNotSupportedForInsert" xml:space="preserve">
-    <value>The type '{0}' is not supported in the {1} implementation.</value>
-    <comment>Indicates that the key type is not supported for a KeyedInsertProcedure. Only integer types are supported.</comment>
-  </data>
-  <data name="CommandFactoryReturnedNullCommand" xml:space="preserve">
-    <value>The command factory is null for POCO data '{0}'.</value>
-    <comment>Indicates that the command factory returned a null command for the specified POCO data.</comment>
   </data>
   <data name="ConnectionFactoryReturnedNullConnection" xml:space="preserve">
     <value>The connection factory '{0}' returned a null connection.</value>
@@ -425,39 +165,6 @@
     <value>The provider is disposed and cannot be used as a transaction provider.</value>
     <comment>Indicates that the repository provider is disposed and cannot be used as a transaction provider.</comment>
   </data>
-  <data name="DynamicTypesNotSupported" xml:space="preserve">
-    <value>Dynamic types are not supported with this method.</value>
-    <comment>Indicates that the current method does not support dynamic types.</comment>
-  </data>
-  <data name="ResultTypeNotSupported" xml:space="preserve">
-    <value>Result '{0}' type '{1}' is not supported.</value>
-    <comment>Indicates that the result type is not supported for data item insertions.</comment>
-  </data>
-  <data name="CertificateNotFound" xml:space="preserve">
-    <value>The certificate '{0}' could not be located in the local machine store.</value>
-    <comment>Indicates that the specified certificate could not be found in the current user's store.</comment>
-  </data>
-  <data name="AccountInformationProviderTypeConfigurationMissing" xml:space="preserve">
-    <value>The account information provider type was not set in the audit configuration.</value>
-    <comment>Indicates that the acocunt information provider type was not set in the audit configuration.
-</comment>
-  </data>
-  <data name="AccountCouldNotBeIdentified" xml:space="preserve">
-    <value>Account '{0}' could not be identified: {1}</value>
-    <comment>Indicates that the specified account name could not be identified.</comment>
-  </data>
-  <data name="KeyMappingToEntityTypeNotSupported" xml:space="preserve">
-    <value>Key mapping for the same type as the Entity is not supported.</value>
-    <comment>Indicates that a key mapping for the profile's Entity type is not supported.</comment>
-  </data>
-  <data name="KeyMappingToDataItemTypeNotSupported" xml:space="preserve">
-    <value>Key mapping for the same type as the Data Item is not supported.</value>
-    <comment>Indicates that a key mapping to the Entity Mapping's DataItem type is not supported.</comment>
-  </data>
-  <data name="PropertyNameNotSet" xml:space="preserve">
-    <value>The property's name was not set.</value>
-    <comment>Indicates that the property's name was not set.</comment>
-  </data>
   <data name="ReadOnlyPropertyCannotBeWrittenTo" xml:space="preserve">
     <value>The property '{0}' is not set and cannot be written from {1} '{2}'.</value>
   </data>
@@ -475,21 +182,11 @@
     <value>The database context connection must be a SqlConnection.</value>
     <comment>Indicates that the type of the database connection must be a SqlConnection.</comment>
   </data>
-  <data name="EnumerationCountMismatch" xml:space="preserve">
-    <value>The enumeration did not contain the expected number of elements.</value>
-    <comment>Indicates that the enumeration did not contain the expected number of elements.</comment>
-  </data>
   <data name="ValueCannotBeNullOrWhiteSpace" xml:space="preserve">
     <value>Value cannot be null or whitespace.</value>
   </data>
-  <data name="EnumerationMustBeKnownValue" xml:space="preserve">
-    <value>The enumeration must be set to a known value.</value>
-  </data>
   <data name="IndexPropertiesNotSupported" xml:space="preserve">
     <value>Index properties are not supported by this method.</value>
-  </data>
-  <data name="PropertyIsOutOfRange" xml:space="preserve">
-    <value>Property {0}.{1} value {2} is out of range.</value>
   </data>
   <data name="CouldNotSetPrimaryKeyWithValue" xml:space="preserve">
     <value>Could not set primary key {0}.{1} with value '{2}': {3}</value>

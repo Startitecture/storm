@@ -12,8 +12,6 @@ namespace Startitecture.Core
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Collections.Specialized;
-    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -31,11 +29,6 @@ namespace Startitecture.Core
         /// The item key.
         /// </summary>
         private const string ItemKey = "{Item}";
-
-        /// <summary>
-        /// The qualified property name format.
-        /// </summary>
-        private const string QualifiedPropertyNameFormat = "{0}.{1}";
 
         /// <summary>
         /// The friendly generic type format string.
@@ -480,126 +473,6 @@ namespace Startitecture.Core
         }
 
         /// <summary>
-        /// Determines if the value at the specified index within the current <see cref="NameValueCollection"/> is equivalent to the 
-        /// <see cref="Boolean"/> value <c>true</c>.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to apply the value to.
-        /// </typeparam>
-        /// <typeparam name="TValue">
-        /// The type of value to be applied.
-        /// </typeparam>
-        /// <param name="collection">
-        /// The collection containing the value.
-        /// </param>
-        /// <param name="target">
-        /// The target to apply the setting to.
-        /// </param>
-        /// <param name="propertyExpression">
-        /// The property expression of the source value.
-        /// </param>
-        /// <param name="defaultValue">
-        /// The default value if the configured value is not set.
-        /// </param>
-        /// <param name="parser">
-        /// A parser that will convert the string value into the typed value.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="propertyExpression"/> cannot be evaluated as a property.
-        /// </exception>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="collection"/>, <paramref name="target"/> or <paramref name="propertyExpression"/> is null.
-        /// </exception>
-        public static void ApplySetting<TItem, TValue>(
-            this NameValueCollection collection,
-            TItem target,
-            Expression<Func<TItem, TValue>> propertyExpression,
-            TValue defaultValue,
-            Func<string, TValue> parser)
-        {
-            if (collection == null)
-            {
-                throw new ArgumentNullException(nameof(collection));
-            }
-
-            if (Evaluate.IsNull(target))
-            {
-                throw new ArgumentNullException(nameof(target));
-            }
-
-            if (propertyExpression == null)
-            {
-                throw new ArgumentNullException(nameof(propertyExpression));
-            }
-
-            // Note: use full name and not GetRuntimeName() otherwise each item type would require a different setting.
-            var name = string.Format(CultureInfo.InvariantCulture, QualifiedPropertyNameFormat, typeof(TItem).FullName, propertyExpression.GetPropertyName());
-
-            var newValue = collection.AllKeys.Contains(name)
-                               ? TryParse(collection[name], defaultValue, parser)
-                               : defaultValue;
-
-            if (!(propertyExpression.Body is MemberExpression memberSelection))
-            {
-                throw new ArgumentException(ValidationMessages.SelectorCannotBeEvaluated, nameof(propertyExpression));
-            }
-
-            var property = memberSelection.Member as PropertyInfo;
-
-            if (property == null)
-            {
-                throw new ArgumentException(ValidationMessages.SelectorCannotBeEvaluated, nameof(propertyExpression));
-            }
-
-            property.SetValue(target, newValue, null);
-        }
-
-        /// <summary>
-        /// Checks that the specified entity dependency is valid and throws a <see cref="Startitecture.Core.OperationException"/>
-        /// if the check fails.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of entity with the dependency.
-        /// </typeparam>
-        /// <typeparam name="TDependency">
-        /// The type of dependency to check.
-        /// </typeparam>
-        /// <param name="entity">
-        /// The entity with the dependency.
-        /// </param>
-        /// <param name="selector">
-        /// The selector of the property to verify.
-        /// </param>
-        /// <remarks>
-        /// Dependency checks are intended to ensure that the entity's dependencies exist.
-        /// </remarks>
-        public static void ThrowOnDependencyFailure<TItem, TDependency>(this TItem entity, Expression<Func<TItem, TDependency>> selector)
-        {
-            if (Evaluate.IsNull(entity))
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (selector == null)
-            {
-                throw new ArgumentNullException(nameof(selector));
-            }
-
-            if (Evaluate.IsSet(selector.Compile().Invoke(entity)))
-            {
-                return;
-            }
-
-            string message = string.Format(
-                CultureInfo.CurrentCulture,
-                ValidationMessages.EntityDependencyCheckFailed,
-                typeof(TDependency).Name,
-                selector.GetPropertyName());
-
-            throw new OperationException(entity, message);
-        }
-
-        /// <summary>
         /// Gets the property differences between two objects of the same type.
         /// </summary>
         /// <param name="baseline">
@@ -651,68 +524,6 @@ namespace Startitecture.Core
             return from c in comparisonList
                    where !Evaluate.RecursiveEquals(c.OriginalValue, c.NewValue)
                    select new PropertyComparisonResult(c.Name, c.OriginalValue, c.NewValue);
-
-            ////var originalProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(baseline));
-
-            ////var newProperties = allProperties.ToDictionary(info => info.Name, info => info.GetPropertyValue(comparison));
-
-            ////return (from propertyName in allProperties.Select(x => x.Name)
-            ////        let originalValue = originalProperties[propertyName]
-            ////        let newValue = newProperties[propertyName]
-            ////        where !ReferenceEquals(originalValue, newValue)
-            ////        where (originalValue != null && !originalValue.Equals(newValue)) || !newValue.Equals(originalValue)
-            ////        select new PropertyComparisonResult(propertyName, originalValue, newValue)).ToList();
-        }
-
-        /// <summary>
-        /// Attempts to parse a value from the specified string value.
-        /// </summary>
-        /// <param name="value">
-        /// The string value to parse.
-        /// </param>
-        /// <param name="defaultValue">
-        /// The default value if the parse fails.
-        /// </param>
-        /// <param name="parser">
-        /// The string parser.
-        /// </param>
-        /// <typeparam name="TValue">
-        /// The type of the expected value.
-        /// </typeparam>
-        /// <returns>
-        /// A <typeparamref name="TValue"/> value parsed from <paramref name="value"/>, or <paramref name="defaultValue"/> if the
-        /// <paramref name="parser"/> is unable to parse the string.
-        /// </returns>
-        private static TValue TryParse<TValue>(string value, TValue defaultValue, Func<string, TValue> parser)
-        {
-            if (value == null)
-            {
-                throw new ArgumentNullException(nameof(value));
-            }
-
-            if (parser == null)
-            {
-                throw new ArgumentNullException(nameof(parser));
-            }
-
-            try
-            {
-                return parser(value);
-            }
-            catch (ArgumentException ex)
-            {
-                Trace.TraceWarning($"Parse of '{value}' resulted in {ex.GetType().Name}: {ex.Message}");
-            }
-            catch (FormatException ex)
-            {
-                Trace.TraceWarning($"Parse of '{value}' resulted in {ex.GetType().Name}: {ex.Message}");
-            }
-            catch (OverflowException ex)
-            {
-                Trace.TraceWarning($"Parse of '{value}' resulted in {ex.GetType().Name}: {ex.Message}");
-            }
-
-            return defaultValue;
         }
 
         /// <summary>
@@ -727,7 +538,7 @@ namespace Startitecture.Core
         /// <returns>
         /// A <see cref="List{T}"/> of <see cref="PropertyInfo"/> items matching the <paramref name="propertiesToCompare"/>.
         /// </returns>
-        private static List<PropertyInfo> GetAllProperties<TItem>(string[] propertiesToCompare)
+        private static IEnumerable<PropertyInfo> GetAllProperties<TItem>(string[] propertiesToCompare)
         {
             var allProperties = propertiesToCompare.Any()
                                     ? typeof(TItem).GetProperties()

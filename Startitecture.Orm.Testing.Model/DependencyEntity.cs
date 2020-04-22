@@ -6,14 +6,6 @@
 
 namespace Startitecture.Orm.Testing.Model
 {
-    using System;
-
-    using Core;
-
-    using JetBrains.Annotations;
-
-    using Startitecture.Resources;
-
     /// <summary>
     /// The fake dependency entity.
     /// </summary>
@@ -89,32 +81,5 @@ namespace Startitecture.Orm.Testing.Model
         /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
-
-        /// <summary>
-        /// The associate.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="entity"/> is null.
-        /// </exception>
-        /// <exception cref="Startitecture.Core.BusinessException">
-        /// <see cref="ComplexEntity.ComplexEntityId"/> is not set in <paramref name="entity"/>.
-        /// </exception>
-        public void Associate([NotNull] ComplexEntity entity)
-        {
-            if (entity == null)
-            {
-                throw new ArgumentNullException(nameof(entity));
-            }
-
-            if (entity.ComplexEntityId.HasValue == false)
-            {
-                throw new BusinessException(entity, string.Format(ValidationMessages.PropertyMustBeSet, "ComplexEntityId"));
-            }
-
-            this.ComplexEntityId = entity.ComplexEntityId;
-        }
     }
 }

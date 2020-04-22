@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		nuget.config = nuget.config
 		Startitecture.Orm.vsmdi = Startitecture.Orm.vsmdi
 	EndProjectSection
 EndProject
@@ -15,11 +16,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Code Analysis", "S
 		Solution Code Analysis\CustomDictionary.xml = Solution Code Analysis\CustomDictionary.xml
 		Settings.StyleCop = Settings.StyleCop
 		Solution Code Analysis\TestProjectCodeAnalysis.editorconfig = Solution Code Analysis\TestProjectCodeAnalysis.editorconfig
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "BuildUtilities", "BuildUtilities", "{738BD095-1E36-47AA-822B-1D085BD3247A}"
-	ProjectSection(SolutionItems) = preProject
-		BuildUtilities\UpdateVersionNumber.ps1 = BuildUtilities\UpdateVersionNumber.ps1
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Certificates", "Certificates", "{49232085-0E64-41CA-AA00-8840D2219579}"
@@ -625,8 +621,8 @@ Global
 		{DB9EBF4B-7D16-4DCC-8971-0EB21538A22B} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
+		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

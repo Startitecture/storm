@@ -117,94 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="EntityDependencyCheckFailed" xml:space="preserve">
-    <value>{0} property {1} was not set.</value>
-    <comment>Specifies that an entity (token 1) of a particular type (token 0) failed a dependency check (token 2).</comment>
-  </data>
-  <data name="EntityPropertyValidationFailed" xml:space="preserve">
-    <value>{0} '{1}' property '{2}' ['{3}'] failed one or more validation checks: {4}</value>
-    <comment>Specifies that an entity property failed one or more validation checks.</comment>
-  </data>
-  <data name="EntityValidationCheckFailed" xml:space="preserve">
-    <value>{0} '{1}' failed validation check '{2}'.</value>
-    <comment>Specifies that an entity (token 1) of a particular type (token 0) failed a validation check (token 2).</comment>
-  </data>
-  <data name="EntityValidationFailed" xml:space="preserve">
-    <value>{0} '{1}' failed one or more validation checks: {2}</value>
-    <comment>Specifies that an entity (token 1) of a particular type (token 0) failed one or more validation checks.</comment>
-  </data>
-  <data name="EscapeMaskInvalidFormat" xml:space="preserve">
-    <value>Escape format must contain a single string placeholder ('{0}').</value>
-    <comment>Specifies that the escape format for a single character is invalid.</comment>
-  </data>
-  <data name="PropertyMustBeSet" xml:space="preserve">
-    <value>Property '{0}' must be set.</value>
-    <comment>Specifies that a property must have a non-null, non-empty value.</comment>
-  </data>
-  <data name="PropertyValidationFailed" xml:space="preserve">
-    <value>Property '{0}' value '{1}' failed validation '{2}'.</value>
-    <comment>Indicates that a property value failed a specific validation.</comment>
-  </data>
-  <data name="PropertyValueIsInvalidFormat" xml:space="preserve">
-    <value>Property '{0}' value '{1}' is not in a valid format.</value>
-    <comment>Specifies that a property value must be in a valid format.</comment>
-  </data>
-  <data name="PropertyValueOutOfRange" xml:space="preserve">
-    <value>Property '{0}' value '{1}' is not between '{2}' and '{3}'.</value>
-    <comment>Specifies that a property is not within a valid range.</comment>
-  </data>
-  <data name="UnknownValidationState" xml:space="preserve">
-    <value>The validation state for property '{0}' value '{1}' is unknown.</value>
-    <comment>Indicates that the validation result is unknown for the specified property.</comment>
-  </data>
-  <data name="UnsetPropertyShouldBeNull" xml:space="preserve">
-    <value>Unset property '{0}' is empty and should be null.</value>
-    <comment>Specifies that a property should be null when unset, not empty.</comment>
-  </data>
-  <data name="CopyDirectorySourceAndDestinationAreSame" xml:space="preserve">
-    <value>Source and destination directories cannot be the same.</value>
-    <comment>Indicates that the source and destination folders cannot be the same when copying a directory.</comment>
-  </data>
-  <data name="OneOfMultiplePathsNotValid" xml:space="preserve">
-    <value>One of the provided paths was not valid.</value>
-    <comment>Specifies that one or more of the provided paths was not valid.</comment>
-  </data>
-  <data name="PathWasNotValid" xml:space="preserve">
-    <value>The path '{0}' was not a valid path.</value>
-    <comment>Indicates that the string is not a valid path.</comment>
-  </data>
-  <data name="ValueMustBeBetweenInclusive" xml:space="preserve">
-    <value>Value must be between {0} and {1} inclusive.</value>
-    <comment>Specifies that a value must be between two specific values, inclusive. </comment>
-  </data>
-  <data name="EntityPropertyMatchRequired" xml:space="preserve">
-    <value>At least one property must be specified that matches the entity type.</value>
-    <comment>Specifies that at least one property must match an entity property.</comment>
-  </data>
-  <data name="ItemMustBeSet" xml:space="preserve">
-    <value>The {0} must be set.</value>
-    <comment>Speciifes that an item must be set.</comment>
-  </data>
-  <data name="SaveOperationDidNotReturnItem" xml:space="preserve">
-    <value>The save operation did not return the item '{0}'.</value>
-    <comment>Specifies that a save operation did not return an item. The placeholder should contain the original item intended to be saved.</comment>
-  </data>
-  <data name="ActionIsNotSupportedForMethod" xml:space="preserve">
-    <value>The action '{0}' is not supported for this method.</value>
-    <comment>Indicates that the specified action is not supported for the current method.</comment>
-  </data>
-  <data name="ParameterMustBeOfType" xml:space="preserve">
-    <value>The parameter must be of type '{0}'.</value>
-    <comment>Specifies that a parameter must be of a specific type.</comment>
-  </data>
-  <data name="TypeIsNotInstanceOfExpectedType" xml:space="preserve">
-    <value>The type '{0}' is not an instance of '{1}'.</value>
-    <comment>Indicates that the specified type is not an instance of the expected type.</comment>
-  </data>
-  <data name="TypeDoesNotHaveDefaultConstructor" xml:space="preserve">
-    <value>The type '{0}' does not have a default constructor.</value>
-    <comment>Indicates that the specified type does not have a default constructor.</comment>
-  </data>
   <data name="SelectorCannotBeEvaluated" xml:space="preserve">
     <value>The selector cannot be evaluated.</value>
     <comment>Indicates that a selector expression cannot be evaluated.</comment>
@@ -217,172 +129,21 @@
     <value>At least one parameter must be specified.</value>
     <comment>Indicates that at least one parameter must be specified.</comment>
   </data>
-  <data name="TargetRequiredForAction" xml:space="preserve">
-    <value>A target item must be specified for action '{0}'.</value>
-    <comment>Indicates that a target object is required for the specified action.</comment>
-  </data>
-  <data name="CollectionRequiresOneOrMoreElements" xml:space="preserve">
-    <value>At least one element must be contained in the collection</value>
-  </data>
-  <data name="SourcePathEqualToDestinationPath" xml:space="preserve">
-    <value>Source path '{0}' is equal to destination path '{1}'.</value>
-    <comment>Indicates that the specified source and destination paths point to the same location.</comment>
-  </data>
-  <data name="MinQueueCountGreaterThanMaxQueueCount" xml:space="preserve">
-    <value>The maximum queue count must be equal to or greater than the minimum queue count.</value>
-    <comment>Indicates that the minimum queue count is greater than the maximum queue count.</comment>
-  </data>
-  <data name="MinQueueCountLessThanOne" xml:space="preserve">
-    <value>The minimum queue count must be one or greater.</value>
-    <comment>Indicates that the minimum queue count must be zero or greater.</comment>
-  </data>
-  <data name="DestinationPathSameAsSourcePath" xml:space="preserve">
-    <value>The destination path cannot be the same as the source path.</value>
-    <comment>Indicates that the destination path cannot be the same as the source path.</comment>
-  </data>
-  <data name="RoutingProfileContainedNullRoute" xml:space="preserve">
-    <value>The routing profile '{0}' contained a null service route.</value>
-    <comment>Indicates that at least one of the specified service routes was null.</comment>
-  </data>
-  <data name="RoutingProfileDidNotContainRoute" xml:space="preserve">
-    <value>The route '{0}' is not contained within the specified profile.</value>
-    <comment>Indicates that the specified route was not contained in the router instance.</comment>
-  </data>
-  <data name="RoutingProfileWasNull" xml:space="preserve">
-    <value>None of the profiles can be null.</value>
-    <comment>Indicates that one or more profiles specified in the parameter were null.</comment>
-  </data>
-  <data name="RoutingProfileNotFoundForMessage" xml:space="preserve">
-    <value>No profile was found for message '{0}'.</value>
-    <comment>Indicates that no routing profile could be found for the specified message.</comment>
-  </data>
-  <data name="MaxQueueCountLessThanOne" xml:space="preserve">
-    <value>The maximum queue count must be greater than zero.</value>
-    <comment>Indicates that the maximum queue count must be greater than zero.</comment>
-  </data>
   <data name="ServiceRoutesNotSpecified" xml:space="preserve">
     <value>No service routes were specified.</value>
     <comment>Indicates that no service routes were specified for the document router.</comment>
-  </data>
-  <data name="FailureRouteNotSpecified" xml:space="preserve">
-    <value>A failure route was not specified</value>
-    <comment>Indicates that a failure route was not specified in a routing profile.</comment>
-  </data>
-  <data name="GenericTypeCouldNotBeCreated" xml:space="preserve">
-    <value>Could not create generic type for '{0}' with generic arguments '{1}': {2}</value>
-    <comment>Indicates that a runtime type could not be created for the specified generic type and type arguments.</comment>
-  </data>
-  <data name="AssemblyTypesCouldNotBeLoaded" xml:space="preserve">
-    <value>Unable to load types from assembly '{0}': {1}</value>
-    <comment>Indicates that types could not be loaded from the specified assembly.</comment>
-  </data>
-  <data name="StaticPropertyValueCouldNotBeRetrieved" xml:space="preserve">
-    <value>Could not get the value of static property '{0}' on type '{1}': {2}</value>
-    <comment>Indicates that the specified static property value could not be accessed.</comment>
-  </data>
-  <data name="MessageRequestCannotBeFailedWithoutError" xml:space="preserve">
-    <value>Cannot fail a message request without an error.</value>
-    <comment>Indicates that a message request cannot be sent to the failure queue unless there is an associated error.</comment>
-  </data>
-  <data name="RequestAlreadyActive" xml:space="preserve">
-    <value>Request '{0}' with ID {1} is already active in the current router.</value>
-    <comment>Indicates that a request with the same ID is already actively routing in the current router.</comment>
-  </data>
-  <data name="NamedColumnCannotBeMapped" xml:space="preserve">
-    <value>Cannot map item to non-existent named column'{0}'.</value>
-    <comment>Indicates that the specified named column cannot be mapped.</comment>
-  </data>
-  <data name="PropertyValueNotConvertable" xml:space="preserve">
-    <value>Property '{0}' value '{1}' could not be converted to type '{2}'.</value>
-    <comment>Indicates that the type of the existing property could not be converted to the target property.</comment>
-  </data>
-  <data name="UserAccountNotFoundByProvider" xml:space="preserve">
-    <value>The user account '{0}' could not be located by the {1}.</value>
-    <comment>Indicates that the specified account name could not be located by the current account info provider.</comment>
-  </data>
-  <data name="MessageNotSaved" xml:space="preserve">
-    <value>The specified message was not saved by the profile provider.</value>
-    <comment>Indicates that the message could not be found in order to requeue the message.</comment>
-  </data>
-  <data name="MessageAlreadyDelivered" xml:space="preserve">
-    <value>The message has already been delivered and cannot be canceled.</value>
-    <comment>Indicates that a message has already been delivered and cannot be canceled.</comment>
-  </data>
-  <data name="MessageAlreadySent" xml:space="preserve">
-    <value>The message has already been sent.</value>
-    <comment>Indicates that the specified message has already been sent by the router.</comment>
-  </data>
-  <data name="MessageNotDelivered" xml:space="preserve">
-    <value>The message has not been delivered.</value>
-    <comment>Indicates that the action can't be performed because the message hasn't been delivered.</comment>
-  </data>
-  <data name="RoutingStatusNotSet" xml:space="preserve">
-    <value>The current routing status must be set.</value>
-    <comment>Indicates that the routing status is not set.</comment>
-  </data>
-  <data name="RoutingStatusRouteNotSet" xml:space="preserve">
-    <value>The service route for the current status must be set.</value>
-    <comment>Indicates that the service route for the routing status is not set.</comment>
-  </data>
-  <data name="UpdateSelectionHadNoTargetProperties" xml:space="preserve">
-    <value>No properties could be updated with the specified selection.</value>
-    <comment>Indicates that the selection item resulted in having no properties to update.</comment>
   </data>
   <data name="PropertyMustHaveDeclaringType" xml:space="preserve">
     <value>The property must have a declaring type.</value>
     <comment>Indicates that the property must have a declaring type.</comment>
   </data>
-  <data name="SqlStatementIsNotSelectStatement" xml:space="preserve">
-    <value>The statement is not a valid SELECT statement.</value>
-    <comment>Indicates that the SQL statement is not a valid SELECT statement.</comment>
-  </data>
-  <data name="ConnectionStringNameNotFound" xml:space="preserve">
-    <value>The specified connection string could not be found.</value>
-    <comment>Indicates that the specified connection string name was not found.</comment>
-  </data>
-  <data name="ConnectionStringDidNotSpecifyProvider" xml:space="preserve">
-    <value>The connection string did not specify a provider.</value>
-    <comment>Indicates that the connection string did not specify a provider.</comment>
-  </data>
-  <data name="ConnectionStringProviderDoesNotExist" xml:space="preserve">
-    <value>The specified provider does not exist.</value>
-    <comment>Indicates that the provider specified in the connection string does not actually exist.</comment>
-  </data>
-  <data name="DataConnectionFactoryReturnedNull" xml:space="preserve">
-    <value>The factory did not create a new connection.</value>
-    <comment>Indicates that the call to the database connection factory returned a null value.</comment>
-  </data>
-  <data name="NoDistributionChannelsSpecified" xml:space="preserve">
-    <value>At least one distribution channel is required.</value>
-    <comment>Indicates that at least one distribution channel is required.</comment>
-  </data>
   <data name="EntityValidationFailedSingle" xml:space="preserve">
     <value>The item failed a validation check: {0}</value>
     <comment>Indicates that the item failed a single validation check.</comment>
   </data>
-  <data name="EntityValidationFailedMultiple" xml:space="preserve">
-    <value>The item failed the validation check. The first of {0} failures was: {1}</value>
-    <comment>Indicates that item failed multiple validation checks.</comment>
-  </data>
-  <data name="NumberOfValuesNotSupported" xml:space="preserve">
-    <value>The number of values ({0}) is not supported.</value>
-    <comment>Indicates that the number of values in the collection is not supported by the current method.</comment>
-  </data>
   <data name="ValueMustBeZeroOrGreater" xml:space="preserve">
     <value>The value must be greater than or equal to zero.</value>
     <comment>Indicates that the value must be greater than or equal to zero.</comment>
-  </data>
-  <data name="ComponentMonitorAlreadyInitialized" xml:space="preserve">
-    <value>The resource monitor '{0}' cannot be added because the component monitor is already initialized.</value>
-    <comment>Indicates that the component monitor cannot accept new resource monitors because it has already been initialized.</comment>
-  </data>
-  <data name="CompletionTimeEarlierThanInitiationTime" xml:space="preserve">
-    <value>The completion time must be equal to or greater than the initiation time.</value>
-    <comment>Indicates that the completion time was earlier than the initiation time.</comment>
-  </data>
-  <data name="UserAccountNotSet" xml:space="preserve">
-    <value>The user account cannot be null.</value>
-    <comment>Indicates that the user account was not set.</comment>
   </data>
   <data name="ValueMustBeGreaterThanZero" xml:space="preserve">
     <value>The value must be greater than zero.</value>
@@ -396,39 +157,8 @@
     <value>Parameter '@{0}' specified but only {1} parameters supplied (in `{2}`).</value>
     <comment>Indicates that there are more SQL parameters specified than values provided.</comment>
   </data>
-  <data name="ItemValidationFailed" xml:space="preserve">
-    <value>'{0}' value '{1}' failed validation: {2}</value>
-    <comment>Indicates that the specified item failed validation.</comment>
-  </data>
-  <data name="ServiceRouteTypeNotFound" xml:space="preserve">
-    <value>The route type was not found in the queue pool provider.</value>
-    <comment>Indicates that the service route type did not have a matching registered document queue pool.</comment>
-  </data>
-  <data name="DeliveryAlreadyCompleted" xml:space="preserve">
-    <value>The delivery has already completed.</value>
-    <comment>Indicates that the specified request was already delivered.</comment>
-  </data>
-  <data name="PendingRequestCouldNotBeFound" xml:space="preserve">
-    <value>The pending request could not be found.</value>
-    <comment>Indicates that a pending request with the specified ID could not be found.</comment>
-  </data>
-  <data name="TypeDoesNotImplementRequiredInterface" xml:space="preserve">
-    <value>The type '{0}' does not implement the required interface '{1}'.</value>
-    <comment>Indicates that the specified type does not implement the required interface.</comment>
-  </data>
-  <data name="PropertyMappingNotFoundByConvention" xml:space="preserve">
-    <value>The specified property could not be mapped by convention: the expected property name was not found.</value>
-    <comment>Indicates that the property could not be mapped by convention becuase the expected property name could not be found on the source item.</comment>
-  </data>
-  <data name="PrimaryKeyNotSetAndAlternateKeysNotDefined" xml:space="preserve">
-    <value>Primary key not set and no alternate keys defined.</value>
-    <comment>Indicates that it is not possible to get a selection when the primary key is not set and the alternate keys are not defined.</comment>
-  </data>
-  <data name="DependencyMappingToSameTypeAsEntity" xml:space="preserve">
-    <value>A dependency profile that maps to the same type as the entity will create an infinite loop.</value>
-    <comment>Indicates that a dependency profile that maps to the same type as the entity will create an infinite loop.</comment>
-  </data>
-  <data name="NullablePropertyCannotBeMappedByConvention" xml:space="preserve">
-    <value>The specified property {0}.{1} cannot be mapped by convention because the source is nullable but the target is not. Use MapEntityProperty() instead.</value>
+  <data name="EntityValidationFailedMultiple" xml:space="preserve">
+    <value>The item failed the validation check. The first of {0} failures was: {1}</value>
+    <comment>Indicates that item failed multiple validation checks.</comment>
   </data>
 </root>
