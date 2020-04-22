@@ -231,7 +231,7 @@ namespace Startitecture.Orm.Mapper
         {
             var baseKey = new Tuple<string, string, PocoDataRequest>(typeQualifiedName, entityDefinition.EntityName, dataRequest);
             var baseDirectAttributes = entityDefinition.ReturnableAttributes.Where(x => x.IsReferencedDirect).ToList();
-            var basePocoDelegate = PocoFactories.Get(baseKey, () => DirectFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
+            var basePocoDelegate = PocoFactories.Get(baseKey, () => FlatPocoFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
 
             T poco;
 #if DEBUG
@@ -377,7 +377,7 @@ namespace Startitecture.Orm.Mapper
             var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
             var relatedType = relatedEntityLocation.EntityType;
 
-            var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => DirectFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
+            var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => FlatPocoFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
 
             object relatedEntity;
 #if DEBUG

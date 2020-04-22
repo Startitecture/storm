@@ -32,13 +32,12 @@
     </PackageReference>
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
+    <PackageReference Include="Startitecture.Core" Version="1.0.0-alpha2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.AutoMapper\Startitecture.Orm.AutoMapper.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
-    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.SqlClient\Startitecture.Orm.SqlClient.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj" />

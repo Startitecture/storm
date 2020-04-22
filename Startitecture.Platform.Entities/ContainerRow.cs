@@ -16,7 +16,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities
 {
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
     using System.Diagnostics.CodeAnalysis;
 

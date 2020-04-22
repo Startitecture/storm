@@ -16,7 +16,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Startitecture.Platform.Entities.Workflow
 {
-    using Startitecture.Orm.Common;
     using System.Diagnostics.CodeAnalysis;
 
     using Startitecture.Orm.Schema;

@@ -26,11 +26,8 @@
     </CodeAnalysisDictionary>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
-    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj" />
-    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations">
@@ -42,6 +39,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Startitecture.Core" Version="1.0.0-alpha2" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />

@@ -57,10 +57,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
-      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
-      <Name>Startitecture.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj">
       <Project>{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}</Project>
       <Name>Startitecture.Orm.Mapper</Name>

@@ -66,10 +66,6 @@
     <Compile Include="TransactionItemBase.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
-      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
-      <Name>Startitecture.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
       <Project>{5643589D-8D46-4717-AE66-994173F3D671}</Project>
       <Name>Startitecture.Orm.Common</Name>
@@ -77,10 +73,6 @@
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
       <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
       <Name>Startitecture.Orm.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
-      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
-      <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
       <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>

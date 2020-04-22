@@ -50,14 +50,11 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ItemSelectionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj">
-      <Project>{A0CDFF29-B883-478A-B8C5-698F9771529F}</Project>
-      <Name>Startitecture.Core</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
       <Project>{5643589d-8d46-4717-ae66-994173f3d671}</Project>
       <Name>Startitecture.Orm.Common</Name>
@@ -71,7 +68,7 @@
       <Name>Startitecture.Orm.Model</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
-      <Project>{E735FF25-2F78-4EA5-BB6C-9AB69078B10F}</Project>
+      <Project>{29959608-fc19-4d9c-abef-cb23b4386232}</Project>
       <Name>Startitecture.Orm.Query</Name>
     </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">

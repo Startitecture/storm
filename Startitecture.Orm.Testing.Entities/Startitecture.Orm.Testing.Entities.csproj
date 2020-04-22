@@ -107,7 +107,6 @@
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
@@ -119,7 +118,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+    <PackageReference Include="Startitecture.Core" Version="1.0.0-alpha2" />
   </ItemGroup>
 </Project>

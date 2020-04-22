@@ -98,55 +98,6 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Creates a delegate that returns a POCO from the provided data reader.
         /// </summary>
-        /// <typeparam name="T">
-        /// The type of POCO expected by the return statement.
-        /// </typeparam>
-        /// <param name="dataRequest">
-        /// The data request to create a POCO for.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Delegate"/> that creates a POCO from the reader.
-        /// </returns>
-        public PocoDelegateInfo CreateDelegate<T>([NotNull] PocoDataRequest dataRequest)
-        {
-            if (dataRequest == null)
-            {
-                throw new ArgumentNullException(nameof(dataRequest));
-            }
-
-            return this.CreateDelegate(dataRequest, typeof(T));
-        }
-
-        /// <summary>
-        /// Creates a delegate that returns a POCO from the provided data reader.
-        /// </summary>
-        /// <param name="dataRequest">
-        /// The data request to create a POCO for.
-        /// </param>
-        /// <param name="type">
-        /// The type of the POCO to create.
-        /// </param>
-        /// <returns>
-        /// A <see cref="Delegate"/> that creates a POCO from the reader.
-        /// </returns>
-        public PocoDelegateInfo CreateDelegate([NotNull] PocoDataRequest dataRequest, [NotNull] Type type)
-        {
-            if (dataRequest == null)
-            {
-                throw new ArgumentNullException(nameof(dataRequest));
-            }
-
-            var entityDefinition = dataRequest.EntityDefinition;
-            var attributeDefinitions = this.directOnly
-                               ? entityDefinition.DirectAttributes.ToList()
-                               : entityDefinition.ReturnableAttributes.ToList();
-
-            return this.CreateDelegate(dataRequest, type, attributeDefinitions);
-        }
-
-        /// <summary>
-        /// Creates a delegate that returns a POCO from the provided data reader.
-        /// </summary>
         /// <param name="dataRequest">
         /// The data request to create a POCO for.
         /// </param>
@@ -159,7 +110,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="Delegate"/> that creates a POCO from the reader.
         /// </returns>
-        public PocoDelegateInfo CreateDelegate(
+        public static PocoDelegateInfo CreateDelegate(
             [NotNull] PocoDataRequest dataRequest,
             [NotNull] Type type,
             [NotNull] IList<EntityAttributeDefinition> attributeDefinitions)
@@ -448,6 +399,55 @@ namespace Startitecture.Orm.Mapper
             var mappingDelegate = method.CreateDelegate(Expression.GetFuncType(typeof(IDataReader), type));
             delegateInfo.SetDelegate(mappingDelegate);
             return delegateInfo;
+        }
+
+        /// <summary>
+        /// Creates a delegate that returns a POCO from the provided data reader.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of POCO expected by the return statement.
+        /// </typeparam>
+        /// <param name="dataRequest">
+        /// The data request to create a POCO for.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Delegate"/> that creates a POCO from the reader.
+        /// </returns>
+        public PocoDelegateInfo CreateDelegate<T>([NotNull] PocoDataRequest dataRequest)
+        {
+            if (dataRequest == null)
+            {
+                throw new ArgumentNullException(nameof(dataRequest));
+            }
+
+            return this.CreateDelegate(dataRequest, typeof(T));
+        }
+
+        /// <summary>
+        /// Creates a delegate that returns a POCO from the provided data reader.
+        /// </summary>
+        /// <param name="dataRequest">
+        /// The data request to create a POCO for.
+        /// </param>
+        /// <param name="type">
+        /// The type of the POCO to create.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Delegate"/> that creates a POCO from the reader.
+        /// </returns>
+        public PocoDelegateInfo CreateDelegate([NotNull] PocoDataRequest dataRequest, [NotNull] Type type)
+        {
+            if (dataRequest == null)
+            {
+                throw new ArgumentNullException(nameof(dataRequest));
+            }
+
+            var entityDefinition = dataRequest.EntityDefinition;
+            var attributeDefinitions = this.directOnly
+                               ? entityDefinition.DirectAttributes.ToList()
+                               : entityDefinition.ReturnableAttributes.ToList();
+
+            return CreateDelegate(dataRequest, type, attributeDefinitions);
         }
 
         /// <summary>

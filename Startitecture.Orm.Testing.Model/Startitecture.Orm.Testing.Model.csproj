@@ -36,14 +36,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
-    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj" />
-    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="FieldsMessages.resx">
@@ -63,5 +60,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Startitecture.Core" Version="1.0.0-alpha2" />
   </ItemGroup>
 </Project>

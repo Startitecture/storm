@@ -10,6 +10,7 @@ namespace Startitecture.Orm.Testing.Entities
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
+    using System.Globalization;
 
     using Startitecture.Core;
     using Startitecture.Orm.Mapper;
@@ -91,7 +92,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return Convert.ToString(this.DependentIntegerValue);
+            return Convert.ToString(this.DependentIntegerValue, CultureInfo.CurrentCulture);
         }
 
         /// <summary>
@@ -129,6 +130,5 @@ namespace Startitecture.Orm.Testing.Entities
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
     }
 }

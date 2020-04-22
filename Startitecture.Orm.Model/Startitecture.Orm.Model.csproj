@@ -22,10 +22,6 @@
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Core\Startitecture.Core.csproj" />
-    <ProjectReference Include="..\Startitecture.Resources\Startitecture.Resources.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
       <Link>Code Analysis\CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
@@ -40,6 +36,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="Startitecture.Core" Version="1.0.0-alpha2" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
   </ItemGroup>
 </Project>
