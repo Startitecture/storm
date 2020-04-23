@@ -19,7 +19,12 @@ steps:
   displayName: 'Nuget Installer'
 
 - task: NuGetCommand@2
-  displayName: 'Nuget Restore'
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'config'
+    nugetConfigPath: 'nuget.config'
+    externalFeedCredentials: 'Nuget.org'
 
 - task: VSBuild@1
   displayName: 'VS Build'
