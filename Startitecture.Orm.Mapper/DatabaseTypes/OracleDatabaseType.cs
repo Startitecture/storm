@@ -134,11 +134,13 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
                 param.Direction = ParameterDirection.ReturnValue;
                 param.DbType = DbType.Int64;
                 command.Parameters.Add(param);
-                database.ExecuteNonQueryHelper(command);
+                command.ExecuteNonQuery();
+                ////Database.ExecuteNonQueryHelper(command);
                 return param.Value;
             }
 
-            database.ExecuteNonQueryHelper(command);
+            command.ExecuteNonQuery();
+            ////Database.ExecuteNonQueryHelper(command);
             return -1;
         }
     }

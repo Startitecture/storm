@@ -39,10 +39,10 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
             if (primaryKeyName != null)
             {
                 command.CommandText += ";\nSELECT last_insert_rowid();";
-                return database.ExecuteScalarHelper(command);
+                return command.ExecuteScalar(); //// Database.ExecuteScalarHelper(command);
             }
 
-            database.ExecuteNonQueryHelper(command);
+            command.ExecuteNonQuery(); //// Database.ExecuteNonQueryHelper(command);
             return -1;
         }
 
@@ -68,9 +68,9 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// </returns>
         public override object MapParameterValue(object value)
         {
-            if (value is uint)
+            if (value is uint u)
             {
-                return (long)((uint)value);
+                return (long)u;
             }
 
             return base.MapParameterValue(value);

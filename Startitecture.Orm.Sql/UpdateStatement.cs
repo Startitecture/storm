@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Sql
     using Model;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Creates an update statement for a specific item in the repository.

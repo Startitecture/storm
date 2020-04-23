@@ -16,6 +16,7 @@ namespace Startitecture.Orm.Testing.Entities
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The instance.

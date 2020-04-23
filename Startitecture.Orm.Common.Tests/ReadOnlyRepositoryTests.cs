@@ -21,7 +21,7 @@ namespace Startitecture.Orm.Common.Tests
     using Startitecture.Core;
     using Startitecture.Orm.AutoMapper;
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
@@ -415,7 +415,7 @@ namespace Startitecture.Orm.Common.Tests
         /// The create entity mapper.
         /// </summary>
         /// <returns>
-        /// The <see cref="Startitecture.Orm.Common.IEntityMapper" />.
+        /// The <see cref="IEntityMapper" />.
         /// </returns>
         private static AutoMapperEntityMapper CreateEntityMapper()
         {
@@ -428,7 +428,7 @@ namespace Startitecture.Orm.Common.Tests
                         configuration.AddProfile<CreatedByMappingProfile>();
                         configuration.AddProfile<ModifiedByMappingProfile>();
                         configuration.AddProfile<SubEntityMappingProfile>();
-                        configuration.AddProfile<FakeChildEntityMappingProfile>();
+                        ////configuration.AddProfile<FakeChildEntityMappingProfile>();
                         configuration.AddProfile<FakeComplexEntityMappingProfile>();
                         configuration.AddProfile<FakeDependentEntityMappingProfile>();
                     });

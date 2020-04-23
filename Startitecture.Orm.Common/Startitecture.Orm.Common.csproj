@@ -27,7 +27,6 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
-    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations">

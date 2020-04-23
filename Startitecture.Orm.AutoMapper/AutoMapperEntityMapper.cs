@@ -15,6 +15,7 @@ namespace Startitecture.Orm.AutoMapper
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Implements <see cref="IEntityMapper"/> using AutoMapper.
@@ -33,7 +34,7 @@ namespace Startitecture.Orm.AutoMapper
         /// The AutoMapper configuration action to apply.
         /// </param>
         /// <returns>
-        /// The current <see cref="Startitecture.Orm.Common.IEntityMapper"/>.
+        /// The current <see cref="IEntityMapper"/>.
         /// </returns>
         public IEntityMapper Initialize(Action<IMapperConfigurationExpression> configAction)
         {

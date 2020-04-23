@@ -191,7 +191,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         public virtual object ExecuteInsert(Database database, IDbCommand command, string primaryKeyName)
         {
             command.CommandText += ";\nSELECT @@IDENTITY AS NewID;";
-            return database.ExecuteScalarHelper(command);
+            return command.ExecuteScalar(); //// Database.ExecuteScalarHelper(command);
         }
 
         /// <summary>

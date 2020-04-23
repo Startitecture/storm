@@ -14,7 +14,6 @@ namespace Startitecture.Orm.Common
     using System.Data;
 
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Provides an interface for classes that contain database contexts.
@@ -30,12 +29,6 @@ namespace Startitecture.Orm.Common
         /// Gets the currently open shared connection (or null if none)
         /// </summary>
         IDbConnection Connection { get; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to automatically create the "SELECT columns" part of any query that looks like it 
-        /// needs it.
-        /// </summary>
-        bool EnableAutoSelect { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether parameters named <code>?myparam</code> are populated from properties of the passed
@@ -343,28 +336,6 @@ namespace Startitecture.Orm.Common
         /// </remarks>
         IEnumerable<T> SkipTake<T>(long skip, long take, string sql, params object[] args);
 
-/*
-        /// <summary>
-        /// Performs an SQL Insert
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type of item being inserted.
-        /// </typeparam>
-        /// <param name="tableName">
-        /// The name of the table to insert into
-        /// </param>
-        /// <param name="primaryKeyName">
-        /// The name of the primary key column of the table
-        /// </param>
-        /// <param name="poco">
-        /// The POCO object that specifies the column values to be inserted
-        /// </param>
-        /// <returns>
-        /// The auto allocated primary key of the new record
-        /// </returns>
-        object Insert<T>(string tableName, string primaryKeyName, T poco);
-*/
-
         /// <summary>
         /// Performs an SQL Insert
         /// </summary>
@@ -377,10 +348,6 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The auto allocated primary key of the new record, or null for non-auto-increment tables
         /// </returns>
-        /// <remarks>
-        /// The name of the table, it's primary key and whether it's an auto-allocated primary key are retrieved
-        /// from the POCO's attributes
-        /// </remarks>
         object Insert<T>(T poco);
     }
 }

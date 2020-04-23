@@ -17,12 +17,13 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Core;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake sub raised row.
     /// </summary>
     [Table("SubEntity", Schema = "dbo")]
-    public class SubRow : TransactionItemBase, IEquatable<SubRow>
+    public class SubRow : EntityBase, IEquatable<SubRow>
     {
         /// <summary>
         /// The comparison properties.

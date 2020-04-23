@@ -19,7 +19,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// The fake complex row.
     /// </summary>
     [Table("ComplexEntity")]
-    public class ComplexFlatRow : TransactionItemBase, IEquatable<ComplexFlatRow>
+    public class ComplexFlatRow : EntityBase, IEquatable<ComplexFlatRow>
     {
         /// <summary>
         /// The comparison properties.

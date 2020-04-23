@@ -21,6 +21,9 @@
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml" Link="Code Analysis\CustomDictionary.xml" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
@@ -40,5 +43,8 @@
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
     <PackageReference Include="System.Reflection.Emit.ILGeneration" Version="4.7.0" />
     <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Code Analysis\" />
   </ItemGroup>
 </Project>

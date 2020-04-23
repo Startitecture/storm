@@ -15,27 +15,27 @@ namespace Startitecture.Orm.Common
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
     /// A base class for entity repositories.
     /// </summary>
+    /// <typeparam name="TModel">
+    /// The type of domain model managed by the repository.
+    /// </typeparam>
     /// <typeparam name="TEntity">
     /// The type of entity stored in the repository.
-    /// </typeparam>
-    /// <typeparam name="TDataItem">
-    /// The type of item that represents the entity in the repository.
     /// </typeparam>
     /// <remarks>
     /// Uses the default memory cache if no cache is specified, with a save policy that does not expire items and a select policy with
     /// a sliding expiration of 30 seconds.
     /// </remarks>
-    public class EntityRepository<TEntity, TDataItem> : ReadOnlyRepository<TEntity, TDataItem>, IEntityRepository<TEntity>
-        where TDataItem : class, ITransactionContext, new()
+    public class EntityRepository<TModel, TEntity> : ReadOnlyRepository<TModel, TEntity>, IEntityRepository<TModel>
+        where TEntity : class, ITransactionContext, new()
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityRepository{TEntity,TDataItem}"/> class.
+        /// Initializes a new instance of the <see cref="EntityRepository{TModel,TEntity}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -49,7 +49,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityRepository{TEntity,TDataItem}"/> class.
+        /// Initializes a new instance of the <see cref="EntityRepository{TModel,TEntity}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -63,32 +63,32 @@ namespace Startitecture.Orm.Common
         public EntityRepository(
             IRepositoryProvider repositoryProvider,
             IEntityMapper entityMapper,
-            IComparer<TDataItem> selectionComparer)
+            IComparer<TEntity> selectionComparer)
             : base(repositoryProvider, entityMapper, selectionComparer)
         {
         }
 
         /// <inheritdoc />
-        public TEntity Save(TEntity item)
+        public TModel Save(TModel model)
         {
-            if (Evaluate.IsNull(item))
+            if (Evaluate.IsNull(model))
             {
-                throw new ArgumentNullException(nameof(item));
+                throw new ArgumentNullException(nameof(model));
             }
 
-            return this.SaveEntity(item);
+            return this.SaveModel(model);
         }
 
         /// <inheritdoc />
-        public TEntity Save<TItem>(TItem item)
+        public TModel Save<TItem>(TItem item)
         {
             if (Evaluate.IsNull(item))
             {
                 throw new ArgumentNullException(nameof(item));
             }
 
-            var entity = this.EntityMapper.Map<TEntity>(item);
-            var savedEntity = this.SaveEntity(entity);
+            var entity = this.EntityMapper.Map<TModel>(item);
+            var savedEntity = this.SaveModel(entity);
             return savedEntity;
         }
 
@@ -113,26 +113,26 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var itemSelection = selection.MapTo<TDataItem>();
+            var itemSelection = selection.MapTo<TEntity>();
             return this.RepositoryProvider.DeleteItems(itemSelection);
         }
 
         #region Methods
 
         /// <summary>
-        /// Saves an item to the database.
+        /// Saves a domain model to the repository as an entity.
         /// </summary>
-        /// <param name="entity">
-        /// The item to save.
+        /// <param name="model">
+        /// The model to save.
         /// </param>
         /// <returns>
-        /// The saved data item.
+        /// The saved data entity.
         /// </returns>
-        private TDataItem SaveDataItem(TEntity entity)
+        private TEntity SaveEntity(TModel model)
         {
-            var dataItem = new TDataItem();
+            var dataItem = new TEntity();
             dataItem.SetTransactionProvider(this.RepositoryProvider);
-            this.EntityMapper.MapTo(entity, dataItem);
+            this.EntityMapper.MapTo(model, dataItem);
 
             dataItem = this.RepositoryProvider.Save(dataItem);
 
@@ -142,94 +142,94 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Saves the entity.
+        /// Saves a domain model in the repository.
         /// </summary>
-        /// <param name="item">
-        /// The item to save.
+        /// <param name="model">
+        /// The model to save.
         /// </param>
         /// <returns>
-        /// The saved entity.
+        /// The saved domain model.
         /// </returns>
-        private TEntity SaveEntity(TEntity item)
+        private TModel SaveModel(TModel model)
         {
-            var dataItem = this.SaveDataItem(item);
+            var dataItem = this.SaveEntity(model);
 
-            var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>();
+            var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>();
             var key = entityDefinition.PrimaryKeyAttributes.First().GetValueDelegate.DynamicInvoke(dataItem);
 
             // Assume identical key name
             if (entityDefinition.AutoNumberPrimaryKey.HasValue)
             {
-                var keyProperty = typeof(TEntity).GetProperty(entityDefinition.AutoNumberPrimaryKey.Value.PropertyName);
+                var keyProperty = typeof(TModel).GetProperty(entityDefinition.AutoNumberPrimaryKey.Value.PropertyName);
 
                 if (keyProperty == null)
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.MatchingKeyPropertyNotFound,
-                        item,
-                        typeof(TDataItem),
+                        model,
+                        typeof(TEntity),
                         entityDefinition.AutoNumberPrimaryKey.Value.PropertyName);
 
-                    throw new OperationException(item, message);
+                    throw new OperationException(model, message);
                 }
 
                 try
                 {
-                    keyProperty.SetValue(item, key);
+                    keyProperty.SetValue(model, key);
                 }
                 catch (ArgumentException ex)
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TEntity),
+                        typeof(TModel),
                         keyProperty,
                         key,
                         ex.Message);
 
-                    throw new OperationException(item, message, ex);
+                    throw new OperationException(model, message, ex);
                 }
                 catch (TargetException ex)
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TEntity),
+                        typeof(TModel),
                         keyProperty,
                         key,
                         ex.Message);
 
-                    throw new OperationException(item, message, ex);
+                    throw new OperationException(model, message, ex);
                 }
                 catch (MethodAccessException ex)
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TEntity),
+                        typeof(TModel),
                         keyProperty,
                         key,
                         ex.Message);
 
-                    throw new OperationException(item, message, ex);
+                    throw new OperationException(model, message, ex);
                 }
                 catch (TargetInvocationException ex)
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TEntity),
+                        typeof(TModel),
                         keyProperty,
                         key,
                         ex.Message);
 
-                    throw new OperationException(item, message, ex);
+                    throw new OperationException(model, message, ex);
                 }
             }
 
             // Save the dependent elements of the entity.
-            return item;
+            return model;
         }
 
         #endregion

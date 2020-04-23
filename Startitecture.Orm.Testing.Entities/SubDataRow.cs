@@ -15,7 +15,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// The fake sub data row.
     /// </summary>
     [Table("SubData", Schema = "dbo")]
-    public class SubDataRow : TransactionItemBase
+    public class SubDataRow : EntityBase
     {
         /// <summary>
         /// Gets or sets the fake sub data id.

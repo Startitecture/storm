@@ -14,12 +14,13 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Core;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake complex row.
     /// </summary>
     [Table("ComplexEntity", Schema = "dbo")]
-    public class ComplexRaisedRow : TransactionItemBase, IEquatable<ComplexRaisedRow>
+    public class ComplexRaisedRow : EntityBase, IEquatable<ComplexRaisedRow>
     {
         /// <summary>
         /// The comparison properties.

@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("AggregateEventCompletion", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class AggregateEventCompletionRow : TransactionItemBase
+    public partial class AggregateEventCompletionRow : EntityBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateEventCompletionRow"/> class.

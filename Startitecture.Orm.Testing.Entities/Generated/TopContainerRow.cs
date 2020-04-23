@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("TopContainer", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class TopContainerRow : TransactionItemBase
+    public partial class TopContainerRow : EntityBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TopContainerRow"/> class.

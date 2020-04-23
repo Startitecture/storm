@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("FloatElement", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class FloatElementRow : TransactionItemBase
+    public partial class FloatElementRow : EntityBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="FloatElementRow"/> class.

@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Testing.Entities
     using System.Collections.Generic;
 
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The generic submission row.

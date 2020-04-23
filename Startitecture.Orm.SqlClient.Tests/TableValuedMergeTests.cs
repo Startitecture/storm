@@ -17,7 +17,7 @@ namespace Startitecture.Orm.SqlClient.Tests
     using Startitecture.Core;
     using Startitecture.Orm.AutoMapper;
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Sql;
     using Startitecture.Orm.SqlClient;

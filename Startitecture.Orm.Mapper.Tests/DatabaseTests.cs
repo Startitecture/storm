@@ -59,6 +59,22 @@ namespace Startitecture.Orm.Mapper.Tests
         }
 
         /// <summary>
+        /// The database SQL connection changes database.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void Database_SqlConnectionChangeDatabase_DatabaseChanged()
+        {
+            using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
+            using (var database = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
+            {
+                connection.Open();
+                database.Connection.ChangeDatabase("master");
+                Assert.AreEqual("master", database.Connection.Database);
+            }
+        }
+
+        /// <summary>
         /// The insert test.
         /// </summary>
         [TestMethod]
@@ -78,17 +94,17 @@ namespace Startitecture.Orm.Mapper.Tests
                     mockCommand.Setup(dbCommand => dbCommand.ExecuteScalar()).Returns(Expected);
 
                     var row = new ComplexRaisedRow
-                                  {
-                                      CreatedByFakeMultiReferenceEntityId = 87354,
-                                      ModifiedByFakeMultiReferenceEntityId = 34598,
-                                      FakeEnumerationId = 8,
-                                      FakeOtherEnumerationId = 4,
-                                      UniqueName = "MyUniqueName",
-                                      Description = "Some Stuff!",
-                                      FakeSubEntityId = 4598,
-                                      CreationTime = DateTimeOffset.Now,
-                                      ModifiedTime = DateTimeOffset.Now
-                                  };
+                    {
+                        CreatedByFakeMultiReferenceEntityId = 87354,
+                        ModifiedByFakeMultiReferenceEntityId = 34598,
+                        FakeEnumerationId = 8,
+                        FakeOtherEnumerationId = 4,
+                        UniqueName = "MyUniqueName",
+                        Description = "Some Stuff!",
+                        FakeSubEntityId = 4598,
+                        CreationTime = DateTimeOffset.Now,
+                        ModifiedTime = DateTimeOffset.Now
+                    };
 
                     var result = target.Insert(row);
 
@@ -118,11 +134,11 @@ namespace Startitecture.Orm.Mapper.Tests
                     mockCommand.Setup(dbCommand => dbCommand.ExecuteScalar()).Returns(expected);
 
                     var row = new DependentRow
-                                  {
-                                      FakeDependentEntityId = expected,
-                                      DependentIntegerValue = 4583,
-                                      DependentTimeValue = DateTimeOffset.Now
-                                  };
+                    {
+                        FakeDependentEntityId = expected,
+                        DependentIntegerValue = 4583,
+                        DependentTimeValue = DateTimeOffset.Now
+                    };
 
                     var result = target.Insert(row);
                     Assert.AreEqual(expected, result);

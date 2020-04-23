@@ -52,10 +52,11 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
             if (primaryKeyName != null)
             {
                 command.CommandText += $"returning {this.EscapeSqlIdentifier(primaryKeyName)} as NewID";
-                return database.ExecuteScalarHelper(command);
+                return command.ExecuteScalar(); //// Database.ExecuteScalarHelper(command);
             }
 
-            database.ExecuteNonQueryHelper(command);
+            command.ExecuteNonQuery();
+            ////Database.ExecuteNonQueryHelper(command);
             return -1;
         }
 

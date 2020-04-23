@@ -20,7 +20,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// The fake raised child row.
     /// </summary>
     [Table("ChildEntity")]
-    public class ChildRaisedRow : TransactionItemBase
+    public class ChildRaisedRow : EntityBase
     {
         /// <summary>
         /// Gets or sets the fake child entity id.

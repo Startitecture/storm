@@ -18,7 +18,7 @@ namespace Startitecture.Orm.SqlClient
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 

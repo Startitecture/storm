@@ -20,7 +20,6 @@ namespace Startitecture.Orm.Schema
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Resources;
 

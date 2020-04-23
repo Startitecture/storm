@@ -9,7 +9,6 @@
 
 namespace Startitecture.Orm.Mapper.DatabaseTypes
 {
-    using System;
     using System.Data;
     using System.Linq;
 
@@ -75,7 +74,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// </returns>
         public override object ExecuteInsert(Database database, IDbCommand command, string primaryKeyName)
         {
-            return database.ExecuteScalarHelper(command);
+            return command.ExecuteScalar(); //// Database.ExecuteScalarHelper(command);
         }
 
         /// <summary>

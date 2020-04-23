@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     /// </summary>
     [TableType("FieldValueElementTableType")]
     [Table("FieldValueElement", Schema = "dbo")]
-    public class FieldValueElementTableTypeRow : TransactionItemBase
+    public class FieldValueElementTableTypeRow : EntityBase
     {
         /// <summary>
         /// Gets or sets the field value element ID.

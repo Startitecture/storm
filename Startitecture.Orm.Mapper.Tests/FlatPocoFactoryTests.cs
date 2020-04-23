@@ -7,14 +7,17 @@
 namespace Startitecture.Orm.Mapper.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
     using System.Diagnostics;
+    using System.Linq;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Core;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
+    using Startitecture.Orm.Testing.Moq;
 
     /// <summary>
     /// The flat POCO factory tests.
@@ -116,6 +119,41 @@ namespace Startitecture.Orm.Mapper.Tests
             pocoDelegate.Invoke(pocoDataRequest.DataReader);
             Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #3");
             stopwatch.Reset();
+        }
+
+        /// <summary>
+        /// The create delegate_ attribute for dynamic object_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateDelegate_AttributeForDynamicObject_MatchesExpected()
+        {
+            var target = new FlatPocoFactory();
+            var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<OverriddenColumnNameRow>();
+            var expected = new OverriddenColumnNameRow
+                               {
+                                   OverriddenColumnNameId = 12,
+                                   Description = "my desc",
+                                   EntryTime = DateTimeOffset.Now,
+                                   Name = "name",
+                                   RelatedRowId = 234,
+                                   RelatedRowName = "relatedName"
+                               };
+
+            var attributeDefinitions = entityDefinition.DirectAttributes.ToDictionary(definition => definition.ReferenceName, definition => definition);
+
+            using (var dataReader = expected.MockDataReader(attributeDefinitions, entityDefinition).Object)
+            {
+                var dataRequest = new PocoDataRequest(dataReader, entityDefinition);
+                var func = target.CreateDelegate<dynamic>(dataRequest).MappingDelegate as Func<IDataReader, dynamic>;
+                Assert.IsNotNull(func);
+
+                var actual = func(dataReader);
+
+                foreach (var definition in attributeDefinitions)
+                {
+                    Assert.AreEqual(definition.Value.GetValueDelegate.DynamicInvoke(expected), ((IDictionary<string, object>)actual)[definition.Key]);
+                }
+            }
         }
     }
 }

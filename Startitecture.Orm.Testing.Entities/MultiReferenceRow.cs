@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// The fake multi reference row.
     /// </summary>
     [Table("MultiReferenceEntity")]
-    public class MultiReferenceRow : TransactionItemBase, IEquatable<MultiReferenceRow>
+    public class MultiReferenceRow : EntityBase, IEquatable<MultiReferenceRow>
     {
         /// <summary>
         /// The comparison properties.

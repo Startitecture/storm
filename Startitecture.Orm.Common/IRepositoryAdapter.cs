@@ -13,7 +13,7 @@ namespace Startitecture.Orm.Common
     using System.Collections.Generic;
     using System.Linq.Expressions;
 
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Provides an interface for interacting with data in a repository.

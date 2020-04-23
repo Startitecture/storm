@@ -79,10 +79,6 @@
       <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
       <Name>Startitecture.Orm.Model</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Query\Startitecture.Orm.Query.csproj">
-      <Project>{29959608-fc19-4d9c-abef-cb23b4386232}</Project>
-      <Name>Startitecture.Orm.Query</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
       <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
       <Name>Startitecture.Orm.Schema</Name>

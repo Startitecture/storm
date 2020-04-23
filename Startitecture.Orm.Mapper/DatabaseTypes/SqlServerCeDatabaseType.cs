@@ -60,7 +60,8 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// </returns>
         public override object ExecuteInsert(Database database, System.Data.IDbCommand command, string primaryKeyName)
         {
-            database.ExecuteNonQueryHelper(command);
+            command.ExecuteNonQuery();
+            //// Database.ExecuteNonQueryHelper(command);
             return database.ExecuteScalar<object>("SELECT @@@IDENTITY AS NewID;");
         }
     }

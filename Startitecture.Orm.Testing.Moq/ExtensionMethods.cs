@@ -7,10 +7,13 @@
 namespace Startitecture.Orm.Testing.Moq
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
     using System.Diagnostics;
+    using System.Globalization;
     using System.Linq;
+    using System.Reflection;
 
     using Castle.DynamicProxy.Internal;
 
@@ -195,6 +198,144 @@ namespace Startitecture.Orm.Testing.Moq
                 .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
                 .Returns(command.Object);
             return commandProvider;
+        }
+
+        /// <summary>
+        /// Mocks a data reader for the specified <paramref name="item"/>.
+        /// </summary>
+        /// <param name="item">
+        /// The item to create the reader for.
+        /// </param>
+        /// <param name="attributeDefinitions">
+        /// The attribute definitions to use when creating a reader for the item.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition for the item.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of item to create a reader for.
+        /// </typeparam>
+        /// <returns>
+        /// The <see cref="Mock{IDataReader}"/> for the specified object.
+        /// </returns>
+        public static Mock<IDataReader> MockDataReader<T>(this T item, IDictionary<string, EntityAttributeDefinition> attributeDefinitions, IEntityDefinition entityDefinition)
+        {
+            var dataReader = new Mock<IDataReader>();
+            dataReader.Setup(reader => reader.FieldCount).Returns(attributeDefinitions.Count);
+            int ordinal = 0;
+
+            foreach (var attribute in attributeDefinitions)
+            {
+                object baseObject = item;
+                var currentNode = attribute.Value.EntityNode.List.First;
+                var targetNode = attribute.Value.EntityNode;
+
+                while (currentNode != targetNode && currentNode?.Next != null && currentNode.Next.Value.IsVirtual == false)
+                {
+                    var entityLocation = currentNode.Next.Value;
+
+                    // If the base object can't be found, the row has been flattened, so return the original item.
+                    baseObject = GetObjectProperty(baseObject, entityLocation) ?? item;
+                    currentNode = currentNode.Next;
+                }
+
+                object value;
+
+                if (baseObject.GetType() != attribute.Value.GetValueMethod.ReflectedType)
+                {
+                    // The source object is actually null.
+                    value = null;
+                }
+                else
+                {
+                    try
+                    {
+                        value = attribute.Value.GetValueDelegate.DynamicInvoke(baseObject);
+                    }
+                    catch (TargetException ex)
+                    {
+                        Trace.TraceError($"{entityDefinition.EntityContainer}.{baseObject.GetType().Name} '{baseObject}' for {attribute.Value}:{ex.Message}");
+
+                        throw;
+                    }
+                }
+
+                // NOTE: All this stubbin' makes the tests slower. Baseline after each change.
+                // Need a local variable inside the closure for this to work.
+                var localOrdinal = ordinal;
+                dataReader.Setup(reader => reader.GetName(It.Is<int>(i => i == localOrdinal))).Returns(attribute.Key);
+                dataReader.Setup(reader => reader.GetOrdinal(It.Is<string>(s => s == attribute.Key))).Returns(localOrdinal);
+
+                var propertyType = attribute.Value.PropertyInfo.PropertyType;
+                dataReader.Setup(reader => reader.GetFieldType(It.Is<int>(i => i == localOrdinal))).Returns(propertyType);
+                dataReader.Setup(reader => reader.IsDBNull(It.Is<int>(i => i == localOrdinal))).Returns(value == null);
+
+                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                {
+                    var typeOfNullable = Nullable.GetUnderlyingType(propertyType);
+
+                    if (typeOfNullable == typeof(DateTimeOffset))
+                    {
+                        dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    }
+                    else if (typeOfNullable == typeof(int))
+                    {
+                        dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                        dataReader.Setup(reader => reader.GetInt32(It.Is<int>(i => i == localOrdinal))).Returns((int?)value ?? default);
+                    }
+                }
+                else if (propertyType == typeof(int))
+                {
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetInt32(It.Is<int>(i => i == localOrdinal))).Returns((int?)value ?? default);
+                }
+                else if (propertyType == typeof(short))
+                {
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetInt16(It.Is<int>(i => i == localOrdinal))).Returns((short?)value ?? default);
+                }
+                else if (propertyType == typeof(bool))
+                {
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetBoolean(It.Is<int>(i => i == localOrdinal))).Returns((bool?)value ?? default);
+                }
+                else if (propertyType == typeof(string))
+                {
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetString(It.Is<int>(i => i == localOrdinal)))
+                        .Returns(Convert.ToString(value, CultureInfo.CurrentCulture));
+                }
+                else if (propertyType == typeof(DateTimeOffset))
+                {
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns((DateTimeOffset?)value ?? default);
+                }
+                else if (propertyType == typeof(decimal))
+                {
+                    dataReader.Setup(reader => reader.GetValue(It.Is<int>(i => i == localOrdinal))).Returns(value);
+                    dataReader.Setup(reader => reader.GetDecimal(It.Is<int>(i => i == localOrdinal))).Returns((decimal?)value ?? default);
+                }
+
+                ordinal++;
+            }
+
+            return dataReader;
+        }
+
+        /// <summary>
+        /// Gets an object property referenced by the entity location.
+        /// </summary>
+        /// <param name="baseObject">
+        /// The base object.
+        /// </param>
+        /// <param name="entityLocation">
+        /// The entity location.
+        /// </param>
+        /// <returns>
+        /// The related entity as an <see cref="object"/>.
+        /// </returns>
+        private static object GetObjectProperty(object baseObject, EntityLocation entityLocation)
+        {
+            return baseObject.GetType().GetProperty(entityLocation.Alias ?? entityLocation.Name)?.GetMethod.Invoke(baseObject, null);
         }
     }
 }

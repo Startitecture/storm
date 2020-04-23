@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("DomainAggregate", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class DomainAggregateRow : TransactionItemBase
+    public partial class DomainAggregateRow : EntityBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="DomainAggregateRow"/> class.

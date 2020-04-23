@@ -13,8 +13,6 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
-    using Query;
-
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Sql;
@@ -292,7 +290,7 @@ namespace Startitecture.Orm.SqlClient
         /// <paramref name="filterType"/> is a value that is not supported by this operation.
         /// </exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// <paramref name="filterType"/> is outside the range of values for <see cref="Startitecture.Orm.Query.FilterType"/>.
+        /// <paramref name="filterType"/> is outside the range of values for <see cref="FilterType"/>.
         /// </exception>
         private static int AddTokens(
             FilterType filterType,
@@ -556,7 +554,7 @@ namespace Startitecture.Orm.SqlClient
         /// The query as a <see cref="string"/>.
         /// </returns>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="Startitecture.Orm.Query.StatementOutputType"/>.
+        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="StatementOutputType"/>.
         /// </exception>
         private string CompleteStatement<TItem>(
             QueryContext<TItem> queryContext,

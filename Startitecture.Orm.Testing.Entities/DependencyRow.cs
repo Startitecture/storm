@@ -15,7 +15,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// The fake dependency row.
     /// </summary>
     [Table("DependencyEntity", Schema = "dbo")]
-    public class DependencyRow : TransactionItemBase
+    public class DependencyRow : EntityBase
     {
         /// <summary>
         /// Gets or sets the fake dependency entity id.

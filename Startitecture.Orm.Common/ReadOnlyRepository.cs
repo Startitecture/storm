@@ -19,20 +19,20 @@ namespace Startitecture.Orm.Common
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
     /// The view repository.
     /// </summary>
+    /// <typeparam name="TModel">
+    /// The type of domain model managed by the repository.
+    /// </typeparam>
     /// <typeparam name="TEntity">
-    /// The type of item that is contained in the view.
+    /// The type of entity stored in the repository.
     /// </typeparam>
-    /// <typeparam name="TDataItem">
-    /// The type of data item used to represent the domain item.
-    /// </typeparam>
-    public class ReadOnlyRepository<TEntity, TDataItem> : IReadOnlyRepository<TEntity>
-        where TDataItem : class, ITransactionContext, new()
+    public class ReadOnlyRepository<TModel, TEntity> : IReadOnlyRepository<TModel>
+        where TEntity : class, ITransactionContext, new()
     {
         /// <summary>
         /// The cache key format.
@@ -52,10 +52,10 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// The selection comparer.
         /// </summary>
-        private readonly IComparer<TDataItem> selectionComparer;
+        private readonly IComparer<TEntity> selectionComparer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity,TDataItem}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TModel,TEntity}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -69,7 +69,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TEntity,TDataItem}"/> class.
+        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TModel,TEntity}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
         /// The repository provider for this repository.
@@ -83,7 +83,7 @@ namespace Startitecture.Orm.Common
         public ReadOnlyRepository(
             [NotNull] IRepositoryProvider repositoryProvider,
             [NotNull] IEntityMapper entityMapper,
-            IComparer<TDataItem> selectionComparer)
+            IComparer<TEntity> selectionComparer)
         {
             this.EntityMapper = entityMapper ?? throw new ArgumentNullException(nameof(entityMapper));
             this.RepositoryProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
@@ -121,11 +121,11 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.RepositoryProvider.Contains(selection.MapTo<TDataItem>());
+            return this.RepositoryProvider.Contains(selection.MapTo<TEntity>());
         }
 
         /// <inheritdoc />
-        public TEntity FirstOrDefault<TItem>(TItem candidate)
+        public TModel FirstOrDefault<TItem>(TItem candidate)
         {
             if (Evaluate.IsNull(candidate))
             {
@@ -137,13 +137,13 @@ namespace Startitecture.Orm.Common
                 context.SetTransactionProvider(this.RepositoryProvider);
             }
 
-            TEntity entity;
+            TModel entity;
 
             var selectionItem = this.GetExampleItem(candidate);
             var uniqueItemSelection = this.GetUniqueItemSelection(selectionItem);
 
             // Because we want to hydrate the entire entity, we need to add joins if available.
-            foreach (var relation in this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>().DefaultRelations)
+            foreach (var relation in this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>().DefaultRelations)
             {
                 uniqueItemSelection.AddRelation(relation);
             }
@@ -165,7 +165,7 @@ namespace Startitecture.Orm.Common
 
                 dataItem.SetTransactionProvider(this.RepositoryProvider);
 
-                entity = this.ConstructEntity(dataItem, this.RepositoryProvider);
+                entity = this.ConstructEntity(dataItem);
                 this.UpdateCache(cacheResult.Key, entity);
             }
 
@@ -173,91 +173,68 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public TEntity FirstOrDefault<TItem>([NotNull] ItemSelection<TItem> selection)
+        public TModel FirstOrDefault<TItem>([NotNull] ItemSelection<TItem> selection)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var item = this.RepositoryProvider.GetFirstOrDefault(selection.MapTo<TDataItem>());
-            return item != null ? this.EntityMapper.Map<TEntity>(item) : default;
+            var item = this.RepositoryProvider.GetFirstOrDefault(selection.MapTo<TEntity>());
+            return item != null ? this.EntityMapper.Map<TModel>(item) : default;
         }
 
         /// <inheritdoc />
-        public IEnumerable<TEntity> SelectAll()
+        public IEnumerable<TModel> SelectAll()
         {
-            var exampleSelection = new ItemSelection<TDataItem>();
+            var exampleSelection = new ItemSelection<TEntity>();
             var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
             return this.SelectResults(dataItems);
         }
 
         /// <inheritdoc />
-        public IEnumerable<TEntity> Select<TItem>([NotNull] ItemSelection<TItem> selection)
+        public IEnumerable<TModel> Select<TItem>([NotNull] ItemSelection<TItem> selection)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var mappedSelection = selection.MapTo<TDataItem>();
+            var mappedSelection = selection.MapTo<TEntity>();
             var dataItems = this.RepositoryProvider.GetSelection(mappedSelection);
             return this.SelectResults(dataItems);
         }
 
         /// <summary>
-        /// Gets a unique item selection for the specified item.
+        /// Gets a unique item selection for the specified entity.
         /// </summary>
-        /// <param name="item">
-        /// The item to create the selection for.
+        /// <param name="entity">
+        /// The entity to create the selection for.
         /// </param>
         /// <returns>
-        /// A <see cref="ItemSelection{TItem}"/> for the specified item.
+        /// A <see cref="ItemSelection{TEntity}"/> for the specified entity.
         /// </returns>
-        protected virtual ItemSelection<TDataItem> GetUniqueItemSelection(TDataItem item)
+        protected virtual ItemSelection<TEntity> GetUniqueItemSelection(TEntity entity)
         {
-            return new UniqueQuery<TDataItem>(this.RepositoryProvider.EntityDefinitionProvider, item);
+            return new UniqueQuery<TEntity>(this.RepositoryProvider.EntityDefinitionProvider, entity);
         }
 
         /// <summary>
         /// Constructs the entity for the specified data item.
         /// </summary>
-        /// <param name="dataItem">
+        /// <param name="entity">
         /// The data item to construct an entity for.
-        /// </param>
-        /// <param name="repositoryProvider">
-        /// The repository provider.
         /// </param>
         /// <returns>
         /// A new instance of the entity.
         /// </returns>
-        protected virtual TEntity ConstructEntity(TDataItem dataItem, [NotNull] IRepositoryProvider repositoryProvider)
+        protected virtual TModel ConstructEntity(TEntity entity)
         {
-            if (repositoryProvider == null)
-            {
-                throw new ArgumentNullException(nameof(repositoryProvider));
-            }
-
-            return this.EntityMapper.Map<TEntity>(dataItem);
+            return this.EntityMapper.Map<TModel>(entity);
         }
 
         /// <summary>
-        /// Selects a list of items from the repository.
-        /// </summary>
-        /// <param name="selection">
-        /// The selection criteria.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the criteria.
-        /// </returns>
-        protected IEnumerable<TEntity> SelectEntities(ItemSelection<TDataItem> selection)
-        {
-            var dataItems = this.RepositoryProvider.GetSelection(selection);
-            return this.SelectResults(dataItems);
-        }
-
-        /// <summary>
-        /// Gets an example item from the provided <typeparamref name="TDataItem"/> key.
+        /// Gets an example item from the provided <typeparamref name="TEntity"/> key.
         /// </summary>
         /// <param name="key">
         /// The key for the example item.
@@ -266,21 +243,21 @@ namespace Startitecture.Orm.Common
         /// The type of item that represents the key.
         /// </typeparam>
         /// <returns>
-        /// An example of the data row as a <typeparamref name="TDataItem"/>.
+        /// An example of the data row as a <typeparamref name="TEntity"/>.
         /// </returns>
         /// <exception cref="OperationException">
-        /// The key cannot be applied to the <typeparamref name="TDataItem"/>. The inner exception contains details as to why.
+        /// The key cannot be applied to the <typeparamref name="TEntity"/>. The inner exception contains details as to why.
         /// </exception>
-        protected TDataItem GetExampleItem<TItem>(TItem key)
+        protected TEntity GetExampleItem<TItem>(TItem key)
         {
-            TDataItem dataItem;
+            TEntity dataItem;
 
             if (key?.GetType().IsValueType == true)
             {
-                var keyDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TDataItem>().PrimaryKeyAttributes.First();
+                var keyDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>().PrimaryKeyAttributes.First();
 
                 // If the example is a value type, create a new data item as an example and set the key. Assumption is that the two are compatible.
-                dataItem = new TDataItem();
+                dataItem = new TEntity();
 
                 try
                 {
@@ -291,7 +268,7 @@ namespace Startitecture.Orm.Common
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.CouldNotSetPrimaryKeyWithValue,
-                        typeof(TDataItem),
+                        typeof(TEntity),
                         keyDefinition.PropertyName,
                         key,
                         ex.Message);
@@ -303,7 +280,7 @@ namespace Startitecture.Orm.Common
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.CouldNotSetPrimaryKeyWithValue,
-                        typeof(TDataItem),
+                        typeof(TEntity),
                         keyDefinition.PropertyName,
                         key,
                         ex.Message);
@@ -315,7 +292,7 @@ namespace Startitecture.Orm.Common
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
                         ErrorMessages.CouldNotSetPrimaryKeyWithValue,
-                        typeof(TDataItem),
+                        typeof(TEntity),
                         keyDefinition.PropertyName,
                         key,
                         ex.Message);
@@ -325,7 +302,7 @@ namespace Startitecture.Orm.Common
             }
             else
             {
-                dataItem = this.EntityMapper.Map<TDataItem>(key);
+                dataItem = this.EntityMapper.Map<TEntity>(key);
             }
 
             dataItem.SetTransactionProvider(this.RepositoryProvider);
@@ -341,10 +318,10 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// <c>true</c> if the entity is found; otherwise, <c>false</c>.
         /// </returns>
-        private CacheResult<TEntity> QueryCache(ItemSelection<TDataItem> selection)
+        private CacheResult<TModel> QueryCache(ItemSelection<TEntity> selection)
         {
-            var key = string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TEntity).ToRuntimeName(), selection);
-            var cacheResult = new CacheResult<TEntity>(default, false, key);
+            var key = string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TModel).ToRuntimeName(), selection);
+            var cacheResult = new CacheResult<TModel>(default, false, key);
 
             if (this.RepositoryProvider.EnableCaching == false)
             {
@@ -353,10 +330,10 @@ namespace Startitecture.Orm.Common
 
             var cachedItem = this.entityCache.Get(key);
 
-            if (cachedItem is TEntity item)
+            if (cachedItem is TModel item)
             {
                 ////Trace.TraceInformation("Got item '{0}' from the cache with key '{1}'.", cachedItem, key);
-                cacheResult = new CacheResult<TEntity>(item, true, key);
+                cacheResult = new CacheResult<TModel>(item, true, key);
             }
 
             return cacheResult;
@@ -371,7 +348,7 @@ namespace Startitecture.Orm.Common
         /// <param name="entity">
         /// The entity to save in the cache.
         /// </param>
-        private void UpdateCache(string key, TEntity entity)
+        private void UpdateCache(string key, TModel entity)
         {
             this.entityCache.Set(key, entity, this.cacheItemPolicy);
         }
@@ -385,9 +362,9 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A collection of entities based on the specified data items.
         /// </returns>
-        private IEnumerable<TEntity> SelectResults(IEnumerable<TDataItem> dataItems)
+        private IEnumerable<TModel> SelectResults(IEnumerable<TEntity> dataItems)
         {
-            var results = new List<TEntity>();
+            var results = new List<TModel>();
 
             // Order the list of data items if desired.
             var items = this.selectionComparer == null ? dataItems : dataItems.OrderBy(x => x, this.selectionComparer);
@@ -396,7 +373,7 @@ namespace Startitecture.Orm.Common
             foreach (var dataItem in items)
             {
                 dataItem.SetTransactionProvider(this.RepositoryProvider);
-                var entity = this.ConstructEntity(dataItem, this.RepositoryProvider);
+                var entity = this.ConstructEntity(dataItem);
                 results.Add(entity);
             }
 

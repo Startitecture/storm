@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("AggregateOption", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class AggregateOptionRow : TransactionItemBase
+    public partial class AggregateOptionRow : EntityBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="AggregateOptionRow"/> class.

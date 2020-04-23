@@ -12,7 +12,7 @@ namespace Startitecture.Orm.Sql.Tests
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;

@@ -48,17 +48,17 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the schema.
         /// </summary>
-        public string Schema { get; private set; }
+        public string Schema { get; }
 
         /// <summary>
         /// Gets the entity name.
         /// </summary>
-        public string EntityName { get; private set; }
+        public string EntityName { get; }
 
         /// <summary>
         /// Gets the attribute name.
         /// </summary>
-        public string AttributeName { get; private set; }
+        public string AttributeName { get; }
 
         #region Equality and Comparison Methods and Operators
 

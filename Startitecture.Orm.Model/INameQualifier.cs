@@ -6,8 +6,6 @@
 
 namespace Startitecture.Orm.Model
 {
-    using System;
-
     using JetBrains.Annotations;
 
     /// <summary>

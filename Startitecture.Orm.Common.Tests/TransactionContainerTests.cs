@@ -12,6 +12,8 @@ namespace Startitecture.Orm.Common.Tests
 
     using Moq;
 
+    using Startitecture.Orm.Model;
+
     /// <summary>
     /// The transaction container tests.
     /// </summary>

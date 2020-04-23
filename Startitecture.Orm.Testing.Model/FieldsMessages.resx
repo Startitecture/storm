@@ -136,13 +136,13 @@
     <value>The form was already submitted.</value>
   </data>
   <data name="ItemAlreadyAdded" xml:space="preserve">
-    <value>The item was already added.</value>
+    <value>The model was already added.</value>
   </data>
   <data name="OrderedElementNotInList" xml:space="preserve">
     <value>The ordered element could not be found in the list.</value>
   </data>
   <data name="SortedItemAlreadyAddedToCollection" xml:space="preserve">
-    <value>The sorted item was already added to the collection.</value>
+    <value>The sorted model was already added to the collection.</value>
   </data>
   <data name="StringCannotBeNullOrWhiteSpace" xml:space="preserve">
     <value>String cannot be null or white space.</value>

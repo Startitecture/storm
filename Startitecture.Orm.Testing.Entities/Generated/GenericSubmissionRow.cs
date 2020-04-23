@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// </summary>
     [Table("GenericSubmission", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("EF.Reverse.POCO.Generator", "2.34.1.0")]
-    public partial class GenericSubmissionRow : TransactionItemBase
+    public partial class GenericSubmissionRow : EntityBase
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="GenericSubmissionRow"/> class.

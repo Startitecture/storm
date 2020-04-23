@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Common
     using System;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>

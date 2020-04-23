@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Sql
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
 
     /// <summary>
     /// Represents a Transact-SQL join.

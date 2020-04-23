@@ -19,7 +19,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// The fake dependent row.
     /// </summary>
     [Table("DependentEntity")]
-    public class DependentRow : TransactionItemBase, IEquatable<DependentRow>
+    public class DependentRow : EntityBase, IEquatable<DependentRow>
     {
         /// <summary>
         /// The comparison properties.

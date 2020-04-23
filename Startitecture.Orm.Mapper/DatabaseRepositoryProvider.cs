@@ -24,7 +24,6 @@ namespace Startitecture.Orm.Mapper
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
     using Startitecture.Resources;
 
     /// <summary>
@@ -102,18 +101,12 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(adapterFactory));
             }
 
-            if (itemCache == null)
-            {
-                throw new ArgumentNullException(nameof(itemCache));
-            }
-
             if (databaseFactory == null)
             {
                 throw new ArgumentNullException(nameof(databaseFactory));
             }
 
-            this.DependencyContainer = new DependencyContainer();
-            this.itemCache = itemCache;
+            this.itemCache = itemCache ?? throw new ArgumentNullException(nameof(itemCache));
 
             try
             {
@@ -157,20 +150,6 @@ namespace Startitecture.Orm.Mapper
         /// Gets the internal identifier for this provider.
         /// </summary>
         public Guid InstanceIdentifier { get; } = Guid.NewGuid();
-
-        /// <inheritdoc />
-        public IDependencyContainer DependencyContainer { get; private set; }
-
-        /// <inheritdoc />
-        public void SetDependencyContainer([NotNull] IDependencyContainer container)
-        {
-            if (container == null)
-            {
-                throw new ArgumentNullException(nameof(container));
-            }
-
-            this.DependencyContainer = container;
-        }
 
         /// <inheritdoc />
         public void Dispose()
@@ -348,7 +327,7 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        /// <exception cref="Startitecture.Orm.Common.RepositoryException">
+        /// <exception cref="RepositoryException">
         /// The item could not be saved in the repository.
         /// </exception>
         public TDataItem Save<TDataItem>(TDataItem item)
@@ -526,10 +505,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            this.DatabaseContext.EnableAutoSelect = false;
+            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = false;
             this.DatabaseContext.Execute(executionStatement, parameterValues);
-            this.DatabaseContext.EnableAutoSelect = autoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
         }
 
         /// <inheritdoc />
@@ -546,10 +525,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            this.DatabaseContext.EnableAutoSelect = false;
+            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = false;
             var result = this.DatabaseContext.ExecuteScalar<T>(executionStatement, parameterValues);
-            this.DatabaseContext.EnableAutoSelect = autoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -567,10 +546,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            this.DatabaseContext.EnableAutoSelect = false;
+            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = false;
             var result = this.DatabaseContext.Fetch<dynamic>(executionStatement, parameterValues);
-            this.DatabaseContext.EnableAutoSelect = autoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -588,10 +567,10 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            this.DatabaseContext.EnableAutoSelect = false;
+            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = false;
             var result = this.DatabaseContext.Fetch<T>(executionStatement, parameterValues);
-            this.DatabaseContext.EnableAutoSelect = autoSelect;
+            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 

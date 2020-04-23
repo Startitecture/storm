@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Testing.Entities
     /// The fake sub sub row.
     /// </summary>
     [Table("SubSub")]
-    public class SubSubRow : TransactionItemBase, IEquatable<SubSubRow>
+    public class SubSubRow : EntityBase, IEquatable<SubSubRow>
     {
         /// <summary>
         /// The comparison properties.

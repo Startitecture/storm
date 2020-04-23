@@ -1,4 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseRepositoryProviderTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
@@ -8,13 +9,17 @@ namespace Startitecture.Orm.Mapper.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Linq;
 
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Moq;
+
     using Startitecture.Core;
-    using Startitecture.Orm.Query;
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
@@ -34,6 +39,67 @@ namespace Startitecture.Orm.Mapper.Tests
         /// The configuration root.
         /// </summary>
         private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
+
+        /// <summary>
+        /// The change database test.
+        /// </summary>
+        [TestMethod]
+        public void ChangeDatabase_DatabaseRepositoryProvider_DatabaseChanged()
+        {
+            var mockDatabaseFactory = new Mock<IDatabaseFactory>();
+            var mockDatabaseContext = new Mock<IDatabaseContext>();
+            mockDatabaseFactory.Setup(factory => factory.Create()).Returns(mockDatabaseContext.Object);
+
+            var mockConnection = new Mock<IDbConnection>();
+            mockDatabaseContext.Setup(context => context.Connection).Returns(mockConnection.Object);
+
+            mockConnection.Setup(connection => connection.ChangeDatabase(It.IsAny<string>()))
+                .Callback(
+                    (string s) =>
+                        {
+                            mockConnection.Setup(connection => connection.Database).Returns(s);
+                        });
+
+            var databaseFactory = mockDatabaseFactory.Object;
+            var repositoryAdapterFactory = new Mock<IRepositoryAdapterFactory>().Object;
+
+            using (var target = new DatabaseRepositoryProvider(databaseFactory, repositoryAdapterFactory))
+            {
+                target.DatabaseContext.Connection.ChangeDatabase("newDatabase");
+                Assert.AreEqual("newDatabase", target.DatabaseContext.Connection.Database);
+            }
+        }
+
+        /// <summary>
+        /// The start transaction test.
+        /// </summary>
+        [TestMethod]
+        public void StartTransaction_TransactionWithIsolationLevel_ReturnsTransactionWithExpectedIsolationLevel()
+        {
+            var mockDatabaseFactory = new Mock<IDatabaseFactory>();
+            var mockDatabaseContext = new Mock<IDatabaseContext>();
+            mockDatabaseFactory.Setup(factory => factory.Create()).Returns(mockDatabaseContext.Object);
+
+            var mockConnection = new Mock<IDbConnection>();
+            mockDatabaseContext.Setup(context => context.Connection).Returns(mockConnection.Object);
+
+            mockConnection.Setup(connection => connection.BeginTransaction(It.IsAny<IsolationLevel>()))
+                .Returns((IsolationLevel i) =>
+                    {
+                        var transaction = new Mock<IDbTransaction>();
+                        transaction.Setup(dbTransaction => dbTransaction.IsolationLevel).Returns(i);
+                        return transaction.Object;
+                    });
+
+            var databaseFactory = mockDatabaseFactory.Object;
+            var repositoryAdapterFactory = new Mock<IRepositoryAdapterFactory>().Object;
+
+            using (var target = new DatabaseRepositoryProvider(databaseFactory, repositoryAdapterFactory))
+            {
+                var actual = target.StartTransaction(IsolationLevel.Serializable);
+                Assert.AreEqual(IsolationLevel.Serializable, actual.IsolationLevel);
+            }
+        }
 
         /// <summary>
         /// The save test.
@@ -75,10 +141,10 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 item = new FieldRow
-                           {
-                               Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                               Description = "Mah Field Description"
-                           };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 target.Save(item);
             }
@@ -88,11 +154,11 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
-                             {
-                                 FieldId = item.FieldId,
-                                 Name = item.Name,
-                                 Description = "Mah Field Description The Second of That Name"
-                             };
+                {
+                    FieldId = item.FieldId,
+                    Name = item.Name,
+                    Description = "Mah Field Description The Second of That Name"
+                };
 
                 target.Save(expected);
             }
@@ -121,137 +187,137 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(topContainer2);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 target.Save(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 target.Save(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 target.Save(otherAggregate10);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 2,
-                                               Value = 439034.0332m
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 2,
+                    Value = 439034.0332m
+                };
 
                 var aggregateOption2 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 4,
-                                               Value = 32453253
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 4,
+                    Value = 32453253
+                };
 
                 var domainAggregate1 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption1,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
-                                               Description = "My First Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption1,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                    Description = "My First Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Save(domainAggregate1);
 
                 var domainAggregate2 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption2,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Second Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               OtherAggregate = otherAggregate10,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption2,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                    Description = "My Second Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    OtherAggregate = otherAggregate10,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Save(domainAggregate2);
 
                 var domainAggregate3 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Third Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Save(domainAggregate3);
 
@@ -262,10 +328,10 @@ namespace Startitecture.Orm.Mapper.Tests
                 target.Save(aggregateOption2);
 
                 var associationRow = new AssociationRow
-                                         {
-                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                             OtherAggregateId = otherAggregate10.OtherAggregateId
-                                         };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    OtherAggregateId = otherAggregate10.OtherAggregateId
+                };
 
                 target.Save(associationRow);
 
@@ -315,10 +381,10 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
-                           {
-                               Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                               Description = "Mah Field Description"
-                           };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 target.Save(expected);
             }
@@ -347,80 +413,80 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(topContainer2);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 target.Save(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 target.Save(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 target.Save(otherAggregate10);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Save(template23);
 
                 expected = new DomainAggregateRow
-                               {
-                                   CategoryAttribute = categoryAttribute20,
-                                   CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                   Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                   Description = "My Third Domain Aggregate",
-                                   CreatedBy = timBobIdentity,
-                                   CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                   CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                   LastModifiedBy = timBobIdentity,
-                                   LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                   LastModifiedTime = DateTimeOffset.Now,
-                                   SubContainer = subContainerA,
-                                   SubContainerId = subContainerA.SubContainerId,
-                                   Template = template23,
-                                   TemplateId = template23.TemplateId
-                               };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Save(expected);
 
@@ -487,10 +553,10 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
-                               {
-                                   Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                   Description = "Mah Field Description"
-                               };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 target.Save(expected);
             }
@@ -533,10 +599,10 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
-                               {
-                                   Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                   Description = "Mah Field Description"
-                               };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 target.Save(expected);
             }
@@ -567,26 +633,26 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 var field1 = new FieldRow
-                                 {
-                                     Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                     Description = description
-                                 };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = description
+                };
 
                 target.Save(field1);
 
                 var field2 = new FieldRow
-                                 {
-                                     Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                     Description = description
-                                 };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = description
+                };
 
                 target.Save(field2);
 
                 var field3 = new FieldRow
-                                 {
-                                     Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                     Description = description
-                                 };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = description
+                };
 
                 target.Save(field3);
             }
@@ -635,7 +701,7 @@ namespace Startitecture.Orm.Mapper.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void Update_ExistingAttachmentRow_MatchesExpected()
+        public void Update_ExistingFieldRow_MatchesExpected()
         {
             FieldRow item;
 
@@ -644,10 +710,10 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 item = new FieldRow
-                           {
-                               Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                               Description = "Mah Field Description"
-                           };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 target.Save(item);
             }
@@ -657,11 +723,11 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = providerFactory.Create())
             {
                 expected = new FieldRow
-                               {
-                                   FieldId = item.FieldId,
-                                   Name = item.Name,
-                                   Description = "Mah Field Description The Second of That Name"
-                               };
+                {
+                    FieldId = item.FieldId,
+                    Name = item.Name,
+                    Description = "Mah Field Description The Second of That Name"
+                };
 
                 target.UpdateItem(expected);
             }
@@ -673,6 +739,60 @@ namespace Startitecture.Orm.Mapper.Tests
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
+            }
+        }
+
+        /// <summary>
+        /// The update test.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void Update_ExistingDomainIdentityRowWithSpecificUpdateAttributes_MatchesExpected()
+        {
+            DomainIdentityRow item;
+
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+
+            var uniqueIdentifier = Guid.NewGuid().ToString();
+            using (var target = providerFactory.Create())
+            {
+                item = new DomainIdentityRow
+                           {
+                               UniqueIdentifier = uniqueIdentifier,
+                               FirstName = "First Name",
+                               MiddleName = "Middle Name",
+                               LastName = "Last Name"
+                           };
+
+                target.Save(item);
+            }
+
+            // Completely new context to test that caching is not involved.
+            DomainIdentityRow expected;
+
+            using (var target = providerFactory.Create())
+            {
+                expected = new DomainIdentityRow
+                               {
+                                   DomainIdentityId = item.DomainIdentityId,
+                                   UniqueIdentifier = uniqueIdentifier,
+                                   FirstName = "New First Name",
+                                   MiddleName = "Middle Name Should Not Match",
+                                   LastName = "New Last Name"
+                               };
+
+                target.UpdateItem(expected, row => row.FirstName, row => row.LastName);
+            }
+
+            // New context again
+            using (var target = providerFactory.Create())
+            {
+                var actual = target.GetFirstOrDefault(Select.From<DomainIdentityRow>().WhereEqual(row => row.DomainIdentityId, item.DomainIdentityId));
+                Assert.IsNotNull(actual);
+                Assert.AreNotEqual(expected.MiddleName, actual.MiddleName);
+                Assert.AreEqual(expected.FirstName, actual.FirstName);
+                Assert.AreEqual(expected.LastName, actual.LastName);
+                Assert.AreEqual(expected.DomainIdentityId, actual.DomainIdentityId);
             }
         }
 

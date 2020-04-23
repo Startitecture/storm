@@ -24,7 +24,6 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Orm.Mapper.DatabaseTypes;
     using Startitecture.Orm.Mapper.Internal;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Query;
     using Startitecture.Resources;
 
     /// <summary>
@@ -118,35 +117,26 @@ namespace Startitecture.Orm.Mapper
         /// <param name="nameQualifier">
         /// The name qualifier for the target connection.
         /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="connection"/>, <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
+        /// </exception>
         /// <remarks>
         /// The supplied IDbConnection will not be closed/disposed - that remains the responsibility of the caller.
         /// </remarks>
         public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
         {
-            if (connection == null)
-            {
-                throw new ArgumentNullException(nameof(connection));
-            }
-
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
             if (nameQualifier == null)
             {
                 throw new ArgumentNullException(nameof(nameQualifier));
             }
 
-            this.DefinitionProvider = definitionProvider;
+            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
 
-            // TODO: This seems to fail with SqlConnection.
             this.isConnectionUserProvided = true;
-            this.Connection = connection;
+            this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
             this.connectionString = connection.ConnectionString;
             this.CommonConstruct();
 
-            // TODO: Make other qualifiers based on database type
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
         }
 
@@ -166,6 +156,12 @@ namespace Startitecture.Orm.Mapper
         /// <param name="nameQualifier">
         /// The name qualifier for the connection.
         /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
+        /// </exception>
         /// <remarks>
         /// This class will automatically close and dispose any connections it creates.
         /// </remarks>
@@ -177,17 +173,12 @@ namespace Startitecture.Orm.Mapper
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                throw new ArgumentNullException(nameof(connectionString));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionString));
             }
 
             if (string.IsNullOrWhiteSpace(providerName))
             {
-                throw new ArgumentNullException(nameof(providerName));
-            }
-
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
             if (nameQualifier == null)
@@ -197,7 +188,7 @@ namespace Startitecture.Orm.Mapper
 
             this.connectionString = connectionString;
             this.providerName = providerName;
-            this.DefinitionProvider = definitionProvider;
+            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.CommonConstruct();
 
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
@@ -210,8 +201,8 @@ namespace Startitecture.Orm.Mapper
         /// <param name="connectionString">
         /// The connection string to use
         /// </param>
-        /// <param name="provider">
-        /// The DbProviderFactory to use for instantiating IDbConnection's
+        /// <param name="providerFactory">
+        /// The DbProviderFactory to use for instantiating IDbConnections.
         /// </param>
         /// <param name="definitionProvider">
         /// The entity definition provider.
@@ -219,25 +210,21 @@ namespace Startitecture.Orm.Mapper
         /// <param name="nameQualifier">
         /// The name qualifier for the connection.
         /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="connectionString"/> is null or whitespace.
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="providerFactory"/>, <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
+        /// </exception>
         public Database(
             [NotNull] string connectionString,
-            [NotNull] DbProviderFactory provider,
+            [NotNull] DbProviderFactory providerFactory,
             [NotNull] IEntityDefinitionProvider definitionProvider,
             [NotNull] INameQualifier nameQualifier)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
-                throw new ArgumentNullException(nameof(connectionString));
-            }
-
-            if (provider == null)
-            {
-                throw new ArgumentNullException(nameof(provider));
-            }
-
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionString));
             }
 
             if (nameQualifier == null)
@@ -246,8 +233,8 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.connectionString = connectionString;
-            this.factory = provider;
-            this.DefinitionProvider = definitionProvider;
+            this.factory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
+            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.CommonConstruct();
 
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
@@ -322,7 +309,7 @@ namespace Startitecture.Orm.Mapper
             if (this.Connection.State == ConnectionState.Closed)
             {
                 this.Connection.Open();
-                this.OnConnectionOpened(this.Connection);
+                ////this.OnConnectionOpened(this.Connection);
             }
         }
 
@@ -341,7 +328,7 @@ namespace Startitecture.Orm.Mapper
                 this.OpenSharedConnection();
                 this.transaction = this.Connection.BeginTransaction();
                 this.transactionCancelled = false;
-                this.OnBeginTransaction();
+                ////this.OnBeginTransaction();
             }
 
             return this.transaction;
@@ -416,7 +403,7 @@ namespace Startitecture.Orm.Mapper
                 using (var cmd = this.CreateCommand(this.Connection, sql, args))
                 {
                     var returnValue = cmd.ExecuteNonQuery();
-                    this.OnExecutedCommand(cmd);
+                    ////this.OnExecutedCommand(cmd);
                     return returnValue;
                 }
             }
@@ -465,7 +452,7 @@ namespace Startitecture.Orm.Mapper
                 using (var command = this.CreateCommand(this.Connection, sql, args))
                 {
                     var result = command.ExecuteScalar();
-                    this.OnExecutedCommand(command);
+                    ////this.OnExecutedCommand(command);
 
                     // Handle nullable types
                     var underlyingType = Nullable.GetUnderlyingType(typeof(T));
@@ -485,7 +472,7 @@ namespace Startitecture.Orm.Mapper
                     throw;
                 }
 
-                return default(T);
+                return default;
             }
         }
 
@@ -546,7 +533,7 @@ namespace Startitecture.Orm.Mapper
                 try
                 {
                     dataReader = cmd.ExecuteReader();
-                    this.OnExecutedCommand(cmd);
+                    ////this.OnExecutedCommand(cmd);
                 }
                 catch (Exception ex)
                 {
@@ -731,7 +718,7 @@ namespace Startitecture.Orm.Mapper
         /// </remarks>
         public Page<T> FetchPage<T>(long page, long itemsPerPage, string sql, params object[] args)
         {
-            this.BuildPageQueries<T>((page - 1) * itemsPerPage, itemsPerPage, sql, ref args, out var sqlCount, out var sqlPage);
+            this.BuildPageQueries((page - 1) * itemsPerPage, itemsPerPage, sql, ref args, out var sqlCount, out var sqlPage);
             return this.FetchPage<T>(page, itemsPerPage, sqlCount, args, sqlPage, args);
         }
 
@@ -848,7 +835,7 @@ namespace Startitecture.Orm.Mapper
         /// </remarks>
         public IEnumerable<T> SkipTake<T>(long skip, long take, string sql, params object[] args)
         {
-            this.BuildPageQueries<T>(skip, take, sql, ref args, out _, out var sqlPage);
+            this.BuildPageQueries(skip, take, sql, ref args, out _, out var sqlPage);
             return this.Fetch<T>(sqlPage, args);
         }
 
@@ -983,9 +970,9 @@ namespace Startitecture.Orm.Mapper
                     }
                     else
                     {
-                        this.DoPreExecute(command);
+                        ////this.DoPreExecute(command);
                         command.ExecuteNonQuery();
-                        this.OnExecutedCommand(command);
+                        ////this.OnExecutedCommand(command);
                     }
 
                     return result;
@@ -1008,19 +995,22 @@ namespace Startitecture.Orm.Mapper
 
         #region Methods
 
+/*
         /// <summary>
         /// The execute non query helper.
         /// </summary>
         /// <param name="command">
         /// The command.
         /// </param>
-        internal void ExecuteNonQueryHelper(IDbCommand command)
+        internal static void ExecuteNonQueryHelper(IDbCommand command)
         {
-            this.DoPreExecute(command);
+            ////this.DoPreExecute(command);
             command.ExecuteNonQuery();
-            this.OnExecutedCommand(command);
+            ////this.OnExecutedCommand(command);
         }
+*/
 
+/*
         /// <summary>
         /// The execute scalar helper.
         /// </summary>
@@ -1030,16 +1020,18 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The <see cref="object"/>.
         /// </returns>
-        internal object ExecuteScalarHelper(IDbCommand command)
+        internal static object ExecuteScalarHelper(IDbCommand command)
         {
-            this.DoPreExecute(command);
+            ////this.DoPreExecute(command);
             var scalar = command.ExecuteScalar();
-            this.OnExecutedCommand(command);
+            ////this.OnExecutedCommand(command);
             return scalar;
         }
+*/
 
         #region Events
 
+/*
         /// <summary>
         /// Called when a transaction starts.  Overridden by the T4 template generated database
         /// classes to ensure the same DB instance is used throughout the transaction.
@@ -1047,7 +1039,9 @@ namespace Startitecture.Orm.Mapper
         protected virtual void OnBeginTransaction()
         {
         }
+*/
 
+/*
         /// <summary>
         /// Called when DB connection closed
         /// </summary>
@@ -1057,7 +1051,9 @@ namespace Startitecture.Orm.Mapper
         protected virtual void OnConnectionClosing(IDbConnection connection)
         {
         }
+*/
 
+/*
         /// <summary>
         /// Occurs when a database connection is opened.
         /// </summary>
@@ -1067,13 +1063,16 @@ namespace Startitecture.Orm.Mapper
         protected virtual void OnConnectionOpened(IDbConnection connection)
         {
         }
+*/
 
+/*
         /// <summary>
         /// Called when a transaction ends.
         /// </summary>
         protected virtual void OnEndTransaction()
         {
         }
+*/
 
         /// <summary>
         /// Called if an exception occurs during processing of a DB operation.  Override to provide custom logging/handling.
@@ -1089,6 +1088,7 @@ namespace Startitecture.Orm.Mapper
             return true;
         }
 
+/*
         /// <summary>
         /// Called on completion of command execution
         /// </summary>
@@ -1098,7 +1098,9 @@ namespace Startitecture.Orm.Mapper
         protected virtual void OnExecutedCommand(IDbCommand command)
         {
         }
+*/
 
+/*
         /// <summary>
         /// Called just before an DB command is executed.
         /// </summary>
@@ -1111,6 +1113,7 @@ namespace Startitecture.Orm.Mapper
         protected virtual void OnExecutingCommand(IDbCommand command)
         {
         }
+*/
 
         #endregion
 
@@ -1137,6 +1140,7 @@ namespace Startitecture.Orm.Mapper
             this.transaction?.Dispose();
         }
 
+/*
         /// <summary>
         /// The do pre execute.
         /// </summary>
@@ -1156,8 +1160,9 @@ namespace Startitecture.Orm.Mapper
                 cmd.CommandTimeout = this.CommandTimeout;
             }
 
-            this.OnExecutingCommand(cmd);
+            ////this.OnExecutingCommand(cmd);
         }
+*/
 
         /// <summary>
         /// Add a parameter to a DB command
@@ -1174,15 +1179,15 @@ namespace Startitecture.Orm.Mapper
         private void AddParam(IDbCommand cmd, object value, PropertyInfo pi)
         {
             // Convert value to from poco type to db type
-            if (pi != null)
-            {
-                var mapper = Mappers.GetMapper(pi.DeclaringType);
-                var fn = mapper.GetToDbConverter(pi);
-                if (fn != null)
-                {
-                    value = fn(value);
-                }
-            }
+            ////if (pi != null)
+            ////{
+            ////    var mapper = Mappers.GetMapper(pi.DeclaringType);
+            ////    var fn = mapper.GetToDbConverter(pi);
+            ////    if (fn != null)
+            ////    {
+            ////        value = fn(value);
+            ////    }
+            ////}
 
             // Support passed in parameters
             if (value is IDbDataParameter dataParameter)
@@ -1196,7 +1201,7 @@ namespace Startitecture.Orm.Mapper
             var parameter = cmd.CreateParameter();
             parameter.ParameterName = $"{this.paramPrefix}{cmd.Parameters.Count}";
 
-            // Assign the parmeter value
+            // Assign the parameter value
             if (value == null)
             {
                 parameter.Value = DBNull.Value;
@@ -1315,11 +1320,11 @@ namespace Startitecture.Orm.Mapper
             // Notify the DB type
             this.databaseType.PreExecute(command);
 
-            // Call logging
-            if (string.IsNullOrEmpty(sql) == false)
-            {
-                this.DoPreExecute(command);
-            }
+            ////// Call logging
+            ////if (string.IsNullOrEmpty(sql) == false)
+            ////{
+            ////    this.DoPreExecute(command);
+            ////}
 
             return command;
         }
@@ -1328,9 +1333,6 @@ namespace Startitecture.Orm.Mapper
         /// Starting with a regular SELECT statement, derives the SQL statements required to query a
         /// DB for a page of records and the total number of records
         /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
         /// <param name="skip">
         /// The number of rows to skip before the start of the page
         /// </param>
@@ -1349,20 +1351,10 @@ namespace Startitecture.Orm.Mapper
         /// <param name="sqlPage">
         /// Outputs the SQL statement to retrieve a single page of matching rows
         /// </param>
-        private void BuildPageQueries<T>(long skip, long take, string sql, ref object[] args, out string sqlCount, out string sqlPage)
+        private void BuildPageQueries(long skip, long take, string sql, ref object[] args, out string sqlCount, out string sqlPage)
         {
-            ////// Add auto select clause
-            ////if (this.EnableAutoSelect)
-            ////{
-            ////    var entityDefinition = this.DefinitionProvider.Resolve<T>();
-            ////    var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
-            ////    sql = autoSelectHelper.AddSelectClause(sql);
-            ////}
-
             // Split the SQL
-            SqlPageStatement pageStatement;
-
-            if (PagingHelper.TrySplitSql(sql, out pageStatement) == false)
+            if (PagingHelper.TrySplitSql(sql, out var pageStatement) == false)
             {
                 throw new FormatException(ErrorMessages.PagedSqlCouldNotBeParsed);
             }
@@ -1376,7 +1368,7 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private void CleanupTransaction()
         {
-            this.OnEndTransaction();
+            ////this.OnEndTransaction();
 
             if (this.transactionCancelled)
             {
