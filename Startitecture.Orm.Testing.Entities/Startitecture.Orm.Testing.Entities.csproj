@@ -2,18 +2,8 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <DocumentationFile>bin\Debug\Startitecture.Orm.Testing.Entities.xml</DocumentationFile>
-    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <RunCodeAnalysis>false</RunCodeAnalysis>
-    <DocumentationFile>bin\Release\Startitecture.Orm.Testing.Entities.xml</DocumentationFile>
-    <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
-  </PropertyGroup>
   <ItemGroup>
-    <Compile Update="Generated\AggregateEventCompletionRow.cs">
+    <!--<Compile Update="Generated\AggregateEventCompletionRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
     </Compile>
     <Compile Update="Generated\AggregateEventStartRow.cs">
@@ -95,7 +85,7 @@
     </Compile>
     <Compile Update="Generated\TopContainerRow.cs">
       <DependentUpon>TestDatabase-dbo.tt</DependentUpon>
-    </Compile>
+    </Compile>-->
   </ItemGroup>
   <ItemGroup>
     <Content Include="Generated\TestDatabase-dbo.tt">

@@ -133,7 +133,7 @@ namespace Startitecture.Orm.Mapper
             // Create the method
             var name = $"poco_factory_{Guid.NewGuid()}";
 
-            var delegateInfo = new PocoDelegateInfo(name, type, attributeDefinitions);
+            ////var delegateInfo = new PocoDelegateInfo(name, type, attributeDefinitions);
 
             var method = new DynamicMethod(name, type, new[] { typeof(IDataReader) }, true);
             var generator = method.GetILGenerator();
@@ -273,7 +273,7 @@ namespace Startitecture.Orm.Mapper
                         continue;
                     }
 
-                    delegateInfo.MapDefinition(attribute);
+                    ////delegateInfo.MapDefinition(attribute);
 
                     // Get the source type for this column
                     var sourceType = reader.GetFieldType(i);
@@ -397,8 +397,8 @@ namespace Startitecture.Orm.Mapper
 
             // Cache it, return it
             var mappingDelegate = method.CreateDelegate(Expression.GetFuncType(typeof(IDataReader), type));
-            delegateInfo.SetDelegate(mappingDelegate);
-            return delegateInfo;
+            ////delegateInfo.SetDelegate(mappingDelegate);
+            return new PocoDelegateInfo(mappingDelegate);
         }
 
         /// <summary>

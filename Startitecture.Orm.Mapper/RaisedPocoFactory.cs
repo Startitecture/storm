@@ -32,11 +32,6 @@ namespace Startitecture.Orm.Mapper
             new MemoryCache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo>();
 
         /// <summary>
-        /// The direct factory.
-        /// </summary>
-        private static readonly FlatPocoFactory DirectFactory = FlatPocoFactory.DirectFactory;
-
-        /// <summary>
         /// The relation properties cache.
         /// </summary>
         private static readonly MemoryCache<string, PropertyInfo> RelationPropertiesMemoryCache = new MemoryCache<string, PropertyInfo>();

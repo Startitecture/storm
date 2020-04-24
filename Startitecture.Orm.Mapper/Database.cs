@@ -15,7 +15,6 @@ namespace Startitecture.Orm.Mapper
     using System.Data.Common;
     using System.Globalization;
     using System.Linq;
-    using System.Reflection;
     using System.Text.RegularExpressions;
 
     using JetBrains.Annotations;
@@ -255,12 +254,6 @@ namespace Startitecture.Orm.Mapper
         public IDbConnection Connection { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether to automatically create the "SELECT columns" part of any query that looks like it 
-        /// needs it.
-        /// </summary>
-        public bool EnableAutoSelect { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether parameters named <code>?myparam</code> are populated from properties of the passed
         /// in argument values.
         /// </summary>
@@ -396,25 +389,12 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(args));
             }
 
-            try
-            {
-                this.OpenSharedConnection();
+            this.OpenSharedConnection();
 
-                using (var cmd = this.CreateCommand(this.Connection, sql, args))
-                {
-                    var returnValue = cmd.ExecuteNonQuery();
-                    ////this.OnExecutedCommand(cmd);
-                    return returnValue;
-                }
-            }
-            catch (Exception ex)
+            using (var cmd = this.CreateCommand(this.Connection, sql, args))
             {
-                if (this.OnException(ex))
-                {
-                    throw;
-                }
-
-                return -1;
+                var returnValue = cmd.ExecuteNonQuery();
+                return returnValue;
             }
         }
 
@@ -445,34 +425,21 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(args));
             }
 
-            try
+            this.OpenSharedConnection();
+
+            using (var command = this.CreateCommand(this.Connection, sql, args))
             {
-                this.OpenSharedConnection();
+                var result = command.ExecuteScalar();
 
-                using (var command = this.CreateCommand(this.Connection, sql, args))
+                // Handle nullable types
+                var underlyingType = Nullable.GetUnderlyingType(typeof(T));
+
+                if (underlyingType != null && result == null)
                 {
-                    var result = command.ExecuteScalar();
-                    ////this.OnExecutedCommand(command);
-
-                    // Handle nullable types
-                    var underlyingType = Nullable.GetUnderlyingType(typeof(T));
-
-                    if (underlyingType != null && result == null)
-                    {
-                        return default;
-                    }
-
-                    return (T)Convert.ChangeType(result, underlyingType ?? typeof(T), CultureInfo.CurrentCulture);
-                }
-            }
-            catch (Exception ex)
-            {
-                if (this.OnException(ex))
-                {
-                    throw;
+                    return default;
                 }
 
-                return default;
+                return (T)Convert.ChangeType(result, underlyingType ?? typeof(T), CultureInfo.CurrentCulture);
             }
         }
 
@@ -516,67 +483,27 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(args));
             }
 
-            var entityDefinition = this.DefinitionProvider.Resolve<T>();
-
-            ////if (this.EnableAutoSelect)
-            ////{
-            ////    var autoSelectHelper = new AutoSelectHelper(this.databaseType, entityDefinition);
-            ////    sql = autoSelectHelper.AddSelectClause(sql);
-            ////}
-
             this.OpenSharedConnection();
 
+            var entityDefinition = this.DefinitionProvider.Resolve<T>();
+
             using (var cmd = this.CreateCommand(this.Connection, sql, args))
+            using (var dataReader = cmd.ExecuteReader())
             {
-                IDataReader dataReader;
-
-                try
+                while (true)
                 {
-                    dataReader = cmd.ExecuteReader();
-                    ////this.OnExecutedCommand(cmd);
-                }
-                catch (Exception ex)
-                {
-                    if (this.OnException(ex))
+                    if (!dataReader.Read())
                     {
-                        throw;
+                        yield break;
                     }
 
-                    yield break;
-                }
+                    var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition)
+                                              {
+                                                  FirstColumn = 0
+                                              };
 
-                using (dataReader)
-                {
-                    while (true)
-                    {
-                        T poco;
-
-                        try
-                        {
-                            if (!dataReader.Read())
-                            {
-                                yield break;
-                            }
-
-                            var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition)
-                                                      {
-                                                          FirstColumn = 0
-                                                      };
-
-                            poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
-                        }
-                        catch (Exception ex)
-                        {
-                            if (this.OnException(ex))
-                            {
-                                throw;
-                            }
-
-                            yield break;
-                        }
-
-                        yield return poco;
-                    }
+                    var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
+                    yield return poco;
                 }
             }
         }
@@ -916,7 +843,7 @@ namespace Startitecture.Orm.Mapper
 
                         names.Add(this.databaseType.EscapeSqlIdentifier(columnName));
                         values.Add($"{this.paramPrefix}{index++}");
-                        this.AddParam(command, value, column.PropertyInfo);
+                        this.AddParam(command, value);
                     }
 
                     var escapeTableName = $"{tableInfo.TableName}"; //// this.databaseType.EscapeTableName(tableName);
@@ -995,84 +922,7 @@ namespace Startitecture.Orm.Mapper
 
         #region Methods
 
-/*
-        /// <summary>
-        /// The execute non query helper.
-        /// </summary>
-        /// <param name="command">
-        /// The command.
-        /// </param>
-        internal static void ExecuteNonQueryHelper(IDbCommand command)
-        {
-            ////this.DoPreExecute(command);
-            command.ExecuteNonQuery();
-            ////this.OnExecutedCommand(command);
-        }
-*/
-
-/*
-        /// <summary>
-        /// The execute scalar helper.
-        /// </summary>
-        /// <param name="command">
-        /// The command.
-        /// </param>
-        /// <returns>
-        /// The <see cref="object"/>.
-        /// </returns>
-        internal static object ExecuteScalarHelper(IDbCommand command)
-        {
-            ////this.DoPreExecute(command);
-            var scalar = command.ExecuteScalar();
-            ////this.OnExecutedCommand(command);
-            return scalar;
-        }
-*/
-
         #region Events
-
-/*
-        /// <summary>
-        /// Called when a transaction starts.  Overridden by the T4 template generated database
-        /// classes to ensure the same DB instance is used throughout the transaction.
-        /// </summary>
-        protected virtual void OnBeginTransaction()
-        {
-        }
-*/
-
-/*
-        /// <summary>
-        /// Called when DB connection closed
-        /// </summary>
-        /// <param name="connection">
-        /// The soon to be closed IDBConnection
-        /// </param>
-        protected virtual void OnConnectionClosing(IDbConnection connection)
-        {
-        }
-*/
-
-/*
-        /// <summary>
-        /// Occurs when a database connection is opened.
-        /// </summary>
-        /// <param name="connection">
-        /// The newly opened <see cref="IDbConnection"/>.
-        /// </param>
-        protected virtual void OnConnectionOpened(IDbConnection connection)
-        {
-        }
-*/
-
-/*
-        /// <summary>
-        /// Called when a transaction ends.
-        /// </summary>
-        protected virtual void OnEndTransaction()
-        {
-        }
-*/
 
         /// <summary>
         /// Called if an exception occurs during processing of a DB operation.  Override to provide custom logging/handling.
@@ -1087,33 +937,6 @@ namespace Startitecture.Orm.Mapper
         {
             return true;
         }
-
-/*
-        /// <summary>
-        /// Called on completion of command execution
-        /// </summary>
-        /// <param name="command">
-        /// The IDbCommand that finished executing
-        /// </param>
-        protected virtual void OnExecutedCommand(IDbCommand command)
-        {
-        }
-*/
-
-/*
-        /// <summary>
-        /// Called just before an DB command is executed.
-        /// </summary>
-        /// <param name="command">
-        /// The command to be executed.
-        /// </param>
-        /// <remarks>
-        /// Override this method to provide custom logging of commands and/or modification of the IDbCommand before it's executed.
-        /// </remarks>
-        protected virtual void OnExecutingCommand(IDbCommand command)
-        {
-        }
-*/
 
         #endregion
 
@@ -1140,30 +963,6 @@ namespace Startitecture.Orm.Mapper
             this.transaction?.Dispose();
         }
 
-/*
-        /// <summary>
-        /// The do pre execute.
-        /// </summary>
-        /// <param name="cmd">
-        /// The command.
-        /// </param>
-        private void DoPreExecute(IDbCommand cmd)
-        {
-            // Setup command timeout
-            if (this.OnetimeCommandTimeout != 0)
-            {
-                cmd.CommandTimeout = this.OnetimeCommandTimeout;
-                this.OnetimeCommandTimeout = 0;
-            }
-            else if (this.CommandTimeout != 0)
-            {
-                cmd.CommandTimeout = this.CommandTimeout;
-            }
-
-            ////this.OnExecutingCommand(cmd);
-        }
-*/
-
         /// <summary>
         /// Add a parameter to a DB command
         /// </summary>
@@ -1173,22 +972,8 @@ namespace Startitecture.Orm.Mapper
         /// <param name="value">
         /// The value to assign to the parameter
         /// </param>
-        /// <param name="pi">
-        /// Optional, a reference to the property info of the POCO property from which the value is coming.
-        /// </param>
-        private void AddParam(IDbCommand cmd, object value, PropertyInfo pi)
+        private void AddParam(IDbCommand cmd, object value)
         {
-            // Convert value to from poco type to db type
-            ////if (pi != null)
-            ////{
-            ////    var mapper = Mappers.GetMapper(pi.DeclaringType);
-            ////    var fn = mapper.GetToDbConverter(pi);
-            ////    if (fn != null)
-            ////    {
-            ////        value = fn(value);
-            ////    }
-            ////}
-
             // Support passed in parameters
             if (value is IDbDataParameter dataParameter)
             {
@@ -1314,18 +1099,11 @@ namespace Startitecture.Orm.Mapper
 
             foreach (var item in parameters)
             {
-                this.AddParam(command, item, null);
+                this.AddParam(command, item);
             }
 
             // Notify the DB type
             this.databaseType.PreExecute(command);
-
-            ////// Call logging
-            ////if (string.IsNullOrEmpty(sql) == false)
-            ////{
-            ////    this.DoPreExecute(command);
-            ////}
-
             return command;
         }
 
@@ -1368,8 +1146,6 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private void CleanupTransaction()
         {
-            ////this.OnEndTransaction();
-
             if (this.transactionCancelled)
             {
                 this.transaction.Rollback();
@@ -1390,7 +1166,6 @@ namespace Startitecture.Orm.Mapper
         {
             // Reset
             this.transactionDepth = 0;
-            this.EnableAutoSelect = true;
             this.EnableNamedParameters = true;
 
             // If a provider name was supplied, get the IDbProviderFactory for it
@@ -1407,6 +1182,6 @@ namespace Startitecture.Orm.Mapper
             this.paramPrefix = this.databaseType.GetParameterPrefix(this.connectionString);
         }
 
-#endregion
+        #endregion
     }
 }
