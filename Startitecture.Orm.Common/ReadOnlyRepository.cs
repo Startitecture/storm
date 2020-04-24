@@ -85,6 +85,7 @@ namespace Startitecture.Orm.Common
             [NotNull] IEntityMapper entityMapper,
             IComparer<TEntity> selectionComparer)
         {
+            // The entity mapper, and its resolution context, is intended to last only for the lifetime of the repository.
             this.EntityMapper = entityMapper ?? throw new ArgumentNullException(nameof(entityMapper));
             this.RepositoryProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
             this.selectionComparer = selectionComparer;

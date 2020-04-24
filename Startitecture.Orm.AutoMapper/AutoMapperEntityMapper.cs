@@ -13,8 +13,9 @@ namespace Startitecture.Orm.AutoMapper
 
     using global::AutoMapper;
 
+    using JetBrains.Annotations;
+
     using Startitecture.Core;
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
 
     /// <summary>
@@ -28,26 +29,49 @@ namespace Startitecture.Orm.AutoMapper
         private IMapper mapperEngine;
 
         /// <summary>
-        /// Initializes the default mapper and asserts the configuration is valid.
+        /// Initializes a new instance of the <see cref="AutoMapperEntityMapper"/> class.
         /// </summary>
-        /// <param name="configAction">
-        /// The AutoMapper configuration action to apply.
+        /// <param name="configurationProvider">
+        /// The configuration provider.
         /// </param>
-        /// <returns>
-        /// The current <see cref="IEntityMapper"/>.
-        /// </returns>
-        public IEntityMapper Initialize(Action<IMapperConfigurationExpression> configAction)
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="configurationProvider"/> is null.
+        /// </exception>
+        public AutoMapperEntityMapper([NotNull] IConfigurationProvider configurationProvider)
         {
-            if (configAction == null)
+            if (configurationProvider == null)
             {
-                throw new ArgumentNullException(nameof(configAction));
+                throw new ArgumentNullException(nameof(configurationProvider));
             }
 
-            var mappingConfiguration = new MapperConfiguration(configAction);
-            mappingConfiguration.AssertConfigurationIsValid();
+            this.mapperEngine = configurationProvider.CreateMapper();
+        }
 
-            this.mapperEngine = mappingConfiguration.CreateMapper();
-            return this;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AutoMapperEntityMapper"/> class.
+        /// </summary>
+        /// <param name="configurationProvider">
+        /// The configuration provider.
+        /// </param>
+        /// <param name="serviceConstructor">
+        /// The service constructor.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="configurationProvider"/> or <paramref name="serviceConstructor"/> is null.
+        /// </exception>
+        public AutoMapperEntityMapper([NotNull] IConfigurationProvider configurationProvider, [NotNull] Func<Type, object> serviceConstructor)
+        {
+            if (configurationProvider == null)
+            {
+                throw new ArgumentNullException(nameof(configurationProvider));
+            }
+
+            if (serviceConstructor == null)
+            {
+                throw new ArgumentNullException(nameof(serviceConstructor));
+            }
+
+            this.mapperEngine = configurationProvider.CreateMapper(serviceConstructor);
         }
 
         /// <summary>

@@ -13,6 +13,8 @@ namespace Startitecture.Orm.SqlClient.Tests
     using System.Collections.Generic;
     using System.Linq;
 
+    using global::AutoMapper;
+
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -38,8 +40,12 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// <summary>
         /// The entity mapper.
         /// </summary>
-        private readonly IEntityMapper entityMapper =
-            new AutoMapperEntityMapper().Initialize(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); });
+        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
+            new MapperConfiguration(
+                expression =>
+                    {
+                        expression.AddProfile<GenericSubmissionMappingProfile>();
+                    }));
 
         /// <summary>
         /// The configuration root.
@@ -53,6 +59,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void Execute_TableValueInsertForFields_MatchesExpected()
         {
+            var mapper = this.mapperFactory.Create();
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create())
@@ -115,7 +122,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Set up the structured command provider.
                 var databaseContextProvider = (IDatabaseContextProvider)provider;
                 var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider);
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.entityMapper);
+                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
@@ -140,11 +147,12 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void ExecuteWithIdentityUpdate_TableValuedInsertForGenericSubmission_DoesNotThrowException()
         {
+            var mapper = this.mapperFactory.Create();
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider()); 
 
             using (var provider = providerFactory.Create())
             {
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.entityMapper);
+                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
 
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
@@ -209,7 +217,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 expected.Submit();
 
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.entityMapper);
+                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
 
                 // TODO: Return names only from the repo as a dynamic
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
@@ -219,7 +227,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 foreach (var field in existingFields)
                 {
                     var output = fields[field.Name];
-                    this.entityMapper.MapTo(field, output);
+                    mapper.MapTo(field, output);
                 }
 
                 foreach (var field in fields.Values.Where(field => field.FieldId.HasValue == false))
@@ -227,7 +235,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                     fieldRepository.Save(field);
                 }
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.entityMapper);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
 
                 var transaction = provider.StartTransaction();
                 submissionRepository.Save(expected);
@@ -259,7 +267,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 foreach (var value in expected.SubmissionValues)
                 {
                     var input = insertedValues.FirstOrDefault(row => row.FieldId == value.Field.FieldId);
-                    this.entityMapper.MapTo(input, value);
+                    mapper.MapTo(input, value);
                 }
 
                 // Do the field value elements
@@ -287,7 +295,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
                 {
                     var input = elementsList.First(row => row.FieldValueId == element.FieldValue.FieldValueId && row.Order == element.Order);
-                    this.entityMapper.MapTo(input, element);
+                    mapper.MapTo(input, element);
                 }
 
                 var dateElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)

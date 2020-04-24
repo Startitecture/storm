@@ -9,6 +9,8 @@ namespace Startitecture.Orm.SqlClient.Tests
     using System.Collections.Generic;
     using System.Linq;
 
+    using global::AutoMapper;
+
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -35,8 +37,12 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// <summary>
         /// The entity mapper.
         /// </summary>
-        private readonly IEntityMapper entityMapper =
-            new AutoMapperEntityMapper().Initialize(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); });
+        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
+            new MapperConfiguration(
+                expression =>
+                    {
+                        expression.AddProfile<GenericSubmissionMappingProfile>();
+                    }));
 
         /// <summary>
         /// The configuration root.
@@ -329,10 +335,12 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
 
+            var mapper = this.mapperFactory.Create();
+
             using (var provider = providerFactory.Create())
             {
                 // Set up the domain identity, not part of our validity testing.
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.entityMapper);
+                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
                                      ?? identityRepository.Save(
@@ -362,7 +370,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                 baselineSubmission.SetValue(yearlyWage, 72150.35m); // gonna get updated so lets check that this value got scrapped
                 baselineSubmission.Submit();
 
-                this.MergeSubmission(baselineSubmission, provider);
+                this.MergeSubmission(baselineSubmission, provider, mapper);
             }
 
             Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
@@ -389,12 +397,12 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Using a new provider clears any provider-level caches
             using (var provider = providerFactory.Create())
             {
-                this.MergeSubmission(expected, provider);
+                this.MergeSubmission(expected, provider, mapper);
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.entityMapper);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
                 actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
-                var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.entityMapper);
+                var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
                 var values = fieldValueRepository.Select(
                         Select.From<GenericSubmissionValueRow>()
                             .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
@@ -447,9 +455,13 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
         /// <param name="provider">
         /// The provider.
         /// </param>
+        /// <param name="mapper">
+        /// The mapper.
+        /// </param>
         private void MergeSubmission(
             GenericSubmission submission,
-            IRepositoryProvider provider)
+            IRepositoryProvider provider,
+            IEntityMapper mapper)
         {
             // Merge our existing fields
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
@@ -482,10 +494,10 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                     continue;
                 }
 
-                this.entityMapper.MapTo(input, field);
+                mapper.MapTo(input, field);
             }
 
-            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.entityMapper);
+            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
             submissionRepository.Save(submission);
 
             // Could be mapped as well.
@@ -511,7 +523,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             foreach (var value in submission.SubmissionValues)
             {
                 var input = mergedFieldValues.First(row => row.FieldId == value.Field.FieldId);
-                this.entityMapper.MapTo(input, value);
+                mapper.MapTo(input, value);
                 Assert.IsTrue(value.FieldValueId.HasValue);
             }
 
@@ -540,7 +552,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             foreach (var element in submission.SubmissionValues.SelectMany(value => value.Elements))
             {
                 var input = mergedValueElements.First(row => row.FieldValueId == element.FieldValue.FieldValueId && row.Order == element.Order);
-                this.entityMapper.MapTo(input, element);
+                mapper.MapTo(input, element);
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 

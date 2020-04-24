@@ -1,6 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<!--<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">-->
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+  <!--<PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{0190B7C6-9EB8-4EF8-8973-FE766CD800C7}</ProjectGuid>
@@ -48,93 +54,36 @@
   <PropertyGroup>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
-  </PropertyGroup>
+  </PropertyGroup>-->
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
+    <ProjectReference Include="..\Startitecture.Orm.AutoMapper\Startitecture.Orm.AutoMapper.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.SqlClient\Startitecture.Orm.SqlClient.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.Testing.Moq\Startitecture.Orm.Testing.Moq.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GlobalSuppressions.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="UpdateStatementTest.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include=".editorconfig" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Orm.AutoMapper\Startitecture.Orm.AutoMapper.csproj">
-      <Project>{5F9D3446-A8C8-48C5-9234-3CCCBEDCB420}</Project>
-      <Name>Startitecture.Orm.AutoMapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj">
-      <Project>{5643589d-8d46-4717-ae66-994173f3d671}</Project>
-      <Name>Startitecture.Orm.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj">
-      <Project>{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}</Project>
-      <Name>Startitecture.Orm.Mapper</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj">
-      <Project>{74143502-7860-42C5-B9CB-9D0CEDDC41D2}</Project>
-      <Name>Startitecture.Orm.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj">
-      <Project>{9D984C1F-1486-4718-9D52-0A36B1C06DB3}</Project>
-      <Name>Startitecture.Orm.Schema</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.SqlClient\Startitecture.Orm.SqlClient.csproj">
-      <Project>{5436B30A-18CC-4D87-840F-3B0599C04C79}</Project>
-      <Name>Startitecture.Orm.SqlClient</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj">
-      <Project>{1F629078-CE41-48E5-8160-C13D46121252}</Project>
-      <Name>Startitecture.Orm.Sql</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj">
-      <Project>{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}</Project>
-      <Name>Startitecture.Orm.Testing.Entities</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj">
-      <Project>{2541775F-1B34-4E5A-95BB-B8961633114A}</Project>
-      <Name>Startitecture.Orm.Testing.Model</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Startitecture.Orm.Testing.Moq\Startitecture.Orm.Testing.Moq.csproj">
-      <Project>{628FE999-E820-466C-BB85-96EFF48FA58F}</Project>
-      <Name>Startitecture.Orm.Testing.Moq</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="AutoMapper">
-      <Version>9.0.0</Version>
-    </PackageReference>
-    <PackageReference Include="FluentValidation">
-      <Version>8.6.2</Version>
-    </PackageReference>
-    <PackageReference Include="JetBrains.Annotations">
-      <Version>2020.1.0</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers">
-      <Version>2.9.8</Version>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="FluentValidation" Version="8.6.2" />
+    <PackageReference Include="JetBrains.Annotations" Version="2020.1.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration">
-      <Version>3.1.3</Version>
-    </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json">
-      <Version>3.1.3</Version>
-    </PackageReference>
-    <PackageReference Include="Moq">
-      <Version>4.13.1</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestAdapter">
-      <Version>2.1.1</Version>
-    </PackageReference>
-    <PackageReference Include="MSTest.TestFramework">
-      <Version>2.1.1</Version>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.3" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.3" />
+    <PackageReference Include="Moq" Version="4.13.1" />
+    <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
+    <PackageReference Include="MSTest.TestFramework" Version="2.1.1" />
+    <PackageReference Include="coverlet.collector" Version="1.2.1">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-  <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

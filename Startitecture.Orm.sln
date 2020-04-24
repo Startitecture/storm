@@ -47,13 +47,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Sql", "St
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Mapper", "Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj", "{2100EE7E-02A9-4912-A8A8-A482B4E8C55B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Model.Tests", "Startitecture.Orm.Model.Tests\Startitecture.Orm.Model.Tests.csproj", "{C5D4A33E-8DB6-4AF3-8406-17AC4241FBB2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Model.Tests", "Startitecture.Orm.Model.Tests\Startitecture.Orm.Model.Tests.csproj", "{C5D4A33E-8DB6-4AF3-8406-17AC4241FBB2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.Model", "Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj", "{2541775F-1B34-4E5A-95BB-B8961633114A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Mapper.Tests", "Startitecture.Orm.Mapper.Tests\Startitecture.Orm.Mapper.Tests.csproj", "{49E494DC-E001-49AA-A420-A7BB8D852A86}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Mapper.Tests", "Startitecture.Orm.Mapper.Tests\Startitecture.Orm.Mapper.Tests.csproj", "{49E494DC-E001-49AA-A420-A7BB8D852A86}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Sql.Tests", "Startitecture.Orm.Sql.Tests\Startitecture.Orm.Sql.Tests.csproj", "{0190B7C6-9EB8-4EF8-8973-FE766CD800C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Sql.Tests", "Startitecture.Orm.Sql.Tests\Startitecture.Orm.Sql.Tests.csproj", "{0190B7C6-9EB8-4EF8-8973-FE766CD800C7}"
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Startitecture.Orm.Testing.Schema", "Startitecture.Orm.Testing.Schema\Startitecture.Orm.Testing.Schema.sqlproj", "{40106EBF-BF23-427D-B3AD-9D32EBF54FDF}"
 EndProject
@@ -78,6 +78,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Core", "st-core\Startitecture.Core\Startitecture.Core.csproj", "{54DE697D-092F-42F8-BB6B-6E811729AB87}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Core.Tests", "st-core\Startitecture.Core.Tests\Startitecture.Core.Tests.csproj", "{A8165E22-777E-4B60-81CB-AF6FEF1696E6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.AutoMapper.Tests", "Startitecture.Orm.AutoMapper.Tests\Startitecture.Orm.AutoMapper.Tests.csproj", "{AA999909-59CF-45BE-AAB1-3FA55125585D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -524,6 +526,24 @@ Global
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6}.Release|x86.ActiveCfg = Release|Any CPU
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6}.Release|x86.Build.0 = Release|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Debug|x86.Build.0 = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.DebugLocal|x86.Build.0 = Debug|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|x86.ActiveCfg = Release|Any CPU
+		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -556,6 +576,7 @@ Global
 		{40AC2627-EDFF-471E-9B78-863629B88957} = {5A41FA6C-648C-488C-BC31-FB580931C88B}
 		{54DE697D-092F-42F8-BB6B-6E811729AB87} = {5A41FA6C-648C-488C-BC31-FB580931C88B}
 		{A8165E22-777E-4B60-81CB-AF6FEF1696E6} = {5A41FA6C-648C-488C-BC31-FB580931C88B}
+		{AA999909-59CF-45BE-AAB1-3FA55125585D} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
