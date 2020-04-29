@@ -80,19 +80,6 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public TModel Save<TItem>(TItem item)
-        {
-            if (Evaluate.IsNull(item))
-            {
-                throw new ArgumentNullException(nameof(item));
-            }
-
-            var entity = this.EntityMapper.Map<TModel>(item);
-            var savedEntity = this.SaveModel(entity);
-            return savedEntity;
-        }
-
-        /// <inheritdoc />
         public int Delete<TItem>([NotNull] TItem example)
         {
             if (example == null)

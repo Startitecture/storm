@@ -35,11 +35,6 @@ namespace Startitecture.Orm.Model
         private const string AttributeNameFormat = "{0}/{1}";
 
         /// <summary>
-        /// The attribute name format.
-        /// </summary>
-        private const string AliasedNameFormat = "{0}/{1}:({2})";
-
-        /// <summary>
         /// The delegate cache.
         /// </summary>
         private static readonly MemoryCache<string, Delegate> DelegateMemoryCache  = new MemoryCache<string, Delegate>();
@@ -421,9 +416,7 @@ namespace Startitecture.Orm.Model
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return this.Alias == null
-                       ? string.Format(CultureInfo.CurrentCulture, AttributeNameFormat, this.Entity, this.PropertyName)
-                       : string.Format(CultureInfo.CurrentCulture, AliasedNameFormat, this.Entity, this.PropertyName, this.Alias);
+            return string.Format(CultureInfo.CurrentCulture, AttributeNameFormat, this.Entity, this.ReferenceName);
         }
 
         /// <summary>

@@ -490,58 +490,6 @@ namespace Startitecture.Orm.Model
             return this;
         }
 
-        /// <summary>
-        /// Adds a between filter for the specified example item.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item to evaluate.
-        /// </typeparam>
-        /// <param name="baseline">
-        /// The baseline item.
-        /// </param>
-        /// <param name="boundary">
-        /// The boundary item.
-        /// </param>
-        /// <param name="selectors">
-        /// The selectors of the properties to match.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
-        /// </returns>
-        public ItemSelection<TItem> Between<TDataItem>(
-            TDataItem baseline,
-            TDataItem boundary,
-            params Expression<Func<TDataItem, object>>[] selectors)
-        {
-            if (Evaluate.IsNull(baseline))
-            {
-                throw new ArgumentNullException(nameof(baseline));
-            }
-
-            if (Evaluate.IsNull(boundary))
-            {
-                throw new ArgumentNullException(nameof(boundary));
-            }
-
-            if (selectors == null)
-            {
-                throw new ArgumentNullException(nameof(selectors));
-            }
-
-            if (selectors.Any() == false)
-            {
-                throw new ArgumentException(ValidationMessages.SpecifyAtLeastOneParameter, nameof(selectors));
-            }
-
-            foreach (var selector in selectors)
-            {
-                var compiledSelector = selector.Compile();
-                this.AddRangeFilter(selector, compiledSelector.Invoke(baseline), compiledSelector.Invoke(boundary));
-            }
-
-            return this;
-        }
-
         #endregion
 
         #region JOINs

@@ -86,7 +86,7 @@ namespace Startitecture.Orm.Schema
             var cacheKey = $"{this.GetType().FullName}:{entityType.FullName}:{listName}";
             var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, entityType, this.GetRelationAttributes, ItemPolicy);
 
-            return result.Item;
+            return result.Item;////.Distinct(Singleton<ReferenceNameComparer>.Instance);
         }
 
         /// <inheritdoc />
@@ -406,7 +406,6 @@ namespace Startitecture.Orm.Schema
                 var attributeName = physicalName;
                 var isPrimaryKey = this.IsKey(attributeReference.PropertyInfo);
                 var isIdentity = this.IsIdentity(attributeReference.PropertyInfo);
-
                 var attributeTypes = EntityAttributeTypes.None;
 
                 if (isPrimaryKey)

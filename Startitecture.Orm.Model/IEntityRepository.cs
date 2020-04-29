@@ -29,23 +29,6 @@ namespace Startitecture.Orm.Model
         TModel Save(TModel model);
 
         /// <summary>
-        /// Saves an item to the database.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to save.
-        /// </typeparam>
-        /// <param name="item">
-        /// The item to save.
-        /// </param>
-        /// <returns>
-        /// The saved <typeparamref name="TModel"/> instance.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="item"/> is null.
-        /// </exception>
-        TModel Save<TItem>(TItem item);
-
-        /// <summary>
         /// Deletes a single item in the database.
         /// </summary>
         /// <typeparam name="TItem">

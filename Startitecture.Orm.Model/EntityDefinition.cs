@@ -67,61 +67,6 @@ namespace Startitecture.Orm.Model
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <param name="type">
-        /// The type of the entity.
-        /// </param>
-        public EntityDefinition([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] Type type)
-        {
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
-            if (type == null)
-            {
-                throw new ArgumentNullException(nameof(type));
-            }
-
-            var entityReference = new EntityReference { EntityType = type };
-            this.DefinitionProvider = definitionProvider;
-            this.allAttributes = new Lazy<List<EntityAttributeDefinition>>(
-                () => new List<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(type)));
-
-            // Do not include mapped attributes.
-            this.returnableAttributes =
-                new Lazy<List<EntityAttributeDefinition>>(this.allAttributes.Value.Where(x => x.IsMetadata == false).ToList);
-
-            // Do not include related attributes.
-            this.directAttributes = new Lazy<List<EntityAttributeDefinition>>(this.returnableAttributes.Value.Where(x => x.IsDirect).ToList);
-            this.primaryKeyAttributes = new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Where(x => x.IsPrimaryKey).ToList);
-            this.autoNumberPrimaryKey = new Lazy<EntityAttributeDefinition?>(this.GetAutoNumberPrimaryKey);
-
-            // Do not include primary keys. // TODO: Also identify calculated columns.
-            this.updateableAttributes =
-                new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Except(this.primaryKeyAttributes.Value).ToList);
-
-            this.entityLocation = new Lazy<EntityLocation>(() => definitionProvider.GetEntityLocation(entityReference));
-            this.defaultRelations = new Lazy<List<IEntityRelation>>(
-                () =>
-                    {
-                        if (typeof(IEntityAggregate).IsAssignableFrom(type) && type.GetConstructor(Array.Empty<Type>()) != null)
-                        {
-                            // We have to make an instance to get the relations.
-                            // TODO: Use T4 template in conjunction with property declarations to build this without instantiation
-                            var entity = Activator.CreateInstance(type);
-                            return ((IEntityAggregate)entity).EntityRelations.ToList();
-                        }
-
-                        return new List<IEntityRelation>();
-                    });
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityDefinition"/> class.
-        /// </summary>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
         /// <param name="entityReference">
         /// The entity reference.
         /// </param>
@@ -132,12 +77,7 @@ namespace Startitecture.Orm.Model
                 throw new ArgumentNullException(nameof(entityReference));
             }
 
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
-            this.DefinitionProvider = definitionProvider;
+            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.allAttributes = new Lazy<List<EntityAttributeDefinition>>(
                 () => new List<EntityAttributeDefinition>(this.DefinitionProvider.ResolveDefinitions(entityReference.EntityType)));
 
@@ -198,7 +138,6 @@ namespace Startitecture.Orm.Model
         public EntityAttributeDefinition? AutoNumberPrimaryKey => this.autoNumberPrimaryKey.Value;
 
         /// <inheritdoc />
-        /// TODO: Use a more generic representation
         public string QualifiedName => $"{this.EntityContainer}.{this.EntityName}";
 
         /// <inheritdoc />

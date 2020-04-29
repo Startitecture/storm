@@ -47,17 +47,12 @@ namespace Startitecture.Orm.Mapper
         /// </param>
         public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] IEntityDefinition entityDefinition)
         {
-            if (dataReader == null)
-            {
-                throw new ArgumentNullException(nameof(dataReader));
-            }
-
             if (entityDefinition == null)
             {
                 throw new ArgumentNullException(nameof(entityDefinition));
             }
 
-            this.DataReader = dataReader;
+            this.DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
             this.FieldCount = dataReader.FieldCount;
             this.EntityDefinition = entityDefinition ?? throw new ArgumentNullException(nameof(entityDefinition));
 

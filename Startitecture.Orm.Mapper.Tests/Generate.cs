@@ -8,12 +8,6 @@ namespace Startitecture.Orm.Mapper.Tests
 {
     using System;
     using System.Collections.Concurrent;
-    using System.Data;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Reflection;
-
-    using Moq;
 
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Testing.Entities;
@@ -137,48 +131,6 @@ namespace Startitecture.Orm.Mapper.Tests
                            FakeOtherEnumerationId = MyInt,
                            ComplexEntityId = MyInt
                        };
-        }
-
-        /// <summary>
-        /// Creates a POCO data request.
-        /// </summary>
-        /// <param name="item">
-        /// The item to use as the source of the property values.
-        /// </param>
-        /// <param name="definitionProvider">
-        /// The definition provider.
-        /// </param>
-        /// <typeparam name="T">
-        /// The type of POCO to create the request for.
-        /// </typeparam>
-        /// <returns>
-        /// A <see cref="Startitecture.Orm.Mapper.PocoDataRequest"/> for the specified type.
-        /// </returns>
-        public static PocoDataRequest CreatePocoDataRequest<T>(T item, IEntityDefinitionProvider definitionProvider)
-        {
-            var entityDefinition = definitionProvider.Resolve<T>();
-            var attributeDefinitions = new ConcurrentDictionary<string, EntityAttributeDefinition>();
-
-            foreach (var attributeDefinition in entityDefinition.ReturnableAttributes)
-            {
-                // Don't add duplicates in case of multiple paths.
-                if (attributeDefinitions.ContainsKey(attributeDefinition.ReferenceName))
-                {
-                    continue;
-                }
-
-                attributeDefinitions.AddOrUpdate(attributeDefinition.ReferenceName, attributeDefinition, (s, column) => attributeDefinition);
-            }
-
-            var dataReader = item.MockDataReader(attributeDefinitions, entityDefinition);
-
-            var pocoDataRequest = new PocoDataRequest(dataReader.Object, entityDefinition)
-                                      {
-                                          ////FieldCount = attributeDefinitions.Count,
-                                          FirstColumn = 0
-                                      };
-
-            return pocoDataRequest;
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Startitecture.Orm.Model;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ItemSelectionTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
@@ -50,13 +52,65 @@ namespace Startitecture.Orm.Model.Tests
         public void Between_ItemSelectionWithUnorderedValues_FilterMatchesExpected()
         {
             Expression<Func<SelectionTestRow, DateTime>> selector = row => row.SomeDate;
-            var maxValue = DateTime.Today;  
+            var maxValue = DateTime.Today;
             var minValue = maxValue.AddDays(-1);
             var expected = new ValueFilter(new AttributeLocation(selector), FilterType.Between, minValue, maxValue);
             var target = new ItemSelection<SelectionTestRow>().Between(selector, minValue, maxValue);
             var actual = target.Filters.First();
 
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
+        }
+
+        /// <summary>
+        /// The greater than test.
+        /// </summary>
+        [TestMethod]
+        public void GreaterThan_DataRowAttribute_MatchesExpected()
+        {
+            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
+            var target = new ItemSelection<DataRow>().GreaterThan(valueExpression, 35);
+            var expected = new ValueFilter(valueExpression, FilterType.GreaterThan, 35);
+            var actual = target.Filters.FirstOrDefault();
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// The greater than test.
+        /// </summary>
+        [TestMethod]
+        public void GreaterThanOrEqualTo_DataRowAttribute_MatchesExpected()
+        {
+            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
+            var target = new ItemSelection<DataRow>().GreaterThanOrEqualTo(valueExpression, 35);
+            var expected = new ValueFilter(valueExpression, FilterType.GreaterThanOrEqualTo, 35);
+            var actual = target.Filters.FirstOrDefault();
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// The greater than test.
+        /// </summary>
+        [TestMethod]
+        public void LessThan_DataRowAttribute_MatchesExpected()
+        {
+            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
+            var target = new ItemSelection<DataRow>().LessThan(valueExpression, 35);
+            var expected = new ValueFilter(valueExpression, FilterType.LessThan, 35);
+            var actual = target.Filters.FirstOrDefault();
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// The greater than test.
+        /// </summary>
+        [TestMethod]
+        public void LessThanOrEqualTo_DataRowAttribute_MatchesExpected()
+        {
+            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
+            var target = new ItemSelection<DataRow>().LessThanOrEqualTo(valueExpression, 35);
+            var expected = new ValueFilter(valueExpression, FilterType.LessThanOrEqualTo, 35);
+            var actual = target.Filters.FirstOrDefault();
+            Assert.AreEqual(expected, actual);
         }
 
         /// <summary>
@@ -147,6 +201,38 @@ namespace Startitecture.Orm.Model.Tests
             expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        }
+
+        /// <summary>
+        /// The inner join_ two external relations with relation alias_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void InnerJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
+        {
+            var actual = new ItemSelection<DataRow>().InnerJoin<RelatedRow, DependencyRow>(
+                row => row.RelatedRowId,
+                row => row.FakeDependencyEntityId,
+                "My Alias").Relations.First();
+
+            var expected = new EntityRelation(EntityRelationType.InnerJoin);
+            expected.Join<RelatedRow, DependencyRow>(row => row.RelatedRowId, row => row.FakeDependencyEntityId, null, "My Alias");
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// The left join_ two external relations with relation alias_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void LeftJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
+        {
+            var actual = new ItemSelection<DataRow>().LeftJoin<RelatedRow, DependencyRow>(
+                row => row.RelatedRowId,
+                row => row.FakeDependencyEntityId,
+                "My Alias").Relations.First();
+
+            var expected = new EntityRelation(EntityRelationType.LeftJoin);
+            expected.Join<RelatedRow, DependencyRow>(row => row.RelatedRowId, row => row.FakeDependencyEntityId, null, "My Alias");
+            Assert.AreEqual(expected, actual);
         }
 
         /// <summary>
@@ -300,21 +386,21 @@ namespace Startitecture.Orm.Model.Tests
         public void SelectionStatement_DirectData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                ValueColumn = 2,
-                                NullableColumn = "CouldHaveBeenNull",
-                                NullableValueColumn = null
-                            };
+            {
+                ValueColumn = 2,
+                NullableColumn = "CouldHaveBeenNull",
+                NullableValueColumn = null
+            };
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10,
-                                   NormalColumn = "Greater"
-                               };
+            {
+                FakeDataId = 10,
+                NormalColumn = "Greater"
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20,
-                                   AnotherColumn = "Less"
-                               };
+            {
+                FakeDataId = 20,
+                AnotherColumn = "Less"
+            };
             var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .Select(
@@ -358,21 +444,21 @@ namespace Startitecture.Orm.Model.Tests
         public void SelectionStatement_DirectDataRaisedRow_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                ValueColumn = 2,
-                                NullableColumn = "CouldHaveBeenNull",
-                                NullableValueColumn = null
-                            };
+            {
+                ValueColumn = 2,
+                NullableColumn = "CouldHaveBeenNull",
+                NullableValueColumn = null
+            };
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10,
-                                   NormalColumn = "Greater"
-                               };
+            {
+                FakeDataId = 10,
+                NormalColumn = "Greater"
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20,
-                                   AnotherColumn = "Less"
-                               };
+            {
+                FakeDataId = 20,
+                AnotherColumn = "Less"
+            };
             var transactionSelection = Select
                 .From<DataRow>(
                     row => row.FakeDataId,
@@ -416,24 +502,24 @@ namespace Startitecture.Orm.Model.Tests
         public void SelectionStatement_RelatedDataRaisedRow_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NullableValueColumn = null,
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2
-                            };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
             var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
@@ -465,67 +551,67 @@ namespace Startitecture.Orm.Model.Tests
         /// The selection statement_ union related data_ matches expected.
         /// </summary>
         [TestMethod]
-        public void SelectionStatement_UnionRelatedDataRaisedRow_MatchesExpected()
+        public void PropertyValues_RelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related1"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull1",
-                                 ValueColumn = 2
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
 
             var baseline1 = new DataRow
-                                {
-                                    FakeDataId = 10
-                                };
+            {
+                FakeDataId = 10
+            };
             var boundary1 = new DataRow
-                                {
-                                    FakeDataId = 20
-                                };
+            {
+                FakeDataId = 20
+            };
 
             var match2 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related2"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull2",
-                                 ValueColumn = 3
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
 
             var baseline2 = new DataRow
-                                {
-                                    FakeDataId = 50
-                                };
+            {
+                FakeDataId = 50
+            };
             var boundary2 = new DataRow
-                                {
-                                    FakeDataId = 40
-                                };
+            {
+                FakeDataId = 40
+            };
 
             var match3 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related3"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull3",
-                                 ValueColumn = 4
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
 
             var baseline3 = new DataRow
-                                {
-                                    FakeDataId = 60
-                                };
+            {
+                FakeDataId = 60
+            };
             var boundary3 = new DataRow
-                                {
-                                    FakeDataId = 70
-                                };
+            {
+                FakeDataId = 70
+            };
 
             var transactionSelection = Select
                 .From<DataRow>(
@@ -580,6 +666,312 @@ namespace Startitecture.Orm.Model.Tests
 
             var actual = transactionSelection.PropertyValues.ToArray();
             CollectionAssert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// The union_ item selection with linked selections_ link type matches expected.
+        /// </summary>
+        [TestMethod]
+        public void Union_ItemSelectionWithLinkedSelections_LinkTypeMatchesExpected()
+        {
+            var match1 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
+
+            var baseline1 = new DataRow
+            {
+                FakeDataId = 10
+            };
+            var boundary1 = new DataRow
+            {
+                FakeDataId = 20
+            };
+
+            var match2 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
+
+            var baseline2 = new DataRow
+            {
+                FakeDataId = 50
+            };
+            var boundary2 = new DataRow
+            {
+                FakeDataId = 40
+            };
+
+            var match3 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
+
+            var baseline3 = new DataRow
+            {
+                FakeDataId = 60
+            };
+            var boundary3 = new DataRow
+            {
+                FakeDataId = 70
+            };
+
+            var transactionSelection = Select
+                .From<DataRow>(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Union(
+                    Select
+                        .From<DataRow>(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedAlias.RelatedId,
+                            row => row.RelatedAlias.RelatedProperty,
+                            row => row.OtherAlias.RelatedProperty)
+                        .Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Union(
+                            Select.From<DataRow>(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedAlias.RelatedId,
+                                    row => row.RelatedAlias.RelatedProperty,
+                                    row => row.OtherAlias.RelatedProperty)
+                                .Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+
+            Assert.AreEqual(SelectionLinkType.Union, transactionSelection.LinkedSelection.LinkType);
+            Assert.AreEqual(SelectionLinkType.Union, transactionSelection.LinkedSelection.Selection.LinkedSelection.LinkType);
+        }
+
+        /// <summary>
+        /// The intersect_ item selection with linked selections_ link type matches expected.
+        /// </summary>
+        [TestMethod]
+        public void Intersect_ItemSelectionWithLinkedSelections_LinkTypeMatchesExpected()
+        {
+            var match1 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
+
+            var baseline1 = new DataRow
+            {
+                FakeDataId = 10
+            };
+            var boundary1 = new DataRow
+            {
+                FakeDataId = 20
+            };
+
+            var match2 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
+
+            var baseline2 = new DataRow
+            {
+                FakeDataId = 50
+            };
+            var boundary2 = new DataRow
+            {
+                FakeDataId = 40
+            };
+
+            var match3 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
+
+            var baseline3 = new DataRow
+            {
+                FakeDataId = 60
+            };
+            var boundary3 = new DataRow
+            {
+                FakeDataId = 70
+            };
+
+            var transactionSelection = Select
+                .From<DataRow>(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Intersect(
+                    Select
+                        .From<DataRow>(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedAlias.RelatedId,
+                            row => row.RelatedAlias.RelatedProperty,
+                            row => row.OtherAlias.RelatedProperty)
+                        .Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Intersect(
+                            Select.From<DataRow>(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedAlias.RelatedId,
+                                    row => row.RelatedAlias.RelatedProperty,
+                                    row => row.OtherAlias.RelatedProperty)
+                                .Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+
+            Assert.AreEqual(SelectionLinkType.Intersection, transactionSelection.LinkedSelection.LinkType);
+            Assert.AreEqual(SelectionLinkType.Intersection, transactionSelection.LinkedSelection.Selection.LinkedSelection.LinkType);
+        }
+
+        /// <summary>
+        /// The except_ item selection with linked selections_ link type matches expected.
+        /// </summary>
+        [TestMethod]
+        public void Except_ItemSelectionWithLinkedSelections_LinkTypeMatchesExpected()
+        {
+            var match1 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
+
+            var baseline1 = new DataRow
+            {
+                FakeDataId = 10
+            };
+            var boundary1 = new DataRow
+            {
+                FakeDataId = 20
+            };
+
+            var match2 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
+
+            var baseline2 = new DataRow
+            {
+                FakeDataId = 50
+            };
+            var boundary2 = new DataRow
+            {
+                FakeDataId = 40
+            };
+
+            var match3 = new DataRow
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
+
+            var baseline3 = new DataRow
+            {
+                FakeDataId = 60
+            };
+            var boundary3 = new DataRow
+            {
+                FakeDataId = 70
+            };
+
+            var transactionSelection = Select
+                .From<DataRow>(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.RelatedAlias.RelatedId,
+                    row => row.RelatedAlias.RelatedProperty,
+                    row => row.OtherAlias.RelatedProperty)
+                .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Except(
+                    Select
+                        .From<DataRow>(
+                            row => row.FakeDataId,
+                            row => row.NormalColumn,
+                            row => row.RelatedAlias.RelatedId,
+                            row => row.RelatedAlias.RelatedProperty,
+                            row => row.OtherAlias.RelatedProperty)
+                        .Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                        .Except(
+                            Select.From<DataRow>(
+                                    row => row.FakeDataId,
+                                    row => row.NormalColumn,
+                                    row => row.RelatedAlias.RelatedId,
+                                    row => row.RelatedAlias.RelatedProperty,
+                                    row => row.OtherAlias.RelatedProperty)
+                                .Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+
+            Assert.AreEqual(SelectionLinkType.Exception, transactionSelection.LinkedSelection.LinkType);
+            Assert.AreEqual(SelectionLinkType.Exception, transactionSelection.LinkedSelection.Selection.LinkedSelection.LinkType);
         }
 
         /// <summary>

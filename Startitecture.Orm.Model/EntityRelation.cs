@@ -223,6 +223,7 @@ namespace Startitecture.Orm.Model
             this.Join(sourceAttribute, relationAttribute, null, null);
         }
 
+/*
         /// <summary>
         /// Applies the join attributes using the specified items.
         /// </summary>
@@ -276,6 +277,7 @@ namespace Startitecture.Orm.Model
             ////this.SourceAttribute = sourceDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == sourceAttribute.GetPropertyName());
             ////this.RelationAttribute = relationDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == relationAttribute.GetPropertyName());
         }
+*/
 
         /// <summary>
         /// Applies the join attributes using the specified items.

@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Mapper
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Diagnostics;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
@@ -58,12 +59,7 @@ namespace Startitecture.Orm.Mapper
         /// </exception>
         public RaisedPocoFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
-            if (definitionProvider == null)
-            {
-                throw new ArgumentNullException(nameof(definitionProvider));
-            }
-
-            this.definitionProvider = definitionProvider;
+            this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
         }
 
         /// <inheritdoc />
@@ -96,7 +92,7 @@ namespace Startitecture.Orm.Mapper
             var qualifiedName = entityDefinition.QualifiedName;
             var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
 
-            var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.PhysicalName).ToList());
+            var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.Ordinal).ToList());
             var poco = (T)this.pocoMemoryCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, typeQualifiedName, entityDefinition, reader));
 
             var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
@@ -112,7 +108,7 @@ namespace Startitecture.Orm.Mapper
                 var keyDefinitions = entityDefinition.ReturnableAttributes.Where(
                         x => (string.IsNullOrWhiteSpace(x.Entity.Alias) ? $"{x.Entity.Container}.{x.Entity.Name}" : x.Entity.Alias)
                              == relationReferenceName && x.IsPrimaryKey)
-                    .OrderBy(x => x.PhysicalName);
+                    .OrderBy(x => x.Ordinal);
 
                 var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions.ToList());
 
@@ -182,12 +178,17 @@ namespace Startitecture.Orm.Mapper
             {
                 try
                 {
-                    pocoKeyBuilder.Append($".{definition.PhysicalName}.{record.GetValue(record.GetOrdinal(definition.ReferenceName))}");
+                    var ordinal = record.GetOrdinal(definition.ReferenceName);
+                    var keyValue = record.GetValue(ordinal);
+                    pocoKeyBuilder.Append($".{definition.PhysicalName}.{keyValue}");
+#if DEBUG
+                    Trace.WriteLine($"Got {definition.ReferenceName} key value '{keyValue}' at ordinal {ordinal}");
+#endif
                 }
                 catch (IndexOutOfRangeException ex)
                 {
                     var message = $"The data reader did not have a column for '{definition.ReferenceName}'. "
-                                  + "Check that the query has JOINs for all relations";
+                                  + "Check that the query has JOINs for all relations.";
 
                     throw new OperationException(definition, message, ex);
                 }
