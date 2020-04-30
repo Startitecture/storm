@@ -327,33 +327,6 @@ namespace Startitecture.Orm.Mapper
             return this.transaction;
         }
 
-        /// <summary>
-        /// Aborts the entire outer most transaction scope
-        /// </summary>
-        /// <remarks>
-        /// Called automatically by Transaction.Dispose() if the transaction wasn't completed.
-        /// </remarks>
-        public void AbortTransaction()
-        {
-            this.transactionCancelled = true;
-
-            if ((--this.transactionDepth) == 0)
-            {
-                this.CleanupTransaction();
-            }
-        }
-
-        /// <summary>
-        /// Marks the current transaction scope as complete.
-        /// </summary>
-        public void CompleteTransaction()
-        {
-            if ((--this.transactionDepth) == 0)
-            {
-                this.CleanupTransaction();
-            }
-        }
-
         #endregion
 
         /// <inheritdoc />
@@ -796,123 +769,109 @@ namespace Startitecture.Orm.Mapper
             var definition = this.DefinitionProvider.Resolve<T>();
             var tableInfo = definition.ToTableInfo();
 
-            try
+            this.OpenSharedConnection();
+
+            using (var command = this.CreateCommand(this.Connection, string.Empty))
             {
-                this.OpenSharedConnection();
+                var names = new List<string>();
+                var values = new List<string>();
+                int index = 0;
 
-                using (var command = this.CreateCommand(this.Connection, string.Empty))
+                // Capture the primary key type. We'll use this later to change the declared type of the returned ID.
+                var primaryKeyAttribute = definition.PrimaryKeyAttributes.FirstOrDefault();
+
+                var primaryKeyType = primaryKeyAttribute == EntityAttributeDefinition.Empty
+                                         ? null
+                                         : definition.PrimaryKeyAttributes.First().PropertyInfo.PropertyType;
+
+                object result = null;
+
+                foreach (var column in definition.DirectAttributes)
                 {
-                    var names = new List<string>();
-                    var values = new List<string>();
-                    int index = 0;
+                    var columnName = column.ReferenceName;
+                    var value = column.GetValueDelegate.DynamicInvoke(poco);
 
-                    // Capture the primary key type. We'll use this later to change the declared type of the returned ID.
-                    var primaryKeyAttribute = definition.PrimaryKeyAttributes.FirstOrDefault();
-
-                    var primaryKeyType = primaryKeyAttribute == EntityAttributeDefinition.Empty
-                                             ? null
-                                             : definition.PrimaryKeyAttributes.First().PropertyInfo.PropertyType;
-
-                    object result = null;
-
-                    foreach (var column in definition.DirectAttributes)
+                    // Don't insert the primary key (except under oracle where we need bring in the next sequence value)
+                    if (column.IsDirect && column.IsIdentityColumn)
                     {
-                        var columnName = column.ReferenceName;
-                        var value = column.GetValueDelegate.DynamicInvoke(poco);
+                        // Setup auto increment expression
+                        string autoIncExpression = this.databaseType.GetAutoIncrementExpression(tableInfo);
 
-                        // Don't insert the primary key (except under oracle where we need bring in the next sequence value)
-                        if (column.IsDirect && column.IsIdentityColumn) 
+                        if (autoIncExpression != null)
                         {
-                            // Setup auto increment expression
-                            string autoIncExpression = this.databaseType.GetAutoIncrementExpression(tableInfo);
-
-                            if (autoIncExpression != null)
-                            {
-                                names.Add(columnName);
-                                values.Add(autoIncExpression);
-                            }
-
-                            continue;
+                            names.Add(columnName);
+                            values.Add(autoIncExpression);
                         }
 
-                        if (column.IsDirect && column.IsPrimaryKey)
-                        {
-                            // Get the primary key value that we'll later return.
-                            result = value;
-                        }
-
-                        names.Add(this.databaseType.EscapeSqlIdentifier(columnName));
-                        values.Add($"{this.paramPrefix}{index++}");
-                        this.AddParam(command, value);
+                        continue;
                     }
 
-                    var escapeTableName = $"{tableInfo.TableName}"; //// this.databaseType.EscapeTableName(tableName);
-                    var columnNames = string.Join(",", names.ToArray());
-                    var columnValues = string.Join(",", values.ToArray());
-                    var commandText = $"INSERT INTO {escapeTableName} ({columnNames}) VALUES ({columnValues})";
-
-                    if (definition.AutoNumberPrimaryKey.HasValue)
+                    if (column.IsDirect && column.IsPrimaryKey)
                     {
-                        // TODO: This is SQL-only. Move into the database type thing.
-                        string type;
-
-                        if (primaryKeyType == typeof(int))
-                        {
-                            type = "int";
-                        }
-                        else if (primaryKeyType == typeof(long))
-                        {
-                            type = "bigint";
-                        }
-                        else if (primaryKeyType == typeof(short))
-                        {
-                            type = "smallint";
-                        }
-                        else if (primaryKeyType == typeof(byte))
-                        {
-                            type = "tinyint";
-                        }
-                        else
-                        {
-                            type = "decimal";
-                        }
-
-                        // Declare and return the ID without using the OUTPUT statement which triggers will mess with.
-                        commandText = string.Concat(
-                            $"DECLARE @NewId {type}",
-                            Environment.NewLine,
-                            commandText,
-                            Environment.NewLine,
-                            "SET @NewId = SCOPE_IDENTITY()",
-                            Environment.NewLine,
-                            "SELECT @NewId");
+                        // Get the primary key value that we'll later return.
+                        result = value;
                     }
 
-                    command.CommandText = commandText;
+                    names.Add(this.databaseType.EscapeSqlIdentifier(columnName));
+                    values.Add($"{this.paramPrefix}{index++}");
+                    this.AddParam(command, value);
+                }
 
-                    if (definition.AutoNumberPrimaryKey.HasValue)
+                var escapeTableName = $"{tableInfo.TableName}";
+                var columnNames = string.Join(",", names.ToArray());
+                var columnValues = string.Join(",", values.ToArray());
+                var commandText = $"INSERT INTO {escapeTableName} ({columnNames}) VALUES ({columnValues})";
+
+                if (definition.AutoNumberPrimaryKey.HasValue)
+                {
+                    // TODO: This is SQL-only. Move into the database type thing.
+                    string type;
+
+                    if (primaryKeyType == typeof(int))
                     {
-                        result = this.databaseType.ExecuteInsert(this, command, primaryKeyAttribute.ReferenceName);
-                        definition.AutoNumberPrimaryKey.Value.SetValueDelegate.DynamicInvoke(poco, result);
+                        type = "int";
+                    }
+                    else if (primaryKeyType == typeof(long))
+                    {
+                        type = "bigint";
+                    }
+                    else if (primaryKeyType == typeof(short))
+                    {
+                        type = "smallint";
+                    }
+                    else if (primaryKeyType == typeof(byte))
+                    {
+                        type = "tinyint";
                     }
                     else
                     {
-                        ////this.DoPreExecute(command);
-                        command.ExecuteNonQuery();
-                        ////this.OnExecutedCommand(command);
+                        type = "decimal";
                     }
 
-                    return result;
-                }
-            }
-            catch (Exception ex)
-            {
-                if (this.OnException(ex))
-                {
-                    throw;
+                    // Declare and return the ID without using the OUTPUT statement which triggers will mess with.
+                    commandText = string.Concat(
+                        $"DECLARE @NewId {type}",
+                        Environment.NewLine,
+                        commandText,
+                        Environment.NewLine,
+                        "SET @NewId = SCOPE_IDENTITY()",
+                        Environment.NewLine,
+                        "SELECT @NewId");
                 }
 
-                return null;
+                command.CommandText = commandText;
+
+                if (definition.AutoNumberPrimaryKey.HasValue)
+                {
+                    result = this.databaseType.ExecuteInsert(this, command, primaryKeyAttribute.ReferenceName);
+                    definition.AutoNumberPrimaryKey.Value.SetValueDelegate.DynamicInvoke(poco, result);
+                }
+                else
+                {
+                    command.ExecuteNonQuery();
+                }
+
+                return result;
             }
         }
 
@@ -921,24 +880,6 @@ namespace Startitecture.Orm.Mapper
         #endregion
 
         #region Methods
-
-        #region Events
-
-        /// <summary>
-        /// Called if an exception occurs during processing of a DB operation.  Override to provide custom logging/handling.
-        /// </summary>
-        /// <param name="exception">
-        /// The exception instance
-        /// </param>
-        /// <returns>
-        /// True to re-throw the exception, false to suppress it
-        /// </returns>
-        protected virtual bool OnException(Exception exception)
-        {
-            return true;
-        }
-
-        #endregion
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -1139,24 +1080,6 @@ namespace Startitecture.Orm.Mapper
 
             sqlPage = this.databaseType.BuildPageQuery(skip, take, pageStatement, ref args);
             sqlCount = pageStatement.SqlCount;
-        }
-
-        /// <summary>
-        /// Internal helper to cleanup transaction
-        /// </summary>
-        private void CleanupTransaction()
-        {
-            if (this.transactionCancelled)
-            {
-                this.transaction.Rollback();
-            }
-            else
-            {
-                this.transaction.Commit();
-            }
-
-            this.transaction.Dispose();
-            this.transaction = null;
         }
 
         /// <summary>

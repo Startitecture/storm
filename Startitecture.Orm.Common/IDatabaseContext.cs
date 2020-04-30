@@ -63,19 +63,6 @@ namespace Startitecture.Orm.Common
         IDbTransaction BeginTransaction();
 
         /// <summary>
-        /// Aborts the entire outer most transaction scope
-        /// </summary>
-        /// <remarks>
-        /// Called automatically by Transaction.Dispose() if the transaction wasn't completed.
-        /// </remarks>
-        void AbortTransaction();
-
-        /// <summary>
-        /// Marks the current transaction scope as complete.
-        /// </summary>
-        void CompleteTransaction();
-
-        /// <summary>
         /// Executes a non-query command
         /// </summary>
         /// <param name="sql">
@@ -165,10 +152,6 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A List of results
         /// </returns>
-        /// <remarks>
-        /// PetaPoco will automatically modify the supplied SELECT statement to only retrieve the
-        /// records for the specified page.
-        /// </remarks>
         IEnumerable<T> Fetch<T>(long page, long itemsPerPage, string sql, params object[] args);
 
         /// <summary>
@@ -231,11 +214,6 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A Page of results
         /// </returns>
-        /// <remarks>
-        /// PetaPoco will automatically modify the supplied SELECT statement to only retrieve the
-        /// records for the specified page.  It will also execute a second query to retrieve the
-        /// total number of records in the result set.
-        /// </remarks>
         Page<T> FetchPage<T>(long page, long itemsPerPage, string sql, params object[] args);
 
         /// <summary>
@@ -330,10 +308,6 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A List of results
         /// </returns>
-        /// <remarks>
-        /// PetaPoco will automatically modify the supplied SELECT statement to only retrieve the
-        /// records for the specified range.
-        /// </remarks>
         IEnumerable<T> SkipTake<T>(long skip, long take, string sql, params object[] args);
 
         /// <summary>

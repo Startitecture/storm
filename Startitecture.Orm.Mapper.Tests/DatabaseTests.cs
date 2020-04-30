@@ -54,7 +54,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     command.ExecuteNonQuery();
                 }
 
-                target.AbortTransaction();
+                transaction.Rollback();
             }
         }
 

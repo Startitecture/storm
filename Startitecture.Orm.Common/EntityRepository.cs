@@ -87,8 +87,8 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(example));
             }
 
-            var dataItem = this.GetExampleItem(example);
-            var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
+            var entity = this.GetExampleEntity(example);
+            var uniqueItemSelection = this.GetUniqueItemSelection(entity);
             return this.RepositoryProvider.DeleteItems(uniqueItemSelection);
         }
 
@@ -107,28 +107,6 @@ namespace Startitecture.Orm.Common
         #region Methods
 
         /// <summary>
-        /// Saves a domain model to the repository as an entity.
-        /// </summary>
-        /// <param name="model">
-        /// The model to save.
-        /// </param>
-        /// <returns>
-        /// The saved data entity.
-        /// </returns>
-        private TEntity SaveEntity(TModel model)
-        {
-            var dataItem = new TEntity();
-            dataItem.SetTransactionProvider(this.RepositoryProvider);
-            this.EntityMapper.MapTo(model, dataItem);
-
-            dataItem = this.RepositoryProvider.Save(dataItem);
-
-            // In an update operation, dataItem will be a different object reference blended with the original.
-            dataItem.SetTransactionProvider(this.RepositoryProvider);
-            return dataItem;
-        }
-
-        /// <summary>
         /// Saves a domain model in the repository.
         /// </summary>
         /// <param name="model">
@@ -139,10 +117,10 @@ namespace Startitecture.Orm.Common
         /// </returns>
         private TModel SaveModel(TModel model)
         {
-            var dataItem = this.SaveEntity(model);
+            var entity = this.SaveEntity(model);
 
             var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>();
-            var key = entityDefinition.PrimaryKeyAttributes.First().GetValueDelegate.DynamicInvoke(dataItem);
+            var key = entityDefinition.PrimaryKeyAttributes.First().GetValueDelegate.DynamicInvoke(entity);
 
             // Assume identical key name
             if (entityDefinition.AutoNumberPrimaryKey.HasValue)
@@ -217,6 +195,43 @@ namespace Startitecture.Orm.Common
 
             // Save the dependent elements of the entity.
             return model;
+        }
+
+        /// <summary>
+        /// Saves a domain model to the repository as an entity.
+        /// </summary>
+        /// <param name="model">
+        /// The model to save.
+        /// </param>
+        /// <returns>
+        /// The saved data entity.
+        /// </returns>
+        private TEntity SaveEntity(TModel model)
+        {
+            var dataItem = new TEntity();
+            dataItem.SetTransactionProvider(this.RepositoryProvider);
+            this.EntityMapper.MapTo(model, dataItem);
+
+            if (this.Contains(dataItem))
+            {
+                this.RepositoryProvider.Update(dataItem, this.GetUniqueItemSelection(dataItem));
+            }
+            else
+            {
+                dataItem = this.RepositoryProvider.InsertItem(dataItem);
+            }
+
+            if (dataItem == null)
+            {
+                throw new OperationException(model, $"The underlying provider returned a null entity when inserting '{model}'.");
+            }
+
+            if (object.ReferenceEquals(this.RepositoryProvider, dataItem.TransactionProvider) == false)
+            {
+                dataItem.SetTransactionProvider(this.RepositoryProvider);
+            }
+
+            return dataItem;
         }
 
         #endregion

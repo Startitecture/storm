@@ -1,5 +1,4 @@
-﻿
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseRepositoryProviderTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
@@ -101,77 +100,77 @@ namespace Startitecture.Orm.Mapper.Tests
             }
         }
 
-        /// <summary>
-        /// The save test.
-        /// </summary>
-        [TestMethod]
-        [TestCategory("Integration")]
-        public void Save_NewField_IdSet()
-        {
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+        /////// <summary>
+        /////// The save test.
+        /////// </summary>
+        ////[TestMethod]
+        ////[TestCategory("Integration")]
+        ////public void Save_NewField_IdSet()
+        ////{
+        ////    var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
-            {
-                target.StartTransaction();
+        ////    using (var target = providerFactory.Create())
+        ////    {
+        ////        target.StartTransaction();
 
-                try
-                {
-                    var item = new FieldRow { Name = "MahField", Description = "Mah Field Description" };
-                    var actual = target.Save(item);
-                    Assert.AreNotEqual(0, actual.FieldId);
-                }
-                finally
-                {
-                    target.AbortTransaction();
-                }
-            }
-        }
+        ////        try
+        ////        {
+        ////            var item = new FieldRow { Name = "MahField", Description = "Mah Field Description" };
+        ////            var actual = target.Save(item);
+        ////            Assert.AreNotEqual(0, actual.FieldId);
+        ////        }
+        ////        finally
+        ////        {
+        ////            target.AbortTransaction();
+        ////        }
+        ////    }
+        ////}
 
-        /// <summary>
-        /// The save test.
-        /// </summary>
-        [TestMethod]
-        [TestCategory("Integration")]
-        public void Save_ExistingField_ChangesMatchExpected()
-        {
-            FieldRow item;
+        /////// <summary>
+        /////// The save test.
+        /////// </summary>
+        ////[TestMethod]
+        ////[TestCategory("Integration")]
+        ////public void Save_ExistingField_ChangesMatchExpected()
+        ////{
+        ////    FieldRow item;
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+        ////    var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
-            {
-                item = new FieldRow
-                {
-                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                    Description = "Mah Field Description"
-                };
+        ////    using (var target = providerFactory.Create())
+        ////    {
+        ////        item = new FieldRow
+        ////        {
+        ////            Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+        ////            Description = "Mah Field Description"
+        ////        };
 
-                target.Save(item);
-            }
+        ////        target.Save(item);
+        ////    }
 
-            // Completely new context to test that caching is not involved.
-            FieldRow expected;
-            using (var target = providerFactory.Create())
-            {
-                expected = new FieldRow
-                {
-                    FieldId = item.FieldId,
-                    Name = item.Name,
-                    Description = "Mah Field Description The Second of That Name"
-                };
+        ////    // Completely new context to test that caching is not involved.
+        ////    FieldRow expected;
+        ////    using (var target = providerFactory.Create())
+        ////    {
+        ////        expected = new FieldRow
+        ////        {
+        ////            FieldId = item.FieldId,
+        ////            Name = item.Name,
+        ////            Description = "Mah Field Description The Second of That Name"
+        ////        };
 
-                target.Save(expected);
-            }
+        ////        target.Save(expected);
+        ////    }
 
-            // New context again
-            using (var target = providerFactory.Create())
-            {
-                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
-                Assert.IsNotNull(actual);
-                Assert.AreEqual(expected, actual);
-                Assert.AreEqual(expected.FieldId, actual.FieldId);
-            }
-        }
+        ////    // New context again
+        ////    using (var target = providerFactory.Create())
+        ////    {
+        ////        var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
+        ////        Assert.IsNotNull(actual);
+        ////        Assert.AreEqual(expected, actual);
+        ////        Assert.AreEqual(expected.FieldId, actual.FieldId);
+        ////    }
+        ////}
 
         /// <summary>
         /// The get selection test.
@@ -191,7 +190,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(topContainer2);
+                target.InsertItem(topContainer2);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -200,7 +199,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                target.Save(subContainerA);
+                target.InsertItem(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -209,7 +208,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     IsSystem = false
                 };
 
-                target.Save(categoryAttribute20);
+                target.InsertItem(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -218,7 +217,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(timBobIdentity);
+                target.InsertItem(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -227,7 +226,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(fooBarIdentity);
+                target.InsertItem(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -235,14 +234,14 @@ namespace Startitecture.Orm.Mapper.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                target.Save(otherAggregate10);
+                target.InsertItem(otherAggregate10);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(template23);
+                target.InsertItem(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
                 {
@@ -277,7 +276,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.Save(domainAggregate1);
+                target.InsertItem(domainAggregate1);
 
                 var domainAggregate2 = new DomainAggregateRow
                 {
@@ -299,7 +298,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.Save(domainAggregate2);
+                target.InsertItem(domainAggregate2);
 
                 var domainAggregate3 = new DomainAggregateRow
                 {
@@ -319,13 +318,13 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.Save(domainAggregate3);
+                target.InsertItem(domainAggregate3);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                target.Save(aggregateOption1);
+                target.InsertItem(aggregateOption1);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                target.Save(aggregateOption2);
+                target.InsertItem(aggregateOption2);
 
                 var associationRow = new AssociationRow
                 {
@@ -333,7 +332,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     OtherAggregateId = otherAggregate10.OtherAggregateId
                 };
 
-                target.Save(associationRow);
+                target.InsertItem(associationRow);
 
                 expected = new List<DomainAggregateRow>
                                {
@@ -386,7 +385,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.Save(expected);
+                target.InsertItem(expected);
             }
 
             // New context again
@@ -417,7 +416,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(topContainer2);
+                target.InsertItem(topContainer2);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -426,7 +425,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                target.Save(subContainerA);
+                target.InsertItem(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -435,7 +434,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     IsSystem = false
                 };
 
-                target.Save(categoryAttribute20);
+                target.InsertItem(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -444,7 +443,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(timBobIdentity);
+                target.InsertItem(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -453,7 +452,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(fooBarIdentity);
+                target.InsertItem(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -461,14 +460,14 @@ namespace Startitecture.Orm.Mapper.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                target.Save(otherAggregate10);
+                target.InsertItem(otherAggregate10);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.Save(template23);
+                target.InsertItem(template23);
 
                 expected = new DomainAggregateRow
                 {
@@ -488,17 +487,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.Save(expected);
-
-                ////var aggregateOption1 = new AggregateOptionRow
-                ////                           {
-                ////                               AggregateOptionId = expected.DomainAggregateId,
-                ////                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                ////                               AggregateOptionTypeId = 2,
-                ////                               Value = 439034.0332m
-                ////                           };
-
-                ////target.Save(aggregateOption1);
+                target.InsertItem(expected);
             }
 
             using (var target = providerFactory.Create())
@@ -558,7 +547,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.Save(expected);
+                target.InsertItem(expected);
             }
 
             // New context again
@@ -604,7 +593,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.Save(expected);
+                target.InsertItem(expected);
             }
 
             Assert.AreNotEqual(0, expected.FieldId);
@@ -638,7 +627,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = description
                 };
 
-                target.Save(field1);
+                target.InsertItem(field1);
 
                 var field2 = new FieldRow
                 {
@@ -646,7 +635,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = description
                 };
 
-                target.Save(field2);
+                target.InsertItem(field2);
 
                 var field3 = new FieldRow
                 {
@@ -654,7 +643,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = description
                 };
 
-                target.Save(field3);
+                target.InsertItem(field3);
             }
 
             // New context again
@@ -681,7 +670,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = providerFactory.Create())
             {
-                target.StartTransaction();
+                var transaction = target.StartTransaction();
 
                 try
                 {
@@ -691,7 +680,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 }
                 finally
                 {
-                    target.AbortTransaction();
+                    transaction.Rollback();
                 }
             }
         }
@@ -715,7 +704,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.Save(item);
+                target.InsertItem(item);
             }
 
             // Completely new context to test that caching is not involved.
@@ -764,7 +753,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                LastName = "Last Name"
                            };
 
-                target.Save(item);
+                target.InsertItem(item);
             }
 
             // Completely new context to test that caching is not involved.

@@ -12,6 +12,7 @@ namespace Startitecture.Orm.Common.Tests
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Linq;
 
     using global::AutoMapper;
@@ -115,6 +116,155 @@ namespace Startitecture.Orm.Common.Tests
             {
                 var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create());
                 var actual = target.Contains(22);
+                Assert.IsTrue(actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains item selection for existing entity returns true.
+        /// </summary>
+        [TestMethod]
+        public void Contains_ItemSelectionForExistingEntity_ReturnsTrue()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            repositoryProvider.Setup(provider => provider.Contains(It.IsAny<ItemSelection<ComplexRaisedRow>>()))
+                .Returns(true);
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create());
+                var actual = target.Contains(Select.From<ComplexRaisedRow>().WhereEqual(row => row.FakeSubEntityId, 22));
+                Assert.IsTrue(actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains item selection for non existing entity returns true.
+        /// </summary>
+        [TestMethod]
+        public void Contains_ItemSelectionForNonExistingEntity_ReturnsTrue()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            repositoryProvider.Setup(provider => provider.Contains(It.IsAny<ItemSelection<ComplexRaisedRow>>())).Returns(false);
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create());
+                var actual = target.Contains(Select.From<ComplexRaisedRow>().WhereEqual(row => row.FakeSubEntityId, 22));
+                Assert.IsFalse(actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains entity with string unique key specified returns true.
+        /// </summary>
+        [TestMethod]
+        public void Contains_EntityWithStringUniqueKeySpecified_ReturnsTrue()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            repositoryProvider.Setup(
+                    provider => provider.Contains(
+                        It.Is<ItemSelection<ComplexRaisedRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
+                .Returns(true);
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create(), row => row.UniqueName);
+                var actual = target.Contains("UniqueName");
+                Assert.IsTrue(actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains entity with value type unique key specified returns true.
+        /// </summary>
+        [TestMethod]
+        public void Contains_EntityWithValueTypeUniqueKeySpecified_ReturnsTrue()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            repositoryProvider.Setup(
+                    provider => provider.Contains(
+                        It.Is<ItemSelection<DependentRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as int? == 24)))
+                .Returns(true);
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<DependentEntity, DependentRow>(provider, this.mapperFactory.Create(), row => row.DependentIntegerValue);
+                var actual = target.Contains(24);
+                Assert.IsTrue(actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains_ entity with dynamic unique key specified_ returns true.
+        /// </summary>
+        [TestMethod]
+        public void Contains_EntityWithDynamicUniqueKeySpecified_ReturnsTrue()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            repositoryProvider.Setup(
+                    provider => provider.Contains(
+                        It.Is<ItemSelection<ComplexRaisedRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
+                .Returns(true);
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create(), row => row.UniqueName);
+                dynamic key = new ExpandoObject();
+                key.UniqueName = "UniqueName";
+                key.Foo = 12;
+
+                var actual = target.Contains(key);
+
+                Assert.IsTrue(actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains_ entity with dynamic unique key specified_ returns true.
+        /// </summary>
+        [TestMethod]
+        public void Contains_EntityWithAnonymousUniqueKeySpecified_ReturnsTrue()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            repositoryProvider.Setup(
+                    provider => provider.Contains(
+                        It.Is<ItemSelection<ComplexRaisedRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
+                .Returns(true);
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create(), row => row.UniqueName);
+
+                var actual = target.Contains(
+                    new
+                    {
+                        UniqueName = "UniqueName",
+                        Foo = 12
+                    });
+
                 Assert.IsTrue(actual);
             }
         }
@@ -339,8 +489,165 @@ namespace Startitecture.Orm.Common.Tests
         }
 
         /// <summary>
+        /// The contains entity with string unique key specified returns true.
+        /// </summary>
+        [TestMethod]
+        public void FirstOrDefault_EntityWithStringUniqueKeySpecified_ReturnsEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            var expected = new ComplexRaisedRow
+                               {
+                                   ComplexEntityId = 34,
+                                   CreatedByFakeMultiReferenceEntityId = 3335,
+                                   CreationTime = DateTimeOffset.Now,
+                                   Description = "Foo",
+                                   FakeEnumerationId = 3,
+                                   FakeOtherEnumerationId = 6,
+                                   ModifiedByFakeMultiReferenceEntityId = 998,
+                                   UniqueName = "UniqueName"
+                               };
+
+            repositoryProvider.Setup(
+                    provider => provider.GetFirstOrDefault(
+                        It.Is<ItemSelection<ComplexRaisedRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
+                .Returns(expected);
+
+            var entityMapper = this.mapperFactory.Create();
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper, row => row.UniqueName);
+                var actual = target.FirstOrDefault("UniqueName");
+                Assert.AreEqual(entityMapper.Map<ComplexEntity>(expected), actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains entity with value type unique key specified returns true.
+        /// </summary>
+        [TestMethod]
+        public void FirstOrDefault_EntityWithValueTypeUniqueKeySpecified_ReturnsEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            var expected = new DependentRow
+                               {
+                                   FakeDependentEntityId = 46,
+                                   DependentIntegerValue = 24,
+                                   DependentTimeValue = DateTimeOffset.Now
+                               };
+
+            repositoryProvider.Setup(
+                    provider => provider.GetFirstOrDefault(
+                        It.Is<ItemSelection<DependentRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as int? == 24)))
+                .Returns(expected);
+
+            var entityMapper = this.mapperFactory.Create();
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<DependentEntity, DependentRow>(provider, entityMapper, row => row.DependentIntegerValue);
+                var actual = target.FirstOrDefault(24);
+                Assert.AreEqual(entityMapper.Map<DependentEntity>(expected), actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains_ entity with dynamic unique key specified_ returns true.
+        /// </summary>
+        [TestMethod]
+        public void FirstOrDefault_EntityWithDynamicUniqueKeySpecified_ReturnsEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            var expected = new ComplexRaisedRow
+                               {
+                                   ComplexEntityId = 34,
+                                   CreatedByFakeMultiReferenceEntityId = 3335,
+                                   CreationTime = DateTimeOffset.Now,
+                                   Description = "Foo",
+                                   FakeEnumerationId = 3,
+                                   FakeOtherEnumerationId = 6,
+                                   ModifiedByFakeMultiReferenceEntityId = 998,
+                                   UniqueName = "UniqueName"
+                               };
+
+            repositoryProvider.Setup(
+                    provider => provider.GetFirstOrDefault(
+                        It.Is<ItemSelection<ComplexRaisedRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
+                .Returns(expected);
+
+            var entityMapper = this.mapperFactory.Create();
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper, row => row.UniqueName);
+                dynamic key = new ExpandoObject();
+                key.UniqueName = "UniqueName";
+                key.Foo = 12;
+
+                var actual = target.FirstOrDefault(key);
+
+                Assert.AreEqual(entityMapper.Map<ComplexEntity>(expected), actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains_ entity with dynamic unique key specified_ returns true.
+        /// </summary>
+        [TestMethod]
+        public void FirstOrDefault_EntityWithAnonymousUniqueKeySpecified_ReturnsEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            var expected = new ComplexRaisedRow
+                               {
+                                   ComplexEntityId = 34,
+                                   CreatedByFakeMultiReferenceEntityId = 3335,
+                                   CreationTime = DateTimeOffset.Now,
+                                   Description = "Foo",
+                                   FakeEnumerationId = 3,
+                                   FakeOtherEnumerationId = 6,
+                                   ModifiedByFakeMultiReferenceEntityId = 998,
+                                   UniqueName = "UniqueName"
+                               };
+
+            repositoryProvider.Setup(
+                    provider => provider.GetFirstOrDefault(
+                        It.Is<ItemSelection<ComplexRaisedRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
+                .Returns(expected);
+
+            var entityMapper = this.mapperFactory.Create();
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper, row => row.UniqueName);
+
+                var actual = target.FirstOrDefault(
+                    new
+                    {
+                        UniqueName = "UniqueName",
+                        Foo = 12
+                    });
+
+                Assert.AreEqual(entityMapper.Map<ComplexEntity>(expected), actual);
+            }
+        }
+
+        /// <summary>
         /// Tests that the first or default of the repository matches the expected results.
-        /// TODO: Ensure that SubSubEntity is the same reference
         /// </summary>
         [TestMethod]
         public void SelectAll_FakeRaisedSubEntity_MatchesExpected()
@@ -386,7 +693,6 @@ namespace Startitecture.Orm.Common.Tests
 
         /// <summary>
         /// The select test.
-        /// TODO: Ensure that SubSubEntity is the same reference
         /// </summary>
         [TestMethod]
         public void Select_ReadOnlyRepositoryWithItemSelection_MatchesExpected()

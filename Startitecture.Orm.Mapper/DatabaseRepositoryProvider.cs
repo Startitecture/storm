@@ -14,7 +14,6 @@ namespace Startitecture.Orm.Mapper
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
-    using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.Caching;
 
@@ -149,7 +148,7 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Gets the internal identifier for this provider.
         /// </summary>
-        public Guid InstanceIdentifier { get; } = Guid.NewGuid();
+        private Guid InstanceIdentifier { get; } = Guid.NewGuid();
 
         /// <inheritdoc />
         public void Dispose()
@@ -218,6 +217,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
+/*
         /// <inheritdoc />
         public void CompleteTransaction()
         {
@@ -238,7 +238,9 @@ namespace Startitecture.Orm.Mapper
                 throw new RepositoryException(this, ex.Message, ex);
             }
         }
+*/
 
+/*
         /// <inheritdoc />
         public void AbortTransaction()
         {
@@ -259,6 +261,7 @@ namespace Startitecture.Orm.Mapper
                 throw new RepositoryException(this, ex.Message, ex);
             }
         }
+*/
 
         /// <inheritdoc />
         public bool Contains<TDataItem>(ItemSelection<TDataItem> selection)
@@ -326,6 +329,7 @@ namespace Startitecture.Orm.Mapper
             return this.repositoryAdapter.SelectItems(selection, pageSize, page);
         }
 
+/*
         /// <inheritdoc />
         /// <exception cref="RepositoryException">
         /// The item could not be saved in the repository.
@@ -344,47 +348,10 @@ namespace Startitecture.Orm.Mapper
 
             var uniqueSelection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, item).Select(selectExpressions);
 
-            ////// If caching is enabled, incoming items will be compared against the cache. This will catch forward changes (A1 -> A2) but 
-            ////// will ignore reverse changes (A2 -> A1) until the cached item expires.
-            ////var existingItem = this.FirstOrDefault(uniqueSelection, this.EnableCaching);
-
             var savePolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) };
 
             if (this.Contains(uniqueSelection))
             {
-                ////// This needs to be done prior to the mapping so we know what is in the database.
-                ////var existingValues = from a in attributeDefinitions
-                ////                     select a.GetValueDelegate.DynamicInvoke(existingItem);
-
-                ////// Now apply the auto-number key from the existing item to the incoming item if necessary. This is for cases when the 
-                ////// unique key is used rather than an auto-number ID. 
-                ////var primaryKey = entityDefinition.AutoNumberPrimaryKey;
-                ////var keyCompare = new Lazy<bool>(
-                ////    () => primaryKey?.GetValueDelegate.DynamicInvoke(item) == primaryKey?.GetValueDelegate.DynamicInvoke(existingItem));
-
-                ////if (primaryKey != null && keyCompare.Value == false)
-                ////{
-                ////    var existingKey = primaryKey.Value.GetValueDelegate.DynamicInvoke(existingItem);
-                ////    primaryKey.Value.SetValueDelegate.DynamicInvoke(item, existingKey);
-                ////}
-
-                ////var mergedValues = from a in attributeDefinitions
-                ////                   select a.GetValueDelegate.DynamicInvoke(item);
-
-                ////// Do not update unless needed. // TODO: Is this wise?
-                ////if (existingValues.SequenceEqual(mergedValues))
-                ////{
-                ////    if (this.EnableCaching)
-                ////    {
-                ////        lock (this.itemLock)
-                ////        {
-                ////            this.itemCache.Set(CreateCacheKey(uniqueSelection), item, savePolicy);
-                ////        }
-                ////    }
-
-                ////    item.SetTransactionProvider(this);
-                ////    return item;
-                ////}
 
                 this.Update(item, uniqueSelection);
 
@@ -418,6 +385,7 @@ namespace Startitecture.Orm.Mapper
             savedItem.SetTransactionProvider(this);
             return savedItem;
         }
+*/
 
         /// <inheritdoc />
         public int DeleteItems<TDataItem>(ItemSelection<TDataItem> selection) 

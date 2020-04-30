@@ -188,9 +188,6 @@
   <data name="IndexPropertiesNotSupported" xml:space="preserve">
     <value>Index properties are not supported by this method.</value>
   </data>
-  <data name="CouldNotSetPrimaryKeyWithValue" xml:space="preserve">
-    <value>Could not set primary key {0}.{1} with value '{2}': {3}</value>
-  </data>
   <data name="UnableToSetPropertyToValue" xml:space="preserve">
     <value>Unable to set {0}.{1} to '{2}': {3}</value>
   </data>

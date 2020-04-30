@@ -73,15 +73,19 @@ namespace Startitecture.Orm.Model
         /// </returns>
         IDbTransaction StartTransaction(IsolationLevel isolationLevel);
 
+/*
         /// <summary>
         /// Completes a transaction in the repository.
         /// </summary>
         void CompleteTransaction();
+*/
 
+/*
         /// <summary>
         /// Aborts a transaction, rolling back changes in the repository.
         /// </summary>
         void AbortTransaction();
+*/
 
         /// <summary>
         /// Determines whether an item exists given the specified unique key.
@@ -147,24 +151,6 @@ namespace Startitecture.Orm.Model
         /// A collection of items that match the filter.
         /// </returns>
         Page<TDataItem> GetSelection<TDataItem>(ItemSelection<TDataItem> selection, long pageSize, long page)
-            where TDataItem : ITransactionContext;
-
-        /// <summary>
-        /// Saves an item into the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="item">
-        /// The item to save.
-        /// </param>
-        /// <returns>
-        /// The saved item as a <typeparamref name="TDataItem"/>.
-        /// </returns>
-        /// <exception cref="RepositoryException">
-        /// The item could not be saved in the repository.
-        /// </exception>
-        TDataItem Save<TDataItem>(TDataItem item)
             where TDataItem : ITransactionContext;
 
         /// <summary>

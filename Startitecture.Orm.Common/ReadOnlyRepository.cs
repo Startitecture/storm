@@ -11,8 +11,10 @@ namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
+    using System.Dynamic;
     using System.Globalization;
     using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
     using System.Runtime.Caching;
 
@@ -55,6 +57,11 @@ namespace Startitecture.Orm.Common
         private readonly IComparer<TEntity> selectionComparer;
 
         /// <summary>
+        /// The unique key expressions.
+        /// </summary>
+        private readonly List<Expression<Func<TEntity, object>>> uniqueKeyExpressions = new List<Expression<Func<TEntity, object>>>();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ReadOnlyRepository{TModel,TEntity}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
@@ -63,8 +70,14 @@ namespace Startitecture.Orm.Common
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
-        public ReadOnlyRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
-            : this(repositoryProvider, entityMapper, null)
+        /// <param name="uniqueKeyExpressions">
+        /// The unique key expressions for the entity, if any.
+        /// </param>
+        public ReadOnlyRepository(
+            IRepositoryProvider repositoryProvider,
+            IEntityMapper entityMapper,
+            params Expression<Func<TEntity, object>>[] uniqueKeyExpressions)
+            : this(repositoryProvider, entityMapper, null, uniqueKeyExpressions)
         {
         }
 
@@ -80,16 +93,28 @@ namespace Startitecture.Orm.Common
         /// <param name="selectionComparer">
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
+        /// <param name="uniqueKeyExpressions">
+        /// The unique key expressions for the entity, if any.
+        /// </param>
         public ReadOnlyRepository(
             [NotNull] IRepositoryProvider repositoryProvider,
             [NotNull] IEntityMapper entityMapper,
-            IComparer<TEntity> selectionComparer)
+            IComparer<TEntity> selectionComparer,
+            [NotNull] params Expression<Func<TEntity, object>>[] uniqueKeyExpressions)
         {
             // The entity mapper, and its resolution context, is intended to last only for the lifetime of the repository.
             this.EntityMapper = entityMapper ?? throw new ArgumentNullException(nameof(entityMapper));
             this.RepositoryProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
             this.selectionComparer = selectionComparer;
-        }
+ 
+            if (uniqueKeyExpressions == null)
+            {
+                throw new ArgumentNullException(nameof(uniqueKeyExpressions));
+            }
+
+            this.uniqueKeyExpressions.Clear();
+            this.uniqueKeyExpressions.AddRange(uniqueKeyExpressions);
+       }
 
         /// <summary>
         /// Gets the repository provider.
@@ -109,7 +134,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            var dataItem = this.GetExampleItem(candidate);
+            var dataItem = this.GetExampleEntity(candidate);
             var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
             return this.RepositoryProvider.Contains(uniqueItemSelection);
         }
@@ -140,7 +165,7 @@ namespace Startitecture.Orm.Common
 
             TModel entity;
 
-            var selectionItem = this.GetExampleItem(candidate);
+            var selectionItem = this.GetExampleEntity(candidate);
             var uniqueItemSelection = this.GetUniqueItemSelection(selectionItem);
 
             // Because we want to hydrate the entire entity, we need to add joins if available.
@@ -217,7 +242,19 @@ namespace Startitecture.Orm.Common
         /// </returns>
         protected virtual ItemSelection<TEntity> GetUniqueItemSelection(TEntity entity)
         {
-            return new UniqueQuery<TEntity>(this.RepositoryProvider.EntityDefinitionProvider, entity);
+            if (this.uniqueKeyExpressions.Count == 0)
+            {
+                return new UniqueQuery<TEntity>(this.RepositoryProvider.EntityDefinitionProvider, entity);
+            }
+
+            var itemSelection = new ItemSelection<TEntity>();
+
+            foreach (var keyExpression in this.uniqueKeyExpressions)
+            {
+                itemSelection.WhereEqual(keyExpression, keyExpression.Compile().Invoke(entity));
+            }
+
+            return itemSelection;
         }
 
         /// <summary>
@@ -235,7 +272,10 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Gets an example item from the provided <typeparamref name="TEntity"/> key.
+        /// Gets an example item from the provided <typeparamref name="TItem"/> key. If the key is a value type or string, an item is created and its
+        /// first unique key property value is set to the key, or first primary key property if no unique keys are specified. If the key is the same
+        /// type as the entity, then the entity is returned directly. If the key is a dynamic, then all matching unique attributes of the specified
+        /// unique key are set from the dynamic, or all matching primary key values if no unique keys are specified.
         /// </summary>
         /// <param name="key">
         /// The key for the example item.
@@ -246,19 +286,34 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// An example of the data row as a <typeparamref name="TEntity"/>.
         /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="key"/> is null.
+        /// </exception>
         /// <exception cref="OperationException">
         /// The key cannot be applied to the <typeparamref name="TEntity"/>. The inner exception contains details as to why.
         /// </exception>
-        protected TEntity GetExampleItem<TItem>(TItem key)
+        protected TEntity GetExampleEntity<TItem>([NotNull] TItem key)
         {
-            TEntity dataItem;
-
-            if (key?.GetType().IsValueType == true)
+            if (key == null)
             {
-                var keyDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>().PrimaryKeyAttributes.First();
+                throw new ArgumentNullException(nameof(key));
+            }
 
+            TEntity dataItem;
+            var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>();
+
+            var keyDefinitions = this.uniqueKeyExpressions.Count == 0
+                                    ? entityDefinition.PrimaryKeyAttributes
+                                    : this.uniqueKeyExpressions.Select(entityDefinition.Find);
+
+            var keyType = key.GetType();
+
+            // Single key value
+            if (keyType.IsValueType || key is string)
+            {
                 // If the example is a value type, create a new data item as an example and set the key. Assumption is that the two are compatible.
                 dataItem = new TEntity();
+                var keyDefinition = keyDefinitions.First();
 
                 try
                 {
@@ -268,7 +323,7 @@ namespace Startitecture.Orm.Common
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
-                        ErrorMessages.CouldNotSetPrimaryKeyWithValue,
+                        ErrorMessages.UnableToSetPropertyToValue,
                         typeof(TEntity),
                         keyDefinition.PropertyName,
                         key,
@@ -280,7 +335,7 @@ namespace Startitecture.Orm.Common
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
-                        ErrorMessages.CouldNotSetPrimaryKeyWithValue,
+                        ErrorMessages.UnableToSetPropertyToValue,
                         typeof(TEntity),
                         keyDefinition.PropertyName,
                         key,
@@ -292,7 +347,7 @@ namespace Startitecture.Orm.Common
                 {
                     var message = string.Format(
                         CultureInfo.CurrentCulture,
-                        ErrorMessages.CouldNotSetPrimaryKeyWithValue,
+                        ErrorMessages.UnableToSetPropertyToValue,
                         typeof(TEntity),
                         keyDefinition.PropertyName,
                         key,
@@ -303,7 +358,130 @@ namespace Startitecture.Orm.Common
             }
             else
             {
-                dataItem = this.EntityMapper.Map<TEntity>(key);
+                switch (key)
+                {
+                    case TEntity entity:
+                        dataItem = entity;
+                        break;
+                    case ExpandoObject expando:
+                        
+                        // Handle dynamics 
+                        dataItem = new TEntity();
+
+                        foreach (var attribute in keyDefinitions)
+                        {
+                            try
+                            {
+                                attribute.SetValueDelegate.DynamicInvoke(
+                                    dataItem,
+                                    expando.FirstOrDefault(pair => pair.Key == attribute.PropertyName).Value);
+                            }
+                            catch (ArgumentException ex)
+                            {
+                                var message = string.Format(
+                                    CultureInfo.CurrentCulture,
+                                    ErrorMessages.UnableToSetPropertyToValue,
+                                    typeof(TEntity),
+                                    attribute.PropertyName,
+                                    key,
+                                    ex.Message);
+
+                                throw new OperationException(key, message, ex);
+                            }
+                            catch (MemberAccessException ex)
+                            {
+                                var message = string.Format(
+                                    CultureInfo.CurrentCulture,
+                                    ErrorMessages.UnableToSetPropertyToValue,
+                                    typeof(TEntity),
+                                    attribute.PropertyName,
+                                    key,
+                                    ex.Message);
+
+                                throw new OperationException(key, message, ex);
+                            }
+                            catch (TargetInvocationException ex)
+                            {
+                                var message = string.Format(
+                                    CultureInfo.CurrentCulture,
+                                    ErrorMessages.UnableToSetPropertyToValue,
+                                    typeof(TEntity),
+                                    attribute.PropertyName,
+                                    key,
+                                    ex.Message);
+
+                                throw new OperationException(key, message, ex);
+                            }
+                        }
+
+                        break;
+
+                    default:
+
+                        // Handle anonymous types, require all key definitions to be set.
+                        dataItem = new TEntity();
+                        bool anyNull = false;
+
+                        foreach (var attribute in keyDefinitions)
+                        {
+                            try
+                            {
+                                var value = key.GetType().GetProperty(attribute.PropertyName)?.GetMethod.Invoke(key, null);
+
+                                if (value == null)
+                                {
+                                    anyNull = true;
+                                    break;
+                                }
+
+                                attribute.SetValueDelegate.DynamicInvoke(dataItem, value);
+                            }
+                            catch (ArgumentException ex)
+                            {
+                                var message = string.Format(
+                                    CultureInfo.CurrentCulture,
+                                    ErrorMessages.UnableToSetPropertyToValue,
+                                    typeof(TEntity),
+                                    attribute.PropertyName,
+                                    key,
+                                    ex.Message);
+
+                                throw new OperationException(key, message, ex);
+                            }
+                            catch (MemberAccessException ex)
+                            {
+                                var message = string.Format(
+                                    CultureInfo.CurrentCulture,
+                                    ErrorMessages.UnableToSetPropertyToValue,
+                                    typeof(TEntity),
+                                    attribute.PropertyName,
+                                    key,
+                                    ex.Message);
+
+                                throw new OperationException(key, message, ex);
+                            }
+                            catch (TargetInvocationException ex)
+                            {
+                                var message = string.Format(
+                                    CultureInfo.CurrentCulture,
+                                    ErrorMessages.UnableToSetPropertyToValue,
+                                    typeof(TEntity),
+                                    attribute.PropertyName,
+                                    key,
+                                    ex.Message);
+
+                                throw new OperationException(key, message, ex);
+                            }
+                        }
+
+                        // If any key definitions are null, our last resort is to try the mapper.
+                        if (anyNull)
+                        {
+                            dataItem = this.EntityMapper.Map<TEntity>(key);
+                        }
+
+                        break;
+                }
             }
 
             dataItem.SetTransactionProvider(this.RepositoryProvider);

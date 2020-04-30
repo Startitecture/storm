@@ -7,6 +7,7 @@
 namespace Startitecture.Orm.Common.Tests
 {
     using System;
+    using System.Linq;
 
     using global::AutoMapper;
 
@@ -66,7 +67,7 @@ namespace Startitecture.Orm.Common.Tests
             repositoryProvider.Setup(provider => provider.GetFirstOrDefault(It.IsAny<ItemSelection<ComplexRaisedRow>>()))
                 .Returns(default(ComplexRaisedRow));
 
-            repositoryProvider.Setup(provider => provider.Save(It.IsAny<ComplexRaisedRow>()))
+            repositoryProvider.Setup(provider => provider.InsertItem(It.IsAny<ComplexRaisedRow>()))
                 .Callback((ComplexRaisedRow row) => row.ComplexEntityId = 43)
                 .Returns((ComplexRaisedRow row) => row);
 
@@ -131,7 +132,13 @@ namespace Startitecture.Orm.Common.Tests
             repositoryProvider.Setup(provider => provider.GetFirstOrDefault(It.IsAny<ItemSelection<ComplexRaisedRow>>()))
                 .Returns(mapper.Map<ComplexRaisedRow>(baseline));
 
-            repositoryProvider.Setup(provider => provider.Save(It.IsAny<ComplexRaisedRow>())).Returns((ComplexRaisedRow row) => row);
+            repositoryProvider.Setup(
+                    provider => provider.Contains(
+                        It.Is<ItemSelection<ComplexRaisedRow>>(selection => (int?)selection.PropertyValues.FirstOrDefault() == 22)))
+                .Returns(true);
+
+            repositoryProvider.Setup(provider => provider.Update(It.IsAny<ComplexRaisedRow>(), It.IsAny<ItemSelection<ComplexRaisedRow>>()))
+                .Returns(1);
 
             using (var provider = repositoryProvider.Object)
             {

@@ -8,14 +8,14 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Startitecture, LLC</Authors>
-    <Description>Resource file for Startitecture and ST/orm error, validation and action messages.</Description>
+    <Description>Resource file for Startitecture and ST/orm error and validation messages.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageProjectUrl>https://github.com/Startitecture/Core</PackageProjectUrl>
     <RepositoryUrl></RepositoryUrl>
     <RepositoryType></RepositoryType>
     <PackageIcon>Startitecture New Logo.png</PackageIcon>
     <PackageTags>#framework #library</PackageTags>
-    <Version>1.0.0-alpha3</Version>
+    <Version>1.0.0-alpha4</Version>
     <ApplicationIcon>startitecture_new_logo.ico</ApplicationIcon>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>

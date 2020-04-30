@@ -124,15 +124,6 @@ namespace Startitecture.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Could not set primary key {0}.{1} with value &apos;{2}&apos;: {3}.
-        /// </summary>
-        public static string CouldNotSetPrimaryKeyWithValue {
-            get {
-                return ResourceManager.GetString("CouldNotSetPrimaryKeyWithValue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The database context connection must be a SqlConnection..
         /// </summary>
         public static string DatabaseContextConnectionIsNotSqlConnection {
