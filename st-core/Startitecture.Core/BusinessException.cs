@@ -3,7 +3,7 @@
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Represents an error that is the direct result of invalid commands or values provided by the user.
+//   Represents a validation error in business logic or rules.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -21,7 +21,7 @@ namespace Startitecture.Core
     using Startitecture.Resources;
 
     /// <summary>
-    /// Represents an error that is the direct result of invalid commands or values provided by the user.
+    /// Represents a validation error in business logic or rules.
     /// </summary>
     [Serializable]
     public sealed class BusinessException : Exception

@@ -8,7 +8,6 @@ namespace Startitecture.Core
     using System;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
@@ -33,7 +32,6 @@ namespace Startitecture.Core
         /// <returns>
         /// <c>true</c> if the value is null; otherwise, <c>false</c>.
         /// </returns>
-        [DebuggerHidden]
         public static bool IsNull<T>(T value)
         {
             return !IsSet(value);
@@ -51,7 +49,6 @@ namespace Startitecture.Core
         /// <returns>
         /// <c>true</c> if the value is not null; otherwise, <c>false</c>.
         /// </returns>
-        [DebuggerHidden]
         public static bool IsSet<T>(T value)
         {
             var type = typeof(T);
@@ -70,7 +67,6 @@ namespace Startitecture.Core
         /// <returns>
         /// True if the value is in its default state, otherwise false.
         /// </returns>
-        [DebuggerHidden]
         public static bool IsDefaultValue<T>(T value)
         {
             return EqualityComparer<T>.Default.Equals(value, default);
@@ -163,7 +159,6 @@ namespace Startitecture.Core
         /// <returns>
         /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
         /// </returns>
-        [DebuggerHidden]
         public static bool Equals<T>(T valueA, object valueB)
         {
             if (IsNull(valueA) && IsNull(valueB))
@@ -209,7 +204,6 @@ namespace Startitecture.Core
         /// calls <see cref="System.IEquatable{T}.Equals(T)"/>. The same issue applies if the calling type is not 
         /// <see cref="System.IEquatable{T}.Equals(T)"/>.
         /// </remarks>
-        [DebuggerHidden]
         public static bool Equals<T>(T itemA, T itemB, params Func<T, object>[] selectors)
         {
             if (selectors == null)
@@ -354,7 +348,6 @@ namespace Startitecture.Core
         /// <returns>
         /// The hash code of the object, or 0 if the object is null.
         /// </returns>
-        [DebuggerHidden]
         public static int GetHashCode<T>(T value)
         {
             return IsDefaultValue(value) ? 0 : value.GetHashCode();
@@ -369,7 +362,6 @@ namespace Startitecture.Core
         /// <returns>
         /// An integer hash code based on the specified values.
         /// </returns>
-        [DebuggerHidden]
         public static int GenerateHashCode(params object[] values)
         {
             return values?.Aggregate(0, AggregateHash) ?? 0;
@@ -387,7 +379,6 @@ namespace Startitecture.Core
         /// <returns>
         /// A hash code based on ORing all the hash codes for the specified values.
         /// </returns>
-        [DebuggerHidden]
         public static int GenerateHashCode<T>(IEnumerable<T> values)
         {
             unchecked
@@ -418,7 +409,6 @@ namespace Startitecture.Core
             "Microsoft.Design", 
             "CA1006:DoNotNestGenericTypesInMemberSignatures", 
             Justification = "Allows passing of Func<T, object> collections which are not difficult to create.")]
-        [DebuggerHidden]
         public static int GenerateHashCode<T>(T item, IEnumerable<Func<T, object>> selectors)
         {
             if (IsNull(item))
@@ -513,7 +503,6 @@ namespace Startitecture.Core
         /// <returns>
         /// The resulting hash code as an <see cref="int"/>.
         /// </returns>
-        [DebuggerHidden]
         private static int AggregateHash<T>(int current, T value)
         {
             return (current * 397) + GetHashCode(value);

@@ -39,34 +39,7 @@ namespace Startitecture.Core
 
         #endregion
 
-        #region Public Properties
-
-        /// <summary>
-        /// Gets the count.
-        /// </summary>
-        public int Count => this.cacheMap.Count;
-
-        #endregion
-
         #region Public Methods and Operators
-
-        /// <summary>
-        /// The flush.
-        /// </summary>
-        public void Flush()
-        {
-            // Cache it
-            this.cacheLock.EnterWriteLock();
-
-            try
-            {
-                this.cacheMap.Clear();
-            }
-            finally
-            {
-                this.cacheLock.ExitWriteLock();
-            }
-        }
 
         /// <summary>
         /// Gets the item from the cache.

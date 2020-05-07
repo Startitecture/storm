@@ -9,7 +9,7 @@
     <Company>Startitecture, LLC</Company>
     <NeutralLanguage>en-US</NeutralLanguage>
     <PackageTags>#framework #library</PackageTags>
-    <Version>1.0.0-alpha3</Version>
+    <Version>1.0.0-beta2</Version>
     <Description>Core methods and functionality for Startitecture, LLC packages.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageProjectUrl>https://github.com/Startitecture/Core</PackageProjectUrl>

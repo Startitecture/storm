@@ -53,17 +53,6 @@ namespace Startitecture.Core.Tests
         /// </summary>
         public IEnumerable<string> TestList => this.testList;
 
-        /// <summary>
-        /// The this.
-        /// </summary>
-        /// <param name="index">
-        /// The index.
-        /// </param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        public string this[int index] => this.testList[index];
-
         #region Equality and Comparison Methods and Operators
 
         /// <summary>
@@ -154,5 +143,16 @@ namespace Startitecture.Core.Tests
         }
 
         #endregion
+
+        /// <summary>
+        /// Adds an item to the list.
+        /// </summary>
+        /// <param name="item">
+        /// The item to add.
+        /// </param>
+        public void AddItem(string item)
+        {
+            this.testList.Add(item);
+        }
     }
 }
