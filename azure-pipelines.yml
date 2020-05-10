@@ -11,8 +11,9 @@ pool:
   vmImage: 'windows-latest'
 
 variables:
-  buildConfiguration: 'Release'
-  group: Git-Push
+  - group: Git-Push
+  - name: buildConfiguration
+    value: 'Release'
 
 steps:
 
