@@ -68,9 +68,10 @@ steps:
     CleanTargetFolder: true
 
 - task: PublishPipelineArtifact@1
+  displayName: 'Publish Test DACPAC'
   inputs:
-    targetPath: '$(Pipeline.Workspace)'
-    artifact: 'Artifact1'
+    targetPath: '$(Pipeline.Workspace)/Startitecture.Orm.Testing.Schema/bin/$(buildConfiguration)/Startitecture.Orm.Testing.Schema.dacpac'
+    artifact: 'Storm Test DACPAC'
     publishLocation: 'pipeline'
 
 - task: NuGetCommand@2
