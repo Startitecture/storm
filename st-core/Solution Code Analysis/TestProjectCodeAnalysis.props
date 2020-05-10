@@ -1,8 +1,0 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-    <SkipDefaultEditorConfigAsAdditionalFile>true</SkipDefaultEditorConfigAsAdditionalFile>
-  </PropertyGroup>
-  <ItemGroup Condition="Exists('..\Solution Code Analysis\TestProjectCodeAnalysis.editorconfig')" >
-    <AdditionalFiles Include="..\Solution Code Analysis\TestProjectCodeAnalysis.editorconfig" />
-  </ItemGroup>
-</Project>

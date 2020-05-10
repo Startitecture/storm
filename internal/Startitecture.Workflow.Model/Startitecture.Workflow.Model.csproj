@@ -15,9 +15,6 @@
     <CodeAnalysisIgnoreGeneratedCode>false</CodeAnalysisIgnoreGeneratedCode>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Startitecture.Common.Model\Startitecture.Common.Model.csproj" />
-  </ItemGroup>
-  <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
       <Link>Code Analysis\CustomDictionary.xml</Link>
     </CodeAnalysisDictionary>
