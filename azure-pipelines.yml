@@ -89,7 +89,7 @@ steps:
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Test DACPAC'
   inputs:
-    targetPath: '$(build.artifactstagingdirectory)/Startitecture.Orm.Testing.Schema/bin/$(buildConfiguration)/Startitecture.Orm.Testing.Schema.dacpac'
+    targetPath: '$(System.DefaultWorkingDirectory)/Startitecture.Orm.Testing.Schema/bin/$(buildConfiguration)/Startitecture.Orm.Testing.Schema.dacpac'
     artifact: 'Storm Test DACPAC'
     publishLocation: 'pipeline'
 
