@@ -67,7 +67,11 @@ steps:
     TargetFolder: '$(build.artifactstagingdirectory)'
     CleanTargetFolder: true
 
-
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Pipeline.Workspace)'
+    artifact: 'Artifact1'
+    publishLocation: 'pipeline'
 
 - task: NuGetCommand@2
   displayName: 'Push NuGet Packages'
