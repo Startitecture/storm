@@ -12,6 +12,7 @@ pool:
 
 variables:
   buildConfiguration: 'Release'
+  group: Git-Push
 
 steps:
 
@@ -53,26 +54,12 @@ steps:
     runOnlyImpactedTests: true
 
 - task: PublishTestResults@2
-  displayName: 'Publish Test Results'
+  displayName: 'Publish Test Results Internal'
   inputs:
     testResultsFormat: 'VSTest'
     testResultsFiles: '**/TEST-*.xml'
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
-
-- task: CopyFiles@2
-  displayName: 'Copy Build Output'
-  inputs:
-    Contents: '**\*'
-    TargetFolder: '$(build.artifactstagingdirectory)'
-    CleanTargetFolder: true
-
-- task: PublishPipelineArtifact@1
-  displayName: 'Publish Test DACPAC'
-  inputs:
-    targetPath: '$(build.artifactstagingdirectory)/Startitecture.Orm.Testing.Schema/bin/$(buildConfiguration)/Startitecture.Orm.Testing.Schema.dacpac'
-    artifact: 'Storm Test DACPAC'
-    publishLocation: 'pipeline'
 
 - task: NuGetCommand@2
   displayName: 'Push NuGet Packages'
@@ -82,3 +69,33 @@ steps:
     nuGetFeedType: 'internal'
     publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
     allowPackageConflicts: true
+
+- task: CopyFiles@2
+  displayName: 'Copy NuGet Packages'
+  inputs:
+    SourceFolder: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;$(Build.ArtifactStagingDirectory)/**/*.snupkg'
+    Contents: '**/*.nupkg'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish NuGet Package Build Artifacts'
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)/Packages'
+    ArtifactName: 'NuGet Packages'
+    publishLocation: 'Container'
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Test DACPAC'
+  inputs:
+    targetPath: '$(build.artifactstagingdirectory)/Startitecture.Orm.Testing.Schema/bin/$(buildConfiguration)/Startitecture.Orm.Testing.Schema.dacpac'
+    artifact: 'Storm Test DACPAC'
+    publishLocation: 'pipeline'
+
+- task: CmdLine@2
+  displayName: 'Mirror to Github'
+  env:
+    GitPat: $(GithubPAT-Mirror)
+  inputs:
+    script: |
+      git remote add --mirror=fetch mirror https://%GitPat%@github.com/Startitecture/storm.git
+      git push mirror --progress --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/*
