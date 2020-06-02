@@ -79,6 +79,8 @@ steps:
       **/*.nupkg
       **/*.snupkg
     TargetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
+    CleanTargetFolder: true
+    flattenFolders: true
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish NuGet Package Build Artifacts'
