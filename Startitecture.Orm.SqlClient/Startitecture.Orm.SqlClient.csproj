@@ -13,6 +13,7 @@
     <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #storm</PackageTags>
     <PackageIcon>storm.png</PackageIcon>
     <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
