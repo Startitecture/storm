@@ -20,6 +20,17 @@
   <PropertyGroup>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
+    <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Version>1.0.0-alpha1</Version>
+    <Authors>Startitecture, LLC</Authors>
+    <Company>Startitecture, LLC</Company>
+    <Description>Model library for the ST/orm (Startitecture.Orm) package.</Description>
+    <Copyright>© 2020, Startitecture, LLC</Copyright>
+    <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
+    <PackageIcon>storm.png</PackageIcon>
+    <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #storm</PackageTags>
   </PropertyGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
@@ -46,5 +57,11 @@
     </PackageReference>
     <PackageReference Include="Startitecture.Core" Version="1.0.0-alpha2" />
     <PackageReference Include="System.Data.DataSetExtensions" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Logos\storm.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 </Project>

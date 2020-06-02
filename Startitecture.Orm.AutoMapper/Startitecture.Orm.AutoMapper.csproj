@@ -13,6 +13,7 @@
     <PackageIcon>storm.png</PackageIcon>
     <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #objectmapper #mapper #automapper</PackageTags>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
+    <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

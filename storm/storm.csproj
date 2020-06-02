@@ -4,18 +4,19 @@
     <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.0-alpha1</Version>
+    <Version>1.0.0-alpha2</Version>
     <Company>Startitecture, LLC</Company>
     <Product>ST/orm</Product>
     <Description>An ORM that combines the speed of micro-ORMs with the flexibility of fluent queries and complex POCOs.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>storm.png</PackageIcon>
-    <PackageTags>#orm #microorm #objectrelationalmapper #crud #query</PackageTags>
+    <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #storm</PackageTags>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Startitecture, LLC</Authors>
     <PackageId>Startitecture.Orm</PackageId>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
+    <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
