@@ -1,8 +1,6 @@
 <#
-// Based on the EF Reverse POCO Generator file v2.34.1, Copyrighted (C) by Simon Hughes 2012 under the Apache 2.0 license.
-// https://marketplace.visualstudio.com/items?itemName=SimonHughes.EntityFrameworkReversePOCOGenerator
-//
-// All subsequent changes Copyright (C) Startitecture, LLC 2020.
+// Copyright (C) Simon Hughes 2012
+// v2.34.1
 #>
 <#@ template debug="true" hostspecific="true" language="C#" #>
 <#@ include file="EF6.Utility.CS.ttinclude"#>
@@ -78,6 +76,8 @@
         public static string CollectionInterfaceType = "System.Collections.Generic.ICollection";
         public static string CollectionType = "System.Collections.Generic.List";
         public static bool NullableShortHand;
+        public static bool UseDataAnnotations;
+        public static bool UseDataAnnotationsSchema;
         public static bool MakeClassesPartial;
         public static bool MakeClassesInternal;
         public static bool MakeDbContextInterfacePartial;
@@ -632,7 +632,8 @@
 
                 foreach (var t in tables)
                 {
-                    t.SetupDataAnnotations();
+                    if(Settings.UseDataAnnotationsSchema)
+                        t.SetupDataAnnotations();
                     t.Suffix = Settings.TableSuffix;
                 }
 
@@ -919,28 +920,42 @@
         {
             DataAnnotations = new List<string>();
             string databaseGeneratedOption = null;
-            var schemaReference = string.Empty;
+            var schemaReference = Settings.UseDataAnnotations
+                ? string.Empty
+                : "System.ComponentModel.DataAnnotations.Schema.";
 
 			bool isNewSequentialId = !string.IsNullOrEmpty(Default)  && Default.ToLower().Contains("newsequentialid");
 
             if (IsIdentity || isNewSequentialId)
             {
-                DataAnnotations.Add("DatabaseGenerated(DatabaseGeneratedOption.Identity)");
+                if(Settings.UseDataAnnotationsSchema || isNewSequentialId)
+                    DataAnnotations.Add("DatabaseGenerated(DatabaseGeneratedOption.Identity)");
+                else
+                    databaseGeneratedOption = string.Format(".HasDatabaseGeneratedOption({0}DatabaseGeneratedOption.Identity)", schemaReference);
             }
             else if(IsComputed())
             {
-                DataAnnotations.Add("DatabaseGenerated(DatabaseGeneratedOption.Computed)");
+                if(Settings.UseDataAnnotationsSchema)
+                    DataAnnotations.Add("DatabaseGenerated(DatabaseGeneratedOption.Computed)");
+                else
+                    databaseGeneratedOption = string.Format(".HasDatabaseGeneratedOption({0}DatabaseGeneratedOption.Computed)", schemaReference);
             }
             else if (IsPrimaryKey)
             {
-                DataAnnotations.Add("DatabaseGenerated(DatabaseGeneratedOption.None)");
+                if(Settings.UseDataAnnotationsSchema)
+                    DataAnnotations.Add("DatabaseGenerated(DatabaseGeneratedOption.None)");
+                else
+                    databaseGeneratedOption = string.Format(".HasDatabaseGeneratedOption({0}DatabaseGeneratedOption.None)", schemaReference);
             }
 
             var sb = new StringBuilder();
 
-            DataAnnotations.Add(string.Format("Column(@\"{0}\", Order = {1}, TypeName = \"{2}\")", Name, Ordinal, SqlPropertyType));
+            if(Settings.UseDataAnnotationsSchema || (IsPrimaryKey && Settings.UseDataAnnotations))
+                DataAnnotations.Add(string.Format("Column(@\"{0}\", Order = {1}, TypeName = \"{2}\")", Name, Ordinal, SqlPropertyType));
+            else
+                sb.AppendFormat(".HasColumnName(@\"{0}\").HasColumnType(\"{1}\")", Name, SqlPropertyType);
 
-            if (Indexes.Any())
+            if (Settings.UseDataAnnotationsSchema && Indexes.Any())
             {
                 foreach (var index in Indexes)
                 {
@@ -958,8 +973,13 @@
             }
             else
             {
-                if(!IsComputed())
-                    DataAnnotations.Add("Required");
+                if (Settings.UseDataAnnotations)
+                {
+                    if(!IsComputed())
+                        DataAnnotations.Add("Required");
+                }
+                else
+                    sb.Append(".IsRequired()");
             }
 
             if (IsFixedLength || IsRowVersion)
@@ -978,15 +998,28 @@
             {
                 var doNotSpecifySize = (Settings.IsSqlCe && MaxLength > 4000); // Issue #179
 
-                DataAnnotations.Add(doNotSpecifySize ? "MaxLength" : string.Format("MaxLength({0})", MaxLength));
+                if (Settings.UseDataAnnotations)
+                {
+                    DataAnnotations.Add(doNotSpecifySize ? "MaxLength" : string.Format("MaxLength({0})", MaxLength));
 
-                if (PropertyType.Equals("string", StringComparison.InvariantCultureIgnoreCase))
-                    DataAnnotations.Add(string.Format("StringLength({0})", MaxLength));
+                    if (PropertyType.Equals("string", StringComparison.InvariantCultureIgnoreCase))
+                        DataAnnotations.Add(string.Format("StringLength({0})", MaxLength));
+                }
+                else
+                {
+                    if (doNotSpecifySize)
+                        sb.Append(".HasMaxLength(null)");
+                    else
+                        sb.AppendFormat(".HasMaxLength({0})", MaxLength);
+                }
             }
 
             if (IsMaxLength)
             {
-                DataAnnotations.Add("MaxLength");
+                if (Settings.UseDataAnnotations)
+                    DataAnnotations.Add("MaxLength");
+                else
+                    sb.Append(".IsMaxLength()");
             }
 
             if ((Precision > 0 || Scale > 0) && PropertyType == "decimal")
@@ -997,7 +1030,10 @@
 
             if (IsRowVersion)
             {
-                DataAnnotations.Add("Timestamp");
+                if (Settings.UseDataAnnotations)
+                    DataAnnotations.Add("Timestamp");
+                else
+                    sb.Append(".IsRowVersion()");
             }
 
             if (IsConcurrencyToken)
@@ -1012,6 +1048,9 @@
             var config = sb.ToString();
             if(!string.IsNullOrEmpty(config))
                 Config = string.Format("Property(x => x.{0}){1};", NameHumanCase, config);
+
+            if (!Settings.UseDataAnnotations)
+                return; // Only data annotations below this point
 
             if (IsPrimaryKey)
                 DataAnnotations.Add("Key");
@@ -2634,17 +2673,19 @@ SELECT  SERVERPROPERTY('Edition') AS Edition,
                 string fkPropName = pkTable.GetUniqueColumnName(fkTable.NameHumanCase, foreignKey, checkForFkNameClashes, fkMakePropNameSingular, Relationship.OneToMany);
 
                 var dataAnnotation = string.Empty;
-
-                dataAnnotation = string.Format("[ForeignKey(\"{0}\"){1}] ",
-                    string.Join(", ", fkCols.Select(x => x.col.NameHumanCase).Distinct().ToArray()),
-                    foreignKey.IncludeRequiredAttribute ? ", Required" : string.Empty
-                );
-
-                if (!checkForFkNameClashes && relationship == Relationship.OneToOne && foreignKey.IncludeReverseNavigation && fkCol.col.IsPrimaryKey)
+                if (Settings.UseDataAnnotations && Settings.UseDataAnnotationsSchema)
                 {
-                    var principalEndAttribute = string.Format("ForeignKey(\"{0}\")", pkPropName);
-                    if (!fkCol.col.DataAnnotations.Contains(principalEndAttribute))
-                        fkCol.col.DataAnnotations.Add(principalEndAttribute);
+                    dataAnnotation = string.Format("[ForeignKey(\"{0}\"){1}] ",
+                        string.Join(", ", fkCols.Select(x => x.col.NameHumanCase).Distinct().ToArray()),
+                        foreignKey.IncludeRequiredAttribute ? ", Required" : string.Empty
+                    );
+
+                    if (!checkForFkNameClashes && relationship == Relationship.OneToOne && foreignKey.IncludeReverseNavigation && fkCol.col.IsPrimaryKey)
+                    {
+                        var principalEndAttribute = string.Format("ForeignKey(\"{0}\")", pkPropName);
+                        if (!fkCol.col.DataAnnotations.Contains(principalEndAttribute))
+                            fkCol.col.DataAnnotations.Add(principalEndAttribute);
+                    }
                 }
 
                 var fkd = new PropertyAndComments
@@ -2672,6 +2713,12 @@ SELECT  SERVERPROPERTY('Edition') AS Edition,
                 } else {
                     manyToManyMapping = string.Format("c => c.{0}", fkCol.col.NameHumanCase);
                     mapKey = string.Format("\"{0}\"", fkCol.col.Name);
+                }
+
+                if (!Settings.UseDataAnnotationsSchema)
+                {
+                    fkCol.col.ConfigFk.Add(string.Format("{0};{1}", GetRelationship(relationship, fkCol.col, pkCol, pkPropName, fkPropName, manyToManyMapping, mapKey, foreignKey.CascadeOnDelete, foreignKey.IncludeReverseNavigation, foreignKey.IsNotEnforced),
+                        Settings.IncludeComments != CommentsStyle.None ? " // " + foreignKey.ConstraintName : string.Empty));
                 }
 
                 if(foreignKey.IncludeReverseNavigation)

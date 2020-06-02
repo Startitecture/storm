@@ -244,7 +244,7 @@ namespace Startitecture.Orm.Model
             // TODO: This is iterating more than necessary based on what is probably the real-world usage.
             var attributeDefinition =
                 this.allAttributes.Value.FirstOrDefault(
-                    x => Singleton<EntityLocationEqualityComparer>.Instance.Equals(x.Entity, location) && x.PropertyName == propertyName);
+                    x => EntityLocationEqualityComparer.TypeAndName.Equals(x.Entity, location) && x.PropertyName == propertyName);
 
             return attributeDefinition;
         }
@@ -266,6 +266,11 @@ namespace Startitecture.Orm.Model
         /// </summary>
         private class EntityLocationEqualityComparer : EqualityComparer<EntityLocation>
         {
+            /// <summary>
+            /// Gets an equality comparer that bases equality on the entity location type, container, name and alias.
+            /// </summary>
+            public static EqualityComparer<EntityLocation> TypeAndName { get; } = new EntityLocationEqualityComparer();
+
             /// <summary>
             /// Determines whether two <see cref="EntityLocation"/> values represent the same location.
             /// </summary>

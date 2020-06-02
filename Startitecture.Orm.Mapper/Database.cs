@@ -89,10 +89,12 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private IDbTransaction transaction;
 
+/*
         /// <summary>
         /// The transaction cancelled.
         /// </summary>
         private bool transactionCancelled;
+*/
 
         /// <summary>
         /// The transaction depth.
@@ -320,7 +322,7 @@ namespace Startitecture.Orm.Mapper
             {
                 this.OpenSharedConnection();
                 this.transaction = this.Connection.BeginTransaction();
-                this.transactionCancelled = false;
+                ////this.transactionCancelled = false;
                 ////this.OnBeginTransaction();
             }
 

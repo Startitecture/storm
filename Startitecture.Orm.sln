@@ -15,7 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Code Analysis", "S
 	ProjectSection(SolutionItems) = preProject
 		Solution Code Analysis\CustomDictionary.xml = Solution Code Analysis\CustomDictionary.xml
 		Settings.StyleCop = Settings.StyleCop
-		Solution Code Analysis\TestProjectCodeAnalysis.editorconfig = Solution Code Analysis\TestProjectCodeAnalysis.editorconfig
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Certificates", "Certificates", "{49232085-0E64-41CA-AA00-8840D2219579}"
@@ -26,10 +25,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Common", "Startitecture.Orm.Common\Startitecture.Orm.Common.csproj", "{5643589D-8D46-4717-AE66-994173F3D671}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Model", "Startitecture.Orm.Model\Startitecture.Orm.Model.csproj", "{74143502-7860-42C5-B9CB-9D0CEDDC41D2}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{B9191F04-16D8-43DB-9E74-427EEB7D8698}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Public", "Public", "{E2CC0600-0A5D-45F0-9FCD-DD16818965A1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Schema", "Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj", "{9D984C1F-1486-4718-9D52-0A36B1C06DB3}"
 EndProject
@@ -49,8 +44,6 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "Startitecture.Orm.Testing.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.Entities", "Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj", "{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Storm", "Storm", "{8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Common.Tests", "Startitecture.Orm.Common.Tests\Startitecture.Orm.Common.Tests.csproj", "{B5B67152-6020-41D7-8E11-CF94F448BEA6}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Testing.Moq", "Startitecture.Orm.Testing.Moq\Startitecture.Orm.Testing.Moq.csproj", "{628FE999-E820-466C-BB85-96EFF48FA58F}"
@@ -68,6 +61,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logos", "Logos", "{E7D704F2
 		Logos\Startitecture New Logo.png = Logos\Startitecture New Logo.png
 		Logos\startitecture_new_logo.ico = Logos\startitecture_new_logo.ico
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "storm", "storm\storm.csproj", "{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -397,30 +392,27 @@ Global
 		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|x86.ActiveCfg = Release|Any CPU
 		{AA999909-59CF-45BE-AAB1-3FA55125585D}.Release|x86.Build.0 = Release|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Debug|x86.Build.0 = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.DebugLocal|x86.Build.0 = Debug|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Release|x86.ActiveCfg = Release|Any CPU
+		{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{5643589D-8D46-4717-AE66-994173F3D671} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{74143502-7860-42C5-B9CB-9D0CEDDC41D2} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{E2CC0600-0A5D-45F0-9FCD-DD16818965A1} = {B9191F04-16D8-43DB-9E74-427EEB7D8698}
-		{9D984C1F-1486-4718-9D52-0A36B1C06DB3} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{1F629078-CE41-48E5-8160-C13D46121252} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{2100EE7E-02A9-4912-A8A8-A482B4E8C55B} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{C5D4A33E-8DB6-4AF3-8406-17AC4241FBB2} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{2541775F-1B34-4E5A-95BB-B8961633114A} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{49E494DC-E001-49AA-A420-A7BB8D852A86} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{0190B7C6-9EB8-4EF8-8973-FE766CD800C7} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{40106EBF-BF23-427D-B3AD-9D32EBF54FDF} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{8F7F395A-6152-4F7A-8DC4-4610A9E38EC8} = {E2CC0600-0A5D-45F0-9FCD-DD16818965A1}
-		{B5B67152-6020-41D7-8E11-CF94F448BEA6} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{628FE999-E820-466C-BB85-96EFF48FA58F} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{5F9D3446-A8C8-48C5-9234-3CCCBEDCB420} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{5436B30A-18CC-4D87-840F-3B0599C04C79} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{DB9EBF4B-7D16-4DCC-8971-0EB21538A22B} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
-		{AA999909-59CF-45BE-AAB1-3FA55125585D} = {8F7F395A-6152-4F7A-8DC4-4610A9E38EC8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin

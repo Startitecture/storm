@@ -26,7 +26,7 @@ namespace Startitecture.Orm.AutoMapper
         /// <summary>
         /// The mapper engine.
         /// </summary>
-        private IMapper mapperEngine;
+        private readonly IMapper mapperEngine;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoMapperEntityMapper"/> class.
