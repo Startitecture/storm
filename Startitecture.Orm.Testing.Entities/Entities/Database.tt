@@ -17,13 +17,13 @@
     // ConnectionStringName is the only required setting.
     // 
     // .NET Core: As an alternative to ConnectionStringName above, which must match your app/web.config connection string name, you can override them below
-    // Settings.ConnectionString = @"Data Source=(local);Initial Catalog=Northwind;Integrated Security=True;Application Name=storm Reverse POCO Generator";
-    // Settings.ProviderName = "System.Data.SqlClient";
+    Settings.ConnectionString = @"Data Source=(localdb)\ProjectsV13;Initial Catalog=Startitecture.Orm.Testing.Schema;Integrated Security=SSPI";
+    Settings.ProviderName = "System.Data.SqlClient";
     //
     // Check out the Filtering section to target schemas other than "dbo".
 
-    Settings.Namespace = "My.Entities.Namespace"; // Override the default namespace here
-    Settings.DbContextName = "DatabaseContext"; // Note: If generating separate files, please give the db context a different name from this tt filename.
+    Settings.Namespace = "Startitecture.Orm.Testing.Entities"; // Override the default namespace here
+    Settings.DbContextName = "MyDatabaseContext"; // Note: If generating separate files, please give the db context a different name from this tt filename.
     //Settings.DbContextInterfaceName = "IMyDbContext"; // Defaults to "I" + DbContextName or set string empty to not implement any interface.
     Settings.DbContextInterfaceBaseClasses = "System.IDisposable";    // Specify what the base classes are for your database context interface
     Settings.DbContextBaseClass = "System.Data.Entity.DbContext";   // Specify what the base class is for your DbContext. For ASP.NET Identity use "IdentityDbContext<ApplicationUser>"
@@ -366,7 +366,7 @@
         return r.ToString();
         */
 
-        return " : EntityBase"; // Do not change this unless these base classes also inherit from ITransactionContext
+        return " : EntityBase";
     };
 
     // Writes any boilerplate stuff inside the POCO class

@@ -4,19 +4,21 @@ Startitecture.Orm (ST/orm)
 
 IMPORTANT: .NET SDK and .NET Core projects do not allow NuGet packages to place
 mutable content within project files. Follow the steps below to ensure
-everything works:
+everything works (Visual Studio):
 
-(1) Copy these files from the "Generation" folder:
+(1) Navigate to the NuGet package "Generation" folder by right-clicking one of
+the following files in this project's "Generation" folder:
 
-* Database.tt (recommend renaming to <dbname>.tt, or <dbname>-<schema>.tt)
+* Database.tt
 * storm.Reverse.POCO.Core.ttinclude
 * storm.Reverse.POCO.ttinclude
 
-into your project or a project subfolder. Do not run the transform if prompted.
+Drag all three files from the Explorer window into your project or a project 
+subfolder. Do not run the transform if prompted.
 
-(2) Review the settings in Database.tt (or whatever you renamed it to) and 
-ensure that you have a valid connection name (if using Web.config or 
-app.config) or connection string (.NET Core, .NET SDK).
+(2) Review the settings in Database.tt and ensure that you have a valid 
+connection name (if using Web.config or app.config) or connection string 
+(.NET Core, .NET SDK).
 
 (3) Save changes and allow the transform to run.
 

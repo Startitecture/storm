@@ -3,10 +3,9 @@
     <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="Generated\TestDatabase-dbo.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>TestDatabase-dbo.cs</LastGenOutput>
-    </Content>
+    <Compile Remove="Generated\**" />
+    <EmbeddedResource Remove="Generated\**" />
+    <None Remove="Generated\**" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
@@ -24,5 +23,19 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Startitecture.Core" Version="1.0.0-beta4" />
+    <PackageReference Include="Startitecture.Orm" Version="1.0.0-alpha3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Entities\Database.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Database.tt</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="Entities\Database.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>Database.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 </Project>
