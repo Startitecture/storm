@@ -4,36 +4,42 @@
     <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.0-alpha2</Version>
+    <Version>1.0.0-alpha3</Version>
     <Company>Startitecture, LLC</Company>
     <Product>ST/orm</Product>
     <Description>An ORM that combines the speed of micro-ORMs with the flexibility of fluent queries and complex POCOs.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageIcon>storm.png</PackageIcon>
+    <PackageIcon>Storm Logo.png</PackageIcon>
     <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #storm</PackageTags>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Startitecture, LLC</Authors>
     <PackageId>Startitecture.Orm</PackageId>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
-    <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
+    <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Entities\Database.tt" />
-    <None Remove="Entities\storm.Reverse.POCO.Core.ttinclude" />
-    <None Remove="Entities\storm.Reverse.POCO.ttinclude" />
+    <None Include="readme.txt" pack="true" PackagePath="." />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Entities\Database.tt">
+    <None Remove="Generation\Database.tt" />
+    <None Remove="Generation\storm.Reverse.POCO.Core.ttinclude" />
+    <None Remove="Generation\storm.Reverse.POCO.ttinclude" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Generation\Database.tt">
       <LastGenOutput>Database.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
-    </Content>
-    <Content Include="Entities\storm.Reverse.POCO.Core.ttinclude">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Entities\storm.Reverse.POCO.ttinclude">
+    <Content Include="Generation\storm.Reverse.POCO.Core.ttinclude">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Generation\storm.Reverse.POCO.ttinclude">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
@@ -45,7 +51,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Logos\storm.png">
+    <None Include="..\Logos\Storm Logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
@@ -57,14 +63,6 @@
 
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Update="Entities\Database.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Database.tt</DependentUpon>
-    </Compile>
   </ItemGroup>
 
 </Project>

@@ -28,9 +28,9 @@
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
-    <PackageIcon>storm.png</PackageIcon>
+    <PackageIcon>Storm Logo.png</PackageIcon>
     <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #storm</PackageTags>
-    <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
+    <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
@@ -62,7 +62,7 @@
     <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Logos\storm.png">
+    <None Include="..\Logos\Storm Logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

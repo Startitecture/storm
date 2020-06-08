@@ -10,10 +10,10 @@
     <Description>Adds an IEntityMapper implementation based on AutoMapper.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageIcon>storm.png</PackageIcon>
+    <PackageIcon>Storm Logo.png</PackageIcon>
     <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #objectmapper #mapper #automapper</PackageTags>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
-    <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
+    <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Logos\storm.png">
+    <None Include="..\Logos\Storm Logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>

@@ -60,9 +60,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Logos", "Logos", "{E7D704F2
 	ProjectSection(SolutionItems) = preProject
 		Logos\Startitecture New Logo.png = Logos\Startitecture New Logo.png
 		Logos\startitecture_new_logo.ico = Logos\startitecture_new_logo.ico
+		Logos\Storm Logo.png = Logos\Storm Logo.png
+		Logos\storm_logo_q3R_icon.ico = Logos\storm_logo_q3R_icon.ico
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "storm", "storm\storm.csproj", "{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "storm", "storm\storm.csproj", "{3ECC4ACA-F512-42A6-B24B-AB761F0B4FB0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -415,8 +417,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
+		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

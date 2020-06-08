@@ -11,8 +11,8 @@
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
     <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #storm</PackageTags>
-    <PackageIcon>storm.png</PackageIcon>
-    <ApplicationIcon>storm_sot_icon.ico</ApplicationIcon>
+    <PackageIcon>Storm Logo.png</PackageIcon>
+    <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
@@ -39,7 +39,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\Logos\storm.png">
+    <None Include="..\Logos\Storm Logo.png">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
