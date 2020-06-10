@@ -89,6 +89,11 @@ steps:
     ArtifactName: 'NuGet Packages'
     publishLocation: 'Container'
 
+- task: DocFxTask@0
+  displayName: 'Create DocFx documentation'
+  inputs:
+    solution: 'docs\docfx.json'
+
 - task: PublishPipelineArtifact@1
   displayName: 'Publish Test DACPAC'
   inputs:
