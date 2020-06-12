@@ -95,6 +95,12 @@ steps:
     solution: 'docs\docfx.json'
 
 - task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/docs/_site'
+    artifact: 'DocFx Site'
+    publishLocation: 'pipeline'
+
+- task: PublishPipelineArtifact@1
   displayName: 'Publish Test DACPAC'
   inputs:
     targetPath: '$(System.DefaultWorkingDirectory)/Startitecture.Orm.Testing.Schema/bin/$(buildConfiguration)/Startitecture.Orm.Testing.Schema.dacpac'
