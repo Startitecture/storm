@@ -51,7 +51,7 @@
         ],
         "exclude": [
           "obj/**",
-          "_site/storm/**"
+          "_site/**"
         ]
       }
     ],
