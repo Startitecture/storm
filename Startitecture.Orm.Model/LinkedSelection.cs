@@ -9,16 +9,17 @@
 
 namespace Startitecture.Orm.Model
 {
+    using System;
+
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Contains a reference to a linked selection with the link type.
     /// </summary>
-    /// <typeparam name="TItem">
-    /// The type of item in the selection.
-    /// </typeparam>
-    public class LinkedSelection<TItem>
+    public class LinkedSelection
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="LinkedSelection{TItem}"/> class.
+        /// Initializes a new instance of the <see cref="LinkedSelection"/> class.
         /// </summary>
         /// <param name="selection">
         /// The parent selection.
@@ -26,9 +27,12 @@ namespace Startitecture.Orm.Model
         /// <param name="linkType">
         /// The link type.
         /// </param>
-        public LinkedSelection(ItemSelection<TItem> selection, SelectionLinkType linkType)
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
+        public LinkedSelection([NotNull] ISelection selection, SelectionLinkType linkType)
         {
-            this.Selection = selection;
+            this.Selection = selection ?? throw new ArgumentNullException(nameof(selection));
             this.LinkType = linkType;
         }
 
@@ -37,12 +41,12 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the link type.
         /// </summary>
-        public SelectionLinkType LinkType { get; private set; }
+        public SelectionLinkType LinkType { get; }
 
         /// <summary>
         /// Gets the linked selection.
         /// </summary>
-        public ItemSelection<TItem> Selection { get; private set; }
+        public ISelection Selection { get; }
 
         #endregion
 

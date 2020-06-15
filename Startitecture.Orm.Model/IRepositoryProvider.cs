@@ -133,27 +133,6 @@ namespace Startitecture.Orm.Model
             where TDataItem : ITransactionContext;
 
         /// <summary>
-        /// Selects a matching list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <param name="pageSize">
-        /// The page size.
-        /// </param>
-        /// <param name="page">
-        /// The 1-based page to return.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the filter.
-        /// </returns>
-        Page<TDataItem> GetSelection<TDataItem>(ItemSelection<TDataItem> selection, long pageSize, long page)
-            where TDataItem : ITransactionContext;
-
-        /// <summary>
         /// Deletes the items matching the filter.
         /// </summary>
         /// <typeparam name="TDataItem">

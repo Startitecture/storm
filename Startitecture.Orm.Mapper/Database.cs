@@ -420,7 +420,7 @@ namespace Startitecture.Orm.Mapper
 
         #endregion
 
-        #region Fetch Operations
+        #region Query Operations
 
         /// <summary>
         /// Runs an SQL query, returning the results as an IEnumerable collection.
@@ -483,147 +483,6 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Runs a query and returns the result set as a typed list
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query to execute
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL
-        /// </param>
-        /// <returns>
-        /// A List holding the results of the query
-        /// </returns>
-        public IEnumerable<T> Fetch<T>(string sql, params object[] args)
-        {
-            return this.Query<T>(sql, args).ToList();
-        }
-
-        /// <summary>
-        /// Retrieves a page of records (without the total count)
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="page">
-        /// The 1 based page number to retrieve
-        /// </param>
-        /// <param name="itemsPerPage">
-        /// The number of records per page
-        /// </param>
-        /// <param name="sql">
-        /// The base SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// A List of results
-        /// </returns>
-        /// <remarks>
-        /// Automatically modifies the supplied SELECT statement to only retrieve the records for the specified page.
-        /// </remarks>
-        public IEnumerable<T> Fetch<T>(long page, long itemsPerPage, string sql, params object[] args)
-        {
-            return this.SkipTake<T>((page - 1) * itemsPerPage, itemsPerPage, sql, args);
-        }
-
-        /// <summary>
-        /// Retrieves a page of records and the total number of available records.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set.
-        /// </typeparam>
-        /// <param name="page">
-        /// The 1 based page number to retrieve.
-        /// </param>
-        /// <param name="itemsPerPage">
-        /// The number of records per page.
-        /// </param>
-        /// <param name="sqlCount">
-        /// The SQL to retrieve the total number of records.
-        /// </param>
-        /// <param name="countArgs">
-        /// Arguments to any embedded parameters in the <paramref name="sqlCount"/> statement.
-        /// </param>
-        /// <param name="sqlPage">
-        /// The SQL To retrieve a single page of results.
-        /// </param>
-        /// <param name="pageArgs">
-        /// Arguments to any embedded parameters in the <paramref name="sqlPage"/> statement.
-        /// </param>
-        /// <returns>
-        /// A Page of results.
-        /// </returns>
-        /// <remarks>
-        /// This method allows separate SQL statements to be explicitly provided for the two parts of the page query.
-        /// The page and itemsPerPage parameters are not used directly and are used simply to populate the returned Page object.
-        /// </remarks>
-        public Page<T> FetchPage<T>(long page, long itemsPerPage, string sqlCount, object[] countArgs, string sqlPage, object[] pageArgs)
-        {
-            // Save the one-time command time out and use it for both queries
-            var saveTimeout = this.OnetimeCommandTimeout;
-
-            // Get the records
-            var results = this.Fetch<T>(sqlPage, pageArgs);
-
-            // Setup the paged result
-            var result = new Page<T>(results)
-                             {
-                                 CurrentPage = page, 
-                                 ItemsPerPage = itemsPerPage, 
-                                 TotalItems = this.ExecuteScalar<long>(sqlCount, countArgs)
-                             };
-
-            result.TotalPages = result.TotalItems / itemsPerPage;
-
-            if ((result.TotalItems % itemsPerPage) != 0)
-            {
-                result.TotalPages++;
-            }
-
-            this.OnetimeCommandTimeout = saveTimeout;
-
-            // Done
-            return result;
-        }
-
-        /// <summary>
-        /// Retrieves a page of records and the total number of available records
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="page">
-        /// The 1 based page number to retrieve
-        /// </param>
-        /// <param name="itemsPerPage">
-        /// The number of records per page
-        /// </param>
-        /// <param name="sql">
-        /// The base SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// A Page of results
-        /// </returns>
-        /// <remarks>
-        /// Automatically modifies the supplied SELECT statement to only retrieve the
-        /// records for the specified page.  It will also execute a second query to retrieve the
-        /// total number of records in the result set.
-        /// </remarks>
-        public Page<T> FetchPage<T>(long page, long itemsPerPage, string sql, params object[] args)
-        {
-            this.BuildPageQueries((page - 1) * itemsPerPage, itemsPerPage, sql, ref args, out var sqlCount, out var sqlPage);
-            return this.FetchPage<T>(page, itemsPerPage, sqlCount, args, sqlPage, args);
-        }
-
         #endregion
 
         #region IEnumerable
@@ -645,7 +504,7 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         public T First<T>(string sql, params object[] args)
         {
-            return this.Fetch<T>(sql, args).First();
+            return this.Query<T>(sql, args).First();
         }
 
         /// <summary>
@@ -665,7 +524,7 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         public T FirstOrDefault<T>(string sql, params object[] args)
         {
-            return this.Fetch<T>(sql, args).FirstOrDefault();
+            return this.Query<T>(sql, args).FirstOrDefault();
         }
 
         /// <summary>
@@ -686,9 +545,9 @@ namespace Startitecture.Orm.Mapper
         /// <remarks>
         /// Throws an exception if there are zero or more than one matching record
         /// </remarks>
-        public T Unique<T>(string sql, params object[] args)
+        public T Single<T>(string sql, params object[] args)
         {
-            return this.Fetch<T>(sql, args).Single();
+            return this.Query<T>(sql, args).Single();
         }
 
         /// <summary>
@@ -706,39 +565,9 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The single record matching the specified primary key value, or default(T) if no matching rows
         /// </returns>
-        public T UniqueOrDefault<T>(string sql, params object[] args)
+        public T SingleOrDefault<T>(string sql, params object[] args)
         {
-            return this.Fetch<T>(sql, args).SingleOrDefault();
-        }
-
-        /// <summary>
-        /// Retrieves a range of records from result set
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="skip">
-        /// The number of rows at the start of the result set to skip over
-        /// </param>
-        /// <param name="take">
-        /// The number of rows to retrieve
-        /// </param>
-        /// <param name="sql">
-        /// The base SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// A List of results
-        /// </returns>
-        /// <remarks>
-        /// Automatically modifies the supplied SELECT statement to only retrieve the records for the specified range.
-        /// </remarks>
-        public IEnumerable<T> SkipTake<T>(long skip, long take, string sql, params object[] args)
-        {
-            this.BuildPageQueries(skip, take, sql, ref args, out _, out var sqlPage);
-            return this.Fetch<T>(sqlPage, args);
+            return this.Query<T>(sql, args).SingleOrDefault();
         }
 
         #endregion
@@ -1050,39 +879,39 @@ namespace Startitecture.Orm.Mapper
             return command;
         }
 
-        /// <summary>
-        /// Starting with a regular SELECT statement, derives the SQL statements required to query a
-        /// DB for a page of records and the total number of records
-        /// </summary>
-        /// <param name="skip">
-        /// The number of rows to skip before the start of the page
-        /// </param>
-        /// <param name="take">
-        /// The number of rows in the page
-        /// </param>
-        /// <param name="sql">
-        /// The original SQL select statement
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL
-        /// </param>
-        /// <param name="sqlCount">
-        /// Outputs the SQL statement to query for the total number of matching rows
-        /// </param>
-        /// <param name="sqlPage">
-        /// Outputs the SQL statement to retrieve a single page of matching rows
-        /// </param>
-        private void BuildPageQueries(long skip, long take, string sql, ref object[] args, out string sqlCount, out string sqlPage)
-        {
-            // Split the SQL
-            if (PagingHelper.TrySplitSql(sql, out var pageStatement) == false)
-            {
-                throw new FormatException(ErrorMessages.PagedSqlCouldNotBeParsed);
-            }
+        /////// <summary>
+        /////// Starting with a regular SELECT statement, derives the SQL statements required to query a
+        /////// DB for a page of records and the total number of records
+        /////// </summary>
+        /////// <param name="skip">
+        /////// The number of rows to skip before the start of the page
+        /////// </param>
+        /////// <param name="take">
+        /////// The number of rows in the page
+        /////// </param>
+        /////// <param name="sql">
+        /////// The original SQL select statement
+        /////// </param>
+        /////// <param name="args">
+        /////// Arguments to any embedded parameters in the SQL
+        /////// </param>
+        /////// <param name="sqlCount">
+        /////// Outputs the SQL statement to query for the total number of matching rows
+        /////// </param>
+        /////// <param name="sqlPage">
+        /////// Outputs the SQL statement to retrieve a single page of matching rows
+        /////// </param>
+        ////private void BuildPageQueries(long skip, long take, string sql, ref object[] args, out string sqlCount, out string sqlPage)
+        ////{
+        ////    // Split the SQL
+        ////    if (PagingHelper.TrySplitSql(sql, out var pageStatement) == false)
+        ////    {
+        ////        throw new FormatException(ErrorMessages.PagedSqlCouldNotBeParsed);
+        ////    }
 
-            sqlPage = this.databaseType.BuildPageQuery(skip, take, pageStatement, ref args);
-            sqlCount = pageStatement.SqlCount;
-        }
+        ////    sqlPage = this.databaseType.BuildPageQuery(skip, take, pageStatement, ref args);
+        ////    sqlCount = pageStatement.SqlCount;
+        ////}
 
         /// <summary>
         /// Provides common initialization for the various constructors

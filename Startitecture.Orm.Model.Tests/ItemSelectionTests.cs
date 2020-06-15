@@ -1,6 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Startitecture.Orm.Model;
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ItemSelectionTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
@@ -25,6 +23,139 @@ namespace Startitecture.Orm.Model.Tests
     [TestClass]
     public class ItemSelectionTests
     {
+        /// <summary>
+        /// The select test.
+        /// </summary>
+        [TestMethod]
+        public void Select_DataItemExplicitSelectionsWithDistinctAttributeReferences_MatchesExpected()
+        {
+            Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
+            Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
+            Expression<Func<ChildRaisedRow, object>> expr3 = row => row.SomeValue;
+            Expression<Func<ChildRaisedRow, object>> expr4 = row => row.ComplexEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr5 = row => row.ComplexEntity.SubEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr6 = row => row.ComplexEntity.SubEntity.SubSubEntity.UniqueName;
+
+            var expressions = new List<Expression<Func<ChildRaisedRow, object>>>
+                                  {
+                                      expr1,
+                                      expr2,
+                                      expr3,
+                                      expr4,
+                                      expr5,
+                                      expr6
+                                  };
+
+            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
+            var selection = new ItemSelection<ChildRaisedRow>().Select(expressions.ToArray());
+
+            var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
+            var expected = expressions.Select(entityDefinition.Find).ToList();
+
+            var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// The skip test.
+        /// </summary>
+        [TestMethod]
+        public void Skip_ItemSelectionPageRowOffset_MatchesExpected()
+        {
+            var target = new ItemSelection<ComplexRaisedRow>().Skip(10);
+            Assert.AreEqual(10, target.Page.RowOffset);
+        }
+
+        /// <summary>
+        /// The take test.
+        /// </summary>
+        [TestMethod]
+        public void Take_ItemSelectionPageSize_MatchesExpected()
+        {
+            var target = new ItemSelection<ComplexRaisedRow>().Take(10);
+            Assert.AreEqual(10, target.Page.Size);
+        }
+
+        /// <summary>
+        /// The order by test.
+        /// </summary>
+        [TestMethod]
+        public void OrderBy_MultipleExpressionsAdded_MatchesExpected()
+        {
+            Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
+            Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
+            Expression<Func<ChildRaisedRow, object>> expr3 = row => row.SomeValue;
+            Expression<Func<ChildRaisedRow, object>> expr4 = row => row.ComplexEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr5 = row => row.ComplexEntity.SubEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr6 = row => row.ComplexEntity.SubEntity.SubSubEntity.UniqueName;
+
+            var expressions = new List<Expression<Func<ChildRaisedRow, object>>>
+                                  {
+                                      expr1,
+                                      expr2,
+                                      expr3,
+                                      expr4,
+                                      expr5,
+                                      expr6
+                                  };
+
+            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
+            var selection = new ItemSelection<ChildRaisedRow>().Select();
+
+            foreach (var expression in expressions)
+            {
+                selection.OrderBy(expression);
+            }
+
+            var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
+            var expected = expressions.Select(entityDefinition.Find).ToList();
+
+            var actual = selection.OrderByExpressions.Select(expression => expression.PropertyExpression).Select(entityDefinition.Find).ToList();
+            CollectionAssert.AreEqual(expected, actual);
+
+            Assert.IsTrue(selection.OrderByExpressions.All(expression => expression.OrderDescending == false));
+        }
+
+        /// <summary>
+        /// The order by descending test.
+        /// </summary>
+        [TestMethod]
+        public void OrderByDescending_MultipleExpressionsAdded_MatchesExpected()
+        {
+            Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
+            Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
+            Expression<Func<ChildRaisedRow, object>> expr3 = row => row.SomeValue;
+            Expression<Func<ChildRaisedRow, object>> expr4 = row => row.ComplexEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr5 = row => row.ComplexEntity.SubEntity.Description;
+            Expression<Func<ChildRaisedRow, object>> expr6 = row => row.ComplexEntity.SubEntity.SubSubEntity.UniqueName;
+
+            var expressions = new List<Expression<Func<ChildRaisedRow, object>>>
+                                  {
+                                      expr1,
+                                      expr2,
+                                      expr3,
+                                      expr4,
+                                      expr5,
+                                      expr6
+                                  };
+
+            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
+            var selection = new ItemSelection<ChildRaisedRow>().Select();
+
+            foreach (var expression in expressions)
+            {
+                selection.OrderByDescending(expression);
+            }
+
+            var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
+            var expected = expressions.Select(entityDefinition.Find).ToList();
+
+            var actual = selection.OrderByExpressions.Select(expression => expression.PropertyExpression).Select(entityDefinition.Find).ToList();
+            CollectionAssert.AreEqual(expected, actual);
+
+            Assert.IsTrue(selection.OrderByExpressions.All(expression => expression.OrderDescending));
+        }
+        
         /// <summary>
         /// The between test.
         /// </summary>
@@ -328,79 +459,27 @@ namespace Startitecture.Orm.Model.Tests
         }
 
         /// <summary>
-        /// The clear relations test.
-        /// </summary>
-        [TestMethod]
-        public void ClearRelations_ItemSelectionWithRelations_RelationsAreCleared()
-        {
-            var selection = Select.From<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId);
-
-            Assert.IsNotNull(selection.Relations.FirstOrDefault());
-            selection.ClearRelations();
-            Assert.IsNull(selection.Relations.FirstOrDefault());
-        }
-
-        /// <summary>
-        /// The select test.
-        /// </summary>
-        [TestMethod]
-        public void Select_DataItemExplicitSelectionsWithDistinctAttributeReferences_MatchesExpected()
-        {
-            Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
-            Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
-            Expression<Func<ChildRaisedRow, object>> expr3 = row => row.SomeValue;
-            Expression<Func<ChildRaisedRow, object>> expr4 = row => row.ComplexEntity.Description;
-            Expression<Func<ChildRaisedRow, object>> expr5 = row => row.ComplexEntity.SubEntity.Description;
-            Expression<Func<ChildRaisedRow, object>> expr6 = row => row.ComplexEntity.SubEntity.SubSubEntity.UniqueName;
-
-            var expressions = new List<Expression<Func<ChildRaisedRow, object>>>
-                                  {
-                                      expr1,
-                                      expr2,
-                                      expr3,
-                                      expr4,
-                                      expr5,
-                                      expr6
-                                  };
-
-            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
-            var selection = new ItemSelection<ChildRaisedRow>().Select(expressions.ToArray());
-
-            var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
-            var expected = expressions.Select(entityDefinition.Find).ToList();
-
-            var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
-            CollectionAssert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
         /// The selection statement_ direct data_ matches expected.
         /// </summary>
         [TestMethod]
-        public void SelectionStatement_DirectData_MatchesExpected()
+        public void PropertyValues_DirectData_MatchesExpected()
         {
             var match = new DataRow
-            {
-                ValueColumn = 2,
-                NullableColumn = "CouldHaveBeenNull",
-                NullableValueColumn = null
-            };
+                            {
+                                ValueColumn = 2,
+                                NullableColumn = "CouldHaveBeenNull",
+                                NullableValueColumn = null
+                            };
             var baseline = new DataRow
-            {
-                FakeDataId = 10,
-                NormalColumn = "Greater"
-            };
+                               {
+                                   FakeDataId = 10,
+                                   NormalColumn = "Greater"
+                               };
             var boundary = new DataRow
-            {
-                FakeDataId = 20,
-                AnotherColumn = "Less"
-            };
+                               {
+                                   FakeDataId = 20,
+                                   AnotherColumn = "Less"
+                               };
             var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .Select(
@@ -427,6 +506,7 @@ namespace Startitecture.Orm.Model.Tests
                                    15,
                                    20
                                };
+
             var actual = transactionSelection.PropertyValues.ToArray();
             CollectionAssert.AreEqual(
                 expected,
@@ -441,24 +521,24 @@ namespace Startitecture.Orm.Model.Tests
         /// The selection statement_ direct data_ matches expected.
         /// </summary>
         [TestMethod]
-        public void SelectionStatement_DirectDataRaisedRow_MatchesExpected()
+        public void PropertyValues_DirectDataRaisedRow_MatchesExpected()
         {
             var match = new DataRow
-            {
-                ValueColumn = 2,
-                NullableColumn = "CouldHaveBeenNull",
-                NullableValueColumn = null
-            };
+                            {
+                                ValueColumn = 2,
+                                NullableColumn = "CouldHaveBeenNull",
+                                NullableValueColumn = null
+                            };
             var baseline = new DataRow
-            {
-                FakeDataId = 10,
-                NormalColumn = "Greater"
-            };
+                               {
+                                   FakeDataId = 10,
+                                   NormalColumn = "Greater"
+                               };
             var boundary = new DataRow
-            {
-                FakeDataId = 20,
-                AnotherColumn = "Less"
-            };
+                               {
+                                   FakeDataId = 20,
+                                   AnotherColumn = "Less"
+                               };
             var transactionSelection = Select
                 .From<DataRow>(
                     row => row.FakeDataId,
@@ -499,27 +579,27 @@ namespace Startitecture.Orm.Model.Tests
         /// The selection statement_ related data_ matches expected.
         /// </summary>
         [TestMethod]
-        public void SelectionStatement_RelatedDataRaisedRow_MatchesExpected()
+        public void PropertyValues_RelatedDataRaisedRow_MatchesExpected()
         {
             var match = new DataRow
-            {
-                NullableValueColumn = null,
-                RelatedAlias = new FakeRelatedRow
-                {
-                    RelatedProperty = "Related"
-                },
-                NullableColumn = "CouldHaveBeenNull",
-                ValueColumn = 2
-            };
+                            {
+                                NullableValueColumn = null,
+                                RelatedAlias = new FakeRelatedRow
+                                                   {
+                                                       RelatedProperty = "Related"
+                                                   },
+                                NullableColumn = "CouldHaveBeenNull",
+                                ValueColumn = 2
+                            };
 
             var baseline = new DataRow
-            {
-                FakeDataId = 10
-            };
+                               {
+                                   FakeDataId = 10
+                               };
             var boundary = new DataRow
-            {
-                FakeDataId = 20
-            };
+                               {
+                                   FakeDataId = 20
+                               };
             var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
@@ -551,67 +631,67 @@ namespace Startitecture.Orm.Model.Tests
         /// The selection statement_ union related data_ matches expected.
         /// </summary>
         [TestMethod]
-        public void PropertyValues_RelatedDataRaisedRow_MatchesExpected()
+        public void PropertyValues_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
-            {
-                NullableValueColumn = null,
-                RelatedAlias = new FakeRelatedRow
-                {
-                    RelatedProperty = "Related1"
-                },
-                NullableColumn = "CouldHaveBeenNull1",
-                ValueColumn = 2
-            };
+                             {
+                                 NullableValueColumn = null,
+                                 RelatedAlias = new FakeRelatedRow
+                                                    {
+                                                        RelatedProperty = "Related1"
+                                                    },
+                                 NullableColumn = "CouldHaveBeenNull1",
+                                 ValueColumn = 2
+                             };
 
             var baseline1 = new DataRow
-            {
-                FakeDataId = 10
-            };
+                                {
+                                    FakeDataId = 10
+                                };
             var boundary1 = new DataRow
-            {
-                FakeDataId = 20
-            };
+                                {
+                                    FakeDataId = 20
+                                };
 
             var match2 = new DataRow
-            {
-                NullableValueColumn = null,
-                RelatedAlias = new FakeRelatedRow
-                {
-                    RelatedProperty = "Related2"
-                },
-                NullableColumn = "CouldHaveBeenNull2",
-                ValueColumn = 3
-            };
+                             {
+                                 NullableValueColumn = null,
+                                 RelatedAlias = new FakeRelatedRow
+                                                    {
+                                                        RelatedProperty = "Related2"
+                                                    },
+                                 NullableColumn = "CouldHaveBeenNull2",
+                                 ValueColumn = 3
+                             };
 
             var baseline2 = new DataRow
-            {
-                FakeDataId = 50
-            };
+                                {
+                                    FakeDataId = 50
+                                };
             var boundary2 = new DataRow
-            {
-                FakeDataId = 40
-            };
+                                {
+                                    FakeDataId = 40
+                                };
 
             var match3 = new DataRow
-            {
-                NullableValueColumn = null,
-                RelatedAlias = new FakeRelatedRow
-                {
-                    RelatedProperty = "Related3"
-                },
-                NullableColumn = "CouldHaveBeenNull3",
-                ValueColumn = 4
-            };
+                             {
+                                 NullableValueColumn = null,
+                                 RelatedAlias = new FakeRelatedRow
+                                                    {
+                                                        RelatedProperty = "Related3"
+                                                    },
+                                 NullableColumn = "CouldHaveBeenNull3",
+                                 ValueColumn = 4
+                             };
 
             var baseline3 = new DataRow
-            {
-                FakeDataId = 60
-            };
+                                {
+                                    FakeDataId = 60
+                                };
             var boundary3 = new DataRow
-            {
-                FakeDataId = 70
-            };
+                                {
+                                    FakeDataId = 70
+                                };
 
             var transactionSelection = Select
                 .From<DataRow>(
@@ -984,23 +1064,22 @@ namespace Startitecture.Orm.Model.Tests
             var selection2 = new ItemSelection<SelectionTestDto>();
             var selection3 = new ItemSelection<SelectionTestDto>();
             expected.Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
+                .Skip(10).Take(10)
                 .WhereEqual(dto => dto.Parent.UniqueName, "Test1")
                 .Between(dto => dto.SomeDate, DateTime.Today, DateTime.Today.AddDays(-1))
                 .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId)
                 .Union(
                     selection2.Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
+                        .Skip(20).Take(10)
                         .WhereEqual(dto => dto.Parent.UniqueName, "Test2")
                         .Between(dto => dto.SomeDecimal, 10.2m, 11.4m)
                         .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId)
                         .Union(
                             selection3.Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
+                                .Skip(20).Take(20)
                                 .WhereEqual(dto => dto.Parent.UniqueName, "Test3")
                                 .Between(dto => dto.StringValue, "AAA", "BBB")
                                 .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId)));
-
-            expected.Limit = 10;
-            selection2.Limit = 10;
-            selection3.Limit = 20;
 
             var actual = expected.MapTo<SelectionTestRow>();
 
@@ -1020,9 +1099,9 @@ namespace Startitecture.Orm.Model.Tests
         /// <param name="actual">
         /// The actual.
         /// </param>
-        private static void AssertSelectionEquality(ItemSelection<SelectionTestDto> expected, ItemSelection<SelectionTestRow> actual)
+        private static void AssertSelectionEquality(ISelection expected, ISelection actual)
         {
-            Assert.AreEqual(expected.Limit, actual.Limit);
+            Assert.AreEqual(expected.Page, actual.Page);
             CollectionAssert.AreEqual(expected.Filters.ToList(), actual.Filters.ToList());
             CollectionAssert.AreEqual(expected.Relations.ToList(), actual.Relations.ToList());
             CollectionAssert.AreEqual(
@@ -1138,5 +1217,6 @@ namespace Startitecture.Orm.Model.Tests
             /// </summary>
             public ParentRow Parent { get; set; }
         }
+
     }
 }

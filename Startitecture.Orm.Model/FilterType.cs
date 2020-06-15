@@ -59,11 +59,11 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The filter should match values that are set.
         /// </summary>
-        IsSet = 9,
+        IsNotNull = 9,
 
         /// <summary>
         /// The filter should match values that are not set.
         /// </summary>
-        IsNotSet = 10,
+        IsNull = 10,
     }
 }

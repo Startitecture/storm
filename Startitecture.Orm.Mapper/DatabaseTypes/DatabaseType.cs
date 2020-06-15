@@ -115,30 +115,30 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
             return Singleton<SqlServerDatabaseType>.Instance;
         }
 
-        /// <summary>
-        /// Builds a SQL query suitable for performing page based queries to the database.
-        /// </summary>
-        /// <param name="skip">
-        /// The number of rows that should be skipped by the query.
-        /// </param>
-        /// <param name="take">
-        /// The number of rows that should be returned by the query.
-        /// </param>
-        /// <param name="pageStatement">
-        /// The page statement.
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL query.
-        /// </param>
-        /// <returns>
-        /// The final SQL query that should be executed.
-        /// </returns>
-        public virtual string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
-        {
-            string sql = $"{pageStatement.Sql}\nLIMIT @{args.Length} OFFSET @{args.Length + 1}";
-            args = args.Concat(new object[] { take, skip }).ToArray();
-            return sql;
-        }
+        /////// <summary>
+        /////// Builds a SQL query suitable for performing page based queries to the database.
+        /////// </summary>
+        /////// <param name="skip">
+        /////// The number of rows that should be skipped by the query.
+        /////// </param>
+        /////// <param name="take">
+        /////// The number of rows that should be returned by the query.
+        /////// </param>
+        /////// <param name="pageStatement">
+        /////// The page statement.
+        /////// </param>
+        /////// <param name="args">
+        /////// Arguments to any embedded parameters in the SQL query.
+        /////// </param>
+        /////// <returns>
+        /////// The final SQL query that should be executed.
+        /////// </returns>
+        ////public virtual string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
+        ////{
+        ////    string sql = $"{pageStatement.Sql}\nLIMIT @{args.Length} OFFSET @{args.Length + 1}";
+        ////    args = args.Concat(new object[] { take, skip }).ToArray();
+        ////    return sql;
+        ////}
 
         /// <summary>
         /// Escapes a SQL identifier into a format suitable for the associated database provider.

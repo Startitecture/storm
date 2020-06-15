@@ -66,29 +66,6 @@ namespace Startitecture.Orm.Common
         IEnumerable<TDataItem> SelectItems<TDataItem>(ItemSelection<TDataItem> selection);
 
         /// <summary>
-        /// Selects a matching list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <param name="pageSize">
-        /// The page size.
-        /// </param>
-        /// <param name="page">
-        /// The 1-based page number of the page to retrieve.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the filter.
-        /// </returns>
-        /// <exception cref="System.InvalidOperationException">
-        /// The repository could not be queried.
-        /// </exception>
-        Page<TDataItem> SelectItems<TDataItem>(ItemSelection<TDataItem> selection, long pageSize, long page);
-
-        /// <summary>
         /// Inserts a data item into the repository.
         /// </summary>
         /// <typeparam name="TDataItem">

@@ -316,20 +316,7 @@ namespace Startitecture.Orm.Mapper
             return this.repositoryAdapter.SelectItems(selection);
         }
 
-        /// <inheritdoc />
-        public Page<TDataItem> GetSelection<TDataItem>(ItemSelection<TDataItem> selection, long pageSize, long page)
-            where TDataItem : ITransactionContext
-        {
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            this.CheckDisposed();
-            return this.repositoryAdapter.SelectItems(selection, pageSize, page);
-        }
-
-/*
+        /*
         /// <inheritdoc />
         /// <exception cref="RepositoryException">
         /// The item could not be saved in the repository.
@@ -516,7 +503,7 @@ namespace Startitecture.Orm.Mapper
             this.CheckDisposed();
             ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
             ////this.DatabaseContext.EnableAutoSelect = false;
-            var result = this.DatabaseContext.Fetch<dynamic>(executionStatement, parameterValues);
+            var result = this.DatabaseContext.Query<dynamic>(executionStatement, parameterValues);
             ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
@@ -537,7 +524,7 @@ namespace Startitecture.Orm.Mapper
             this.CheckDisposed();
             ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
             ////this.DatabaseContext.EnableAutoSelect = false;
-            var result = this.DatabaseContext.Fetch<T>(executionStatement, parameterValues);
+            var result = this.DatabaseContext.Query<T>(executionStatement, parameterValues);
             ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }

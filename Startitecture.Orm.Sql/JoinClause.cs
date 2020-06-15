@@ -77,13 +77,10 @@ namespace Startitecture.Orm.Sql
         /// <param name="selection">
         /// The selection to evaluate.
         /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item being selected.
-        /// </typeparam>
         /// <returns>
         /// The JOIN clause as a <see cref="string"/>.
         /// </returns>
-        public string Create<TItem>([NotNull] ItemSelection<TItem> selection)
+        public string Create([NotNull] ISelection selection)
         {
             if (selection == null)
             {

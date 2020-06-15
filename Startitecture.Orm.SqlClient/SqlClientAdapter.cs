@@ -140,66 +140,7 @@ namespace Startitecture.Orm.SqlClient
                 var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Select));
 
                 ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
-                return this.dataContext.Fetch<TDataItem>(statement, selection.PropertyValues.ToArray());
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new RepositoryException(selection, ex.Message, ex);
-            }
-            catch (DataException ex)
-            {
-                throw new RepositoryException(selection, ex.Message, ex);
-            }
-            catch (SqlException ex)
-            {
-                throw new RepositoryException(selection, ex.Message, ex);
-            }
-        }
-
-        /// <summary>
-        /// Selects a matching list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <param name="pageSize">
-        /// The page size.
-        /// </param>
-        /// <param name="page">
-        /// The 1-based page number of the page to retrieve.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the filter.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The repository could not be queried.
-        /// </exception>
-        public Page<TDataItem> SelectItems<TDataItem>(ItemSelection<TDataItem> selection, long pageSize, long page)
-        {
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            if (pageSize < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(pageSize), ValidationMessages.ValueMustBeGreaterThanZero);
-            }
-
-            if (page < 1)
-            {
-                throw new ArgumentOutOfRangeException(nameof(page), ValidationMessages.ValueMustBeGreaterThanZero);
-            }
-
-            try
-            {
-                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Select));
-
-                ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
-                return this.dataContext.FetchPage<TDataItem>(page, pageSize, statement, selection.PropertyValues.ToArray());
+                return this.dataContext.Query<TDataItem>(statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
             {

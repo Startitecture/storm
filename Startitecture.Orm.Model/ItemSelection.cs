@@ -25,7 +25,7 @@ namespace Startitecture.Orm.Model
     /// <typeparam name="TItem">
     /// The type of item to select.
     /// </typeparam>
-    public class ItemSelection<TItem>
+    public class ItemSelection<TItem> : ISelection
     {
         /// <summary>
         /// The value separator for the ToString() method.
@@ -48,9 +48,9 @@ namespace Startitecture.Orm.Model
         private readonly List<LambdaExpression> selectExpressions = new List<LambdaExpression>();
 
         /// <summary>
-        /// Gets or sets the maximum number of items to return with the selection.
+        /// The order by expressions.
         /// </summary>
-        public int Limit { get; set; }
+        private readonly List<OrderExpression> orderByExpressions = new List<OrderExpression>();
 
         /// <summary>
         /// Gets the entity relations represented in the selection.
@@ -58,18 +58,18 @@ namespace Startitecture.Orm.Model
         public IEnumerable<IEntityRelation> Relations => this.relations;
 
         /// <summary>
-        /// Gets the child selection, if any, for the current selection.
+        /// Gets the child selection, if any, for the selection.
         /// </summary>
-        public LinkedSelection<TItem> LinkedSelection { get; private set; }
+        public LinkedSelection LinkedSelection { get; private set; }
 
         /// <summary>
-        /// Gets the property values for the filter.
+        /// Gets the property values for the selection filter.
         /// </summary>
         public IEnumerable<object> PropertyValues
         {
             get
             {
-                var selection = this;
+                ISelection selection = this;
 
                 while (selection != null)
                 {
@@ -89,9 +89,19 @@ namespace Startitecture.Orm.Model
         public IEnumerable<LambdaExpression> SelectExpressions => this.selectExpressions;
 
         /// <summary>
-        /// Gets the filters for the current selection.
+        /// Gets the order by expressions for the selection.
+        /// </summary>
+        public IEnumerable<OrderExpression> OrderByExpressions => this.orderByExpressions;
+
+        /// <summary>
+        /// Gets the filters for the selection.
         /// </summary>
         public IEnumerable<ValueFilter> Filters => this.valueFilters;
+
+        /// <summary>
+        /// Gets the page options for the selection.
+        /// </summary>
+        public ResultPage Page { get; } = new ResultPage();
 
         #region Selection
 
@@ -116,39 +126,62 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Selects the properties to return with the query.
+        /// Skips the specified number of rows in the result set.
         /// </summary>
-        /// <param name="selectors">
-        /// The property name selectors. If empty, all properties are returned.
+        /// <param name="rows">
+        /// The rows to skip.
         /// </param>
         /// <returns>
         /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
-        public ItemSelection<TItem> Select(params LambdaExpression[] selectors)
+        public ItemSelection<TItem> Skip(int rows)
         {
-            if (selectors == null)
-            {
-                throw new ArgumentNullException(nameof(selectors));
-            }
-
-            this.selectExpressions.AddRange(selectors);
+            this.Page.RowOffset = rows;
             return this;
         }
 
-        #endregion
-
-        #region Entity Relations
-
         /// <summary>
-        /// Clears any existing relations from the selection.
+        /// Limits the number of rows returned to the number specified.
         /// </summary>
+        /// <param name="rows">
+        /// The number of rows to take.
+        /// </param>
         /// <returns>
         /// The current <see cref="ItemSelection{TItem}"/>.
         /// </returns>
-        public ItemSelection<TItem> ClearRelations()
+        public ItemSelection<TItem> Take(int rows)
         {
-            // Clear out return values and filters not covered in the 
-            this.relations.Clear();
+            this.Page.Size = rows;
+            return this;
+        }
+
+        /// <summary>
+        /// Order the results by the specified <paramref name="propertyExpression"/>.
+        /// </summary>
+        /// <param name="propertyExpression">
+        /// The property expression.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        public ItemSelection<TItem> OrderBy(Expression<Func<TItem, object>> propertyExpression)
+        {
+            this.orderByExpressions.Add(new OrderExpression(propertyExpression));
+            return this;
+        }
+
+        /// <summary>
+        /// Order the results by the specified <paramref name="propertyExpression"/>.
+        /// </summary>
+        /// <param name="propertyExpression">
+        /// The property expression.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        public ItemSelection<TItem> OrderByDescending(Expression<Func<TItem, object>> propertyExpression)
+        {
+            this.orderByExpressions.Add(new OrderExpression(propertyExpression, true));
             return this;
         }
 
@@ -238,7 +271,7 @@ namespace Startitecture.Orm.Model
             }
 
             var valueFilter = Evaluate.IsNull(value)
-                                  ? new ValueFilter(valueExpression, FilterType.IsNotSet, value)
+                                  ? new ValueFilter(valueExpression, FilterType.IsNull, value)
                                   : new ValueFilter(valueExpression, FilterType.Equality, value);
 
             this.valueFilters.Add(valueFilter);
@@ -493,6 +526,26 @@ namespace Startitecture.Orm.Model
         #endregion
 
         #region JOINs
+
+        /// <summary>
+        /// Adds a relation to the selection.
+        /// </summary>
+        /// <param name="relation">
+        /// The relation to add.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        public ItemSelection<TItem> AddRelation([NotNull] IEntityRelation relation)
+        {
+            if (relation == null)
+            {
+                throw new ArgumentNullException(nameof(relation));
+            }
+
+            this.relations.Add(relation);
+            return this;
+        }
 
         /// <summary>
         /// Appends an INNER JOIN clause to the selection.
@@ -927,7 +980,7 @@ namespace Startitecture.Orm.Model
         /// </returns>
         public ItemSelection<TItem> Union(ItemSelection<TItem> selection)
         {
-            this.LinkedSelection = new LinkedSelection<TItem>(selection, SelectionLinkType.Union);
+            this.LinkedSelection = new LinkedSelection(selection, SelectionLinkType.Union);
             return this;
         }
 
@@ -942,7 +995,7 @@ namespace Startitecture.Orm.Model
         /// </returns>
         public ItemSelection<TItem> Intersect(ItemSelection<TItem> selection)
         {
-            this.LinkedSelection = new LinkedSelection<TItem>(selection, SelectionLinkType.Intersection);
+            this.LinkedSelection = new LinkedSelection(selection, SelectionLinkType.Intersection);
             return this;
         }
 
@@ -957,7 +1010,7 @@ namespace Startitecture.Orm.Model
         /// </returns>
         public ItemSelection<TItem> Except(ItemSelection<TItem> selection)
         {
-            this.LinkedSelection = new LinkedSelection<TItem>(selection, SelectionLinkType.Exception);
+            this.LinkedSelection = new LinkedSelection(selection, SelectionLinkType.Exception);
             return this;
         }
 
@@ -977,39 +1030,19 @@ namespace Startitecture.Orm.Model
         {
             var mappedSelection = MapSelection<TDestItem>(this);
 
-            var currentSelection = this;
+            ISelection currentSelection = this;
             var linkedSelection = mappedSelection;
 
             while (currentSelection.LinkedSelection != null)
             {
-                var targetSelection = MapSelection<TDestItem>(currentSelection.LinkedSelection.Selection);
+                var targetSelection = MapSelection<TDestItem>(currentSelection.LinkedSelection.Selection as ItemSelection<TItem>);
                 LinkSelection(currentSelection.LinkedSelection.LinkType, linkedSelection, targetSelection);
 
                 currentSelection = currentSelection.LinkedSelection.Selection;
-                linkedSelection = linkedSelection.LinkedSelection.Selection;
+                linkedSelection = targetSelection;
             }
 
             return mappedSelection;
-        }
-
-        /// <summary>
-        /// Adds a relation to the selection.
-        /// </summary>
-        /// <param name="relation">
-        /// The relation to add.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
-        /// </returns>
-        public ItemSelection<TItem> AddRelation([NotNull] IEntityRelation relation)
-        {
-            if (relation == null)
-            {
-                throw new ArgumentNullException(nameof(relation));
-            }
-
-            this.relations.Add(relation);
-            return this;
         }
 
         /// <summary>
@@ -1103,8 +1136,25 @@ namespace Startitecture.Orm.Model
             targetSelection.selectExpressions.AddRange(sourceSelection.selectExpressions);
             targetSelection.valueFilters.AddRange(sourceSelection.valueFilters);
             targetSelection.relations.AddRange(sourceSelection.relations);
-            targetSelection.Limit = sourceSelection.Limit;
+            targetSelection.Page.RowOffset = sourceSelection.Page.RowOffset;
+            targetSelection.Page.Size = sourceSelection.Page.Size;
             return targetSelection;
+        }
+
+        /// <summary>
+        /// Selects the properties to return with the query.
+        /// </summary>
+        /// <param name="selectors">
+        /// The property name selectors. If empty, all properties are returned.
+        /// </param>
+        private void Select(params LambdaExpression[] selectors)
+        {
+            if (selectors == null)
+            {
+                throw new ArgumentNullException(nameof(selectors));
+            }
+
+            this.selectExpressions.AddRange(selectors);
         }
 
         /// <summary>

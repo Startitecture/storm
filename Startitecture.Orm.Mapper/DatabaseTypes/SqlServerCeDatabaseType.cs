@@ -18,30 +18,30 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
     /// </summary>
     internal class SqlServerCeDatabaseType : DatabaseType
     {
-        /// <summary>
-        /// Builds a SQL query suitable for performing page based queries to the database.
-        /// </summary>
-        /// <param name="skip">
-        /// The number of rows that should be skipped by the query.
-        /// </param>
-        /// <param name="take">
-        /// The number of rows that should be returned by the query.
-        /// </param>
-        /// <param name="pageStatement">
-        /// The page statement.
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL query.
-        /// </param>
-        /// <returns>
-        /// The final SQL query that should be executed.
-        /// </returns>
-        public override string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
-        {
-            var sqlPage = $"{pageStatement.Sql}\nOFFSET @{args.Length} ROWS FETCH NEXT @{args.Length + 1} ROWS ONLY";
-            args = args.Concat(new object[] { skip, take }).ToArray();
-            return sqlPage;
-        }
+        /////// <summary>
+        /////// Builds a SQL query suitable for performing page based queries to the database.
+        /////// </summary>
+        /////// <param name="skip">
+        /////// The number of rows that should be skipped by the query.
+        /////// </param>
+        /////// <param name="take">
+        /////// The number of rows that should be returned by the query.
+        /////// </param>
+        /////// <param name="pageStatement">
+        /////// The page statement.
+        /////// </param>
+        /////// <param name="args">
+        /////// Arguments to any embedded parameters in the SQL query.
+        /////// </param>
+        /////// <returns>
+        /////// The final SQL query that should be executed.
+        /////// </returns>
+        ////public override string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
+        ////{
+        ////    var sqlPage = $"{pageStatement.Sql}\nOFFSET @{args.Length} ROWS FETCH NEXT @{args.Length + 1} ROWS ONLY";
+        ////    args = args.Concat(new object[] { skip, take }).ToArray();
+        ////    return sqlPage;
+        ////}
 
         /// <summary>
         /// Performs an insert operation

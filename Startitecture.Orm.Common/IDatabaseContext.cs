@@ -115,108 +115,6 @@ namespace Startitecture.Orm.Common
         IEnumerable<T> Query<T>(string sql, params object[] args);
 
         /// <summary>
-        /// Runs a query and returns the result set as a typed list
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query to execute
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL
-        /// </param>
-        /// <returns>
-        /// A List holding the results of the query
-        /// </returns>
-        IEnumerable<T> Fetch<T>(string sql, params object[] args);
-
-        /// <summary>
-        /// Retrieves a page of records (without the total count)
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="page">
-        /// The 1 based page number to retrieve
-        /// </param>
-        /// <param name="itemsPerPage">
-        /// The number of records per page
-        /// </param>
-        /// <param name="sql">
-        /// The base SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// A List of results
-        /// </returns>
-        IEnumerable<T> Fetch<T>(long page, long itemsPerPage, string sql, params object[] args);
-
-        /// <summary>
-        /// Retrieves a page of records and the total number of available records.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set.
-        /// </typeparam>
-        /// <param name="page">
-        /// The 1 based page number to retrieve.
-        /// </param>
-        /// <param name="itemsPerPage">
-        /// The number of records per page.
-        /// </param>
-        /// <param name="sqlCount">
-        /// The SQL to retrieve the total number of records.
-        /// </param>
-        /// <param name="countArgs">
-        /// Arguments to any embedded parameters in the <paramref name="sqlCount"/> statement.
-        /// </param>
-        /// <param name="sqlPage">
-        /// The SQL To retrieve a single page of results.
-        /// </param>
-        /// <param name="pageArgs">
-        /// Arguments to any embedded parameters in the <paramref name="sqlPage"/> statement.
-        /// </param>
-        /// <returns>
-        /// A Page of results.
-        /// </returns>
-        /// <remarks>
-        /// This method allows separate SQL statements to be explicitly provided for the two parts of the page query.
-        /// The page and itemsPerPage parameters are not used directly and are used simply to populate the returned Page object.
-        /// </remarks>
-        Page<T> FetchPage<T>(
-            long page,
-            long itemsPerPage,
-            string sqlCount,
-            object[] countArgs,
-            string sqlPage,
-            object[] pageArgs);
-
-        /// <summary>
-        /// Retrieves a page of records and the total number of available records
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="page">
-        /// The 1 based page number to retrieve
-        /// </param>
-        /// <param name="itemsPerPage">
-        /// The number of records per page
-        /// </param>
-        /// <param name="sql">
-        /// The base SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// A Page of results
-        /// </returns>
-        Page<T> FetchPage<T>(long page, long itemsPerPage, string sql, params object[] args);
-
-        /// <summary>
         /// Runs a query that should always return at least one return
         /// </summary>
         /// <typeparam name="T">
@@ -268,7 +166,7 @@ namespace Startitecture.Orm.Common
         /// <remarks>
         /// Throws an exception if there are zero or more than one matching record
         /// </remarks>
-        T Unique<T>(string sql, params object[] args);
+        T Single<T>(string sql, params object[] args);
 
         /// <summary>
         /// Runs a query that should always return either a single row, or no rows
@@ -285,30 +183,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The single record matching the specified primary key value, or default(T) if no matching rows
         /// </returns>
-        T UniqueOrDefault<T>(string sql, params object[] args);
-
-        /// <summary>
-        /// Retrieves a range of records from result set
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="skip">
-        /// The number of rows at the start of the result set to skip over
-        /// </param>
-        /// <param name="take">
-        /// The number of rows to retrieve
-        /// </param>
-        /// <param name="sql">
-        /// The base SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// A List of results
-        /// </returns>
-        IEnumerable<T> SkipTake<T>(long skip, long take, string sql, params object[] args);
+        T SingleOrDefault<T>(string sql, params object[] args);
 
         /// <summary>
         /// Performs an SQL Insert

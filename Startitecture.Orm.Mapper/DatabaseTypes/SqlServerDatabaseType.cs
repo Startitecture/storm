@@ -21,41 +21,41 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
     {
         #region Public Methods and Operators
 
-        /// <summary>
-        /// The build page query.
-        /// </summary>
-        /// <param name="skip">
-        /// The skip.
-        /// </param>
-        /// <param name="take">
-        /// The take.
-        /// </param>
-        /// <param name="pageStatement">
-        /// The page statement.
-        /// </param>
-        /// <param name="args">
-        /// The args.
-        /// </param>
-        /// <returns>
-        /// The <see cref="string"/>.
-        /// </returns>
-        public override string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
-        {
-            pageStatement.SqlSelectRemoved = PagingHelper.OrderByRegex.Replace(pageStatement.SqlSelectRemoved, string.Empty, 1);
+        /////// <summary>
+        /////// The build page query.
+        /////// </summary>
+        /////// <param name="skip">
+        /////// The skip.
+        /////// </param>
+        /////// <param name="take">
+        /////// The take.
+        /////// </param>
+        /////// <param name="pageStatement">
+        /////// The page statement.
+        /////// </param>
+        /////// <param name="args">
+        /////// The args.
+        /////// </param>
+        /////// <returns>
+        /////// The <see cref="string"/>.
+        /////// </returns>
+        ////public override string BuildPageQuery(long skip, long take, SqlPageStatement pageStatement, ref object[] args)
+        ////{
+        ////    pageStatement.SqlSelectRemoved = PagingHelper.OrderByRegex.Replace(pageStatement.SqlSelectRemoved, string.Empty, 1);
 
-            if (PagingHelper.DistinctRegex.IsMatch(pageStatement.SqlSelectRemoved))
-            {
-                pageStatement.SqlSelectRemoved = "peta_inner.* FROM (SELECT " + pageStatement.SqlSelectRemoved + ") peta_inner";
-            }
+        ////    if (PagingHelper.DistinctRegex.IsMatch(pageStatement.SqlSelectRemoved))
+        ////    {
+        ////        pageStatement.SqlSelectRemoved = "peta_inner.* FROM (SELECT " + pageStatement.SqlSelectRemoved + ") peta_inner";
+        ////    }
 
-            string sqlPage =
-                $"SELECT * FROM (SELECT ROW_NUMBER() OVER ({pageStatement.SqlOrderBy ?? "ORDER BY (SELECT NULL)"}) " + 
-                "peta_rn, {pageStatement.SqlSelectRemoved}) peta_paged WHERE peta_rn>@{args.Length} AND peta_rn<=@{args.Length + 1}";
+        ////    string sqlPage =
+        ////        $"SELECT * FROM (SELECT ROW_NUMBER() OVER ({pageStatement.SqlOrderBy ?? "ORDER BY (SELECT NULL)"}) " + 
+        ////        "peta_rn, {pageStatement.SqlSelectRemoved}) peta_paged WHERE peta_rn>@{args.Length} AND peta_rn<=@{args.Length + 1}";
 
-            args = args.Concat(new object[] { skip, skip + take }).ToArray();
+        ////    args = args.Concat(new object[] { skip, skip + take }).ToArray();
 
-            return sqlPage;
-        }
+        ////    return sqlPage;
+        ////}
 
         /// <summary>
         /// Performs an insert operation

@@ -28,11 +28,6 @@ namespace Startitecture.Orm.SqlClient
         private const string SelectStatement = "SELECT";
 
         /// <summary>
-        /// The select top statement.
-        /// </summary>
-        private const string SelectTopStatement = "SELECT TOP {0}";
-
-        /// <summary>
         /// The if exists clause.
         /// </summary>
         private const string IfExistsClause = @"IF EXISTS (
@@ -327,10 +322,10 @@ namespace Startitecture.Orm.SqlClient
                     break;
                 case FilterType.DoesNotMatchSet:
                     throw new NotImplementedException();
-                case FilterType.IsSet:
+                case FilterType.IsNotNull:
                     filterTokens.Add(string.Format(CultureInfo.InvariantCulture, NotNullPredicate, referenceName));
                     break;
-                case FilterType.IsNotSet:
+                case FilterType.IsNull:
                     filterTokens.Add(string.Format(CultureInfo.InvariantCulture, NullPredicate, referenceName));
                     break;
                 default:
@@ -456,7 +451,7 @@ namespace Startitecture.Orm.SqlClient
         private string CreateCompleteStatement<TItem>(QueryContext<TItem> queryContext, bool isContains)
         {
             int offset = queryContext.ParameterOffset;
-            var statement = this.CreateSelectionStatement(queryContext.Selection, offset, isContains);
+            var statement = this.CreateSelectionStatement(queryContext.Selection, offset, isContains, this.definitionProvider.Resolve<TItem>());
             offset = queryContext.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
             var linkedSelection = queryContext.Selection.LinkedSelection;
 
@@ -470,7 +465,7 @@ namespace Startitecture.Orm.SqlClient
                     Environment.NewLine,
                     linkStatement,
                     Environment.NewLine,
-                    this.CreateSelectionStatement(linkedSelection.Selection, offset, isContains));
+                    this.CreateSelectionStatement(linkedSelection.Selection, offset, isContains, this.definitionProvider.Resolve<TItem>()));
 
                 offset += linkedSelection.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
                 linkedSelection = linkedSelection.Selection.LinkedSelection;
@@ -482,9 +477,6 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Creates the selection statement for the current selection.
         /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item being selected.
-        /// </typeparam>
         /// <param name="selection">
         /// The selection to create a statement for.
         /// </param>
@@ -494,13 +486,14 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="isContains">
         /// A value indicating whether the statement is a contains-type statement.
         /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition for the selection statement.
+        /// </param>
         /// <returns>
         /// The T-SQL statement for the current selection as a <see cref="string"/>.
         /// </returns>
-        private string CreateSelectionStatement<TItem>(ItemSelection<TItem> selection, int indexOffset, bool isContains)
+        private string CreateSelectionStatement(ISelection selection, int indexOffset, bool isContains, IEntityDefinition entityDefinition)
         {
-            var entityDefinition = this.definitionProvider.Resolve<TItem>();
-
             // Contains statements do not need any columns.
             var selectAttributes = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
 
@@ -523,7 +516,7 @@ namespace Startitecture.Orm.SqlClient
                              : string.Empty;
 
             return string.Concat(
-                selection.Limit > 0 ? string.Format(CultureInfo.InvariantCulture, SelectTopStatement, selection.Limit) : SelectStatement,
+                SelectStatement,
                 Environment.NewLine,
                 selectColumns,
                 Environment.NewLine,
