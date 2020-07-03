@@ -69,7 +69,9 @@ namespace Startitecture.Orm.SqlClient
             }
 
             // Always remember to supply this method with an array of values!
-            var sql = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Contains));
+            var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), StatementOutputType.Contains);
+            var sql = this.queryFactory.Create(queryContext);
+
             return this.dataContext.ExecuteScalar<int>(sql, selection.PropertyValues.ToArray()) > 0;
         }
 
@@ -94,7 +96,8 @@ namespace Startitecture.Orm.SqlClient
 
             try
             {
-                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Select));
+                var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), StatementOutputType.Select);
+                var statement = this.queryFactory.Create(queryContext);
 
                 ////Trace.TraceInformation("Using unique query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
                 return this.dataContext.FirstOrDefault<TDataItem>(statement, selection.PropertyValues.ToArray());
@@ -137,7 +140,8 @@ namespace Startitecture.Orm.SqlClient
 
             try
             {
-                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Select));
+                var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), StatementOutputType.Select);
+                var statement = this.queryFactory.Create(queryContext);
 
                 ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
                 return this.dataContext.Query<TDataItem>(statement, selection.PropertyValues.ToArray());
@@ -291,7 +295,8 @@ namespace Startitecture.Orm.SqlClient
 
             try
             {
-                var statement = this.queryFactory.Create(new QueryContext<TDataItem>(selection, StatementOutputType.Delete));
+                var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), StatementOutputType.Delete);
+                var statement = this.queryFactory.Create(queryContext);
                 return this.dataContext.Execute(statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)

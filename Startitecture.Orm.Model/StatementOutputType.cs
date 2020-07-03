@@ -12,23 +12,28 @@ namespace Startitecture.Orm.Model
     public enum StatementOutputType
     {
         /// <summary>
-        /// The statement is a select.
+        /// The statement is a selection.
         /// </summary>
         Select = 0,
 
         /// <summary>
-        /// The statement is a contains.
+        /// The statement is a contains query.
         /// </summary>
         Contains = 1,
 
         /// <summary>
-        /// The statement is an update.
+        /// The statement is an update statement.
         /// </summary>
         Update = 2,
 
         /// <summary>
-        /// The statement is a delete.
+        /// The statement is a delete statement.
         /// </summary>
-        Delete = 3
+        Delete = 3,
+
+        /// <summary>
+        /// The statement is a page select.
+        /// </summary>
+        PageSelect = 4
     }
 }

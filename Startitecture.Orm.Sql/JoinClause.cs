@@ -72,6 +72,11 @@ namespace Startitecture.Orm.Sql
         }
 
         /// <summary>
+        /// Gets or sets the indent for the statement output.
+        /// </summary>
+        public int Indent { get; set; }
+
+        /// <summary>
         /// Creates a JOIN clause for the specified <paramref name="selection"/>.
         /// </summary>
         /// <param name="selection">
@@ -87,7 +92,8 @@ namespace Startitecture.Orm.Sql
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return string.Join(Environment.NewLine, selection.Relations.Select(this.GenerateRelationStatement));
+            var indent = this.Indent > 0 ? new string(' ', this.Indent) : string.Empty;
+            return string.Join(Environment.NewLine, selection.Relations.Select(relation => $"{indent}{this.GenerateRelationStatement(relation)}"));
         }
 
         /// <summary>
@@ -159,7 +165,13 @@ namespace Startitecture.Orm.Sql
             if (string.IsNullOrWhiteSpace(relationLocation.Alias))
             {
                 // Use the entity names for the inner join if no alias has been requested.
-                return string.Format(CultureInfo.InvariantCulture, RelationStatementFormat, joinType, relationEntity, sourceName, relationName);
+                return string.Format(
+                    CultureInfo.InvariantCulture,
+                    RelationStatementFormat,
+                    joinType,
+                    relationEntity,
+                    sourceName,
+                    relationName);
             }
 
             // Use the entity names names for the inner join and alias the table.

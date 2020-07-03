@@ -52,12 +52,12 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// The select column format.
         /// </summary>
-        private const string SelectColumnFormat = "    {0}";
+        private const string SelectColumnFormat = "{0}";
 
         /// <summary>
         /// The alias column format.
         /// </summary>
-        private const string AliasColumnFormat = "    {0} AS [{1}]";
+        private const string AliasColumnFormat = "{0} AS [{1}]";
 
         /// <summary>
         /// The SQL where clause.
@@ -140,6 +140,11 @@ namespace Startitecture.Orm.SqlClient
         private const string ParameterSeparator = ", ";
 
         /// <summary>
+        /// The default indent.
+        /// </summary>
+        private const int DefaultIndent = 0;
+
+        /// <summary>
         /// The SQL qualifier.
         /// </summary>
         private static readonly TransactSqlQualifier SqlQualifier = Singleton<TransactSqlQualifier>.Instance;
@@ -149,11 +154,6 @@ namespace Startitecture.Orm.SqlClient
         /// </summary>
         [NotNull]
         private readonly IEntityDefinitionProvider definitionProvider;
-
-        /// <summary>
-        /// The transact SQL join.
-        /// </summary>
-        private readonly JoinClause joinClause;
 
         /// <summary>
         /// The name qualifier.
@@ -170,21 +170,46 @@ namespace Startitecture.Orm.SqlClient
         public TransactSqlQueryFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
         }
 
         /// <inheritdoc />
-        public string Create<TItem>([NotNull] QueryContext<TItem> queryContext)
+        /// <remarks>
+        /// At this time, creating paging statements that include UNION, INTERSECT and EXCEPT clauses is not supported.
+        /// </remarks>
+        public string Create([NotNull] QueryContext queryContext)
         {
             if (queryContext == null)
             {
                 throw new ArgumentNullException(nameof(queryContext));
             }
 
-            var selection = queryContext.Selection;
-            var entityDefinition = this.definitionProvider.Resolve<TItem>();
+            return this.CompleteStatement(queryContext, queryContext.OutputType);
+        }
 
-            return this.CompleteStatement(queryContext, queryContext.OutputType, entityDefinition, selection);
+        /// <summary>
+        /// Gets the selection attributes.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items.
+        /// </returns>
+        private static IEnumerable<EntityAttributeDefinition> GetSelectionAttributes(ISelection selection, IEntityDefinition entityDefinition)
+        {
+            // Contains statements do not need any columns.
+            var selectAttributes = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+
+            // Add all returnable attributes if no explicit columns are selected.
+            if (selectAttributes.Any() == false)
+            {
+                selectAttributes.AddRange(entityDefinition.ReturnableAttributes);
+            }
+
+            return selectAttributes;
         }
 
         /// <summary>
@@ -336,6 +361,69 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
+        /// Completes the query statement.
+        /// </summary>
+        /// <param name="queryContext">
+        /// The query context.
+        /// </param>
+        /// <param name="queryContextOutputType">
+        /// The query context output type.
+        /// </param>
+        /// <returns>
+        /// The query as a <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="StatementOutputType"/>.
+        /// </exception>
+        private string CompleteStatement(QueryContext queryContext, StatementOutputType queryContextOutputType)
+        {
+            var entityDefinition = queryContext.EntityDefinition;
+            var filterStatement = this.CreateFilter(entityDefinition, queryContext.Selection.Filters, queryContext.ParameterOffset);
+
+            switch (queryContextOutputType)
+            {
+                case StatementOutputType.Select:
+                    return this.CreateCompleteStatement(queryContext);
+                case StatementOutputType.PageSelect:
+                    return this.CreatePageStatement(queryContext);
+                case StatementOutputType.Contains:
+                    return string.Format(CultureInfo.InvariantCulture, IfExistsClause, this.CreateCompleteStatement(queryContext));
+                case StatementOutputType.Update:
+                    return filterStatement;
+                case StatementOutputType.Delete:
+                    // Rely on the underlying entity definition for delimiters.
+                    var primaryTableName =
+                        $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
+
+                    var filter = queryContext.Selection.Filters.Any()
+                                     ? string.Concat(
+                                         Environment.NewLine,
+                                         string.Format(CultureInfo.InvariantCulture, SqlWhereClause, filterStatement))
+                                     : string.Empty;
+
+                    if (queryContext.Selection.Relations.Any() == false)
+                    {
+                        return string.Concat(DeleteFromStatement, primaryTableName, filter);
+                    }
+
+                    var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+
+                    return string.Concat(
+                        DeleteStatement,
+                        primaryTableName,
+                        Environment.NewLine,
+                        FromStatement,
+                        primaryTableName,
+                        Environment.NewLine,
+                        joinClause.Create(queryContext.Selection), //// selection.Relations.CreateJoinClause(),
+                        filter);
+
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(queryContextOutputType));
+            }
+        }
+
+        /// <summary>
         /// Gets a reference name from an <paramref name="location"/>.
         /// </summary>
         /// <param name="location">
@@ -407,6 +495,32 @@ namespace Startitecture.Orm.SqlClient
         /// </exception>
         private string CreateFilter(IEntityDefinition entityDefinition, IEnumerable<ValueFilter> filters, int indexOffset)
         {
+            return this.CreateFilter(entityDefinition, filters, indexOffset, DefaultIndent);
+        }
+
+        /// <summary>
+        /// Creates a filter for the current selection.
+        /// </summary>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="filters">
+        /// The filters to apply.
+        /// </param>
+        /// <param name="indexOffset">
+        /// The index offset.
+        /// </param>
+        /// <param name="indent">
+        /// The indent to apply to each filter clause.
+        /// </param>
+        /// <returns>
+        /// The filter clause as a <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="System.IndexOutOfRangeException">
+        /// The number of filter values is outside the range handled by the method.
+        /// </exception>
+        private string CreateFilter(IEntityDefinition entityDefinition, IEnumerable<ValueFilter> filters, int indexOffset, int indent)
+        {
             if (filters == null)
             {
                 throw new ArgumentNullException(nameof(filters));
@@ -430,48 +544,50 @@ namespace Startitecture.Orm.SqlClient
                 index = AddTokens(filter.FilterType, filter.FilterValues.First(), filterTokens, referenceName, setValues, index);
             }
 
-            return string.Join(string.Concat(FilterSeparator, Environment.NewLine), filterTokens);
+            return string.Join(string.Concat(FilterSeparator, Environment.NewLine, new string(' ', indent)), filterTokens);
         }
 
         /// <summary>
         /// Creates a complete selection statement.
         /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item being selected.
-        /// </typeparam>
         /// <param name="queryContext">
         /// The query context.
-        /// </param>
-        /// <param name="isContains">
-        /// A value indicating whether the statement is a contains-type statement.
         /// </param>
         /// <returns>
         /// The selection statement as a <see cref="string"/>.
         /// </returns>
-        private string CreateCompleteStatement<TItem>(QueryContext<TItem> queryContext, bool isContains)
+        private string CreateCompleteStatement(QueryContext queryContext)
         {
             int offset = queryContext.ParameterOffset;
-            var statement = this.CreateSelectionStatement(queryContext.Selection, offset, isContains, this.definitionProvider.Resolve<TItem>());
+            var statement = this.CreateSelectionStatement(queryContext.Selection, offset, queryContext.OutputType, queryContext.EntityDefinition);
+
             offset = queryContext.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
             var linkedSelection = queryContext.Selection.LinkedSelection;
+            var linkSelectionsList = new List<Tuple<string, string>>();
 
             while (linkedSelection != null)
             {
                 var linkType = linkedSelection.LinkType;
                 var linkStatement = CreateLinkStatement(linkType);
 
-                statement = string.Concat(
-                    statement,
-                    Environment.NewLine,
-                    linkStatement,
-                    Environment.NewLine,
-                    this.CreateSelectionStatement(linkedSelection.Selection, offset, isContains, this.definitionProvider.Resolve<TItem>()));
+                var selectionStatement = this.CreateSelectionStatement(
+                    linkedSelection.Selection,
+                    offset,
+                    queryContext.OutputType,
+                    queryContext.EntityDefinition);
 
+                ////statement = string.Concat(statement, Environment.NewLine, linkStatement, Environment.NewLine, selectionStatement);
+                linkSelectionsList.Add(new Tuple<string, string>(linkStatement, selectionStatement));
                 offset += linkedSelection.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
                 linkedSelection = linkedSelection.Selection.LinkedSelection;
             }
 
-            return statement;
+            // If linked, protect each clause with parentheses
+            var isLinked = linkSelectionsList.Any();
+            return string.Concat(
+                isLinked ? $"({statement})" : statement,
+                isLinked ? Environment.NewLine : string.Empty,
+                string.Join(Environment.NewLine, from ls in linkSelectionsList select $"{ls.Item1}{Environment.NewLine}({ls.Item2})"));
         }
 
         /// <summary>
@@ -483,8 +599,8 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="indexOffset">
         /// The index offset.
         /// </param>
-        /// <param name="isContains">
-        /// A value indicating whether the statement is a contains-type statement.
+        /// <param name="outputType">
+        /// The statement output Type.
         /// </param>
         /// <param name="entityDefinition">
         /// The entity definition for the selection statement.
@@ -492,106 +608,139 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The T-SQL statement for the current selection as a <see cref="string"/>.
         /// </returns>
-        private string CreateSelectionStatement(ISelection selection, int indexOffset, bool isContains, IEntityDefinition entityDefinition)
+        private string CreateSelectionStatement(ISelection selection, int indexOffset, StatementOutputType outputType, IEntityDefinition entityDefinition)
         {
-            // Contains statements do not need any columns.
-            var selectAttributes = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+            var selectAttributes = GetSelectionAttributes(selection, entityDefinition);
+            string selectColumns;
 
-            // Add all returnable attributes if no explicit columns are selected.
-            if (selectAttributes.Any() == false)
+            switch (outputType)
             {
-                selectAttributes.AddRange(entityDefinition.ReturnableAttributes);
+                case StatementOutputType.Select:
+                case StatementOutputType.PageSelect:
+                    selectColumns = string.Join(string.Concat(",", Environment.NewLine, new string(' ', 4)), selectAttributes.Select(this.GetQualifiedColumnName));
+                    break;
+                case StatementOutputType.Contains:
+                    selectColumns = '1'.ToString(CultureInfo.InvariantCulture);
+                    break;
+                case StatementOutputType.Update:
+                case StatementOutputType.Delete:
+                    throw new NotSupportedException($"Parameter '{nameof(outputType)}' value '{outputType}' is not supported for selection statements.");
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(outputType), outputType, null);
             }
 
-            string selectColumns = isContains
-                                       ? '1'.ToString(CultureInfo.InvariantCulture)
-                                       : string.Join(string.Concat(",", Environment.NewLine), selectAttributes.Select(this.GetQualifiedColumnName));
+            var fromClause = string.Concat(
+                FromStatement,
+                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
 
-            var fromClause = string.Concat(FromStatement, $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
-            var joinClauseText = this.joinClause.Create(selection);
+            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+            var joinClauseText = joinClause.Create(selection);
             var filter = selection.Filters.Any()
                              ? string.Concat(
                                  Environment.NewLine,
                                  string.Format(CultureInfo.InvariantCulture, SqlWhereClause, this.CreateFilter(entityDefinition, selection.Filters, indexOffset)))
                              : string.Empty;
 
+            var orderByClause = this.CreateOrderByClause(selection.OrderByExpressions);
+
             return string.Concat(
                 SelectStatement,
                 Environment.NewLine,
+                new string(' ', 4),
                 selectColumns,
                 Environment.NewLine,
                 fromClause,
                 selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClauseText) : string.Empty,
-                filter);
+                filter,
+                selection.OrderByExpressions.Any() ? string.Concat(Environment.NewLine, "ORDER BY ", orderByClause) : string.Empty);
         }
 
         /// <summary>
-        /// Completes the query statement.
+        /// Creates an order by clause from the provided expressions.
+        /// </summary>
+        /// <param name="orderExpressions">
+        /// The order expressions.
+        /// </param>
+        /// <returns>
+        /// The ORDER BY clause as a <see cref="string"/>.
+        /// </returns>
+        private string CreateOrderByClause(IEnumerable<OrderExpression> orderExpressions)
+        {
+            var clauses = (from orderExpression in orderExpressions
+                           let reference = this.definitionProvider.GetEntityReference(orderExpression.PropertyExpression)
+                           let location = this.definitionProvider.GetEntityLocation(reference)
+                           let attribute =
+                               this.definitionProvider.Resolve(location.EntityType)
+                                   .DirectAttributes.FirstOrDefault(x => x.PropertyName == orderExpression.PropertyExpression.GetPropertyName())
+                           let referenceName = this.nameQualifier.Qualify(attribute, location)
+                           select orderExpression.OrderDescending ? $"{referenceName} DESC" : referenceName).ToList();
+
+            return string.Join(ParameterSeparator, clauses);
+        }
+
+        /// <summary>
+        /// Creates a page selection statement.
         /// </summary>
         /// <param name="queryContext">
         /// The query context.
         /// </param>
-        /// <param name="queryContextOutputType">
-        /// The query context output type.
-        /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition.
-        /// </param>
-        /// <param name="selection">
-        /// The selection.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item being queried.
-        /// </typeparam>
         /// <returns>
-        /// The query as a <see cref="string"/>.
+        /// The selection statement as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="StatementOutputType"/>.
-        /// </exception>
-        private string CompleteStatement<TItem>(
-            QueryContext<TItem> queryContext,
-            StatementOutputType queryContextOutputType,
-            IEntityDefinition entityDefinition,
-            ItemSelection<TItem> selection)
+        private string CreatePageStatement(QueryContext queryContext)
         {
-            var completeStatement = this.CreateFilter(entityDefinition, selection.Filters, queryContext.ParameterOffset);
+            var selection = queryContext.Selection;
+            var entityDefinition = queryContext.EntityDefinition;
+            var keyColumns = entityDefinition.PrimaryKeyAttributes.ToList();
+            var keySelection = string.Join(ParameterSeparator, keyColumns.Select(definition => definition.ReferenceName));
+            var keyPredicate = string.Join(
+                string.Concat(FilterSeparator, Environment.NewLine),
+                keyColumns.Select(definition => $"pg.{definition.ReferenceName} = {this.GetQualifiedColumnName(definition)}"));
 
-            switch (queryContextOutputType)
-            {
-                case StatementOutputType.Select:
-                    return this.CreateCompleteStatement(queryContext, false);
-                case StatementOutputType.Contains:
-                    return string.Format(CultureInfo.InvariantCulture, IfExistsClause, this.CreateCompleteStatement(queryContext, true));
-                case StatementOutputType.Update:
-                    return completeStatement;
-                case StatementOutputType.Delete:
-                    // Rely on the underlying entity definition for delimiters.
-                    var primaryTableName = $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
-                    var filter = selection.Filters.Any()
-                                     ? string.Concat(
-                                         Environment.NewLine,
-                                         string.Format(CultureInfo.InvariantCulture, SqlWhereClause, completeStatement))
-                                     : string.Empty;
+            var selectAttributes = GetSelectionAttributes(selection, entityDefinition);
+            string selectColumns = string.Join(
+                string.Concat(",", Environment.NewLine, new string(' ', 4)),
+                selectAttributes.Select(this.GetQualifiedColumnName));
 
-                    if (selection.Relations.Any() == false)
-                    {
-                        return string.Concat(DeleteFromStatement, primaryTableName, filter);
-                    }
+            var fromClause = string.Concat(
+                FromStatement,
+                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
 
-                    return string.Concat(
-                        DeleteStatement,
-                        primaryTableName,
-                        Environment.NewLine,
-                        FromStatement,
-                        primaryTableName,
-                        Environment.NewLine,
-                        this.joinClause.Create(selection), //// selection.Relations.CreateJoinClause(),
-                        filter);
+            var pageJoinClause = new JoinClause(this.definitionProvider, this.nameQualifier) { Indent = 8 };
+            var pageJoinClauseText = pageJoinClause.Create(selection);
+            var fullPageJoinClauseText = selection.Relations.Any() ? string.Concat(Environment.NewLine, pageJoinClauseText) : string.Empty;
 
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(queryContextOutputType));
-            }
+            var statementJoinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+            var joinClauseText = statementJoinClause.Create(selection);
+            var fullJoinClauseText = selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClauseText) : string.Empty;
+
+            var pageFilters = this.CreateFilter(entityDefinition, selection.Filters, 0, 8);
+            var pageFilter = selection.Filters.Any()
+                             ? string.Concat(Environment.NewLine, "        ", string.Format(CultureInfo.InvariantCulture, SqlWhereClause, pageFilters))
+                             : string.Empty;
+
+            var filters = this.CreateFilter(entityDefinition, selection.Filters, 0);
+            var mainFilter = selection.Filters.Any() ? string.Concat(" AND", Environment.NewLine, filters) : string.Empty;
+            var orderByClause = this.CreateOrderByClause(selection.OrderByExpressions);
+
+            // TODO: This does not work with linked queries. Workaround is to create a view. Long-term is to further encapsulate query components.
+            var pageStatement = $@";WITH pg AS
+    (
+        SELECT {keySelection}
+        {fromClause}{fullPageJoinClauseText}{pageFilter}
+        ORDER BY {orderByClause}
+        OFFSET @{selection.PropertyValues.Count()} ROWS
+        FETCH NEXT @{selection.PropertyValues.Count() + 1} ROWS ONLY
+    )
+SELECT 
+    {selectColumns}
+{fromClause}{fullJoinClauseText}
+WHERE EXISTS 
+(SELECT 1 FROM pg 
+WHERE {keyPredicate}){mainFilter}
+ORDER BY {orderByClause} OPTION (RECOMPILE)";
+
+            return pageStatement;
         }
     }
 }

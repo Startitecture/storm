@@ -72,7 +72,7 @@ SET
         /// <summary>
         /// The selection.
         /// </summary>
-        private readonly ItemSelection<TItem> selection;
+        private readonly ISelection selection;
 
         /// <summary>
         /// The query factory.
@@ -268,7 +268,7 @@ SET
                                     : string.Empty;
 
             var setClause = string.Join(string.Concat(',', Environment.NewLine), setItems);
-            var predicateClause = this.queryFactory.Create(new QueryContext<TItem>(this.selection, StatementOutputType.Update, index));
+            var predicateClause = this.queryFactory.Create(new QueryContext(this.selection, this.itemDefinition, StatementOutputType.Update, index));
 
             return string.Concat(
                 string.Format(CultureInfo.InvariantCulture, SqlUpdateClause, entityName, setClause),

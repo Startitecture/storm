@@ -17,12 +17,9 @@ namespace Startitecture.Orm.Model
         /// <param name="queryContext">
         /// The query Context.
         /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item that is the target of the selection.
-        /// </typeparam>
         /// <returns>
         /// The query language statement as a <see cref="string"/>.
         /// </returns>
-        string Create<TItem>(QueryContext<TItem> queryContext);
+        string Create(QueryContext queryContext);
     }
 }
