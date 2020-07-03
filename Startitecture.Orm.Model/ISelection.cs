@@ -18,7 +18,7 @@
         /// <summary>
         /// Gets the selection expressions.
         /// </summary>
-        IEnumerable<LambdaExpression> SelectExpressions { get; }
+        IEnumerable<SelectExpression> SelectExpressions { get; }
 
         /// <summary>
         /// Gets the order by expressions for the selection.

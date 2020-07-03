@@ -47,13 +47,32 @@ namespace Startitecture.Orm.Model.Tests
                                   };
 
             var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
-            var selection = new ItemSelection<ChildRaisedRow>().Select(expressions.ToArray());
-
             var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
+
+            var selection = new ItemSelection<ChildRaisedRow>().Select(expressions.ToArray());
             var expected = expressions.Select(entityDefinition.Find).ToList();
 
-            var actual = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+            var actual = selection.SelectExpressions.Select(expression => expression.AttributeExpression).Select(entityDefinition.Find).ToList();
             CollectionAssert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// The count test.
+        /// </summary>
+        [TestMethod]
+        public void CountTest_ItemSelectionWithCount_MatchesExpected()
+        {
+            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
+            var entityDefinition = definitionProvider.Resolve<ComplexRaisedRow>();
+
+            Expression<Func<ComplexRaisedRow, object>> expr1 = row => row.ComplexEntityId;
+            var target = new ItemSelection<ComplexRaisedRow>().Count(row => row.ComplexEntityId);
+            var expected = entityDefinition.Find(expr1);
+            var attributeExpression = target.SelectExpressions.FirstOrDefault()?.AttributeExpression;
+            Assert.IsNotNull(attributeExpression);
+            var actual = entityDefinition.Find(attributeExpression);
+            Assert.AreEqual(expected, actual);
+            Assert.AreEqual(AggregateFunction.Count, target.SelectExpressions.FirstOrDefault()?.AggregateFunction);
         }
 
         /// <summary>
@@ -155,7 +174,7 @@ namespace Startitecture.Orm.Model.Tests
 
             Assert.IsTrue(selection.OrderByExpressions.All(expression => expression.OrderDescending));
         }
-        
+
         /// <summary>
         /// The between test.
         /// </summary>
@@ -465,21 +484,21 @@ namespace Startitecture.Orm.Model.Tests
         public void PropertyValues_DirectData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                ValueColumn = 2,
-                                NullableColumn = "CouldHaveBeenNull",
-                                NullableValueColumn = null
-                            };
+            {
+                ValueColumn = 2,
+                NullableColumn = "CouldHaveBeenNull",
+                NullableValueColumn = null
+            };
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10,
-                                   NormalColumn = "Greater"
-                               };
+            {
+                FakeDataId = 10,
+                NormalColumn = "Greater"
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20,
-                                   AnotherColumn = "Less"
-                               };
+            {
+                FakeDataId = 20,
+                AnotherColumn = "Less"
+            };
             var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .Select(
@@ -524,21 +543,21 @@ namespace Startitecture.Orm.Model.Tests
         public void PropertyValues_DirectDataRaisedRow_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                ValueColumn = 2,
-                                NullableColumn = "CouldHaveBeenNull",
-                                NullableValueColumn = null
-                            };
+            {
+                ValueColumn = 2,
+                NullableColumn = "CouldHaveBeenNull",
+                NullableValueColumn = null
+            };
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10,
-                                   NormalColumn = "Greater"
-                               };
+            {
+                FakeDataId = 10,
+                NormalColumn = "Greater"
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20,
-                                   AnotherColumn = "Less"
-                               };
+            {
+                FakeDataId = 20,
+                AnotherColumn = "Less"
+            };
             var transactionSelection = Select
                 .From<DataRow>(
                     row => row.FakeDataId,
@@ -582,24 +601,24 @@ namespace Startitecture.Orm.Model.Tests
         public void PropertyValues_RelatedDataRaisedRow_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NullableValueColumn = null,
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2
-                            };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
             var transactionSelection = new ItemSelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
@@ -634,64 +653,64 @@ namespace Startitecture.Orm.Model.Tests
         public void PropertyValues_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related1"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull1",
-                                 ValueColumn = 2
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
 
             var baseline1 = new DataRow
-                                {
-                                    FakeDataId = 10
-                                };
+            {
+                FakeDataId = 10
+            };
             var boundary1 = new DataRow
-                                {
-                                    FakeDataId = 20
-                                };
+            {
+                FakeDataId = 20
+            };
 
             var match2 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related2"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull2",
-                                 ValueColumn = 3
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
 
             var baseline2 = new DataRow
-                                {
-                                    FakeDataId = 50
-                                };
+            {
+                FakeDataId = 50
+            };
             var boundary2 = new DataRow
-                                {
-                                    FakeDataId = 40
-                                };
+            {
+                FakeDataId = 40
+            };
 
             var match3 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related3"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull3",
-                                 ValueColumn = 4
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
 
             var baseline3 = new DataRow
-                                {
-                                    FakeDataId = 60
-                                };
+            {
+                FakeDataId = 60
+            };
             var boundary3 = new DataRow
-                                {
-                                    FakeDataId = 70
-                                };
+            {
+                FakeDataId = 70
+            };
 
             var transactionSelection = Select
                 .From<DataRow>(
@@ -1104,9 +1123,11 @@ namespace Startitecture.Orm.Model.Tests
             Assert.AreEqual(expected.Page, actual.Page);
             CollectionAssert.AreEqual(expected.Filters.ToList(), actual.Filters.ToList());
             CollectionAssert.AreEqual(expected.Relations.ToList(), actual.Relations.ToList());
+            var expectedExpressions = expected.SelectExpressions.Select(expression => expression.AttributeExpression);
+            var actualExpressions = actual.SelectExpressions.Select(expression => expression.AttributeExpression);
             CollectionAssert.AreEqual(
-                expected.SelectExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList(),
-                actual.SelectExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList());
+                expectedExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList(),
+                actualExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList());
         }
 
         /// <summary>
@@ -1217,6 +1238,5 @@ namespace Startitecture.Orm.Model.Tests
             /// </summary>
             public ParentRow Parent { get; set; }
         }
-
     }
 }

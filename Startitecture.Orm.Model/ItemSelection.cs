@@ -45,7 +45,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The selection expressions.
         /// </summary>
-        private readonly List<LambdaExpression> selectExpressions = new List<LambdaExpression>();
+        private readonly List<SelectExpression> selectExpressions = new List<SelectExpression>();
 
         /// <summary>
         /// The order by expressions.
@@ -86,7 +86,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the selection expressions.
         /// </summary>
-        public IEnumerable<LambdaExpression> SelectExpressions => this.selectExpressions;
+        public IEnumerable<SelectExpression> SelectExpressions => this.selectExpressions;
 
         /// <summary>
         /// Gets the order by expressions for the selection.
@@ -106,10 +106,10 @@ namespace Startitecture.Orm.Model
         #region Selection
 
         /// <summary>
-        /// Selects the properties to return with the query.
+        /// Selects the attributes to return with the query.
         /// </summary>
         /// <param name="selectors">
-        /// The property name selectors. If empty, all properties are returned.
+        /// The attribute selectors. If empty, all attributes are returned.
         /// </param>
         /// <returns>
         /// The current <see cref="ItemSelection{TItem}"/>.
@@ -122,6 +122,21 @@ namespace Startitecture.Orm.Model
             }
 
             this.Select(selectors as LambdaExpression[]);
+            return this;
+        }
+
+        /// <summary>
+        /// Gets the count for the specified attribute.
+        /// </summary>
+        /// <param name="selector">
+        /// The attribute selector
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// </returns>
+        public ItemSelection<TItem> Count(Expression<Func<TItem, object>> selector)
+        {
+            this.selectExpressions.Add(new SelectExpression(selector, AggregateFunction.Count));
             return this;
         }
 
@@ -196,7 +211,7 @@ namespace Startitecture.Orm.Model
         /// The example to match.
         /// </param>
         /// <param name="selectors">
-        /// The selectors of the properties to match.
+        /// The selectors of the attributes to match.
         /// </param>
         /// <returns>
         /// The current <see cref="ItemSelection{TItem}"/>.
@@ -484,7 +499,7 @@ namespace Startitecture.Orm.Model
         /// The boundary item.
         /// </param>
         /// <param name="selectors">
-        /// The selectors of the properties to match.
+        /// The selectors of the attributes to match.
         /// </param>
         /// <returns>
         /// The current <see cref="ItemSelection{TItem}"/>.
@@ -1142,10 +1157,10 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Selects the properties to return with the query.
+        /// Selects the attributes to return with the query.
         /// </summary>
         /// <param name="selectors">
-        /// The property name selectors. If empty, all properties are returned.
+        /// The property name selectors. If empty, all attributes are returned.
         /// </param>
         private void Select(params LambdaExpression[] selectors)
         {
@@ -1154,7 +1169,7 @@ namespace Startitecture.Orm.Model
                 throw new ArgumentNullException(nameof(selectors));
             }
 
-            this.selectExpressions.AddRange(selectors);
+            this.selectExpressions.AddRange(selectors.Select(expression => new SelectExpression(expression, AggregateFunction.None)));
         }
 
         /// <summary>

@@ -10,6 +10,7 @@ namespace Startitecture.Orm.SqlClient
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
+    using System.Linq.Expressions;
 
     using JetBrains.Annotations;
 
@@ -201,7 +202,9 @@ namespace Startitecture.Orm.SqlClient
         private static IEnumerable<EntityAttributeDefinition> GetSelectionAttributes(ISelection selection, IEntityDefinition entityDefinition)
         {
             // Contains statements do not need any columns.
-            var selectAttributes = selection.SelectExpressions.Select(entityDefinition.Find).ToList();
+            var selectAttributes = selection.SelectExpressions.Select(expression => expression.AttributeExpression)
+                .Select(entityDefinition.Find)
+                .ToList();
 
             // Add all returnable attributes if no explicit columns are selected.
             if (selectAttributes.Any() == false)
@@ -415,7 +418,7 @@ namespace Startitecture.Orm.SqlClient
                         FromStatement,
                         primaryTableName,
                         Environment.NewLine,
-                        joinClause.Create(queryContext.Selection), //// selection.Relations.CreateJoinClause(),
+                        joinClause.Create(queryContext.Selection),
                         filter);
 
                 default:
@@ -473,6 +476,52 @@ namespace Startitecture.Orm.SqlClient
                                           : string.Format(CultureInfo.InvariantCulture, AliasColumnFormat, referenceName, attribute.Alias);
 
             return qualifiedColumnName;
+        }
+
+        /// <summary>
+        /// Gets the column selection clause for the specified selection expression.
+        /// </summary>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="attributeExpression">
+        /// The attribute expression.
+        /// </param>
+        /// <param name="aggregateFunction">
+        /// The aggregate function.
+        /// </param>
+        /// <returns>
+        /// The column selection as a <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// <paramref name="aggregateFunction"/> is not one of the enumerated values.
+        /// </exception>
+        private string GetColumnSelection(
+            [NotNull] IEntityDefinition entityDefinition,
+            [NotNull] LambdaExpression attributeExpression,
+            AggregateFunction aggregateFunction)
+        {
+            if (entityDefinition == null)
+            {
+                throw new ArgumentNullException(nameof(entityDefinition));
+            }
+
+            if (attributeExpression == null)
+            {
+                throw new ArgumentNullException(nameof(attributeExpression));
+            }
+
+            var attribute = entityDefinition.Find(attributeExpression);
+
+            switch (aggregateFunction)
+            {
+                case AggregateFunction.None:
+                    return this.GetQualifiedColumnName(attribute);
+                case AggregateFunction.Count:
+                    return $"{aggregateFunction.ToString().ToUpperInvariant()}({this.GetQualifiedColumnName(attribute)})";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(aggregateFunction), aggregateFunction, @"The specified argument was out of range.");
+            }
         }
 
         /// <summary>
@@ -576,7 +625,6 @@ namespace Startitecture.Orm.SqlClient
                     queryContext.OutputType,
                     queryContext.EntityDefinition);
 
-                ////statement = string.Concat(statement, Environment.NewLine, linkStatement, Environment.NewLine, selectionStatement);
                 linkSelectionsList.Add(new Tuple<string, string>(linkStatement, selectionStatement));
                 offset += linkedSelection.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
                 linkedSelection = linkedSelection.Selection.LinkedSelection;
@@ -610,14 +658,30 @@ namespace Startitecture.Orm.SqlClient
         /// </returns>
         private string CreateSelectionStatement(ISelection selection, int indexOffset, StatementOutputType outputType, IEntityDefinition entityDefinition)
         {
-            var selectAttributes = GetSelectionAttributes(selection, entityDefinition);
             string selectColumns;
 
             switch (outputType)
             {
                 case StatementOutputType.Select:
                 case StatementOutputType.PageSelect:
-                    selectColumns = string.Join(string.Concat(",", Environment.NewLine, new string(' ', 4)), selectAttributes.Select(this.GetQualifiedColumnName));
+
+                    var separator = string.Concat(",", Environment.NewLine, new string(' ', 4));
+
+                    if (selection.SelectExpressions.Any())
+                    {
+                        selectColumns = string.Join(
+                            separator,
+                            selection.SelectExpressions.Select(
+                                expression => this.GetColumnSelection(
+                                    entityDefinition,
+                                    expression.AttributeExpression,
+                                    expression.AggregateFunction)));
+                    }
+                    else
+                    {
+                        selectColumns = string.Join(separator, entityDefinition.ReturnableAttributes.Select(this.GetQualifiedColumnName));
+                    }
+
                     break;
                 case StatementOutputType.Contains:
                     selectColumns = '1'.ToString(CultureInfo.InvariantCulture);
