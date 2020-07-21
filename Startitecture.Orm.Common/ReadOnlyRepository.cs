@@ -140,7 +140,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public bool Contains<TItem>([NotNull] ItemSelection<TItem> selection)
+        public bool Contains<TItem>([NotNull] EntitySelection<TItem> selection)
         {
             if (selection == null)
             {
@@ -199,7 +199,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public TModel FirstOrDefault<TItem>([NotNull] ItemSelection<TItem> selection)
+        public TModel FirstOrDefault<TItem>([NotNull] EntitySelection<TItem> selection)
         {
             if (selection == null)
             {
@@ -213,13 +213,13 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public IEnumerable<TModel> SelectAll()
         {
-            var exampleSelection = new ItemSelection<TEntity>();
+            var exampleSelection = new EntitySelection<TEntity>();
             var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
             return this.SelectResults(dataItems);
         }
 
         /// <inheritdoc />
-        public IEnumerable<TModel> Select<TItem>([NotNull] ItemSelection<TItem> selection)
+        public IEnumerable<TModel> Select<TItem>([NotNull] EntitySelection<TItem> selection)
         {
             if (selection == null)
             {
@@ -238,16 +238,16 @@ namespace Startitecture.Orm.Common
         /// The entity to create the selection for.
         /// </param>
         /// <returns>
-        /// A <see cref="ItemSelection{TEntity}"/> for the specified entity.
+        /// A <see cref="EntitySelection{T}"/> for the specified entity.
         /// </returns>
-        protected virtual ItemSelection<TEntity> GetUniqueItemSelection(TEntity entity)
+        protected virtual EntitySelection<TEntity> GetUniqueItemSelection(TEntity entity)
         {
             if (this.uniqueKeyExpressions.Count == 0)
             {
                 return new UniqueQuery<TEntity>(this.RepositoryProvider.EntityDefinitionProvider, entity);
             }
 
-            var itemSelection = new ItemSelection<TEntity>();
+            var itemSelection = new EntitySelection<TEntity>();
 
             foreach (var keyExpression in this.uniqueKeyExpressions)
             {
@@ -497,7 +497,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// <c>true</c> if the entity is found; otherwise, <c>false</c>.
         /// </returns>
-        private CacheResult<TModel> QueryCache(ItemSelection<TEntity> selection)
+        private CacheResult<TModel> QueryCache(EntitySelection<TEntity> selection)
         {
             var key = string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TModel).ToRuntimeName(), selection);
             var cacheResult = new CacheResult<TModel>(default, false, key);

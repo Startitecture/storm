@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ItemSelectionTests.cs" company="Startitecture">
+// <copyright file="EntitySelectionTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -21,8 +21,29 @@ namespace Startitecture.Orm.Model.Tests
     /// The item selection tests.
     /// </summary>
     [TestClass]
-    public class ItemSelectionTests
+    public class EntitySelectionTests
     {
+        /// <summary>
+        /// The with as test.
+        /// </summary>
+        [TestMethod]
+        public void WithAs_TableExpressionForDifferentTable_ParentExpressionIsSet()
+        {
+            var entityRelationSet = new EntityRelationSet<ChildRaisedRow>().InnerJoin(
+                row => row.ComplexEntityId,
+                row => row.ComplexEntity.ComplexEntityId);
+
+            var target = new EntitySelection<ComplexRaisedRow>().WithAs(
+                    Select.From<ChildRaisedRow>(row => row.ComplexEntityId),
+                    "childCte",
+                    entityRelationSet)
+                .Select(row => row.ComplexEntityId, row => row.UniqueName);
+
+            Assert.IsNotNull(target.ParentExpression);
+            Assert.AreEqual("childCte", target.ParentExpression.TableName);
+            Assert.IsTrue(target.ParentExpression.TableRelations.Any());
+        }
+
         /// <summary>
         /// The select test.
         /// </summary>
@@ -49,7 +70,7 @@ namespace Startitecture.Orm.Model.Tests
             var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
             var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
 
-            var selection = new ItemSelection<ChildRaisedRow>().Select(expressions.ToArray());
+            var selection = new EntitySelection<ChildRaisedRow>().Select(expressions.ToArray());
             var expected = expressions.Select(entityDefinition.Find).ToList();
 
             var actual = selection.SelectExpressions.Select(expression => expression.AttributeExpression).Select(entityDefinition.Find).ToList();
@@ -66,7 +87,7 @@ namespace Startitecture.Orm.Model.Tests
             var entityDefinition = definitionProvider.Resolve<ComplexRaisedRow>();
 
             Expression<Func<ComplexRaisedRow, object>> expr1 = row => row.ComplexEntityId;
-            var target = new ItemSelection<ComplexRaisedRow>().Count(row => row.ComplexEntityId);
+            var target = new EntitySelection<ComplexRaisedRow>().Count(row => row.ComplexEntityId);
             var expected = entityDefinition.Find(expr1);
             var attributeExpression = target.SelectExpressions.FirstOrDefault()?.AttributeExpression;
             Assert.IsNotNull(attributeExpression);
@@ -81,8 +102,10 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void Skip_ItemSelectionPageRowOffset_MatchesExpected()
         {
-            var target = new ItemSelection<ComplexRaisedRow>().Skip(10);
+            var target = new EntitySelection<ComplexRaisedRow>().Skip(10);
             Assert.AreEqual(10, target.Page.RowOffset);
+            Assert.AreEqual(10, target.PropertyValues.ElementAtOrDefault(0));
+            Assert.AreEqual(0, target.PropertyValues.ElementAtOrDefault(1));
         }
 
         /// <summary>
@@ -91,8 +114,10 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void Take_ItemSelectionPageSize_MatchesExpected()
         {
-            var target = new ItemSelection<ComplexRaisedRow>().Take(10);
+            var target = new EntitySelection<ComplexRaisedRow>().Take(10);
             Assert.AreEqual(10, target.Page.Size);
+            Assert.AreEqual(0, target.PropertyValues.ElementAtOrDefault(0));
+            Assert.AreEqual(10, target.PropertyValues.ElementAtOrDefault(1));
         }
 
         /// <summary>
@@ -119,7 +144,7 @@ namespace Startitecture.Orm.Model.Tests
                                   };
 
             var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
-            var selection = new ItemSelection<ChildRaisedRow>().Select();
+            var selection = new EntitySelection<ChildRaisedRow>().Select();
 
             foreach (var expression in expressions)
             {
@@ -159,7 +184,7 @@ namespace Startitecture.Orm.Model.Tests
                                   };
 
             var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
-            var selection = new ItemSelection<ChildRaisedRow>().Select();
+            var selection = new EntitySelection<ChildRaisedRow>().Select();
 
             foreach (var expression in expressions)
             {
@@ -181,7 +206,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void Between_ItemSelectionWithOrderedValues_ValuesMatchExpected()
         {
-            var target = new ItemSelection<SelectionTestRow>().Between(row => row.SomeDate, DateTime.Today, DateTime.Today.AddDays(1));
+            var target = new EntitySelection<SelectionTestRow>().Between(row => row.SomeDate, DateTime.Today, DateTime.Today.AddDays(1));
             Assert.AreEqual(DateTime.Today, target.PropertyValues.First());
         }
 
@@ -191,7 +216,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void Between_ItemSelectionWithUnorderedValues_ValuesMatchExpected()
         {
-            var target = new ItemSelection<SelectionTestRow>().Between(row => row.SomeDate, DateTime.Today.AddDays(1), DateTime.Today);
+            var target = new EntitySelection<SelectionTestRow>().Between(row => row.SomeDate, DateTime.Today.AddDays(1), DateTime.Today);
             Assert.AreEqual(DateTime.Today, target.PropertyValues.First());
         }
 
@@ -205,7 +230,7 @@ namespace Startitecture.Orm.Model.Tests
             var maxValue = DateTime.Today;
             var minValue = maxValue.AddDays(-1);
             var expected = new ValueFilter(new AttributeLocation(selector), FilterType.Between, minValue, maxValue);
-            var target = new ItemSelection<SelectionTestRow>().Between(selector, minValue, maxValue);
+            var target = new EntitySelection<SelectionTestRow>().Between(selector, minValue, maxValue);
             var actual = target.Filters.First();
 
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
@@ -218,7 +243,7 @@ namespace Startitecture.Orm.Model.Tests
         public void GreaterThan_DataRowAttribute_MatchesExpected()
         {
             Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new ItemSelection<DataRow>().GreaterThan(valueExpression, 35);
+            var target = new EntitySelection<DataRow>().GreaterThan(valueExpression, 35);
             var expected = new ValueFilter(valueExpression, FilterType.GreaterThan, 35);
             var actual = target.Filters.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -231,7 +256,7 @@ namespace Startitecture.Orm.Model.Tests
         public void GreaterThanOrEqualTo_DataRowAttribute_MatchesExpected()
         {
             Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new ItemSelection<DataRow>().GreaterThanOrEqualTo(valueExpression, 35);
+            var target = new EntitySelection<DataRow>().GreaterThanOrEqualTo(valueExpression, 35);
             var expected = new ValueFilter(valueExpression, FilterType.GreaterThanOrEqualTo, 35);
             var actual = target.Filters.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -244,7 +269,7 @@ namespace Startitecture.Orm.Model.Tests
         public void LessThan_DataRowAttribute_MatchesExpected()
         {
             Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new ItemSelection<DataRow>().LessThan(valueExpression, 35);
+            var target = new EntitySelection<DataRow>().LessThan(valueExpression, 35);
             var expected = new ValueFilter(valueExpression, FilterType.LessThan, 35);
             var actual = target.Filters.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -257,7 +282,7 @@ namespace Startitecture.Orm.Model.Tests
         public void LessThanOrEqualTo_DataRowAttribute_MatchesExpected()
         {
             Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new ItemSelection<DataRow>().LessThanOrEqualTo(valueExpression, 35);
+            var target = new EntitySelection<DataRow>().LessThanOrEqualTo(valueExpression, 35);
             var expected = new ValueFilter(valueExpression, FilterType.LessThanOrEqualTo, 35);
             var actual = target.Filters.FirstOrDefault();
             Assert.AreEqual(expected, actual);
@@ -269,7 +294,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void InnerJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId).Relations;
+            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId).Relations;
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
             expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
@@ -281,7 +306,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void InnerJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
+            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
@@ -296,7 +321,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void InnerJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
+            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
@@ -311,7 +336,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void InnerJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().InnerJoin<FakeRelatedRow, DependencyRow>(
+            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow, DependencyRow>(
                     row => row.RelatedId,
                     "OtherAlias",
                     row => row.ComplexEntityId,
@@ -330,7 +355,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void InnerJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId).Relations;
+            var relations = new EntitySelection<DataRow>().InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId).Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
             expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
@@ -344,7 +369,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void InnerJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+            var relations = new EntitySelection<DataRow>().InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.InnerJoin);
@@ -359,7 +384,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void InnerJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
         {
-            var actual = new ItemSelection<DataRow>().InnerJoin<RelatedRow, DependencyRow>(
+            var actual = new EntitySelection<DataRow>().InnerJoin<RelatedRow, DependencyRow>(
                 row => row.RelatedRowId,
                 row => row.FakeDependencyEntityId,
                 "My Alias").Relations.First();
@@ -375,7 +400,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void LeftJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
         {
-            var actual = new ItemSelection<DataRow>().LeftJoin<RelatedRow, DependencyRow>(
+            var actual = new EntitySelection<DataRow>().LeftJoin<RelatedRow, DependencyRow>(
                 row => row.RelatedRowId,
                 row => row.FakeDependencyEntityId,
                 "My Alias").Relations.First();
@@ -391,7 +416,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void LeftJoin_WithoutRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId).Relations;
+            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId).Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
             expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
@@ -405,7 +430,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void LeftJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().LeftJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
+            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
@@ -420,7 +445,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void LeftJoin_WithRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
+            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
@@ -435,7 +460,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void LeftJoin_WithSourceAndRelationAlias_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().LeftJoin<FakeRelatedRow, DependencyRow>(
+            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow, DependencyRow>(
                     row => row.RelatedId,
                     "OtherAlias",
                     row => row.ComplexEntityId,
@@ -454,7 +479,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void LeftJoin_InferredWithMatchingRelationProperty_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().LeftJoin(row => row.FakeDataId, row => row.Related.FakeDataId).Relations;
+            var relations = new EntitySelection<DataRow>().LeftJoin(row => row.FakeDataId, row => row.Related.FakeDataId).Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
             expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
@@ -468,7 +493,7 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void LeftJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
         {
-            var relations = new ItemSelection<DataRow>().LeftJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+            var relations = new EntitySelection<DataRow>().LeftJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .Relations;
 
             var expected = new EntityRelation(EntityRelationType.LeftJoin);
@@ -499,7 +524,7 @@ namespace Startitecture.Orm.Model.Tests
                 FakeDataId = 20,
                 AnotherColumn = "Less"
             };
-            var transactionSelection = new ItemSelection<DataRow>()
+            var transactionSelection = new EntitySelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .Select(
                     row => row.FakeDataId,
@@ -619,7 +644,7 @@ namespace Startitecture.Orm.Model.Tests
             {
                 FakeDataId = 20
             };
-            var transactionSelection = new ItemSelection<DataRow>()
+            var transactionSelection = new EntitySelection<DataRow>()
                 .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
                 .Select(
@@ -1079,9 +1104,9 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void MapTo_DtoItemSelectionToRowItemSelection_AllAttributesMapped()
         {
-            var expected = new ItemSelection<SelectionTestDto>();
-            var selection2 = new ItemSelection<SelectionTestDto>();
-            var selection3 = new ItemSelection<SelectionTestDto>();
+            var expected = new EntitySelection<SelectionTestDto>();
+            var selection2 = new EntitySelection<SelectionTestDto>();
+            var selection3 = new EntitySelection<SelectionTestDto>();
             expected.Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
                 .Skip(10).Take(10)
                 .WhereEqual(dto => dto.Parent.UniqueName, "Test1")

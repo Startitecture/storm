@@ -112,7 +112,7 @@ SET
             [NotNull] IEntityDefinitionProvider definitionProvider,
             [NotNull] IQueryFactory queryFactory,
             [NotNull] INameQualifier nameQualifier,
-            [NotNull] ItemSelection<TItem> selection)
+            [NotNull] EntitySelection<TItem> selection)
         {
             if (definitionProvider == null)
             {

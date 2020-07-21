@@ -28,19 +28,19 @@ namespace Startitecture.Orm.Model
         /// The type of item to query.
         /// </typeparam>
         /// <returns>
-        /// A new <see cref="ItemSelection{TItem}"/> for the specified type.
+        /// A new <see cref="EntitySelection{T}"/> for the specified type.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selections"/> is null.
         /// </exception>
-        public static ItemSelection<TItem> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] selections)
+        public static EntitySelection<TItem> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] selections)
         {
             if (selections == null)
             {
                 throw new ArgumentNullException(nameof(selections));
             }
 
-            return new ItemSelection<TItem>().Select(selections);
+            return new EntitySelection<TItem>().Select(selections);
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        bool Contains<TItem>(ItemSelection<TItem> selection);
+        bool Contains<TItem>(EntitySelection<TItem> selection);
 
         /// <summary>
         /// Gets an item by its identifier or unique key.
@@ -88,7 +88,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        TModel FirstOrDefault<TItem>(ItemSelection<TItem> selection);
+        TModel FirstOrDefault<TItem>(EntitySelection<TItem> selection);
 
         /// <summary>
         /// Selects all the domain models of the type <typeparamref name="TModel"/> in the repository.
@@ -114,7 +114,7 @@ namespace Startitecture.Orm.Model
         /// <paramref name="selection"/> is null.
         /// </exception>
 #pragma warning disable CA1716 // Identifiers should not match keywords
-        IEnumerable<TModel> Select<TItem>(ItemSelection<TItem> selection);
+        IEnumerable<TModel> Select<TItem>(EntitySelection<TItem> selection);
 #pragma warning restore CA1716 // Identifiers should not match keywords
     }
 }

@@ -35,6 +35,18 @@ namespace Startitecture.Orm.Model
         /// </summary>
         public int Size { get; set; }
 
+        /// <summary>
+        /// Sets the page number for the current page result.
+        /// </summary>
+        /// <param name="pageNumber">
+        /// The page number to set.
+        /// </param>
+        public void SetPage(int pageNumber)
+        {
+            // Pages are 1-based, so 1 - 1 = 0 or zero offset for the first page.
+            this.RowOffset = this.Size * (pageNumber - 1);
+        }
+
         #region Equality and Comparison Methods and Operators
 
         /// <summary>

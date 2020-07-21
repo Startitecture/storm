@@ -264,7 +264,7 @@ namespace Startitecture.Orm.Mapper
 */
 
         /// <inheritdoc />
-        public bool Contains<TDataItem>(ItemSelection<TDataItem> selection)
+        public bool Contains<TDataItem>(EntitySelection<TDataItem> selection)
             where TDataItem : ITransactionContext
         {
             if (Evaluate.IsNull(selection))
@@ -292,7 +292,18 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public TDataItem GetFirstOrDefault<TDataItem>(ItemSelection<TDataItem> selection)
+        public T GetScalar<T>([NotNull] ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return this.repositoryAdapter.ExecuteScalar<T>(selection);
+        }
+
+        /// <inheritdoc />
+        public TDataItem GetFirstOrDefault<TDataItem>(EntitySelection<TDataItem> selection)
             where TDataItem : ITransactionContext
         {
             if (Evaluate.IsNull(selection))
@@ -304,7 +315,7 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public IEnumerable<TDataItem> GetSelection<TDataItem>(ItemSelection<TDataItem> selection)
+        public IEnumerable<TDataItem> GetSelection<TDataItem>(EntitySelection<TDataItem> selection)
             where TDataItem : ITransactionContext
         {
             if (selection == null)
@@ -316,66 +327,8 @@ namespace Startitecture.Orm.Mapper
             return this.repositoryAdapter.SelectItems(selection);
         }
 
-        /*
         /// <inheritdoc />
-        /// <exception cref="RepositoryException">
-        /// The item could not be saved in the repository.
-        /// </exception>
-        public TDataItem Save<TDataItem>(TDataItem item)
-            where TDataItem : ITransactionContext
-        {
-            // Only review the direct attributes of the object for save comparison.
-            var entityDefinition = this.EntityDefinitionProvider.Resolve<TDataItem>();
-            var attributeDefinitions = entityDefinition.DirectAttributes.ToList();
-            var selectExpressions = (from a in attributeDefinitions
-                                     let parameter = Expression.Parameter(typeof(TDataItem))
-                                     let property = Expression.Property(parameter, a.PropertyInfo)
-                                     let conversion = Expression.Convert(property, typeof(object))
-                                     select Expression.Lambda<Func<TDataItem, object>>(conversion, parameter)).ToArray();
-
-            var uniqueSelection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, item).Select(selectExpressions);
-
-            var savePolicy = new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) };
-
-            if (this.Contains(uniqueSelection))
-            {
-
-                this.Update(item, uniqueSelection);
-
-                // According to http://stackoverflow.com/questions/7477431/executenonquery-returning-a-value-of-2-when-only-1-record-was-updated,
-                // if an update causes a trigger to fire then it's possible to get a 2 or higher with the rows affected, making this
-                // test invalid in some scenarios.
-                ////if (rowsAffected == 1)
-                ////{
-                if (this.EnableCaching)
-                {
-                    lock (this.itemLock)
-                    {
-                        this.itemCache.Set(CreateCacheKey(uniqueSelection), item, savePolicy);
-                    }
-                }
-
-                item.SetTransactionProvider(this);
-                return item;
-            }
-
-            var savedItem = this.InsertItem(item);
-
-            if (this.EnableCaching)
-            {
-                lock (this.itemLock)
-                {
-                    this.itemCache.Set(CreateCacheKey(uniqueSelection), savedItem, savePolicy);
-                }
-            }
-
-            savedItem.SetTransactionProvider(this);
-            return savedItem;
-        }
-*/
-
-        /// <inheritdoc />
-        public int DeleteItems<TDataItem>(ItemSelection<TDataItem> selection) 
+        public int DeleteItems<TDataItem>(EntitySelection<TDataItem> selection) 
             where TDataItem : ITransactionContext
         {
             if (selection == null)
@@ -423,7 +376,7 @@ namespace Startitecture.Orm.Mapper
         /// <inheritdoc />
         public int Update<TDataItem>(
             [NotNull] TDataItem dataItem,
-            [NotNull] ItemSelection<TDataItem> selection,
+            [NotNull] EntitySelection<TDataItem> selection,
             [NotNull] params Expression<Func<TDataItem, object>>[] setExpressions) 
             where TDataItem : ITransactionContext
         {
@@ -460,10 +413,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            ////this.DatabaseContext.EnableAutoSelect = false;
             this.DatabaseContext.Execute(executionStatement, parameterValues);
-            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
         }
 
         /// <inheritdoc />
@@ -480,10 +430,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            ////this.DatabaseContext.EnableAutoSelect = false;
             var result = this.DatabaseContext.ExecuteScalar<T>(executionStatement, parameterValues);
-            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -501,10 +448,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            ////this.DatabaseContext.EnableAutoSelect = false;
             var result = this.DatabaseContext.Query<dynamic>(executionStatement, parameterValues);
-            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -522,10 +466,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            ////var autoSelect = this.DatabaseContext.EnableAutoSelect;
-            ////this.DatabaseContext.EnableAutoSelect = false;
             var result = this.DatabaseContext.Query<T>(executionStatement, parameterValues);
-            ////this.DatabaseContext.EnableAutoSelect = autoSelect;
             return result;
         }
 
@@ -553,7 +494,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="string"/> containing a unique key for the selection.
         /// </returns>
-        private static string CreateCacheKey<TDataItem>(ItemSelection<TDataItem> selection)
+        private static string CreateCacheKey<TDataItem>(EntitySelection<TDataItem> selection)
         {
             return string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TDataItem).ToRuntimeName(), selection);
         }
@@ -573,7 +514,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The first matching <typeparamref name="TDataItem"/>, or the default value if no item is found.
         /// </returns>
-        private TDataItem FirstOrDefault<TDataItem>(ItemSelection<TDataItem> selection, bool useCache)
+        private TDataItem FirstOrDefault<TDataItem>(EntitySelection<TDataItem> selection, bool useCache)
             where TDataItem : ITransactionContext
         {
             this.CheckDisposed();

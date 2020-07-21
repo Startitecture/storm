@@ -93,7 +93,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Delete<TItem>([NotNull] ItemSelection<TItem> selection)
+        public int Delete<TItem>([NotNull] EntitySelection<TItem> selection)
         {
             if (selection == null)
             {

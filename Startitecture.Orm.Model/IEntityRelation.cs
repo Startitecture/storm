@@ -27,9 +27,9 @@ namespace Startitecture.Orm.Model
         LambdaExpression SourceExpression { get; }
 
         /// <summary>
-        /// Gets the source entity alias.
+        /// Gets or sets the source entity alias.
         /// </summary>
-        string SourceEntityAlias { get; }
+        string SourceEntityAlias { get; set; }
 
         /// <summary>
         /// Gets the relation expression.
@@ -37,8 +37,8 @@ namespace Startitecture.Orm.Model
         LambdaExpression RelationExpression { get; }
 
         /// <summary>
-        /// Gets the relation entity alias.
+        /// Gets or sets the relation entity alias.
         /// </summary>
-        string RelationEntityAlias { get; }
+        string RelationEntityAlias { get; set; }
     }
 }

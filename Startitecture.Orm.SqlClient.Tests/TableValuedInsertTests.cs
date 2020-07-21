@@ -222,7 +222,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // TODO: Return names only from the repo as a dynamic
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
-                var existingFields = fieldRepository.Select(new ItemSelection<Field>().Include(field => field.Name, inclusionValues));
+                var existingFields = fieldRepository.Select(new EntitySelection<Field>().Include(field => field.Name, inclusionValues));
 
                 foreach (var field in existingFields)
                 {

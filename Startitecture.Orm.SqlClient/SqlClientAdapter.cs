@@ -49,19 +49,8 @@ namespace Startitecture.Orm.SqlClient
             this.queryFactory = new TransactSqlQueryFactory(dataContext.DefinitionProvider);
         }
 
-        /// <summary>
-        /// Determines if the repository contains the specified item.
-        /// </summary>
-        /// <param name="selection">
-        /// The selection to search for.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of item in the repository.
-        /// </typeparam>
-        /// <returns>
-        /// <c>true</c> if the item exists; otherwise, <c>false</c>.
-        /// </returns>
-        public bool Contains<TDataItem>([NotNull] ItemSelection<TDataItem> selection)
+        /// <inheritdoc />
+        public bool Contains<TDataItem>([NotNull] EntitySelection<TDataItem> selection)
         {
             if (selection == null)
             {
@@ -75,19 +64,8 @@ namespace Startitecture.Orm.SqlClient
             return this.dataContext.ExecuteScalar<int>(sql, selection.PropertyValues.ToArray()) > 0;
         }
 
-        /// <summary>
-        /// Gets the first or default item matching the specified candidate item.
-        /// </summary>
-        /// <param name="selection">
-        /// The selection.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item to retrieve.
-        /// </typeparam>
-        /// <returns>
-        /// The first matching <typeparamref name="TDataItem"/>, or the default value if no item is found.
-        /// </returns>
-        public TDataItem FirstOrDefault<TDataItem>([NotNull] ItemSelection<TDataItem> selection)
+        /// <inheritdoc />
+        public TDataItem FirstOrDefault<TDataItem>([NotNull] EntitySelection<TDataItem> selection)
         {
             if (selection == null)
             {
@@ -96,7 +74,11 @@ namespace Startitecture.Orm.SqlClient
 
             try
             {
-                var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), StatementOutputType.Select);
+                var statementOutputType = selection.ParentExpression == null
+                                              ? StatementOutputType.Select
+                                              : StatementOutputType.CteSelect;
+
+                var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), statementOutputType);
                 var statement = this.queryFactory.Create(queryContext);
 
                 ////Trace.TraceInformation("Using unique query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
@@ -116,22 +98,8 @@ namespace Startitecture.Orm.SqlClient
             }
         }
 
-        /// <summary>
-        /// Selects a matching list of items from the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <returns>
-        /// A collection of items that match the filter.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The repository could not be queried.
-        /// </exception>
-        public IEnumerable<TDataItem> SelectItems<TDataItem>(ItemSelection<TDataItem> selection)
+        /// <inheritdoc />
+        public IEnumerable<TDataItem> SelectItems<TDataItem>(EntitySelection<TDataItem> selection)
         {
             if (selection == null)
             {
@@ -140,7 +108,11 @@ namespace Startitecture.Orm.SqlClient
 
             try
             {
-                var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), StatementOutputType.Select);
+                var statementOutputType = selection.ParentExpression == null
+                                              ? StatementOutputType.Select
+                                              : StatementOutputType.CteSelect;
+
+                var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve<TDataItem>(), statementOutputType);
                 var statement = this.queryFactory.Create(queryContext);
 
                 ////Trace.TraceInformation("Using select query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
@@ -160,21 +132,20 @@ namespace Startitecture.Orm.SqlClient
             }
         }
 
-        /// <summary>
-        /// Inserts a data item into the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="dataItem">
-        /// The data item to insert.
-        /// </param>
-        /// <returns>
-        /// The inserted <typeparamref name="TDataItem"/>.
-        /// </returns>
-        /// <exception cref="RepositoryException">
-        /// The insert operation failed, or there was an error mapping between the model and the data item.
-        /// </exception>
+        /// <inheritdoc />
+        public T ExecuteScalar<T>([NotNull] ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            var queryContext = new QueryContext(selection, this.dataContext.DefinitionProvider.Resolve(selection.EntityType), StatementOutputType.Select);
+            var statement = this.queryFactory.Create(queryContext);
+            return this.dataContext.ExecuteScalar<T>(statement, selection.PropertyValues.ToArray());
+        }
+
+        /// <inheritdoc />
         public TDataItem Insert<TDataItem>(TDataItem dataItem)
             where TDataItem : ITransactionContext
         {
@@ -211,27 +182,10 @@ namespace Startitecture.Orm.SqlClient
             return dataItem;
         }
 
-        /// <summary>
-        /// Updates a selection of items in the repository.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="dataItem">
-        /// The item that contains the update.
-        /// </param>
-        /// <param name="selection">
-        /// The selection to update.
-        /// </param>
-        /// <param name="setExpressions">
-        /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
-        /// </param>
-        /// <returns>
-        /// The number of updated rows.
-        /// </returns>
+        /// <inheritdoc />
         public int Update<TDataItem>(
             [NotNull] TDataItem dataItem,
-            [NotNull] ItemSelection<TDataItem> selection,
+            [NotNull] EntitySelection<TDataItem> selection,
             [NotNull] params Expression<Func<TDataItem, object>>[] setExpressions)
         {
             if (dataItem == null)
@@ -271,22 +225,8 @@ namespace Startitecture.Orm.SqlClient
             }
         }
 
-        /// <summary>
-        /// Deletes the items matching the filter.
-        /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
-        /// </param>
-        /// <returns>
-        /// The number of deleted items as an <see cref="int"/>.
-        /// </returns>
-        /// <exception cref="System.InvalidOperationException">
-        /// The repository could not be updated.
-        /// </exception>
-        public int DeleteSelection<TDataItem>(ItemSelection<TDataItem> selection)
+        /// <inheritdoc />
+        public int DeleteSelection<TDataItem>(EntitySelection<TDataItem> selection)
         {
             if (selection == null)
             {

@@ -1,10 +1,24 @@
-﻿namespace Startitecture.Orm.Model
-{
-    using System.Collections.Generic;
-    using System.Linq.Expressions;
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ISelection.cs" company="Startitecture">
+//   Copyright 2017 Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 
+namespace Startitecture.Orm.Model
+{
+    using System;
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// The selection interface.
+    /// </summary>
     public interface ISelection
     {
+        /// <summary>
+        /// Gets the type of the entity to select.
+        /// </summary>
+        Type EntityType { get; }
+
         /// <summary>
         /// Gets the entity relations represented in the selection.
         /// </summary>
@@ -39,5 +53,10 @@
         /// Gets the child selection, if any, for the selection.
         /// </summary>
         LinkedSelection LinkedSelection { get; }
+
+        /// <summary>
+        /// Gets the table expression for this selection.
+        /// </summary>
+        EntityExpression ParentExpression { get; }
     }
 }

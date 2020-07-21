@@ -33,14 +33,14 @@ namespace Startitecture.Orm.Model
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        public static QueryContext AsSelect<TItem>([NotNull] this ItemSelection<TItem> selection, IEntityDefinition entityDefinition)
+        public static QueryContext AsSelect<TItem>([NotNull] this EntitySelection<TItem> selection, IEntityDefinition entityDefinition)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var outputType = selection.Page.Size + selection.Page.RowOffset > 0 ? StatementOutputType.PageSelect : StatementOutputType.Select;
+            var outputType = selection.ParentExpression == null ? StatementOutputType.Select : StatementOutputType.CteSelect;
             return new QueryContext(selection, entityDefinition, outputType, 0);
         }
 
@@ -62,7 +62,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        public static QueryContext AsContains<TItem>([NotNull] this ItemSelection<TItem> selection, IEntityDefinition entityDefinition)
+        public static QueryContext AsContains<TItem>([NotNull] this EntitySelection<TItem> selection, IEntityDefinition entityDefinition)
         {
             if (selection == null)
             {
@@ -90,7 +90,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        public static QueryContext AsDelete<TItem>([NotNull] this ItemSelection<TItem> selection, IEntityDefinition entityDefinition)
+        public static QueryContext AsDelete<TItem>([NotNull] this EntitySelection<TItem> selection, IEntityDefinition entityDefinition)
         {
             if (selection == null)
             {

@@ -54,6 +54,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The number of items affected as an <see cref="int"/>.
         /// </returns>
-        int Delete<TItem>(ItemSelection<TItem> selection);
+        int Delete<TItem>(EntitySelection<TItem> selection);
     }
 }

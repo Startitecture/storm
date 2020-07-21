@@ -34,6 +34,6 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The statement is a page select.
         /// </summary>
-        PageSelect = 4
+        CteSelect = 4
     }
 }

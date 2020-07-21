@@ -1,9 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ItemSelection.cs" company="Startitecture">
+// <copyright file="EntitySelection.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Creates selection criteria for repository items.
+//   Creates selection criteria for repository entities.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -20,12 +20,12 @@ namespace Startitecture.Orm.Model
     using Startitecture.Resources;
 
     /// <summary>
-    /// Creates selection criteria for repository items.
+    /// Creates selection criteria for repository entities.
     /// </summary>
-    /// <typeparam name="TItem">
-    /// The type of item to select.
+    /// <typeparam name="T">
+    /// The type of entity to select.
     /// </typeparam>
-    public class ItemSelection<TItem> : ISelection
+    public class EntitySelection<T> : ISelection
     {
         /// <summary>
         /// The value separator for the ToString() method.
@@ -52,19 +52,19 @@ namespace Startitecture.Orm.Model
         /// </summary>
         private readonly List<OrderExpression> orderByExpressions = new List<OrderExpression>();
 
-        /// <summary>
-        /// Gets the entity relations represented in the selection.
-        /// </summary>
+        /// <inheritdoc />
+        public EntityExpression ParentExpression { get; private set; }
+
+        /// <inheritdoc />
+        public Type EntityType => typeof(T);
+
+        /// <inheritdoc />
         public IEnumerable<IEntityRelation> Relations => this.relations;
 
-        /// <summary>
-        /// Gets the child selection, if any, for the selection.
-        /// </summary>
+        /// <inheritdoc />
         public LinkedSelection LinkedSelection { get; private set; }
 
-        /// <summary>
-        /// Gets the property values for the selection filter.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<object> PropertyValues
         {
             get
@@ -78,32 +78,90 @@ namespace Startitecture.Orm.Model
                         yield return value;
                     }
 
+                    // FETCH / OFFSET always last
+                    if (selection.Page.Size + selection.Page.RowOffset > 0)
+                    {
+                        yield return selection.Page.RowOffset;
+                        yield return selection.Page.Size;
+                    }
+
                     selection = selection.LinkedSelection?.Selection;
+                }
+
+                // Finally, the values from our parent expression, if any.
+                if (this.ParentExpression == null)
+                {
+                    yield break;
+                }
+
+                foreach (var value in this.ParentExpression.TableSelection.PropertyValues)
+                {
+                    yield return value;
                 }
             }
         }
 
-        /// <summary>
-        /// Gets the selection expressions.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<SelectExpression> SelectExpressions => this.selectExpressions;
 
-        /// <summary>
-        /// Gets the order by expressions for the selection.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<OrderExpression> OrderByExpressions => this.orderByExpressions;
 
-        /// <summary>
-        /// Gets the filters for the selection.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<ValueFilter> Filters => this.valueFilters;
 
-        /// <summary>
-        /// Gets the page options for the selection.
-        /// </summary>
+        /// <inheritdoc />
         public ResultPage Page { get; } = new ResultPage();
 
         #region Selection
+
+        /// <summary>
+        /// Creates a table expression for this selection.
+        /// </summary>
+        /// <typeparam name="TExpression">
+        /// The type of entity the table expression will select from.
+        /// </typeparam>
+        /// <param name="tableExpression">
+        /// The selection for the table expression.
+        /// </param>
+        /// <param name="tableName">
+        /// The table name.
+        /// </param>
+        /// <param name="tableRelationSet">
+        /// The set of relations between the table expression and this selection.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="EntitySelection{T}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="tableExpression"/> or <paramref name="tableRelationSet"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="tableName"/> is null or whitespace.
+        /// </exception>
+        public EntitySelection<T> WithAs<TExpression>(
+            [NotNull] EntitySelection<TExpression> tableExpression,
+            [NotNull] string tableName,
+            [NotNull] EntityRelationSet<TExpression> tableRelationSet)
+        {
+            if (tableExpression == null)
+            {
+                throw new ArgumentNullException(nameof(tableExpression));
+            }
+
+            if (tableRelationSet == null)
+            {
+                throw new ArgumentNullException(nameof(tableRelationSet));
+            }
+
+            if (string.IsNullOrWhiteSpace(tableName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(tableName));
+            }
+
+            this.ParentExpression = new EntityExpression(tableExpression, tableName, new List<IEntityRelation>(tableRelationSet.Relations));
+            return this;
+        }
 
         /// <summary>
         /// Selects the attributes to return with the query.
@@ -112,9 +170,9 @@ namespace Startitecture.Orm.Model
         /// The attribute selectors. If empty, all attributes are returned.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Select(params Expression<Func<TItem, object>>[] selectors)
+        public EntitySelection<T> Select(params Expression<Func<T, object>>[] selectors)
         {
             if (selectors == null)
             {
@@ -132,9 +190,9 @@ namespace Startitecture.Orm.Model
         /// The attribute selector
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Count(Expression<Func<TItem, object>> selector)
+        public EntitySelection<T> Count(Expression<Func<T, object>> selector)
         {
             this.selectExpressions.Add(new SelectExpression(selector, AggregateFunction.Count));
             return this;
@@ -147,11 +205,11 @@ namespace Startitecture.Orm.Model
         /// The rows to skip.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Skip(int rows)
+        public EntitySelection<T> Skip(int rows)
         {
-            this.Page.RowOffset = rows;
+            this.Page.RowOffset = rows < 0 ? 0 : rows;
             return this;
         }
 
@@ -162,11 +220,11 @@ namespace Startitecture.Orm.Model
         /// The number of rows to take.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Take(int rows)
+        public EntitySelection<T> Take(int rows)
         {
-            this.Page.Size = rows;
+            this.Page.Size = rows < 0 ? 0 : rows;
             return this;
         }
 
@@ -177,9 +235,9 @@ namespace Startitecture.Orm.Model
         /// The property expression.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> OrderBy(Expression<Func<TItem, object>> propertyExpression)
+        public EntitySelection<T> OrderBy(Expression<Func<T, object>> propertyExpression)
         {
             this.orderByExpressions.Add(new OrderExpression(propertyExpression));
             return this;
@@ -192,9 +250,9 @@ namespace Startitecture.Orm.Model
         /// The property expression.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> OrderByDescending(Expression<Func<TItem, object>> propertyExpression)
+        public EntitySelection<T> OrderByDescending(Expression<Func<T, object>> propertyExpression)
         {
             this.orderByExpressions.Add(new OrderExpression(propertyExpression, true));
             return this;
@@ -214,9 +272,9 @@ namespace Startitecture.Orm.Model
         /// The selectors of the attributes to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Matching(TItem example, params Expression<Func<TItem, object>>[] selectors)
+        public EntitySelection<T> Matching(T example, params Expression<Func<T, object>>[] selectors)
         {
             if (Evaluate.IsNull(example))
             {
@@ -250,12 +308,12 @@ namespace Startitecture.Orm.Model
         /// The type of the value.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
-        public ItemSelection<TItem> WhereEqual<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        public EntitySelection<T> WhereEqual<TValue>([NotNull] Expression<Func<T, TValue>> valueExpression, TValue value)
         {
             return this.WhereEqual(valueExpression as LambdaExpression, value);
         }
@@ -273,12 +331,12 @@ namespace Startitecture.Orm.Model
         /// The type of the value.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
-        public ItemSelection<TItem> WhereEqual<TValue>([NotNull] LambdaExpression valueExpression, TValue value)
+        public EntitySelection<T> WhereEqual<TValue>([NotNull] LambdaExpression valueExpression, TValue value)
         {
             if (valueExpression == null)
             {
@@ -306,12 +364,12 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
-        public ItemSelection<TItem> GreaterThan<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        public EntitySelection<T> GreaterThan<TValue>([NotNull] Expression<Func<T, TValue>> valueExpression, TValue value)
         {
             if (valueExpression == null)
             {
@@ -335,12 +393,12 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
-        public ItemSelection<TItem> GreaterThanOrEqualTo<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        public EntitySelection<T> GreaterThanOrEqualTo<TValue>([NotNull] Expression<Func<T, TValue>> valueExpression, TValue value)
         {
             if (valueExpression == null)
             {
@@ -364,12 +422,12 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
-        public ItemSelection<TItem> LessThan<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        public EntitySelection<T> LessThan<TValue>([NotNull] Expression<Func<T, TValue>> valueExpression, TValue value)
         {
             if (valueExpression == null)
             {
@@ -393,12 +451,12 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
         /// </exception>
-        public ItemSelection<TItem> LessThanOrEqualTo<TValue>([NotNull] Expression<Func<TItem, TValue>> valueExpression, TValue value)
+        public EntitySelection<T> LessThanOrEqualTo<TValue>([NotNull] Expression<Func<T, TValue>> valueExpression, TValue value)
         {
             if (valueExpression == null)
             {
@@ -422,10 +480,10 @@ namespace Startitecture.Orm.Model
         /// The inclusion values.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Include<TValue>(
-            Expression<Func<TItem, TValue>> selector,
+        public EntitySelection<T> Include<TValue>(
+            Expression<Func<T, TValue>> selector,
             params TValue[] inclusionValues)
         {
             if (selector == null)
@@ -459,12 +517,12 @@ namespace Startitecture.Orm.Model
         /// The type of the value to compare.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selector"/>, <paramref name="minValue"/> or <paramref name="maxValue"/> is null.
         /// </exception>
-        public ItemSelection<TItem> Between<TValue>([NotNull] Expression<Func<TItem, TValue>> selector, [NotNull] TValue minValue, [NotNull] TValue maxValue)
+        public EntitySelection<T> Between<TValue>([NotNull] Expression<Func<T, TValue>> selector, [NotNull] TValue minValue, [NotNull] TValue maxValue)
             where TValue : IComparable
         {
             if (selector == null)
@@ -502,12 +560,12 @@ namespace Startitecture.Orm.Model
         /// The selectors of the attributes to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Between(
-            TItem baseline,
-            TItem boundary,
-            params Expression<Func<TItem, object>>[] selectors)
+        public EntitySelection<T> Between(
+            T baseline,
+            T boundary,
+            params Expression<Func<T, object>>[] selectors)
         {
             if (Evaluate.IsNull(baseline))
             {
@@ -549,9 +607,9 @@ namespace Startitecture.Orm.Model
         /// The relation to add.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> AddRelation([NotNull] IEntityRelation relation)
+        public EntitySelection<T> AddRelation([NotNull] IEntityRelation relation)
         {
             if (relation == null)
             {
@@ -572,11 +630,11 @@ namespace Startitecture.Orm.Model
         /// The right selector of the JOIN clause.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> InnerJoin(
-            [NotNull] Expression<Func<TItem, object>> leftSelector,
-            [NotNull] Expression<Func<TItem, object>> rightSelector)
+        public EntitySelection<T> InnerJoin(
+            [NotNull] Expression<Func<T, object>> leftSelector,
+            [NotNull] Expression<Func<T, object>> rightSelector)
         {
             if (leftSelector == null)
             {
@@ -589,7 +647,7 @@ namespace Startitecture.Orm.Model
             }
 
             var relation = new EntityRelation(EntityRelationType.InnerJoin);
-            relation.Join<TItem>(leftSelector, rightSelector);
+            relation.Join<T>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
 
@@ -606,10 +664,10 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> InnerJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntitySelection<T> InnerJoin<TRelation>(
+            Expression<Func<T, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
             if (leftSelector == null)
@@ -643,10 +701,10 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> InnerJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntitySelection<T> InnerJoin<TRelation>(
+            Expression<Func<T, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string relationAlias)
         {
@@ -682,9 +740,9 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> InnerJoin<TSource, TRelation>(
+        public EntitySelection<T> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
@@ -713,9 +771,9 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> InnerJoin<TSource, TRelation>(
+        public EntitySelection<T> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string relationAlias)
@@ -746,11 +804,11 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the INNER JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
-        public ItemSelection<TItem> InnerJoin<TSource, TRelation>(
+        public EntitySelection<T> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             string sourceAlias,
             Expression<Func<TRelation, object>> rightSelector,
@@ -781,11 +839,11 @@ namespace Startitecture.Orm.Model
         /// The right selector of the JOIN clause.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> LeftJoin(
-            [NotNull] Expression<Func<TItem, object>> leftSelector,
-            [NotNull] Expression<Func<TItem, object>> rightSelector)
+        public EntitySelection<T> LeftJoin(
+            [NotNull] Expression<Func<T, object>> leftSelector,
+            [NotNull] Expression<Func<T, object>> rightSelector)
         {
             if (leftSelector == null)
             {
@@ -798,7 +856,7 @@ namespace Startitecture.Orm.Model
             }
 
             var relation = new EntityRelation(EntityRelationType.LeftJoin);
-            relation.Join<TItem>(leftSelector, rightSelector);
+            relation.Join<T>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
 
@@ -815,10 +873,10 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> LeftJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntitySelection<T> LeftJoin<TRelation>(
+            Expression<Func<T, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
             if (leftSelector == null)
@@ -852,10 +910,10 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> LeftJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntitySelection<T> LeftJoin<TRelation>(
+            Expression<Func<T, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string relationAlias)
         {
@@ -891,9 +949,9 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> LeftJoin<TSource, TRelation>(
+        public EntitySelection<T> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
@@ -922,9 +980,9 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> LeftJoin<TSource, TRelation>(
+        public EntitySelection<T> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string joinAlias)
@@ -955,11 +1013,11 @@ namespace Startitecture.Orm.Model
         /// The type of item on the right side of the LEFT JOIN.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
-        public ItemSelection<TItem> LeftJoin<TSource, TRelation>(
+        public EntitySelection<T> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             string sourceAlias,
             Expression<Func<TRelation, object>> rightSelector,
@@ -991,9 +1049,9 @@ namespace Startitecture.Orm.Model
         /// The selection to combine.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Union(ItemSelection<TItem> selection)
+        public EntitySelection<T> Union(EntitySelection<T> selection)
         {
             this.LinkedSelection = new LinkedSelection(selection, SelectionLinkType.Union);
             return this;
@@ -1006,9 +1064,9 @@ namespace Startitecture.Orm.Model
         /// The selection to combine.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Intersect(ItemSelection<TItem> selection)
+        public EntitySelection<T> Intersect(EntitySelection<T> selection)
         {
             this.LinkedSelection = new LinkedSelection(selection, SelectionLinkType.Intersection);
             return this;
@@ -1021,9 +1079,9 @@ namespace Startitecture.Orm.Model
         /// The selection to combine.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
-        public ItemSelection<TItem> Except(ItemSelection<TItem> selection)
+        public EntitySelection<T> Except(EntitySelection<T> selection)
         {
             this.LinkedSelection = new LinkedSelection(selection, SelectionLinkType.Exception);
             return this;
@@ -1034,23 +1092,23 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Maps the current selection to the target selection type.
         /// </summary>
-        /// <typeparam name="TDestItem">
-        /// The destination item type.
+        /// <typeparam name="TDestEntity">
+        /// The destination entity type.
         /// </typeparam>
         /// <returns>
-        /// An <see cref="ItemSelection{TDestItem}"/> for the destination type.
+        /// An <see cref="EntitySelection{T}"/> for the destination type.
         /// </returns>
-        public ItemSelection<TDestItem> MapTo<TDestItem>()
-            where TDestItem : class, new()
+        public EntitySelection<TDestEntity> MapTo<TDestEntity>()
+            where TDestEntity : class, new()
         {
-            var mappedSelection = MapSelection<TDestItem>(this);
+            var mappedSelection = MapSelection<TDestEntity>(this);
 
             ISelection currentSelection = this;
             var linkedSelection = mappedSelection;
 
             while (currentSelection.LinkedSelection != null)
             {
-                var targetSelection = MapSelection<TDestItem>(currentSelection.LinkedSelection.Selection as ItemSelection<TItem>);
+                var targetSelection = MapSelection<TDestEntity>(currentSelection.LinkedSelection.Selection as EntitySelection<T>);
                 LinkSelection(currentSelection.LinkedSelection.LinkType, linkedSelection, targetSelection);
 
                 currentSelection = currentSelection.LinkedSelection.Selection;
@@ -1079,12 +1137,12 @@ namespace Startitecture.Orm.Model
         /// The value filter to add.
         /// </param>
         /// <returns>
-        /// The current <see cref="ItemSelection{TItem}"/>.
+        /// The current <see cref="EntitySelection{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueFilter"/> is null.
         /// </exception>
-        protected ItemSelection<TItem> AddFilter([NotNull] ValueFilter valueFilter)
+        protected EntitySelection<T> AddFilter([NotNull] ValueFilter valueFilter)
         {
             if (valueFilter == null)
             {
@@ -1107,14 +1165,17 @@ namespace Startitecture.Orm.Model
         /// <param name="targetSelection">
         /// The target selection.
         /// </param>
-        /// <typeparam name="T">
+        /// <typeparam name="TDestEntity">
         /// The type of selection to link.
         /// </typeparam>
         /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="linkType"/> is not one of the values of <see cref="SelectionLinkType"/>.
         /// </exception>
-        private static void LinkSelection<T>(SelectionLinkType linkType, ItemSelection<T> sourceSelection, ItemSelection<T> targetSelection)
-            where T : class, new()
+        private static void LinkSelection<TDestEntity>(
+            SelectionLinkType linkType,
+            EntitySelection<TDestEntity> sourceSelection,
+            EntitySelection<TDestEntity> targetSelection)
+            where TDestEntity : class, new()
         {
             switch (linkType)
             {
@@ -1133,21 +1194,21 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Maps the core part of the selection from this selection to an <see cref="ItemSelection{TDestItem}"/>.
+        /// Maps the core part of the selection from this selection to an <see cref="EntitySelection{T}"/>.
         /// </summary>
         /// <param name="sourceSelection">
         /// The source selection.
         /// </param>
-        /// <typeparam name="TDestItem">
+        /// <typeparam name="TDestEntity">
         /// The type of the selection items to map to.
         /// </typeparam>
         /// <returns>
-        /// The mapped <see cref="ItemSelection{TDestItem}"/>.
+        /// The mapped <see cref="EntitySelection{T}"/>.
         /// </returns>
-        private static ItemSelection<TDestItem> MapSelection<TDestItem>(ItemSelection<TItem> sourceSelection)
-            where TDestItem : class, new()
+        private static EntitySelection<TDestEntity> MapSelection<TDestEntity>(EntitySelection<T> sourceSelection)
+            where TDestEntity : class, new()
         {
-            var targetSelection = new ItemSelection<TDestItem>();
+            var targetSelection = new EntitySelection<TDestEntity>();
             targetSelection.selectExpressions.AddRange(sourceSelection.selectExpressions);
             targetSelection.valueFilters.AddRange(sourceSelection.valueFilters);
             targetSelection.relations.AddRange(sourceSelection.relations);

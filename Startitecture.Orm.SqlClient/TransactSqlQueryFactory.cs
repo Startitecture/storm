@@ -11,6 +11,7 @@ namespace Startitecture.Orm.SqlClient
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Text;
 
     using JetBrains.Annotations;
 
@@ -63,7 +64,7 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// The SQL where clause.
         /// </summary>
-        private const string SqlWhereClause = "WHERE {0}";
+        private const string SqlWhereClause = "WHERE ";
 
         /// <summary>
         /// The union statement.
@@ -108,12 +109,22 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// The less than predicate.
         /// </summary>
-        private const string LessThanPredicate = "{0} <= @{1}";
+        private const string LessThanPredicate = "{0} < @{1}";
+
+        /// <summary>
+        /// The less than predicate.
+        /// </summary>
+        private const string LessThanOrEqualToPredicate = "{0} <= @{1}";
 
         /// <summary>
         /// The greater than predicate.
         /// </summary>
-        private const string GreaterThanPredicate = "{0} >= @{1}";
+        private const string GreaterThanPredicate = "{0} > @{1}";
+
+        /// <summary>
+        /// The greater than predicate.
+        /// </summary>
+        private const string GreaterThanOrEqualToPredicate = "{0} >= @{1}";
 
         /// <summary>
         /// The like operand.
@@ -121,14 +132,29 @@ namespace Startitecture.Orm.SqlClient
         private const string LikeOperand = "LIKE";
 
         /// <summary>
+        /// The like operand.
+        /// </summary>
+        private const string NotLikeOperand = "NOT LIKE";
+
+        /// <summary>
         /// The equality operand.
         /// </summary>
         private const string EqualityOperand = "=";
 
         /// <summary>
+        /// The inequality operand.
+        /// </summary>
+        private const string InequalityOperand = "<>";
+
+        /// <summary>
         /// The inclusive predicate.
         /// </summary>
         private const string InclusionPredicate = "{0} IN ({1})";
+
+        /// <summary>
+        /// The inclusive predicate.
+        /// </summary>
+        private const string ExclusionPredicate = "{0} NOT IN ({1})";
 
         /// <summary>
         /// The parameter format.
@@ -188,34 +214,6 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
-        /// Gets the selection attributes.
-        /// </summary>
-        /// <param name="selection">
-        /// The selection.
-        /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition.
-        /// </param>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items.
-        /// </returns>
-        private static IEnumerable<EntityAttributeDefinition> GetSelectionAttributes(ISelection selection, IEntityDefinition entityDefinition)
-        {
-            // Contains statements do not need any columns.
-            var selectAttributes = selection.SelectExpressions.Select(expression => expression.AttributeExpression)
-                .Select(entityDefinition.Find)
-                .ToList();
-
-            // Add all returnable attributes if no explicit columns are selected.
-            if (selectAttributes.Any() == false)
-            {
-                selectAttributes.AddRange(entityDefinition.ReturnableAttributes);
-            }
-
-            return selectAttributes;
-        }
-
-        /// <summary>
         /// Gets an inclusion filter for the specified filter values and column.
         /// </summary>
         /// <param name="qualifiedName">
@@ -238,17 +236,25 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
-        /// Gets the operand for the specified value.
+        /// Gets an exclusion filter for the specified filter values and column.
         /// </summary>
-        /// <param name="value">
-        /// The value to return an operand for.
+        /// <param name="qualifiedName">
+        /// The qualified name of the column.
+        /// </param>
+        /// <param name="filterIndex">
+        /// The index at which the filter will be inserted.
+        /// </param>
+        /// <param name="filterValues">
+        /// The filter values.
         /// </param>
         /// <returns>
-        /// The operand as a <see cref="string"/>.
+        /// An exclusion predicate for the <paramref name="filterValues"/> as a <see cref="string"/>.
         /// </returns>
-        private static string GetEqualityOperand(object value)
+        private static string GetExclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            return value is string ? LikeOperand : EqualityOperand;
+            var indexTokens = filterValues.Select((o, i) => string.Format(CultureInfo.InvariantCulture, ParameterFormat, filterIndex + i));
+            var inclusionToken = string.Format(CultureInfo.InvariantCulture, ExclusionPredicate, qualifiedName, string.Join(ParameterSeparator, indexTokens));
+            return inclusionToken;
         }
 
         /// <summary>
@@ -326,20 +332,36 @@ namespace Startitecture.Orm.SqlClient
             switch (filterType)
             {
                 case FilterType.Equality:
-                    filterTokens.Add(
-                        string.Format(CultureInfo.InvariantCulture, EqualityFilter, referenceName, GetEqualityOperand(firstFilterValue), index++));
+                    var equalityItem = string.Format(
+                        CultureInfo.InvariantCulture,
+                        EqualityFilter,
+                        referenceName,
+                        firstFilterValue is string ? LikeOperand : EqualityOperand,
+                        index++);
+
+                    filterTokens.Add(equalityItem);
                     break;
                 case FilterType.Inequality:
-                    throw new NotImplementedException();
+                    var inequalityItem = string.Format(
+                        CultureInfo.InvariantCulture,
+                        EqualityFilter,
+                        referenceName,
+                        firstFilterValue is string ? NotLikeOperand : InequalityOperand,
+                        index++);
+
+                    filterTokens.Add(inequalityItem);
+                    break;
                 case FilterType.LessThan:
-                    throw new NotImplementedException();
-                case FilterType.LessThanOrEqualTo:
                     filterTokens.Add(string.Format(CultureInfo.InvariantCulture, LessThanPredicate, referenceName, index++));
                     break;
+                case FilterType.LessThanOrEqualTo:
+                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, LessThanOrEqualToPredicate, referenceName, index++));
+                    break;
                 case FilterType.GreaterThan:
-                    throw new NotImplementedException();
-                case FilterType.GreaterThanOrEqualTo:
                     filterTokens.Add(string.Format(CultureInfo.InvariantCulture, GreaterThanPredicate, referenceName, index++));
+                    break;
+                case FilterType.GreaterThanOrEqualTo:
+                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, GreaterThanOrEqualToPredicate, referenceName, index++));
                     break;
                 case FilterType.Between:
                     filterTokens.Add(string.Format(CultureInfo.InvariantCulture, BetweenFilter, referenceName, index++, index++));
@@ -349,7 +371,9 @@ namespace Startitecture.Orm.SqlClient
                     index += setValues.Count;
                     break;
                 case FilterType.DoesNotMatchSet:
-                    throw new NotImplementedException();
+                    filterTokens.Add(GetExclusionFilter(referenceName, index, setValues));
+                    index += setValues.Count;
+                    break;
                 case FilterType.IsNotNull:
                     filterTokens.Add(string.Format(CultureInfo.InvariantCulture, NotNullPredicate, referenceName));
                     break;
@@ -387,7 +411,7 @@ namespace Startitecture.Orm.SqlClient
             {
                 case StatementOutputType.Select:
                     return this.CreateCompleteStatement(queryContext);
-                case StatementOutputType.PageSelect:
+                case StatementOutputType.CteSelect:
                     return this.CreatePageStatement(queryContext);
                 case StatementOutputType.Contains:
                     return string.Format(CultureInfo.InvariantCulture, IfExistsClause, this.CreateCompleteStatement(queryContext));
@@ -399,9 +423,7 @@ namespace Startitecture.Orm.SqlClient
                         $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
 
                     var filter = queryContext.Selection.Filters.Any()
-                                     ? string.Concat(
-                                         Environment.NewLine,
-                                         string.Format(CultureInfo.InvariantCulture, SqlWhereClause, filterStatement))
+                                     ? string.Concat(Environment.NewLine, SqlWhereClause, filterStatement)
                                      : string.Empty;
 
                     if (queryContext.Selection.Relations.Any() == false)
@@ -608,7 +630,7 @@ namespace Startitecture.Orm.SqlClient
         private string CreateCompleteStatement(QueryContext queryContext)
         {
             int offset = queryContext.ParameterOffset;
-            var statement = this.CreateSelectionStatement(queryContext.Selection, offset, queryContext.OutputType, queryContext.EntityDefinition);
+            var statement = this.CreateSelectionStatement(queryContext.Selection, offset, 0, queryContext.OutputType, queryContext.EntityDefinition);
 
             offset = queryContext.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
             var linkedSelection = queryContext.Selection.LinkedSelection;
@@ -622,6 +644,7 @@ namespace Startitecture.Orm.SqlClient
                 var selectionStatement = this.CreateSelectionStatement(
                     linkedSelection.Selection,
                     offset,
+                    0,
                     queryContext.OutputType,
                     queryContext.EntityDefinition);
 
@@ -647,6 +670,9 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="indexOffset">
         /// The index offset.
         /// </param>
+        /// <param name="indent">
+        /// The indent in spaces for the statement.
+        /// </param>
         /// <param name="outputType">
         /// The statement output Type.
         /// </param>
@@ -656,16 +682,16 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The T-SQL statement for the current selection as a <see cref="string"/>.
         /// </returns>
-        private string CreateSelectionStatement(ISelection selection, int indexOffset, StatementOutputType outputType, IEntityDefinition entityDefinition)
+        private string CreateSelectionStatement(ISelection selection, int indexOffset, int indent, StatementOutputType outputType, IEntityDefinition entityDefinition)
         {
             string selectColumns;
 
             switch (outputType)
             {
                 case StatementOutputType.Select:
-                case StatementOutputType.PageSelect:
+                case StatementOutputType.CteSelect:
 
-                    var separator = string.Concat(",", Environment.NewLine, new string(' ', 4));
+                    var separator = string.Concat(",", Environment.NewLine, new string(' ', indent + 4));
 
                     if (selection.SelectExpressions.Any())
                     {
@@ -694,29 +720,73 @@ namespace Startitecture.Orm.SqlClient
             }
 
             var fromClause = string.Concat(
+                new string(' ', indent),
                 FromStatement,
                 $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
 
-            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier) { Indent = indent };
             var joinClauseText = joinClause.Create(selection);
-            var filter = selection.Filters.Any()
-                             ? string.Concat(
-                                 Environment.NewLine,
-                                 string.Format(CultureInfo.InvariantCulture, SqlWhereClause, this.CreateFilter(entityDefinition, selection.Filters, indexOffset)))
-                             : string.Empty;
+            var filter = new StringBuilder(new string(' ', indent)).Append(SqlWhereClause);
 
-            var orderByClause = this.CreateOrderByClause(selection.OrderByExpressions);
+            if (selection.ParentExpression != null)
+            {
+                // TODO: Support LEFT JOIN?
+                // For now, assume INNER JOIN and create an EXISTS clause.
+                var pageTableName = this.nameQualifier.Escape(selection.ParentExpression.TableName);
+                var keyRelations = selection.ParentExpression.TableRelations.ToList();
+
+                var keyPredicate = string.Join(
+                    string.Concat(FilterSeparator, Environment.NewLine),
+                    keyRelations.Select(
+                        relation =>
+                            $"{pageTableName}.{this.nameQualifier.Escape(entityDefinition.Find(relation.SourceExpression).ReferenceName)} = " + 
+                            $"{this.GetQualifiedColumnName(entityDefinition.Find(relation.RelationExpression))}"));
+
+                filter.Append(
+                    $@"EXISTS 
+(SELECT 1 FROM {pageTableName} 
+WHERE {keyPredicate})");
+            }
+
+            if (selection.Filters.Any())
+            {
+                if (selection.ParentExpression != null)
+                {
+                    filter.AppendLine(" AND");
+                }
+
+                filter.Append(this.CreateFilter(entityDefinition, selection.Filters, indexOffset, indent));
+            }
+
+            var orderByClause = string.Concat(new string(' ', indent), "ORDER BY ", this.CreateOrderByClause(selection.OrderByExpressions));
+            
+            var fetchSelect = new StringBuilder();
+
+            if (selection.Page.RowOffset + selection.Page.Size > 0)
+            {
+                fetchSelect.AppendLine().Append(new string(' ', indent));
+                fetchSelect.Append($"OFFSET @{indexOffset + selection.PropertyValues.Count() - 2} ROWS");
+
+                if (selection.Page.Size > 0)
+                {
+                    fetchSelect.AppendLine().Append(new string(' ', indent));
+                    fetchSelect.Append($"FETCH NEXT @{indexOffset + selection.PropertyValues.Count() - 1} ROWS ONLY");
+                }
+            }
+
+            var hasFilters = selection.ParentExpression != null || selection.Filters.Any();
 
             return string.Concat(
                 SelectStatement,
                 Environment.NewLine,
-                new string(' ', 4),
+                new string(' ', indent + 4),
                 selectColumns,
                 Environment.NewLine,
                 fromClause,
                 selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClauseText) : string.Empty,
-                filter,
-                selection.OrderByExpressions.Any() ? string.Concat(Environment.NewLine, "ORDER BY ", orderByClause) : string.Empty);
+                hasFilters ? string.Concat(Environment.NewLine, filter.ToString()) : string.Empty,
+                selection.OrderByExpressions.Any() ? string.Concat(Environment.NewLine, orderByClause) : string.Empty,
+                fetchSelect.ToString());
         }
 
         /// <summary>
@@ -755,56 +825,37 @@ namespace Startitecture.Orm.SqlClient
         {
             var selection = queryContext.Selection;
             var entityDefinition = queryContext.EntityDefinition;
-            var keyColumns = entityDefinition.PrimaryKeyAttributes.ToList();
-            var keySelection = string.Join(ParameterSeparator, keyColumns.Select(definition => definition.ReferenceName));
-            var keyPredicate = string.Join(
-                string.Concat(FilterSeparator, Environment.NewLine),
-                keyColumns.Select(definition => $"pg.{definition.ReferenceName} = {this.GetQualifiedColumnName(definition)}"));
 
-            var selectAttributes = GetSelectionAttributes(selection, entityDefinition);
-            string selectColumns = string.Join(
-                string.Concat(",", Environment.NewLine, new string(' ', 4)),
-                selectAttributes.Select(this.GetQualifiedColumnName));
+            if (selection.ParentExpression == null)
+            {
+                throw new OperationException(queryContext, "A CTE query requires a parent expression in the selection.");
+            }
 
-            var fromClause = string.Concat(
-                FromStatement,
-                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
+            var pageTableName = this.nameQualifier.Escape(selection.ParentExpression.TableName);
 
-            var pageJoinClause = new JoinClause(this.definitionProvider, this.nameQualifier) { Indent = 8 };
-            var pageJoinClauseText = pageJoinClause.Create(selection);
-            var fullPageJoinClauseText = selection.Relations.Any() ? string.Concat(Environment.NewLine, pageJoinClauseText) : string.Empty;
-
-            var statementJoinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
-            var joinClauseText = statementJoinClause.Create(selection);
-            var fullJoinClauseText = selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClauseText) : string.Empty;
-
-            var pageFilters = this.CreateFilter(entityDefinition, selection.Filters, 0, 8);
-            var pageFilter = selection.Filters.Any()
-                             ? string.Concat(Environment.NewLine, "        ", string.Format(CultureInfo.InvariantCulture, SqlWhereClause, pageFilters))
-                             : string.Empty;
-
-            var filters = this.CreateFilter(entityDefinition, selection.Filters, 0);
-            var mainFilter = selection.Filters.Any() ? string.Concat(" AND", Environment.NewLine, filters) : string.Empty;
-            var orderByClause = this.CreateOrderByClause(selection.OrderByExpressions);
-
+            // TODO: Generate CTE and offset/fetch organically.
             // TODO: This does not work with linked queries. Workaround is to create a view. Long-term is to further encapsulate query components.
-            var pageStatement = $@";WITH pg AS
-    (
-        SELECT {keySelection}
-        {fromClause}{fullPageJoinClauseText}{pageFilter}
-        ORDER BY {orderByClause}
-        OFFSET @{selection.PropertyValues.Count()} ROWS
-        FETCH NEXT @{selection.PropertyValues.Count() + 1} ROWS ONLY
-    )
-SELECT 
-    {selectColumns}
-{fromClause}{fullJoinClauseText}
-WHERE EXISTS 
-(SELECT 1 FROM pg 
-WHERE {keyPredicate}){mainFilter}
-ORDER BY {orderByClause} OPTION (RECOMPILE)";
+            var tableExpressionStatement = this.CreateSelectionStatement(
+                selection.ParentExpression.TableSelection,
+                selection.PropertyValues.Count() - selection.ParentExpression.TableSelection.PropertyValues.Count(),
+                8,
+                StatementOutputType.Select,
+                entityDefinition);
 
-            return pageStatement;
+            var selectionStatement = this.CreateSelectionStatement(selection, 0, 0, StatementOutputType.Select, entityDefinition);
+
+            var fullStatement = $@";WITH {pageTableName} AS
+    (
+        {tableExpressionStatement}
+    )
+{selectionStatement}";
+
+            if (selection.OrderByExpressions.Any())
+            {
+                return fullStatement + " OPTION (RECOMPILE)";
+            }
+
+            return fullStatement;
         }
     }
 }

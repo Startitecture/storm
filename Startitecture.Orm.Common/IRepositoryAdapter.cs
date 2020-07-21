@@ -32,7 +32,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// <c>true</c> if the item exists; otherwise, <c>false</c>.
         /// </returns>
-        bool Contains<TDataItem>(ItemSelection<TDataItem> selection);
+        bool Contains<TDataItem>(EntitySelection<TDataItem> selection);
 
         /// <summary>
         /// Gets the first or default item matching the specified candidate item.
@@ -46,7 +46,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The first matching <typeparamref name="TDataItem"/>, or the default value if no item is found.
         /// </returns>
-        TDataItem FirstOrDefault<TDataItem>(ItemSelection<TDataItem> selection);
+        TDataItem FirstOrDefault<TDataItem>(EntitySelection<TDataItem> selection);
 
         /// <summary>
         /// Selects a matching list of items from the repository.
@@ -63,7 +63,21 @@ namespace Startitecture.Orm.Common
         /// <exception cref="System.InvalidOperationException">
         /// The repository could not be queried.
         /// </exception>
-        IEnumerable<TDataItem> SelectItems<TDataItem>(ItemSelection<TDataItem> selection);
+        IEnumerable<TDataItem> SelectItems<TDataItem>(EntitySelection<TDataItem> selection);
+
+        /// <summary>
+        /// Gets a scalar result for the specified <paramref name="selection"/>.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to get a scalar value for.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of the scalar value.
+        /// </typeparam>
+        /// <returns>
+        /// The scalar value as a type of <typeparamref name="T"/>.
+        /// </returns>
+        T ExecuteScalar<T>(ISelection selection);
 
         /// <summary>
         /// Inserts a data item into the repository.
@@ -100,7 +114,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The number of updated rows.
         /// </returns>
-        int Update<TDataItem>(TDataItem dataItem, ItemSelection<TDataItem> selection, params Expression<Func<TDataItem, object>>[] setExpressions);
+        int Update<TDataItem>(TDataItem dataItem, EntitySelection<TDataItem> selection, params Expression<Func<TDataItem, object>>[] setExpressions);
 
         /// <summary>
         /// Deletes the items matching the filter.
@@ -117,6 +131,6 @@ namespace Startitecture.Orm.Common
         /// <exception cref="System.InvalidOperationException">
         /// The repository could not be updated.
         /// </exception>
-        int DeleteSelection<TDataItem>(ItemSelection<TDataItem> selection);
+        int DeleteSelection<TDataItem>(EntitySelection<TDataItem> selection);
     }
 }

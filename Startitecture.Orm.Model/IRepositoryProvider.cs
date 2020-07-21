@@ -73,20 +73,6 @@ namespace Startitecture.Orm.Model
         /// </returns>
         IDbTransaction StartTransaction(IsolationLevel isolationLevel);
 
-/*
-        /// <summary>
-        /// Completes a transaction in the repository.
-        /// </summary>
-        void CompleteTransaction();
-*/
-
-/*
-        /// <summary>
-        /// Aborts a transaction, rolling back changes in the repository.
-        /// </summary>
-        void AbortTransaction();
-*/
-
         /// <summary>
         /// Determines whether an item exists given the specified unique key.
         /// </summary>
@@ -94,27 +80,41 @@ namespace Startitecture.Orm.Model
         /// The type of data item in the repository.
         /// </typeparam>
         /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
+        /// A selection for the specified item or items to query for existence. 
         /// </param>
         /// <returns>
         /// <c>true</c> if the item exists; otherwise, <c>false</c>.
         /// </returns>
-        bool Contains<TDataItem>(ItemSelection<TDataItem> selection)
+        bool Contains<TDataItem>(EntitySelection<TDataItem> selection)
             where TDataItem : ITransactionContext;
 
         /// <summary>
-        /// Gets the first item matching the filter, or the default value if the item cannot be found.
+        /// Gets a scalar result from the specified query.
+        /// </summary>
+        /// <param name="selection">
+        /// A selection for the specified scalar to return.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of scalar to return.
+        /// </typeparam>
+        /// <returns>
+        /// The <see cref="T"/>.
+        /// </returns>
+        T GetScalar<T>(ISelection selection);
+
+        /// <summary>
+        /// Gets the first item matching the selection, or the default value if the item cannot be found.
         /// </summary>
         /// <typeparam name="TDataItem">
         /// The type of data item in the repository.
         /// </typeparam>
         /// <param name="selection">
-        /// The data item that represents the item to retrieve.
+        /// A selection for the specified item to return. 
         /// </param>
         /// <returns>
         /// The first <typeparamref name="TDataItem"/> item matching the filter, or the default value if no matching item is found.
         /// </returns>
-        TDataItem GetFirstOrDefault<TDataItem>(ItemSelection<TDataItem> selection)
+        TDataItem GetFirstOrDefault<TDataItem>(EntitySelection<TDataItem> selection)
             where TDataItem : ITransactionContext;
 
         /// <summary>
@@ -124,12 +124,12 @@ namespace Startitecture.Orm.Model
         /// The type of data item in the repository.
         /// </typeparam>
         /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
+        /// A selection for the specified items to return. 
         /// </param>
         /// <returns>
         /// A collection of items that match the filter.
         /// </returns>
-        IEnumerable<TDataItem> GetSelection<TDataItem>(ItemSelection<TDataItem> selection)
+        IEnumerable<TDataItem> GetSelection<TDataItem>(EntitySelection<TDataItem> selection)
             where TDataItem : ITransactionContext;
 
         /// <summary>
@@ -139,12 +139,12 @@ namespace Startitecture.Orm.Model
         /// The type of data item in the repository.
         /// </typeparam>
         /// <param name="selection">
-        /// A selection that contains the SQL filter and values to select the item.
+        /// A selection for the specified items to delete. 
         /// </param>
         /// <returns>
         /// The number of deleted items as an <see cref="int"/>.
         /// </returns>
-        int DeleteItems<TDataItem>(ItemSelection<TDataItem> selection)
+        int DeleteItems<TDataItem>(EntitySelection<TDataItem> selection)
             where TDataItem : ITransactionContext;
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The number of updated rows.
         /// </returns>
-        int Update<TDataItem>(TDataItem dataItem, ItemSelection<TDataItem> selection, params Expression<Func<TDataItem, object>>[] setExpressions)
+        int Update<TDataItem>(TDataItem dataItem, EntitySelection<TDataItem> selection, params Expression<Func<TDataItem, object>>[] setExpressions)
             where TDataItem : ITransactionContext;
 
         /// <summary>

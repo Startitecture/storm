@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Model
     /// <typeparam name="TItem">
     /// The type of item to generate a unique query for.
     /// </typeparam>
-    public class UniqueQuery<TItem> : ItemSelection<TItem>
+    public class UniqueQuery<TItem> : EntitySelection<TItem>
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="UniqueQuery{TItem}"/> class.

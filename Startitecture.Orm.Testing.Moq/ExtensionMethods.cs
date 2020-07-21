@@ -465,7 +465,7 @@ namespace Startitecture.Orm.Testing.Moq
 
         /// <summary>
         /// The reference name comparer.
-        /// TODO: Extend this to ItemSelection
+        /// TODO: Extend this to EntitySelection
         /// </summary>
         private class ReferenceNameComparer : EqualityComparer<EntityAttributeDefinition>
         {
