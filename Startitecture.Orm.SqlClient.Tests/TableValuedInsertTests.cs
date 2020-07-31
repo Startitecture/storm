@@ -24,7 +24,6 @@ namespace Startitecture.Orm.SqlClient.Tests
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
     using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
@@ -222,7 +221,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // TODO: Return names only from the repo as a dynamic
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
-                var existingFields = fieldRepository.Select(new EntitySelection<Field>().Include(field => field.Name, inclusionValues));
+                var existingFields = fieldRepository.SelectEntities(new EntitySelection<Field>().Include(field => field.Name, inclusionValues));
 
                 foreach (var field in existingFields)
                 {

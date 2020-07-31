@@ -19,13 +19,13 @@ namespace Startitecture.Orm.Model
 #pragma warning restore CA1716 // Identifiers should not match keywords
     {
         /// <summary>
-        /// Creates a query from the specified item type.
+        /// Creates an entity selection for the specified entity type.
         /// </summary>
         /// <param name="selections">
         /// The properties to return.
         /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to query.
+        /// <typeparam name="T">
+        /// The type of entity to query.
         /// </typeparam>
         /// <returns>
         /// A new <see cref="EntitySelection{T}"/> for the specified type.
@@ -33,14 +33,28 @@ namespace Startitecture.Orm.Model
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selections"/> is null.
         /// </exception>
-        public static EntitySelection<TItem> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] selections)
+        public static EntitySelection<T> From<T>([NotNull] params Expression<Func<T, object>>[] selections)
         {
             if (selections == null)
             {
                 throw new ArgumentNullException(nameof(selections));
             }
 
-            return new EntitySelection<TItem>().Select(selections);
+            return new EntitySelection<T>().Select(selections);
+        }
+
+        /// <summary>
+        /// Creates an entity set for the specified entity type.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of entity to query.
+        /// </typeparam>
+        /// <returns>
+        /// A new <see cref="EntitySet{T}"/>for the specified type.
+        /// </returns>
+        public static EntitySet<T> Where<T>()
+        {
+            return new EntitySet<T>();
         }
     }
 }

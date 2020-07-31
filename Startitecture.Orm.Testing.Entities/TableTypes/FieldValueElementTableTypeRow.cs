@@ -10,6 +10,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Schema;
 

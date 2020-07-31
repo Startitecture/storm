@@ -15,8 +15,9 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The structured insert command.
@@ -52,7 +53,7 @@ namespace Startitecture.Orm.SqlClient
         private readonly List<LambdaExpression> fromColumnExpressions = new List<LambdaExpression>();
 
         /// <summary>
-        /// The item definition.
+        /// The entity definition.
         /// </summary>
         private IEntityDefinition itemDefinition;
 
@@ -94,27 +95,27 @@ namespace Startitecture.Orm.SqlClient
         /// Declares the table to insert into.
         /// </summary>
         /// <param name="insertItems">
-        /// The items to insert.
+        /// The entities to insert.
         /// </param>
         /// <param name="targetColumns">
         /// The target columns of the insert table.
         /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of item to insert the table into.
+        /// <typeparam name="TEntity">
+        /// The type of entity to insert the table into.
         /// </typeparam>
         /// <returns>
         /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        public TableValuedInsert<TStructure> InsertInto<TDataItem>(
+        public TableValuedInsert<TStructure> InsertInto<TEntity>(
             [NotNull] IEnumerable<TStructure> insertItems,
-            params Expression<Func<TDataItem, object>>[] targetColumns)
+            params Expression<Func<TEntity, object>>[] targetColumns)
         {
             if (insertItems == null)
             {
                 throw new ArgumentNullException(nameof(insertItems));
             }
 
-            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TDataItem>();
+            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TEntity>();
             this.Items.Clear();
             this.Items.AddRange(insertItems);
             this.insertColumnExpressions.Clear();

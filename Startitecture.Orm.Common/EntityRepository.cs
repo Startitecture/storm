@@ -28,7 +28,7 @@ namespace Startitecture.Orm.Common
     /// The type of entity stored in the repository.
     /// </typeparam>
     /// <remarks>
-    /// Uses the default memory cache if no cache is specified, with a save policy that does not expire items and a select policy with
+    /// Uses the default memory cache if no cache is specified, with a save policy that does not expire entities and a select policy with
     /// a sliding expiration of 30 seconds.
     /// </remarks>
     public class EntityRepository<TModel, TEntity> : ReadOnlyRepository<TModel, TEntity>, IEntityRepository<TModel>
@@ -58,7 +58,7 @@ namespace Startitecture.Orm.Common
         /// The entity mapper.
         /// </param>
         /// <param name="selectionComparer">
-        /// The selection comparer for ordering data items from the repository after being selected from the database.
+        /// The selection comparer for ordering data entities from the repository after being selected from the database.
         /// </param>
         public EntityRepository(
             IRepositoryProvider repositoryProvider,
@@ -89,7 +89,7 @@ namespace Startitecture.Orm.Common
 
             var entity = this.GetExampleEntity(example);
             var uniqueItemSelection = this.GetUniqueItemSelection(entity);
-            return this.RepositoryProvider.DeleteItems(uniqueItemSelection);
+            return this.RepositoryProvider.Delete(uniqueItemSelection);
         }
 
         /// <inheritdoc />
@@ -101,7 +101,7 @@ namespace Startitecture.Orm.Common
             }
 
             var itemSelection = selection.MapTo<TEntity>();
-            return this.RepositoryProvider.DeleteItems(itemSelection);
+            return this.RepositoryProvider.Delete(itemSelection);
         }
 
         #region Methods
@@ -208,30 +208,34 @@ namespace Startitecture.Orm.Common
         /// </returns>
         private TEntity SaveEntity(TModel model)
         {
-            var dataItem = new TEntity();
-            dataItem.SetTransactionProvider(this.RepositoryProvider);
-            this.EntityMapper.MapTo(model, dataItem);
+            var entity = new TEntity();
+            entity.SetTransactionProvider(this.RepositoryProvider);
+            this.EntityMapper.MapTo(model, entity);
 
-            if (this.Contains(dataItem))
+            if (this.Contains(entity))
             {
-                this.RepositoryProvider.Update(dataItem, this.GetUniqueItemSelection(dataItem));
+                var updateSet = new UpdateSet<TEntity>()
+                    .Set(entity, this.RepositoryProvider.EntityDefinitionProvider)
+                    .Where(Select.Where<TEntity>().MatchKey(entity, this.RepositoryProvider.EntityDefinitionProvider));
+
+                this.RepositoryProvider.Update(updateSet);
             }
             else
             {
-                dataItem = this.RepositoryProvider.InsertItem(dataItem);
+                entity = this.RepositoryProvider.Insert(entity);
             }
 
-            if (dataItem == null)
+            if (entity == null)
             {
                 throw new OperationException(model, $"The underlying provider returned a null entity when inserting '{model}'.");
             }
 
-            if (object.ReferenceEquals(this.RepositoryProvider, dataItem.TransactionProvider) == false)
+            if (object.ReferenceEquals(this.RepositoryProvider, entity.TransactionProvider) == false)
             {
-                dataItem.SetTransactionProvider(this.RepositoryProvider);
+                entity.SetTransactionProvider(this.RepositoryProvider);
             }
 
-            return dataItem;
+            return entity;
         }
 
         #endregion

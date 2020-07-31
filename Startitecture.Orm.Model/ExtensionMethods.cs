@@ -16,24 +16,21 @@ namespace Startitecture.Orm.Model
     public static class ExtensionMethods
     {
         /// <summary>
-        /// Gets a <see cref="QueryContext"/> as a SELECT statement.
+        /// Gets a <see cref="StatementContext"/> as a SELECT statement.
         /// </summary>
         /// <param name="selection">
         /// The selection to use to create the context.
         /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition for the <typeparamref name="TItem"/>.
-        /// </param>
         /// <typeparam name="TItem">
-        /// The type of item being queried.
+        /// The type of entity being queried.
         /// </typeparam>
         /// <returns>
-        /// A new <see cref="QueryContext"/> for the specified <paramref name="selection"/>.
+        /// A new <see cref="StatementContext"/> for the specified <paramref name="selection"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        public static QueryContext AsSelect<TItem>([NotNull] this EntitySelection<TItem> selection, IEntityDefinition entityDefinition)
+        public static StatementContext AsSelect<TItem>([NotNull] this EntitySelection<TItem> selection)
         {
             if (selection == null)
             {
@@ -41,63 +38,57 @@ namespace Startitecture.Orm.Model
             }
 
             var outputType = selection.ParentExpression == null ? StatementOutputType.Select : StatementOutputType.CteSelect;
-            return new QueryContext(selection, entityDefinition, outputType, 0);
+            return new StatementContext(outputType);
         }
 
         /// <summary>
-        /// Gets a <see cref="QueryContext"/> as a CONTAINS statement.
+        /// Gets a <see cref="StatementContext"/> as a CONTAINS statement.
         /// </summary>
         /// <param name="selection">
         /// The selection to use to create the context.
         /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition for the <typeparamref name="TItem"/>.
-        /// </param>
         /// <typeparam name="TItem">
-        /// The type of item being queried.
+        /// The type of entity being queried.
         /// </typeparam>
         /// <returns>
-        /// A new <see cref="QueryContext"/> for the specified <paramref name="selection"/>.
+        /// A new <see cref="StatementContext"/> for the specified <paramref name="selection"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        public static QueryContext AsContains<TItem>([NotNull] this EntitySelection<TItem> selection, IEntityDefinition entityDefinition)
+        public static StatementContext AsContains<TItem>([NotNull] this EntitySelection<TItem> selection)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return new QueryContext(selection, entityDefinition, StatementOutputType.Contains, 0);
+            return new StatementContext(StatementOutputType.Contains);
         }
 
         /// <summary>
-        /// Gets a <see cref="QueryContext"/> as a DELETE statement.
+        /// Gets a <see cref="StatementContext"/> as a DELETE statement.
         /// </summary>
         /// <param name="selection">
         /// The selection to use to create the context.
         /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition for the <typeparamref name="TItem"/>.
-        /// </param>
         /// <typeparam name="TItem">
-        /// The type of item being deleted.
+        /// The type of entity being deleted.
         /// </typeparam>
         /// <returns>
-        /// A new <see cref="QueryContext"/> for the specified <paramref name="selection"/>.
+        /// A new <see cref="StatementContext"/> for the specified <paramref name="selection"/>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        public static QueryContext AsDelete<TItem>([NotNull] this EntitySelection<TItem> selection, IEntityDefinition entityDefinition)
+        public static StatementContext AsDelete<TItem>([NotNull] this EntitySelection<TItem> selection)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return new QueryContext(selection, entityDefinition, StatementOutputType.Delete, 0);
+            return new StatementContext(StatementOutputType.Delete);
         }
     }
 }

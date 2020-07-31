@@ -7,11 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="appsettings.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="9.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="3.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="3.1.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
     <PackageReference Include="Moq" Version="4.14.1" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.1" />
@@ -25,6 +38,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Startitecture.Orm.AutoMapper\Startitecture.Orm.AutoMapper.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
+    <ProjectReference Include="..\Startitecture.Orm.SqlClient\Startitecture.Orm.SqlClient.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj" />
   </ItemGroup>

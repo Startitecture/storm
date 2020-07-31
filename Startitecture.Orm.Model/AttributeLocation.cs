@@ -70,18 +70,8 @@ namespace Startitecture.Orm.Model
         /// </exception>
         public AttributeLocation([NotNull] PropertyInfo propertyInfo, [NotNull] EntityReference entityReference)
         {
-            if (propertyInfo == null)
-            {
-                throw new ArgumentNullException(nameof(propertyInfo));
-            }
-
-            if (entityReference == null)
-            {
-                throw new ArgumentNullException(nameof(entityReference));
-            }
-
-            this.PropertyInfo = propertyInfo;
-            this.EntityReference = entityReference;
+            this.PropertyInfo = propertyInfo ?? throw new ArgumentNullException(nameof(propertyInfo));
+            this.EntityReference = entityReference ?? throw new ArgumentNullException(nameof(entityReference));
         }
 
         /// <summary>

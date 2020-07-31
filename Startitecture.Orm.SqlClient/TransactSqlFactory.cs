@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlQueryFactory.cs" company="Startitecture">
+// <copyright file="TransactSqlFactory.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -17,12 +17,11 @@ namespace Startitecture.Orm.SqlClient
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The Transact-SQL statement factory.
     /// </summary>
-    public class TransactSqlQueryFactory : IQueryFactory
+    public class TransactSqlFactory : IStatementFactory
     {
         /// <summary>
         /// The select statement.
@@ -35,6 +34,33 @@ namespace Startitecture.Orm.SqlClient
         private const string IfExistsClause = @"IF EXISTS (
 {0}
 ) SELECT 1  ELSE SELECT 0";
+
+        /// <summary>
+        /// The SQL UPDATE clause.
+        /// </summary>
+        private const string SqlUpdateClause = @"UPDATE {0}
+SET
+{1}";
+
+        /// <summary>
+        /// The SQL parameter format.
+        /// </summary>
+        private const string SetParameterFormat = "{0} = @{1}";
+
+        /// <summary>
+        /// The null value.
+        /// </summary>
+        private const string SetNullParameterFormat = "{0} = NULL";
+
+        /// <summary>
+        /// The from clause.
+        /// </summary>
+        private const string FromClause = "FROM ";
+
+        /// <summary>
+        /// The where clause.
+        /// </summary>
+        private const string WhereClause = "WHERE";
 
         /// <summary>
         /// The delete statement.
@@ -52,14 +78,9 @@ namespace Startitecture.Orm.SqlClient
         private const string FromStatement = "FROM ";
 
         /// <summary>
-        /// The select column format.
-        /// </summary>
-        private const string SelectColumnFormat = "{0}";
-
-        /// <summary>
         /// The alias column format.
         /// </summary>
-        private const string AliasColumnFormat = "{0} AS [{1}]";
+        private const string AliasColumnFormat = "{0} AS {1}";
 
         /// <summary>
         /// The SQL where clause.
@@ -172,11 +193,6 @@ namespace Startitecture.Orm.SqlClient
         private const int DefaultIndent = 0;
 
         /// <summary>
-        /// The SQL qualifier.
-        /// </summary>
-        private static readonly TransactSqlQualifier SqlQualifier = Singleton<TransactSqlQualifier>.Instance;
-
-        /// <summary>
         /// The definition provider.
         /// </summary>
         [NotNull]
@@ -189,28 +205,151 @@ namespace Startitecture.Orm.SqlClient
         private readonly INameQualifier nameQualifier = new TransactSqlQualifier();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TransactSqlQueryFactory"/> class.
+        /// Initializes a new instance of the <see cref="TransactSqlFactory"/> class.
         /// </summary>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        public TransactSqlQueryFactory([NotNull] IEntityDefinitionProvider definitionProvider)
+        public TransactSqlFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
         }
 
         /// <inheritdoc />
         /// <remarks>
-        /// At this time, creating paging statements that include UNION, INTERSECT and EXCEPT clauses is not supported.
+        /// This implementation will create an IF EXISTS ({statement}) SELECT 1 ELSE SELECT 0 wrapper around the selection. For best performance,
+        /// include only a single, non-nullable column in the selection, ideally a clustered key column.
         /// </remarks>
-        public string Create([NotNull] QueryContext queryContext)
+        public string CreateExistsStatement([NotNull] IEntitySet entitySet)
         {
-            if (queryContext == null)
+            if (entitySet == null)
             {
-                throw new ArgumentNullException(nameof(queryContext));
+                throw new ArgumentNullException(nameof(entitySet));
             }
 
-            return this.CompleteStatement(queryContext, queryContext.OutputType);
+            var entityDefinition = this.definitionProvider.Resolve(entitySet.EntityType);
+            var qualifiedColumns = new List<string>
+                                       {
+                                           '1'.ToString()
+                                       };
+
+            var selectionStatement = this.CreateSelectionStatement(entitySet, entityDefinition, qualifiedColumns, 0, 0);
+            var selectStatement = entitySet.ParentExpression == null
+                                      ? this.CreateCompleteStatement(entitySet, entityDefinition)
+                                      : this.CreateTableExpression(
+                                          entitySet,
+                                          entityDefinition,
+                                          selectionStatement,
+                                          entitySet.ParentExpression != null);
+
+            return string.Format(CultureInfo.InvariantCulture, IfExistsClause, selectStatement);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// At this time, creating paging statements that include UNION, INTERSECT and EXCEPT clauses is not supported.
+        /// </remarks>
+        public string CreateSelectionStatement([NotNull] ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            var entityDefinition = this.definitionProvider.Resolve(selection.EntityType);
+            var qualifiedColumns = this.GetQualifiedColumns(selection, entityDefinition);
+            var selectionStatement = this.CreateSelectionStatement(selection, entityDefinition, qualifiedColumns, 0, 0);
+            return selection.ParentExpression == null
+                       ? this.CreateCompleteStatement(selection, entityDefinition)
+                       : this.CreateTableExpression(selection, entityDefinition, selectionStatement, selection.OrderByExpressions.Any());
+        }
+
+        /// <inheritdoc />
+        public string CreateUpdateStatement([NotNull] IUpdateSet updateSet)
+        {
+            if (updateSet == null)
+            {
+                throw new ArgumentNullException(nameof(updateSet));
+            }
+
+            var setClauses = new List<string>();
+            int index = 0;
+            var entityDefinition = this.definitionProvider.Resolve(updateSet.EntityType);
+
+            foreach (var valueState in updateSet.AttributesToSet)
+            {
+                var attributeDefinition = entityDefinition.Find(valueState.AttributeLocation);
+
+                // Skip attributes that can't be updated, as defined by the entity definition.
+                if (entityDefinition.IsUpdateable(attributeDefinition) == false)
+                {
+                    continue;
+                }
+
+                var qualifiedName = this.nameQualifier.Qualify(attributeDefinition);
+                setClauses.Add(
+                    valueState.Value == null
+                        ? string.Format(CultureInfo.CurrentCulture, SetNullParameterFormat, qualifiedName)
+                        : string.Format(CultureInfo.CurrentCulture, SetParameterFormat, qualifiedName, index));
+
+                if (valueState.Value != null)
+                {
+                    index++;
+                }
+            }
+
+            var entityName = $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
+            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+            string joinClauseText = updateSet.Relations.Any()
+                                        ? string.Concat(
+                                            Environment.NewLine,
+                                            FromClause,
+                                            entityName,
+                                            Environment.NewLine,
+                                            joinClause.Create(updateSet.Relations))
+                                        : string.Empty;
+
+            var setClause = string.Join(string.Concat(',', Environment.NewLine), setClauses);
+            var predicateClause = this.CreateFilter(entityDefinition, updateSet.Filters, index);
+
+            return string.Concat(
+                string.Format(CultureInfo.InvariantCulture, SqlUpdateClause, entityName, setClause),
+                joinClauseText,
+                Environment.NewLine,
+                WhereClause,
+                Environment.NewLine,
+                predicateClause);
+        }
+
+        /// <inheritdoc />
+        public string CreateDeletionStatement([NotNull] IEntitySet entitySet)
+        {
+            if (entitySet == null)
+            {
+                throw new ArgumentNullException(nameof(entitySet));
+            }
+
+            var entityDefinition = this.definitionProvider.Resolve(entitySet.EntityType); //// statementContext.EntityDefinition;
+            var primaryTableName = $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
+            var filterStatement = this.CreateFilter(entityDefinition, entitySet.Filters, 0);
+            var filter = entitySet.Filters.Any() ? string.Concat(Environment.NewLine, SqlWhereClause, filterStatement) : string.Empty;
+
+            if (entitySet.Relations.Any() == false)
+            {
+                return string.Concat(DeleteFromStatement, primaryTableName, filter);
+            }
+
+            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+
+            return string.Concat(
+                DeleteStatement,
+                primaryTableName,
+                Environment.NewLine,
+                FromStatement,
+                primaryTableName,
+                Environment.NewLine,
+                joinClause.Create(entitySet.Relations),
+                filter);
         }
 
         /// <summary>
@@ -388,119 +527,6 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
-        /// Completes the query statement.
-        /// </summary>
-        /// <param name="queryContext">
-        /// The query context.
-        /// </param>
-        /// <param name="queryContextOutputType">
-        /// The query context output type.
-        /// </param>
-        /// <returns>
-        /// The query as a <see cref="string"/>.
-        /// </returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">
-        /// <paramref name="queryContextOutputType"/> is not a value in <see cref="StatementOutputType"/>.
-        /// </exception>
-        private string CompleteStatement(QueryContext queryContext, StatementOutputType queryContextOutputType)
-        {
-            var entityDefinition = queryContext.EntityDefinition;
-            var filterStatement = this.CreateFilter(entityDefinition, queryContext.Selection.Filters, queryContext.ParameterOffset);
-
-            switch (queryContextOutputType)
-            {
-                case StatementOutputType.Select:
-                    return this.CreateCompleteStatement(queryContext);
-                case StatementOutputType.CteSelect:
-                    return this.CreatePageStatement(queryContext);
-                case StatementOutputType.Contains:
-                    return string.Format(CultureInfo.InvariantCulture, IfExistsClause, this.CreateCompleteStatement(queryContext));
-                case StatementOutputType.Update:
-                    return filterStatement;
-                case StatementOutputType.Delete:
-                    // Rely on the underlying entity definition for delimiters.
-                    var primaryTableName =
-                        $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
-
-                    var filter = queryContext.Selection.Filters.Any()
-                                     ? string.Concat(Environment.NewLine, SqlWhereClause, filterStatement)
-                                     : string.Empty;
-
-                    if (queryContext.Selection.Relations.Any() == false)
-                    {
-                        return string.Concat(DeleteFromStatement, primaryTableName, filter);
-                    }
-
-                    var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
-
-                    return string.Concat(
-                        DeleteStatement,
-                        primaryTableName,
-                        Environment.NewLine,
-                        FromStatement,
-                        primaryTableName,
-                        Environment.NewLine,
-                        joinClause.Create(queryContext.Selection),
-                        filter);
-
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(queryContextOutputType));
-            }
-        }
-
-        /// <summary>
-        /// Gets a reference name from an <paramref name="location"/>.
-        /// </summary>
-        /// <param name="location">
-        /// The location to get the reference name from.
-        /// </param>
-        /// <returns>
-        /// The reference name as a <see cref="string"/>.
-        /// </returns>
-        private string GetReferenceName(EntityLocation location)
-        {
-            var isEntityAliased = string.IsNullOrWhiteSpace(location.Alias) == false;
-            return isEntityAliased
-                       ? this.nameQualifier.Escape(location.Alias)
-                       : string.Concat(this.nameQualifier.Escape(location.Container), '.', this.nameQualifier.Escape(location.Name));
-        }
-
-        /// <summary>
-        /// Gets a reference name from an <paramref name="attribute"/>.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to get the reference name from.
-        /// </param>
-        /// <returns>
-        /// The reference name as a <see cref="string"/>.
-        /// </returns>
-        private string GetReferenceName(EntityAttributeDefinition attribute)
-        {
-            return $"{this.GetReferenceName(attribute.Entity)}.[{attribute.PhysicalName}]";
-        }
-
-        /// <summary>
-        /// The get column selection.
-        /// </summary>
-        /// <param name="attribute">
-        /// The attribute to create a column selection for.
-        /// </param>
-        /// <returns>
-        /// The column selection as a <see cref="string"/>.
-        /// </returns>
-        private string GetQualifiedColumnName(EntityAttributeDefinition attribute)
-        {
-            var qualifiedName = SqlQualifier.Qualify(attribute);
-            var referenceName = this.GetReferenceName(attribute);
-
-            var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
-                                          ? string.Format(CultureInfo.InvariantCulture, SelectColumnFormat, qualifiedName)
-                                          : string.Format(CultureInfo.InvariantCulture, AliasColumnFormat, referenceName, attribute.Alias);
-
-            return qualifiedColumnName;
-        }
-
-        /// <summary>
         /// Gets the column selection clause for the specified selection expression.
         /// </summary>
         /// <param name="entityDefinition">
@@ -544,6 +570,27 @@ namespace Startitecture.Orm.SqlClient
                 default:
                     throw new ArgumentOutOfRangeException(nameof(aggregateFunction), aggregateFunction, @"The specified argument was out of range.");
             }
+        }
+
+        /// <summary>
+        /// The get column selection.
+        /// </summary>
+        /// <param name="attribute">
+        /// The attribute to create a column selection for.
+        /// </param>
+        /// <returns>
+        /// The column specification as a <see cref="string"/>.
+        /// </returns>
+        private string GetQualifiedColumnName(EntityAttributeDefinition attribute)
+        {
+            var qualifiedName = this.nameQualifier.Qualify(attribute);
+            var referenceName = this.nameQualifier.GetReferenceName(attribute);
+
+            var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
+                                          ? qualifiedName
+                                          : string.Format(CultureInfo.InvariantCulture, AliasColumnFormat, referenceName, this.nameQualifier.Escape(attribute.Alias));
+
+            return qualifiedColumnName;
         }
 
         /// <summary>
@@ -609,7 +656,7 @@ namespace Startitecture.Orm.SqlClient
                     filter.AttributeLocation.EntityReference.EntityAlias ?? entityLocation.Alias ?? entityLocation.Name,
                     filter.AttributeLocation.PropertyInfo.Name);
 
-                var referenceName = this.GetReferenceName(attribute);
+                var referenceName = this.nameQualifier.GetReferenceName(attribute);
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
                 index = AddTokens(filter.FilterType, filter.FilterValues.First(), filterTokens, referenceName, setValues, index);
@@ -621,32 +668,30 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Creates a complete selection statement.
         /// </summary>
-        /// <param name="queryContext">
-        /// The query context.
+        /// <param name="selection">
+        /// The selection to process.
+        /// </param>
+        /// <param name="definition">
+        /// The entity definition.
         /// </param>
         /// <returns>
         /// The selection statement as a <see cref="string"/>.
         /// </returns>
-        private string CreateCompleteStatement(QueryContext queryContext)
+        private string CreateCompleteStatement(IEntitySet selection, IEntityDefinition definition)
         {
-            int offset = queryContext.ParameterOffset;
-            var statement = this.CreateSelectionStatement(queryContext.Selection, offset, 0, queryContext.OutputType, queryContext.EntityDefinition);
+            int offset = 0;
+            var statement = this.CreateSelectionStatement(selection, definition, this.GetQualifiedColumns(selection, definition), offset, 0);
 
-            offset = queryContext.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
-            var linkedSelection = queryContext.Selection.LinkedSelection;
+            offset = selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
+            var linkedSelection = selection.LinkedSelection;
             var linkSelectionsList = new List<Tuple<string, string>>();
 
             while (linkedSelection != null)
             {
                 var linkType = linkedSelection.LinkType;
                 var linkStatement = CreateLinkStatement(linkType);
-
-                var selectionStatement = this.CreateSelectionStatement(
-                    linkedSelection.Selection,
-                    offset,
-                    0,
-                    queryContext.OutputType,
-                    queryContext.EntityDefinition);
+                var qualifiedColumns = this.GetQualifiedColumns(linkedSelection.Selection, definition);
+                var selectionStatement = this.CreateSelectionStatement(linkedSelection.Selection, definition, qualifiedColumns, offset, 0);
 
                 linkSelectionsList.Add(new Tuple<string, string>(linkStatement, selectionStatement));
                 offset += linkedSelection.Selection.Filters.SelectMany(ValueFilter.SelectNonNullValues).Count();
@@ -664,8 +709,14 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Creates the selection statement for the current selection.
         /// </summary>
-        /// <param name="selection">
+        /// <param name="entitySet">
         /// The selection to create a statement for.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition for the selection statement.
+        /// </param>
+        /// <param name="qualifiedColumns">
+        /// A collection of qualified column names to select.
         /// </param>
         /// <param name="indexOffset">
         /// The index offset.
@@ -673,108 +724,47 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="indent">
         /// The indent in spaces for the statement.
         /// </param>
-        /// <param name="outputType">
-        /// The statement output Type.
-        /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition for the selection statement.
-        /// </param>
         /// <returns>
         /// The T-SQL statement for the current selection as a <see cref="string"/>.
         /// </returns>
-        private string CreateSelectionStatement(ISelection selection, int indexOffset, int indent, StatementOutputType outputType, IEntityDefinition entityDefinition)
+        private string CreateSelectionStatement(
+            IEntitySet entitySet,
+            IEntityDefinition entityDefinition,
+            IEnumerable<string> qualifiedColumns,
+            int indexOffset,
+            int indent)
         {
-            string selectColumns;
+            var separator = string.Concat(",", Environment.NewLine, new string(' ', indent + 4));
+            var selectColumns = string.Join(separator, qualifiedColumns);
+            var entitySetStatement = this.CreateEntitySetStatement(entitySet, entityDefinition, indexOffset, indent);
 
-            switch (outputType)
+            if (entitySet is ISelection selection)
             {
-                case StatementOutputType.Select:
-                case StatementOutputType.CteSelect:
+                var orderByClause = string.Concat(new string(' ', indent), "ORDER BY ", this.CreateOrderByClause(selection.OrderByExpressions));
+                var fetchSelect = new StringBuilder();
 
-                    var separator = string.Concat(",", Environment.NewLine, new string(' ', indent + 4));
-
-                    if (selection.SelectExpressions.Any())
-                    {
-                        selectColumns = string.Join(
-                            separator,
-                            selection.SelectExpressions.Select(
-                                expression => this.GetColumnSelection(
-                                    entityDefinition,
-                                    expression.AttributeExpression,
-                                    expression.AggregateFunction)));
-                    }
-                    else
-                    {
-                        selectColumns = string.Join(separator, entityDefinition.ReturnableAttributes.Select(this.GetQualifiedColumnName));
-                    }
-
-                    break;
-                case StatementOutputType.Contains:
-                    selectColumns = '1'.ToString(CultureInfo.InvariantCulture);
-                    break;
-                case StatementOutputType.Update:
-                case StatementOutputType.Delete:
-                    throw new NotSupportedException($"Parameter '{nameof(outputType)}' value '{outputType}' is not supported for selection statements.");
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(outputType), outputType, null);
-            }
-
-            var fromClause = string.Concat(
-                new string(' ', indent),
-                FromStatement,
-                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
-
-            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier) { Indent = indent };
-            var joinClauseText = joinClause.Create(selection);
-            var filter = new StringBuilder(new string(' ', indent)).Append(SqlWhereClause);
-
-            if (selection.ParentExpression != null)
-            {
-                // TODO: Support LEFT JOIN?
-                // For now, assume INNER JOIN and create an EXISTS clause.
-                var pageTableName = this.nameQualifier.Escape(selection.ParentExpression.TableName);
-                var keyRelations = selection.ParentExpression.TableRelations.ToList();
-
-                var keyPredicate = string.Join(
-                    string.Concat(FilterSeparator, Environment.NewLine),
-                    keyRelations.Select(
-                        relation =>
-                            $"{pageTableName}.{this.nameQualifier.Escape(entityDefinition.Find(relation.SourceExpression).ReferenceName)} = " + 
-                            $"{this.GetQualifiedColumnName(entityDefinition.Find(relation.RelationExpression))}"));
-
-                filter.Append(
-                    $@"EXISTS 
-(SELECT 1 FROM {pageTableName} 
-WHERE {keyPredicate})");
-            }
-
-            if (selection.Filters.Any())
-            {
-                if (selection.ParentExpression != null)
-                {
-                    filter.AppendLine(" AND");
-                }
-
-                filter.Append(this.CreateFilter(entityDefinition, selection.Filters, indexOffset, indent));
-            }
-
-            var orderByClause = string.Concat(new string(' ', indent), "ORDER BY ", this.CreateOrderByClause(selection.OrderByExpressions));
-            
-            var fetchSelect = new StringBuilder();
-
-            if (selection.Page.RowOffset + selection.Page.Size > 0)
-            {
-                fetchSelect.AppendLine().Append(new string(' ', indent));
-                fetchSelect.Append($"OFFSET @{indexOffset + selection.PropertyValues.Count() - 2} ROWS");
-
-                if (selection.Page.Size > 0)
+                if (selection.Page.RowOffset + selection.Page.Size > 0)
                 {
                     fetchSelect.AppendLine().Append(new string(' ', indent));
-                    fetchSelect.Append($"FETCH NEXT @{indexOffset + selection.PropertyValues.Count() - 1} ROWS ONLY");
-                }
-            }
+                    fetchSelect.Append($"OFFSET @{indexOffset + selection.PropertyValues.Count() - 2} ROWS");
 
-            var hasFilters = selection.ParentExpression != null || selection.Filters.Any();
+                    if (selection.Page.Size > 0)
+                    {
+                        fetchSelect.AppendLine().Append(new string(' ', indent));
+                        fetchSelect.Append($"FETCH NEXT @{indexOffset + selection.PropertyValues.Count() - 1} ROWS ONLY");
+                    }
+                }
+
+                return string.Concat(
+                    SelectStatement,
+                    Environment.NewLine,
+                    new string(' ', indent + 4),
+                    selectColumns,
+                    Environment.NewLine,
+                    entitySetStatement,
+                    selection.OrderByExpressions.Any() ? string.Concat(Environment.NewLine, orderByClause) : string.Empty,
+                    fetchSelect.ToString());
+            }
 
             return string.Concat(
                 SelectStatement,
@@ -782,11 +772,77 @@ WHERE {keyPredicate})");
                 new string(' ', indent + 4),
                 selectColumns,
                 Environment.NewLine,
+                entitySetStatement);
+        }
+
+        /// <summary>
+        /// Creates an entity set statement.
+        /// </summary>
+        /// <param name="set">
+        /// The entity set.
+        /// </param>
+        /// <param name="entityDefinition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="indexOffset">
+        /// The index offset.
+        /// </param>
+        /// <param name="indent">
+        /// The indent for the statement.
+        /// </param>
+        /// <returns>
+        /// The entity set statement as a <see cref="string"/>.
+        /// </returns>
+        private string CreateEntitySetStatement(IEntitySet set, IEntityDefinition entityDefinition, int indexOffset, int indent)
+        {
+            var hasFilters = set.ParentExpression != null || set.Filters.Any();
+
+            var fromClause = string.Concat(
+                new string(' ', indent),
+                FromStatement,
+                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
+
+            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier)
+                                 {
+                                     Indent = indent
+                                 };
+            var joinClauseText = joinClause.Create(set.Relations);
+            var filter = new StringBuilder(new string(' ', indent)).Append(SqlWhereClause);
+
+            if (set.ParentExpression != null)
+            {
+                // TODO: Support LEFT JOIN? This will have to be done in the JOIN clause.
+                // For now, assume INNER JOIN and create an EXISTS clause.
+                var pageTableName = this.nameQualifier.Escape(set.ParentExpression.TableName);
+                var keyRelations = set.ParentExpression.TableRelations.ToList();
+
+                var keyPredicate = string.Join(
+                    string.Concat(FilterSeparator, Environment.NewLine),
+                    keyRelations.Select(
+                        relation => $"{pageTableName}.{this.nameQualifier.Escape(entityDefinition.Find(relation.SourceExpression).ReferenceName)} = "
+                                    + $"{this.GetQualifiedColumnName(entityDefinition.Find(relation.RelationExpression))}"));
+
+                filter.Append(
+                    $@"EXISTS 
+(SELECT 1 FROM {pageTableName} 
+WHERE {keyPredicate})");
+            }
+
+            if (set.Filters.Any())
+            {
+                if (set.ParentExpression != null)
+                {
+                    filter.AppendLine(" AND");
+                }
+
+                filter.Append(this.CreateFilter(entityDefinition, set.Filters, indexOffset, indent));
+            }
+
+            var entitySet = string.Concat(
                 fromClause,
-                selection.Relations.Any() ? string.Concat(Environment.NewLine, joinClauseText) : string.Empty,
-                hasFilters ? string.Concat(Environment.NewLine, filter.ToString()) : string.Empty,
-                selection.OrderByExpressions.Any() ? string.Concat(Environment.NewLine, orderByClause) : string.Empty,
-                fetchSelect.ToString());
+                set.Relations.Any() ? string.Concat(Environment.NewLine, joinClauseText) : string.Empty,
+                hasFilters ? string.Concat(Environment.NewLine, filter.ToString()) : string.Empty);
+            return entitySet;
         }
 
         /// <summary>
@@ -815,34 +871,30 @@ WHERE {keyPredicate})");
         /// <summary>
         /// Creates a page selection statement.
         /// </summary>
-        /// <param name="queryContext">
-        /// The query context.
+        /// <param name="set">
+        /// The selection to process.
+        /// </param>
+        /// <param name="definition">
+        /// The entity definition.
+        /// </param>
+        /// <param name="selectionStatement">
+        /// The selection statement to encapsulate with the parent expression.
+        /// </param>
+        /// <param name="orderByRecompile">
+        /// A value indicating whether to have the statement use the RECOMPILE option.
         /// </param>
         /// <returns>
         /// The selection statement as a <see cref="string"/>.
         /// </returns>
-        private string CreatePageStatement(QueryContext queryContext)
+        private string CreateTableExpression(IEntitySet set, IEntityDefinition definition, string selectionStatement, bool orderByRecompile)
         {
-            var selection = queryContext.Selection;
-            var entityDefinition = queryContext.EntityDefinition;
+            var pageTableName = this.nameQualifier.Escape(set.ParentExpression.TableName);
 
-            if (selection.ParentExpression == null)
-            {
-                throw new OperationException(queryContext, "A CTE query requires a parent expression in the selection.");
-            }
+            var tableSelection = set.ParentExpression.TableSelection;
+            var qualifiedColumns = this.GetQualifiedColumns(tableSelection, definition);
 
-            var pageTableName = this.nameQualifier.Escape(selection.ParentExpression.TableName);
-
-            // TODO: Generate CTE and offset/fetch organically.
-            // TODO: This does not work with linked queries. Workaround is to create a view. Long-term is to further encapsulate query components.
-            var tableExpressionStatement = this.CreateSelectionStatement(
-                selection.ParentExpression.TableSelection,
-                selection.PropertyValues.Count() - selection.ParentExpression.TableSelection.PropertyValues.Count(),
-                8,
-                StatementOutputType.Select,
-                entityDefinition);
-
-            var selectionStatement = this.CreateSelectionStatement(selection, 0, 0, StatementOutputType.Select, entityDefinition);
+            var indexOffset = set.PropertyValues.Count() - set.ParentExpression.TableSelection.PropertyValues.Count();
+            var tableExpressionStatement = this.CreateSelectionStatement(tableSelection, definition, qualifiedColumns, indexOffset, 8);
 
             var fullStatement = $@";WITH {pageTableName} AS
     (
@@ -850,12 +902,40 @@ WHERE {keyPredicate})");
     )
 {selectionStatement}";
 
-            if (selection.OrderByExpressions.Any())
+            if (orderByRecompile)
             {
                 return fullStatement + " OPTION (RECOMPILE)";
             }
 
             return fullStatement;
+        }
+
+        /// <summary>
+        /// Gets qualified columns for an entity <paramref name="set"/>.
+        /// </summary>
+        /// <param name="set">
+        /// The entity set.
+        /// </param>
+        /// <param name="definition">
+        /// The entity definition.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of qualified columns for the selection.
+        /// </returns>
+        /// <remarks>
+        /// If the <paramref name="set"/> is not an <see cref="ISelection"/>, then a column ordinal of '1' will be returned.
+        /// </remarks>
+        private IEnumerable<string> GetQualifiedColumns(IEntitySet set, IEntityDefinition definition)
+        {
+            if (set is ISelection selection)
+            {
+                return selection.SelectExpressions.Any()
+                           ? selection.SelectExpressions.Select(
+                               expression => this.GetColumnSelection(definition, expression.AttributeExpression, expression.AggregateFunction))
+                           : definition.ReturnableAttributes.Select(this.GetQualifiedColumnName);
+            }
+
+            return new List<string> { '1'.ToString() };
         }
     }
 }

@@ -52,7 +52,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        bool Contains<TItem>(EntitySelection<TItem> selection);
+        bool Contains<TItem>(EntitySet<TItem> selection);
 
         /// <summary>
         /// Gets an item by its identifier or unique key.
@@ -113,8 +113,6 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-#pragma warning disable CA1716 // Identifiers should not match keywords
-        IEnumerable<TModel> Select<TItem>(EntitySelection<TItem> selection);
-#pragma warning restore CA1716 // Identifiers should not match keywords
+        IEnumerable<TModel> SelectEntities<TItem>(EntitySelection<TItem> selection);
     }
 }

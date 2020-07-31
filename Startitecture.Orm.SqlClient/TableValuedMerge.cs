@@ -15,8 +15,9 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
+    using Startitecture.Orm.Common;
+    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The structured merge command.
@@ -67,7 +68,7 @@ namespace Startitecture.Orm.SqlClient
         private bool deleteUnmatchedInSource;
 
         /// <summary>
-        /// The item definition.
+        /// The entity definition.
         /// </summary>
         private IEntityDefinition itemDefinition;
 
@@ -103,20 +104,20 @@ namespace Startitecture.Orm.SqlClient
         /// Merges a structured table value into the specified data item.
         /// </summary>
         /// <param name="mergeItems">
-        /// The items to merge.
+        /// The entities to merge.
         /// </param>
         /// <param name="mergeMatchExpressions">
         /// The merge match expressions to match columns on.
         /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of the data item to merge into.
+        /// <typeparam name="TEntity">
+        /// The type of the entity to merge into.
         /// </typeparam>
         /// <returns>
         /// The current <see cref="TableValuedMerge{TStructure}"/>.
         /// </returns>
-        public TableValuedMerge<TStructure> MergeInto<TDataItem>(
+        public TableValuedMerge<TStructure> MergeInto<TEntity>(
             [NotNull] IEnumerable<TStructure> mergeItems,
-            [NotNull] params Expression<Func<TDataItem, object>>[] mergeMatchExpressions)
+            [NotNull] params Expression<Func<TEntity, object>>[] mergeMatchExpressions)
         {
             if (mergeItems == null)
             {
@@ -130,7 +131,7 @@ namespace Startitecture.Orm.SqlClient
 
             this.Items.Clear();
             this.Items.AddRange(mergeItems);
-            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TDataItem>();
+            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TEntity>();
             this.directAttributes.AddRange(this.itemDefinition.DirectAttributes);
             this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
 
@@ -177,7 +178,7 @@ namespace Startitecture.Orm.SqlClient
         /// An expression that selects the matching key on the target table.
         /// </param>
         /// <typeparam name="TDataItem">
-        /// The type of item representing the target table of the merge.
+        /// The type of entity representing the target table of the merge.
         /// </typeparam>
         /// <returns>
         /// The current <see cref="TableValuedMerge{TStructure}"/>.
@@ -204,7 +205,7 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
-        /// Deletes items that are unmatched in the source. Use with caution.
+        /// Deletes entities that are unmatched in the source. Use with caution.
         /// </summary>
         /// <param name="constraints">
         /// The delete constraints to filter which rows to delete.
@@ -346,7 +347,7 @@ namespace Startitecture.Orm.SqlClient
                     allAttributes.Join(
                         this.directAttributes,
                         tvp => qualifier.Qualify(tvp),
-                        i => qualifier.GetCanonicalName(i), //// i.GetCanonicalName(),
+                        i => qualifier.GetCanonicalName(i), //// i.GetPhysicalName(),
                         (structure, entity) => structure).OrderBy(x => x.Ordinal).Select(x => $"{qualifier.Escape(x.PropertyName)}").ToList();
 
                 // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original

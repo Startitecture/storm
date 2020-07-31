@@ -37,6 +37,11 @@ namespace Startitecture.Orm.Mapper
         private readonly string toStringText;
 
         /// <summary>
+        /// The attribute definitions.
+        /// </summary>
+        private readonly List<EntityAttributeDefinition> attributeDefinitions = new List<EntityAttributeDefinition>();
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="PocoDataRequest"/> class.
         /// </summary>
         /// <param name="dataReader">
@@ -54,13 +59,48 @@ namespace Startitecture.Orm.Mapper
 
             this.DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
             this.FieldCount = dataReader.FieldCount;
-            this.EntityDefinition = entityDefinition ?? throw new ArgumentNullException(nameof(entityDefinition));
+            this.attributeDefinitions.AddRange(entityDefinition.ReturnableAttributes);
 
             // We need a unique hash for each query formation.
-            this.hashObjects = this.GetHashObjects();
+            this.hashObjects = this.GetHashObjects(entityDefinition.QualifiedName);
 
             this.hashCode = Evaluate.GenerateHashCode(this.hashObjects);
-            this.toStringText = $"{this.EntityDefinition.QualifiedName}:{string.Join(",", this.hashObjects.Skip(1))}";
+            this.toStringText = $"{entityDefinition.QualifiedName}:{string.Join(",", this.hashObjects.Skip(1))}";
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PocoDataRequest"/> class.
+        /// </summary>
+        /// <param name="dataReader">
+        /// The data reader.
+        /// </param>
+        /// <param name="attributeDefinitions">
+        /// The attribute definitions.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="dataReader"/> or <paramref name="attributeDefinitions"/> is null.
+        /// </exception>
+        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] IEnumerable<EntityAttributeDefinition> attributeDefinitions)
+        {
+            if (dataReader == null)
+            {
+                throw new ArgumentNullException(nameof(dataReader));
+            }
+
+            if (attributeDefinitions == null)
+            {
+                throw new ArgumentNullException(nameof(attributeDefinitions));
+            }
+
+            this.DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
+            this.FieldCount = dataReader.FieldCount;
+            this.attributeDefinitions.AddRange(attributeDefinitions);
+
+            // We need a unique hash for each query formation.
+            this.hashObjects = this.GetHashObjects(typeof(object).FullName);
+
+            this.hashCode = Evaluate.GenerateHashCode(this.hashObjects);
+            this.toStringText = $"{typeof(object).FullName}:{string.Join(",", this.hashObjects.Skip(1))}";
         }
 
         /// <summary>
@@ -71,7 +111,7 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Gets the entity definition.
         /// </summary>
-        public IEntityDefinition EntityDefinition { get; }
+        public IEnumerable<EntityAttributeDefinition> AttributeDefinitions => this.attributeDefinitions;
 
         /// <summary>
         /// Gets the field count.
@@ -177,14 +217,17 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Gets hash objects for comparison for this instance.
         /// </summary>
+        /// <param name="entityQualifiedName">
+        /// The qualified name of the entity to hydrate.
+        /// </param>
         /// <returns>
-        /// A <see cref="List{T}"/> of <see cref="object"/> items to use for generating a hash.
+        /// A <see cref="List{T}"/> of <see cref="object"/> entities to use for generating a hash.
         /// </returns>
-        private List<object> GetHashObjects()
+        private List<object> GetHashObjects(string entityQualifiedName)
         {
             var objects = new List<object>
                               {
-                                  this.EntityDefinition.QualifiedName
+                                  entityQualifiedName
                               };
 
             for (int i = 0; i < this.DataReader.FieldCount; i++)

@@ -14,6 +14,20 @@ namespace Startitecture.Orm.Model
     public interface INameQualifier
     {
         /// <summary>
+        /// Escapes an identifier.
+        /// </summary>
+        /// <param name="identifier">
+        /// The identifier to escape.
+        /// </param>
+        /// <returns>
+        /// The escaped identifier as a <see cref="string"/>.
+        /// </returns>
+        /// <exception cref="System.ArgumentException">
+        /// <paramref name="identifier"/> is null or whitespace.
+        /// </exception>
+        string Escape([NotNull] string identifier);
+
+        /// <summary>
         /// Qualifies the name of an attribute.
         /// </summary>
         /// <param name="attribute">
@@ -50,28 +64,28 @@ namespace Startitecture.Orm.Model
         string GetCanonicalName(EntityAttributeDefinition attribute);
 
         /// <summary>
-        /// Gets the canonical name for the <paramref name="location"/>.
+        /// Gets the physical name of the <paramref name="location"/>.
         /// </summary>
         /// <param name="location">
-        /// The location.
+        /// The location to get the physical reference for.
         /// </param>
         /// <returns>
-        /// The <see cref="string"/> representation for the <paramref name="location"/>.
+        /// The <see cref="string"/> representation for the entity's physical <paramref name="location"/>.
         /// </returns>
-        string GetCanonicalName(EntityLocation location);
+        string GetPhysicalName(EntityLocation location);
 
         /// <summary>
-        /// Escapes an identifier.
+        /// Gets the reference name for the <paramref name="attribute"/>. 
         /// </summary>
-        /// <param name="identifier">
-        /// The identifier to escape.
+        /// <param name="attribute">
+        /// The attribute to get the reference for.
         /// </param>
         /// <returns>
-        /// The escaped identifier as a <see cref="string"/>.
+        /// The full reference path to the attribute as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentException">
-        /// <paramref name="identifier"/> is null or whitespace.
-        /// </exception>
-        string Escape([NotNull] string identifier);
+        /// <remarks>
+        /// The reference name includes the alias of the entity but not the alias of the attribute.
+        /// </remarks>
+        string GetReferenceName(EntityAttributeDefinition attribute);
     }
 }

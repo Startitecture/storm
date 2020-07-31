@@ -4,22 +4,19 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.Mapper
 {
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Data.SqlClient;
     using System.Globalization;
     using System.Linq;
     using System.Reflection;
 
-    using Core;
-
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Schema;
     using Startitecture.Resources;
 
@@ -165,10 +162,6 @@ namespace Startitecture.Orm.Sql
         /// <param name="dataTable">
         /// The data table containing the data to send to the operation.
         /// </param>
-        /// <exception cref="Startitecture.Core.OperationException">
-        /// The underlying <see cref="IDatabaseContextProvider"/> does not have a connection of the type
-        /// <see cref="SqlConnection"/>.
-        /// </exception>
         private void Execute([NotNull] DataTable dataTable)
         {
             if (dataTable == null)

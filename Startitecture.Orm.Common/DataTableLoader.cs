@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
@@ -35,7 +35,7 @@ namespace Startitecture.Orm.Sql
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null.
         /// </exception>
         public DataTableLoader([NotNull] IEntityDefinitionProvider definitionProvider)
@@ -58,7 +58,7 @@ namespace Startitecture.Orm.Sql
         /// The values to load.
         /// </param>
         /// <returns>
-        /// A <see cref="DataTable"/> with the loaded values.
+        /// A <see cref="System.Data.DataTable"/> with the loaded values.
         /// </returns>
         public DataTable Load([NotNull] IEnumerable<T> values)
         {
@@ -93,7 +93,7 @@ namespace Startitecture.Orm.Sql
         /// The property info to base the column on.
         /// </param>
         /// <returns>
-        /// A <see cref="DataColumn"/> based on the property info.
+        /// A <see cref="System.Data.DataColumn"/> based on the property info.
         /// </returns>
         private static DataColumn CreateDataColumn(PropertyInfo propertyInfo)
         {

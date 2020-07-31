@@ -13,7 +13,7 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Resources;
 
     /// <summary>
-    /// Qualifies an <see cref="Startitecture.Orm.Model.EntityAttributeDefinition"/> for Transact-SQL.
+    /// Qualifies an <see cref="EntityAttributeDefinition"/> for Transact-SQL.
     /// </summary>
     public class TransactSqlQualifier : INameQualifier
     {
@@ -37,23 +37,55 @@ namespace Startitecture.Orm.SqlClient
         /// <inheritdoc />
         public string Qualify(EntityAttributeDefinition attribute, EntityLocation entityLocation)
         {
-            var entityQualifiedName = string.IsNullOrWhiteSpace(entityLocation.Alias)
-                                          ? $"[{entityLocation.Container}].[{entityLocation.Name}]"
-                                          : string.Concat('[', entityLocation.Alias, ']');
+            return $"{this.GetEntityCanonicalName(entityLocation)}.{this.GetAttributeCanonicalName(attribute)}";
+        }
 
-            return string.Concat(entityQualifiedName, '.', '[', attribute.Alias ?? attribute.PhysicalName, ']');
+        /// <inheritdoc />
+        public string GetReferenceName(EntityAttributeDefinition attribute)
+        {
+            return $"{this.GetEntityCanonicalName(attribute.Entity)}.{this.Escape(attribute.PhysicalName)}";
         }
 
         /// <inheritdoc />
         public string GetCanonicalName(EntityAttributeDefinition attribute)
         {
-            return string.Concat(this.GetCanonicalName(attribute.Entity), '.', '[', attribute.Alias ?? attribute.PhysicalName, ']');
+            return $"{this.GetPhysicalName(attribute.Entity)}.{this.GetAttributeCanonicalName(attribute)}";
         }
 
         /// <inheritdoc />
-        public string GetCanonicalName(EntityLocation location)
+        public string GetPhysicalName(EntityLocation location)
         {
-            return string.Concat('[', location.Container, ']', '.', '[', location.Name, ']');
+            return $"{this.Escape(location.Container)}.{this.Escape(location.Name)}";
+        }
+
+        /// <summary>
+        /// Gets the entity qualified name.
+        /// </summary>
+        /// <param name="entityLocation">
+        /// The entity location.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        private string GetEntityCanonicalName(EntityLocation entityLocation)
+        {
+            return string.IsNullOrWhiteSpace(entityLocation.Alias)
+                       ? $"{this.Escape(entityLocation.Container)}.{this.Escape(entityLocation.Name)}"
+                       : this.Escape(entityLocation.Alias);
+        }
+
+        /// <summary>
+        /// Gets the canonical attribute name.
+        /// </summary>
+        /// <param name="attribute">
+        /// The attribute to get the name for.
+        /// </param>
+        /// <returns>
+        /// The physical name of the attribute, or the alias, if the attribute is aliased. <see cref="string"/>.
+        /// </returns>
+        private string GetAttributeCanonicalName(EntityAttributeDefinition attribute)
+        {
+            return this.Escape(attribute.Alias ?? attribute.PhysicalName);
         }
     }
 }

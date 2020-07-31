@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.Common
 {
     using System.Data;
 
@@ -29,7 +29,7 @@ namespace Startitecture.Orm.Sql
         INameQualifier NameQualifier { get; }
 
         /// <summary>
-        /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
+        /// Creates an <see cref="System.Data.IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>
         /// <param name="structuredCommand">
         /// The structured command.
@@ -41,7 +41,7 @@ namespace Startitecture.Orm.Sql
         /// The transaction to use with the command.
         /// </param>
         /// <returns>
-        /// An <see cref="IDbCommand"/> that will execute the structured command.
+        /// An <see cref="System.Data.IDbCommand"/> that will execute the structured command.
         /// </returns>
         IDbCommand CreateCommand(IStructuredCommand structuredCommand, DataTable dataTable, IDbTransaction transaction);
     }

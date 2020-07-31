@@ -7,9 +7,10 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.SqlClient
 {
     using System;
+    using System.Collections.Generic;
     using System.Globalization;
     using System.Linq;
 
@@ -77,23 +78,23 @@ namespace Startitecture.Orm.Sql
         public int Indent { get; set; }
 
         /// <summary>
-        /// Creates a JOIN clause for the specified <paramref name="selection"/>.
+        /// Creates a JOIN clause for the specified <paramref name="relations"/>.
         /// </summary>
-        /// <param name="selection">
-        /// The selection to evaluate.
+        /// <param name="relations">
+        /// The relations to create the JOIN clause for.
         /// </param>
         /// <returns>
         /// The JOIN clause as a <see cref="string"/>.
         /// </returns>
-        public string Create([NotNull] ISelection selection)
+        public string Create([NotNull] IEnumerable<IEntityRelation> relations)
         {
-            if (selection == null)
+            if (relations == null)
             {
-                throw new ArgumentNullException(nameof(selection));
+                throw new ArgumentNullException(nameof(relations));
             }
 
             var indent = this.Indent > 0 ? new string(' ', this.Indent) : string.Empty;
-            return string.Join(Environment.NewLine, selection.Relations.Select(relation => $"{indent}{this.GenerateRelationStatement(relation)}"));
+            return string.Join(Environment.NewLine, relations.Select(relation => $"{indent}{this.GenerateRelationStatement(relation)}"));
         }
 
         /// <summary>
@@ -159,7 +160,7 @@ namespace Startitecture.Orm.Sql
                 this.definitionProvider.Resolve(relationLocation.EntityType)
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == entityRelation.RelationExpression.GetPropertyName());
 
-            var relationEntity = this.nameQualifier.GetCanonicalName(relationAttribute.Entity); 
+            var relationEntity = this.nameQualifier.GetPhysicalName(relationAttribute.Entity); 
             var relationName = this.nameQualifier.Qualify(relationAttribute, relationLocation); 
 
             if (string.IsNullOrWhiteSpace(relationLocation.Alias))

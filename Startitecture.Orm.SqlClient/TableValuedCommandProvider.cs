@@ -8,7 +8,6 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Data;
-    using System.Data.SqlClient;
 
     using Common;
 
@@ -16,8 +15,9 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
+    using Microsoft.Data.SqlClient;
+
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Sql;
     using Startitecture.Resources;
 
     /// <summary>
@@ -65,7 +65,7 @@ namespace Startitecture.Orm.SqlClient
         /// An <see cref="System.Data.IDbCommand"/> that will execute the structured command.
         /// </returns>
         /// <exception cref="Startitecture.Core.OperationException">
-        /// The underlying <see cref="Startitecture.Orm.Common.IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="System.Data.SqlClient.SqlConnection"/>.
+        /// The underlying <see cref="Startitecture.Orm.Common.IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",

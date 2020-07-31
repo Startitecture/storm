@@ -10,7 +10,10 @@ namespace Startitecture.Orm.Mapper.Tests
     using System.Collections.Generic;
     using System.Data;
     using System.Diagnostics;
+    using System.Linq;
+    using System.Linq.Expressions;
 
+    using Microsoft.CSharp.RuntimeBinder;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Core;
@@ -110,6 +113,49 @@ namespace Startitecture.Orm.Mapper.Tests
 
             Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #3");
             stopwatch.Reset();
+        }
+
+        /// <summary>
+        /// The create delegate test.
+        /// </summary>
+        [TestMethod]
+        public void CreateDelegate_FlatPocoFactoryForDynamic_DelegateSetsPocoAsExpected()
+        {
+            var target = new FlatPocoFactory();
+            var expected = Generate.CreateFakeComplexRow();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var entityDefinition = definitionProvider.Resolve<ComplexFlatRow>();
+
+            Expression<Func<ComplexFlatRow, object>> expression1 = row => row.FakeComplexEntityId;
+            Expression<Func<ComplexFlatRow, object>> expression2 = row => row.FakeDependentEntityDependentIntegerValue;
+            Expression<Func<ComplexFlatRow, object>> expression3 = row => row.FakeSubSubEntityUniqueName;
+
+            var attributes = new[]
+                                 {
+                                     expression1,
+                                     expression2,
+                                     expression3
+                                 }.Select(entityDefinition.Find)
+                .ToList();
+
+            dynamic actual;
+
+            // Set up the data reader with all attributes to ensure that the process is only getting the ones we want.
+            using (var reader = expected.MockDataReader(attributes).Object)
+            {
+                reader.Read();
+                var pocoDataRequest = new PocoDataRequest(reader, attributes);
+
+                var pocoDelegate = target.CreateDelegate<dynamic>(pocoDataRequest).MappingDelegate as Func<IDataReader, dynamic>;
+                Assert.IsNotNull(pocoDelegate);
+                actual = pocoDelegate.Invoke(reader);
+            }
+
+            Assert.IsNotNull(actual);
+            Assert.AreEqual(expected.FakeComplexEntityId, actual.FakeComplexEntityId);
+            Assert.AreEqual(expected.FakeDependentEntityDependentIntegerValue, actual.FakeDependentEntityDependentIntegerValue);
+            Assert.AreEqual(expected.FakeSubSubEntityUniqueName, actual.FakeSubSubEntityUniqueName);
+            Assert.ThrowsException<RuntimeBinderException>(() => Assert.IsNull(actual.Description));
         }
 
         /// <summary>

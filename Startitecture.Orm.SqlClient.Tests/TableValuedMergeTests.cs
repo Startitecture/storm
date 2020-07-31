@@ -21,7 +21,6 @@ namespace Startitecture.Orm.SqlClient.Tests
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.Sql;
     using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
@@ -403,7 +402,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                 actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
                 var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
-                var values = fieldValueRepository.Select(
+                var values = fieldValueRepository.SelectEntities(
                         Select.From<GenericSubmissionValueRow>()
                             .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
                             .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
@@ -413,7 +412,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
 
                 actual.Load(values.Values);
 
-                var valueElementRows = provider.GetSelection(
+                var valueElementRows = provider.SelectEntities(
                         Select.From<FieldValueElementTableTypeRow>()
                             .LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
                             .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)

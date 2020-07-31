@@ -8,8 +8,11 @@ namespace Startitecture.Orm.Mapper.Tests
 {
     using System;
     using System.Data;
-    using System.Data.SqlClient;
+    using System.Data.Common;
+    using System.Diagnostics;
+    using System.Linq;
 
+    using Microsoft.Data.SqlClient;
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -37,11 +40,19 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public void BeginTransaction_SqlCommand_ExecutesNonQuery()
         {
-            using (var target = new Database(
-                ConfigurationRoot.GetConnectionString("MasterDatabase"),
-                "System.Data.SqlClient",
-                new DataAnnotationsDefinitionProvider(),
-                new TransactSqlQualifier()))
+            var providerName = "System.Data.SqlClient";
+#if !NET472
+            if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, providerName, StringComparison.Ordinal)) == false)
+            {
+                Trace.WriteLine($"Registering {providerName} factory");
+                DbProviderFactories.RegisterFactory(providerName, SqlClientFactory.Instance);
+            }
+#endif
+            var connectionString = ConfigurationRoot.GetConnectionString("MasterDatabase");
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var nameQualifier = new TransactSqlQualifier();
+
+            using (var target = new Database(connectionString, providerName, definitionProvider, nameQualifier))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;
                 Assert.IsNotNull(transaction);

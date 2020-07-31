@@ -7,17 +7,16 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Mapper
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
+    using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.Caching;
-
-    using Common;
 
     using JetBrains.Annotations;
 
@@ -40,27 +39,20 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private const string CacheKeyFormat = "{0}=[{1}]";
 
-/*
-        /// <summary>
-        /// The cache time.
-        /// </summary>
-        private readonly TimeSpan cacheTime = TimeSpan.FromMinutes(2);
-*/
-
         /// <summary>
         /// The repository adapter.
         /// </summary>
-        private readonly IRepositoryAdapter repositoryAdapter;
+        private readonly IStatementFactory statementFactory;
 
         /// <summary>
-        /// The item cache.
+        /// The entity cache.
         /// </summary>
-        private readonly ObjectCache itemCache;
+        private readonly ObjectCache entityCache;
 
         /// <summary>
-        /// The item lock.
+        /// The entity lock.
         /// </summary>
-        private readonly object itemLock = new object();
+        private readonly object cacheLock = new object();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
@@ -68,13 +60,13 @@ namespace Startitecture.Orm.Mapper
         /// <param name="databaseFactory">
         /// The database factory.
         /// </param>
-        /// <param name="adapterFactory">
+        /// <param name="statementFactory">
         /// The repository adapter.
         /// </param>
         public DatabaseRepositoryProvider(
             [NotNull] IDatabaseFactory databaseFactory,
-            [NotNull] IRepositoryAdapterFactory adapterFactory)
-            : this(databaseFactory, adapterFactory, MemoryCache.Default)
+            [NotNull] IStatementFactory statementFactory)
+            : this(databaseFactory, statementFactory, MemoryCache.Default)
         {
         }
 
@@ -84,20 +76,20 @@ namespace Startitecture.Orm.Mapper
         /// <param name="databaseFactory">
         /// The database factory.
         /// </param>
-        /// <param name="adapterFactory">
+        /// <param name="statementFactory">
         /// The repository adapter.
         /// </param>
-        /// <param name="itemCache">
-        /// The item cache.
+        /// <param name="entityCache">
+        /// The entity cache.
         /// </param>
         public DatabaseRepositoryProvider(
             [NotNull] IDatabaseFactory databaseFactory,
-            [NotNull] IRepositoryAdapterFactory adapterFactory,
-            [NotNull] ObjectCache itemCache)
+            [NotNull] IStatementFactory statementFactory,
+            [NotNull] ObjectCache entityCache)
         {
-            if (adapterFactory == null)
+            if (statementFactory == null)
             {
-                throw new ArgumentNullException(nameof(adapterFactory));
+                throw new ArgumentNullException(nameof(statementFactory));
             }
 
             if (databaseFactory == null)
@@ -105,13 +97,13 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(databaseFactory));
             }
 
-            this.itemCache = itemCache ?? throw new ArgumentNullException(nameof(itemCache));
+            this.entityCache = entityCache ?? throw new ArgumentNullException(nameof(entityCache));
 
             try
             {
                 this.DatabaseContext = databaseFactory.Create();
                 this.EntityDefinitionProvider = this.DatabaseContext.DefinitionProvider;
-                this.repositoryAdapter = adapterFactory.Create(this.DatabaseContext);
+                this.statementFactory = statementFactory;
             }
             catch (InvalidOperationException ex)
             {
@@ -198,9 +190,10 @@ namespace Startitecture.Orm.Mapper
         /// <inheritdoc />
         public IDbTransaction StartTransaction(IsolationLevel isolationLevel)
         {
+            this.CheckDisposed();
+
             try
             {
-                this.CheckDisposed();
                 return this.DatabaseContext.Connection.BeginTransaction(isolationLevel);
             }
             catch (InvalidOperationException ex)
@@ -217,65 +210,23 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-/*
         /// <inheritdoc />
-        public void CompleteTransaction()
+        public bool Contains<T>(EntitySet<T> selection)
+            where T : ITransactionContext
         {
-            try
-            {
-                this.DatabaseContext.CompleteTransaction();
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-            catch (DataException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-            catch (DbException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-        }
-*/
-
-/*
-        /// <inheritdoc />
-        public void AbortTransaction()
-        {
-            try
-            {
-                this.DatabaseContext.AbortTransaction();
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-            catch (DataException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-            catch (DbException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-        }
-*/
-
-        /// <inheritdoc />
-        public bool Contains<TDataItem>(EntitySelection<TDataItem> selection)
-            where TDataItem : ITransactionContext
-        {
-            if (Evaluate.IsNull(selection))
+            if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
+            this.CheckDisposed();
+
+            var sql = this.statementFactory.CreateExistsStatement(selection);
+
             try
             {
-                this.CheckDisposed();
-                return this.repositoryAdapter.Contains(selection);
+                // Always remember to supply this method with an array of values!
+                return this.DatabaseContext.ExecuteScalar<int>(sql, selection.PropertyValues.ToArray()) > 0;
             }
             catch (InvalidOperationException ex)
             {
@@ -299,24 +250,68 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.repositoryAdapter.ExecuteScalar<T>(selection);
+            this.CheckDisposed();
+            var statement = this.statementFactory.CreateSelectionStatement(selection);
+
+            try
+            {
+                return this.DatabaseContext.ExecuteScalar<T>(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
         }
 
         /// <inheritdoc />
-        public TDataItem GetFirstOrDefault<TDataItem>(EntitySelection<TDataItem> selection)
-            where TDataItem : ITransactionContext
+        public T FirstOrDefault<T>(EntitySelection<T> selection)
+            where T : ITransactionContext
         {
             if (Evaluate.IsNull(selection))
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.FirstOrDefault(selection, this.EnableCaching);
+            this.CheckDisposed();
+            T entity;
+
+            if (this.EnableCaching)
+            {
+                var cacheKey = CreateCacheKey(selection);
+
+                lock (this.cacheLock)
+                {
+                    entity = this.entityCache.GetOrLazyAddExisting(
+                        this.cacheLock,
+                        cacheKey,
+                        selection,
+                        this.FirstOrDefaultEntity<T>,
+                        new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) });
+                }
+            }
+            else
+            {
+                entity = this.FirstOrDefaultEntity<T>(selection);
+            }
+
+            if (entity != null)
+            {
+                entity.SetTransactionProvider(this);
+            }
+
+            return entity;
         }
 
         /// <inheritdoc />
-        public IEnumerable<TDataItem> GetSelection<TDataItem>(EntitySelection<TDataItem> selection)
-            where TDataItem : ITransactionContext
+        public dynamic FirstOrDefault([NotNull] ISelection selection)
         {
             if (selection == null)
             {
@@ -324,79 +319,178 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.CheckDisposed();
-            return this.repositoryAdapter.SelectItems(selection);
-        }
-
-        /// <inheritdoc />
-        public int DeleteItems<TDataItem>(EntitySelection<TDataItem> selection) 
-            where TDataItem : ITransactionContext
-        {
-            if (selection == null)
-            {
-                throw new ArgumentNullException(nameof(selection));
-            }
-
-            this.CheckDisposed();
-            return this.repositoryAdapter.DeleteSelection(selection);
-        }
-
-        /// <inheritdoc />
-        public TDataItem InsertItem<TDataItem>(TDataItem dataItem)
-            where TDataItem : ITransactionContext
-        {
-            if (Evaluate.IsNull(dataItem))
-            {
-                throw new ArgumentNullException(nameof(dataItem));
-            }
-
-            this.CheckDisposed();
-            var item = this.repositoryAdapter.Insert(dataItem);
-            item.SetTransactionProvider(this);
+            var item = this.FirstOrDefaultEntity<dynamic>(selection);
             return item;
         }
 
         /// <inheritdoc />
-        public void UpdateItem<TDataItem>(TDataItem dataItem, params Expression<Func<TDataItem, object>>[] setExpressions)
+        public IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection)
+            where T : ITransactionContext
         {
-            if (dataItem == null)
-            {
-                throw new ArgumentNullException(nameof(dataItem));
-            }
-
-            if (setExpressions == null)
-            {
-                throw new ArgumentNullException(nameof(setExpressions));
-            }
-
-            this.CheckDisposed();
-            var selection = new UniqueQuery<TDataItem>(this.DatabaseContext.DefinitionProvider, dataItem);
-            this.repositoryAdapter.Update(dataItem, selection, setExpressions);
-        }
-
-        /// <inheritdoc />
-        public int Update<TDataItem>(
-            [NotNull] TDataItem dataItem,
-            [NotNull] EntitySelection<TDataItem> selection,
-            [NotNull] params Expression<Func<TDataItem, object>>[] setExpressions) 
-            where TDataItem : ITransactionContext
-        {
-            if (dataItem == null)
-            {
-                throw new ArgumentNullException(nameof(dataItem));
-            }
-
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
+            this.CheckDisposed();
+            var statement = this.statementFactory.CreateSelectionStatement(selection);
+
+            try
+            {
+                return this.DatabaseContext.Query<T>(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public T Insert<T>(T entity)
+            where T : ITransactionContext
+        {
+            if (Evaluate.IsNull(entity))
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            this.CheckDisposed();
+            object result;
+
+            try
+            {
+                result = this.DatabaseContext.Insert(entity);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+
+            if (result == null)
+            {
+                string message = string.Format(CultureInfo.CurrentCulture, $"Failed to insert ({typeof(T).Name}) {entity}");
+                throw new RepositoryException(entity, message);
+            }
+
+            entity.SetTransactionProvider(this);
+            return entity;
+        }
+
+        /// <inheritdoc />
+        public int Update<T>([NotNull] UpdateSet<T> updateSet)
+            where T : ITransactionContext
+        {
+            if (updateSet == null)
+            {
+                throw new ArgumentNullException(nameof(updateSet));
+            }
+
+            var updateStatement = this.statementFactory.CreateUpdateStatement(updateSet);
+
+            try
+            {
+                // Always use ToArray()!
+                return this.DatabaseContext.Execute(updateStatement, updateSet.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(updateSet, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(updateSet, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(updateSet, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public void UpdateSingle<T>(T entity, params Expression<Func<T, object>>[] setExpressions)
+            where T : ITransactionContext
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
             if (setExpressions == null)
             {
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
             this.CheckDisposed();
-            return this.repositoryAdapter.Update(dataItem, selection, setExpressions);
+            var selection = Select.Where<T>().MatchKey(entity, this.DatabaseContext.DefinitionProvider);
+            var update = setExpressions.Any()
+                             ? new UpdateSet<T>().Set(entity, setExpressions).Where(selection)
+                             : new UpdateSet<T>().Set(entity, this.EntityDefinitionProvider).Where(selection);
+
+            var updateStatement = this.statementFactory.CreateUpdateStatement(update);
+
+            try
+            {
+                // Always use ToArray()!
+                this.DatabaseContext.Execute(updateStatement, update.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public int Delete<T>(EntitySelection<T> selection) 
+            where T : ITransactionContext
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            this.CheckDisposed();
+            var statement = this.statementFactory.CreateDeletionStatement(selection);
+
+            try
+            {
+                return this.DatabaseContext.Execute(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
         }
 
         /// <inheritdoc />
@@ -471,10 +565,10 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
-        /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
+        /// Returns a <see cref="string"/> that represents the current <see cref="object"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="String"/> that represents the current <see cref="Object"/>.
+        /// A <see cref="string"/> that represents the current <see cref="object"/>.
         /// </returns>
         /// <filterpriority>2</filterpriority>
         public override string ToString()
@@ -488,63 +582,52 @@ namespace Startitecture.Orm.Mapper
         /// <param name="selection">
         /// The selection to create a key for.
         /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the selection.
-        /// </typeparam>
         /// <returns>
         /// A <see cref="string"/> containing a unique key for the selection.
         /// </returns>
-        private static string CreateCacheKey<TDataItem>(EntitySelection<TDataItem> selection)
+        private static string CreateCacheKey(IEntitySet selection)
         {
-            return string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TDataItem).ToRuntimeName(), selection);
+            return string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, selection.EntityType.ToRuntimeName(), selection);
         }
 
         /// <summary>
-        /// Gets the first or default item matching the selection.
+        /// Gets the first or default entity matching the selection.
         /// </summary>
         /// <param name="selection">
-        /// The selection that identifies the item.
+        /// The selection that identifies the entity.
         /// </param>
-        /// <param name="useCache">
-        /// A value indicating whether to use the cache.
-        /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of data item to retrieve.
+        /// <typeparam name="T">
+        /// The type of entity to retrieve.
         /// </typeparam>
         /// <returns>
-        /// The first matching <typeparamref name="TDataItem"/>, or the default value if no item is found.
+        /// The first matching <typeparamref name="T"/>, or the default value if no entity is found.
         /// </returns>
-        private TDataItem FirstOrDefault<TDataItem>(EntitySelection<TDataItem> selection, bool useCache)
-            where TDataItem : ITransactionContext
+        private T FirstOrDefaultEntity<T>(ISelection selection)
         {
-            this.CheckDisposed();
-            TDataItem dataItem;
-
-            if (useCache)
+            if (selection == null)
             {
-                var cacheKey = CreateCacheKey(selection);
-
-                lock (this.itemLock)
-                {
-                    dataItem = this.itemCache.GetOrLazyAddExisting(
-                        this.itemLock,
-                        cacheKey,
-                        selection,
-                        this.repositoryAdapter.FirstOrDefault,
-                        new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) });
-                }
-            }
-            else
-            {
-                dataItem = this.repositoryAdapter.FirstOrDefault(selection);
+                throw new ArgumentNullException(nameof(selection));
             }
 
-            if (dataItem != null)
-            {
-                dataItem.SetTransactionProvider(this);
-            }
+            var statement = this.statementFactory.CreateSelectionStatement(selection);
 
-            return dataItem;
+            try
+            {
+                ////Trace.TraceInformation("Using unique query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
+                return this.DatabaseContext.FirstOrDefault<T>(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
         }
 
         /// <summary>

@@ -112,29 +112,19 @@ namespace Startitecture.Orm.Model
                     });
         }
 
-        /// <summary>
-        /// Gets the attributes.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<EntityAttributeDefinition> AllAttributes => this.allAttributes.Value;
 
-        /// <summary>
-        /// Gets the returnable attributes of the data item.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<EntityAttributeDefinition> ReturnableAttributes => this.returnableAttributes.Value;
 
-        /// <summary>
-        /// Gets the direct attributes of the data item.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<EntityAttributeDefinition> DirectAttributes => this.directAttributes.Value;
 
-        /// <summary>
-        /// Gets the primary key attributes of the data item.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<EntityAttributeDefinition> PrimaryKeyAttributes => this.primaryKeyAttributes.Value;
 
-        /// <summary>
-        /// Gets the auto-number primary key of the data item, if any.
-        /// </summary>
+        /// <inheritdoc />
         public EntityAttributeDefinition? AutoNumberPrimaryKey => this.autoNumberPrimaryKey.Value;
 
         /// <inheritdoc />
@@ -143,19 +133,13 @@ namespace Startitecture.Orm.Model
         /// <inheritdoc />
         public IEnumerable<IEntityRelation> DefaultRelations => this.defaultRelations.Value;
 
-        /// <summary>
-        /// Gets the updateable attributes of the data item.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<EntityAttributeDefinition> UpdateableAttributes => this.updateableAttributes.Value;
 
-        /// <summary>
-        /// Gets the entity container.
-        /// </summary>
+        /// <inheritdoc />
         public string EntityContainer => this.entityLocation.Value.Container;
 
-        /// <summary>
-        /// Gets the entity name.
-        /// </summary>
+        /// <inheritdoc />
         public string EntityName => this.entityLocation.Value.Name;
 
         /// <summary>
@@ -181,23 +165,7 @@ namespace Startitecture.Orm.Model
                               && definition.PropertyName == attributeLocation.PropertyInfo.Name);
         }
 
-        /// <summary>
-        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name. Direct attributes are queried
-        /// first.
-        /// </summary>
-        /// <param name="entityName">
-        /// The entity name.
-        /// </param>
-        /// <param name="propertyName">
-        /// The property name.
-        /// </param>
-        /// <returns>
-        /// The first <see cref="EntityAttributeDefinition"/> that matches the entity alias or name and property name, or
-        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="entityName"/> or <paramref name="propertyName"/> is null.
-        /// </exception>
+        /// <inheritdoc />
         public EntityAttributeDefinition Find(string entityName, string propertyName)
         {
             if (string.IsNullOrEmpty(entityName))
@@ -216,20 +184,7 @@ namespace Startitecture.Orm.Model
                     definition => (definition.Entity.Alias ?? definition.Entity.Name) == entityName && definition.PropertyName == propertyName);
         }
 
-        /// <summary>
-        /// Finds the first <see cref="EntityAttributeDefinition"/> matching the attribute expression
-        /// </summary>
-        /// <param name="attributeExpression">
-        /// The attribute expression to find.
-        /// </param>
-        /// <returns>
-        /// The first <see cref="EntityAttributeDefinition"/> that matches the property name, or
-        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
-        /// </returns>
-        /// <remarks>
-        /// If the declaring type of <paramref name="attributeExpression"/> is not the same as the type of the entity definition, the
-        /// attribute may not be found.
-        /// </remarks>
+        /// <inheritdoc />
         public EntityAttributeDefinition Find(LambdaExpression attributeExpression)
         {
             if (attributeExpression == null)
@@ -247,6 +202,12 @@ namespace Startitecture.Orm.Model
                     x => EntityLocationEqualityComparer.TypeAndName.Equals(x.Entity, location) && x.PropertyName == propertyName);
 
             return attributeDefinition;
+        }
+
+        /// <inheritdoc />
+        public bool IsUpdateable(EntityAttributeDefinition attributeDefinition)
+        {
+            return attributeDefinition.IsDirect && attributeDefinition.IsIdentityColumn == false && attributeDefinition.IsPrimaryKey == false;
         }
 
         /// <summary>

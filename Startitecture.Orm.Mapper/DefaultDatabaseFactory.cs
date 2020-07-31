@@ -77,13 +77,8 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
-            if (nameQualifier == null)
-            {
-                throw new ArgumentNullException(nameof(nameQualifier));
-            }
-
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.nameQualifier = nameQualifier;
+            this.nameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
             this.connectionString = connectionString;
             this.providerName = providerName;
         }

@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
-    <Version>1.0.0-alpha2</Version>
+    <Version>1.0.0-alpha3</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>SQL Server connection library for the ST/orm (Startitecture.Orm) package.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
@@ -35,7 +35,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Startitecture.Orm.Common\Startitecture.Orm.Common.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
-    <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj" />
   </ItemGroup>
 
   <ItemGroup>

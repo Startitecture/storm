@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Mapper.Tests
+namespace Startitecture.Orm.Common.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -17,7 +17,6 @@ namespace Startitecture.Orm.Mapper.Tests
     using Moq;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.SqlClient;
@@ -60,9 +59,9 @@ namespace Startitecture.Orm.Mapper.Tests
                         });
 
             var databaseFactory = mockDatabaseFactory.Object;
-            var repositoryAdapterFactory = new Mock<IRepositoryAdapterFactory>().Object;
+            var queryFactory = new Mock<IStatementFactory>().Object;
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, repositoryAdapterFactory))
+            using (var target = new DatabaseRepositoryProvider(databaseFactory, queryFactory))
             {
                 target.DatabaseContext.Connection.ChangeDatabase("newDatabase");
                 Assert.AreEqual("newDatabase", target.DatabaseContext.Connection.Database);
@@ -91,9 +90,9 @@ namespace Startitecture.Orm.Mapper.Tests
                     });
 
             var databaseFactory = mockDatabaseFactory.Object;
-            var repositoryAdapterFactory = new Mock<IRepositoryAdapterFactory>().Object;
+            var queryFactory = new Mock<IStatementFactory>().Object;
 
-            using (var target = new DatabaseRepositoryProvider(databaseFactory, repositoryAdapterFactory))
+            using (var target = new DatabaseRepositoryProvider(databaseFactory, queryFactory))
             {
                 var actual = target.StartTransaction(IsolationLevel.Serializable);
                 Assert.AreEqual(IsolationLevel.Serializable, actual.IsolationLevel);
@@ -118,7 +117,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(topContainer2);
+                target.Insert(topContainer2);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -127,7 +126,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                target.InsertItem(subContainerA);
+                target.Insert(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -136,7 +135,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     IsSystem = false
                 };
 
-                target.InsertItem(categoryAttribute20);
+                target.Insert(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -145,7 +144,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(timBobIdentity);
+                target.Insert(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -154,7 +153,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(fooBarIdentity);
+                target.Insert(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -162,14 +161,14 @@ namespace Startitecture.Orm.Mapper.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                target.InsertItem(otherAggregate10);
+                target.Insert(otherAggregate10);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(template23);
+                target.Insert(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
                 {
@@ -204,7 +203,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.InsertItem(domainAggregate1);
+                target.Insert(domainAggregate1);
 
                 var domainAggregate2 = new DomainAggregateRow
                 {
@@ -226,7 +225,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.InsertItem(domainAggregate2);
+                target.Insert(domainAggregate2);
 
                 var domainAggregate3 = new DomainAggregateRow
                 {
@@ -246,13 +245,13 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.InsertItem(domainAggregate3);
+                target.Insert(domainAggregate3);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                target.InsertItem(aggregateOption1);
+                target.Insert(aggregateOption1);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                target.InsertItem(aggregateOption2);
+                target.Insert(aggregateOption2);
 
                 var associationRow = new AssociationRow
                 {
@@ -260,7 +259,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     OtherAggregateId = otherAggregate10.OtherAggregateId
                 };
 
-                target.InsertItem(associationRow);
+                target.Insert(associationRow);
 
                 expected = new List<DomainAggregateRow>
                                {
@@ -284,7 +283,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
                     .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
 
-                var actual = target.GetSelection(itemSelection).OrderBy(x => x.Name).ToList();
+                var actual = target.SelectEntities(itemSelection).OrderBy(x => x.Name).ToList();
                 Assert.AreEqual(
                     expected.First(),
                     actual.First(),
@@ -315,7 +314,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                             Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                                         };
 
-                target.InsertItem(topContainer2);
+                target.Insert(topContainer2);
 
                 var subContainerA = new SubContainerRow
                                         {
@@ -324,7 +323,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                             TopContainerId = topContainer2.TopContainerId
                                         };
 
-                target.InsertItem(subContainerA);
+                target.Insert(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                                               {
@@ -333,7 +332,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                   IsSystem = false
                                               };
 
-                target.InsertItem(categoryAttribute20);
+                target.Insert(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
                                          {
@@ -342,7 +341,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                              UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                                          };
 
-                target.InsertItem(timBobIdentity);
+                target.Insert(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
                                          {
@@ -351,7 +350,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                              UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                                          };
 
-                target.InsertItem(fooBarIdentity);
+                target.Insert(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
                                            {
@@ -359,14 +358,14 @@ namespace Startitecture.Orm.Mapper.Tests
                                                AggregateOptionTypeId = 3
                                            };
 
-                target.InsertItem(otherAggregate10);
+                target.Insert(otherAggregate10);
 
                 var template23 = new TemplateRow
                                      {
                                          Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                                      };
 
-                target.InsertItem(template23);
+                target.Insert(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
                                            {
@@ -401,7 +400,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate1);
+                target.Insert(domainAggregate1);
 
                 var domainAggregate2 = new DomainAggregateRow
                                            {
@@ -423,7 +422,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate2);
+                target.Insert(domainAggregate2);
 
                 var domainAggregate3 = new DomainAggregateRow
                                            {
@@ -443,7 +442,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate3);
+                target.Insert(domainAggregate3);
 
                 var domainAggregate4 = new DomainAggregateRow
                                            {
@@ -463,7 +462,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate4);
+                target.Insert(domainAggregate4);
 
                 var domainAggregate5 = new DomainAggregateRow
                                            {
@@ -483,13 +482,13 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate5);
+                target.Insert(domainAggregate5);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                target.InsertItem(aggregateOption1);
+                target.Insert(aggregateOption1);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                target.InsertItem(aggregateOption2);
+                target.Insert(aggregateOption2);
 
                 var associationRow = new AssociationRow
                                          {
@@ -497,7 +496,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                              OtherAggregateId = otherAggregate10.OtherAggregateId
                                          };
 
-                target.InsertItem(associationRow);
+                target.Insert(associationRow);
 
                 expectedPage1 = new List<DomainAggregateRow>
                                {
@@ -555,7 +554,7 @@ namespace Startitecture.Orm.Mapper.Tests
                         "pgCte",
                         new EntityRelationSet<DomainAggregateRow>().InnerJoin(row => row.DomainAggregateId, row => row.DomainAggregateId));
 
-                var actualPage1 = target.GetSelection(selection).ToList();
+                var actualPage1 = target.SelectEntities(selection).ToList();
                 Assert.AreEqual(
                     expectedPage1.First(),
                     actualPage1.First(),
@@ -566,7 +565,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 // Advance the number of rows
                 selection.ParentExpression.TableSelection.Page.SetPage(2);
 
-                var actualPage2 = target.GetSelection(selection).ToList();
+                var actualPage2 = target.SelectEntities(selection).ToList();
                 Assert.AreEqual(
                     expectedPage2.First(),
                     actualPage2.First(),
@@ -597,7 +596,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                             Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                                         };
 
-                target.InsertItem(topContainer2);
+                target.Insert(topContainer2);
 
                 var subContainerA = new SubContainerRow
                                         {
@@ -606,7 +605,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                             TopContainerId = topContainer2.TopContainerId
                                         };
 
-                target.InsertItem(subContainerA);
+                target.Insert(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                                               {
@@ -615,7 +614,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                   IsSystem = false
                                               };
 
-                target.InsertItem(categoryAttribute20);
+                target.Insert(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
                                          {
@@ -624,7 +623,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                              UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                                          };
 
-                target.InsertItem(timBobIdentity);
+                target.Insert(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
                                          {
@@ -633,7 +632,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                              UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                                          };
 
-                target.InsertItem(fooBarIdentity);
+                target.Insert(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
                                            {
@@ -641,14 +640,14 @@ namespace Startitecture.Orm.Mapper.Tests
                                                AggregateOptionTypeId = 3
                                            };
 
-                target.InsertItem(otherAggregate10);
+                target.Insert(otherAggregate10);
 
                 var template23 = new TemplateRow
                                      {
                                          Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                                      };
 
-                target.InsertItem(template23);
+                target.Insert(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
                                            {
@@ -683,7 +682,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate1);
+                target.Insert(domainAggregate1);
 
                 var domainAggregate2 = new DomainAggregateRow
                                            {
@@ -705,7 +704,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate2);
+                target.Insert(domainAggregate2);
 
                 var domainAggregate3 = new DomainAggregateRow
                                            {
@@ -725,13 +724,13 @@ namespace Startitecture.Orm.Mapper.Tests
                                                TemplateId = template23.TemplateId
                                            };
 
-                target.InsertItem(domainAggregate3);
+                target.Insert(domainAggregate3);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                target.InsertItem(aggregateOption1);
+                target.Insert(aggregateOption1);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                target.InsertItem(aggregateOption2);
+                target.Insert(aggregateOption2);
 
                 var associationRow = new AssociationRow
                                          {
@@ -739,7 +738,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                              OtherAggregateId = otherAggregate10.OtherAggregateId
                                          };
 
-                target.InsertItem(associationRow);
+                target.Insert(associationRow);
 
                 expected = new List<DomainAggregateRow>
                                {
@@ -771,7 +770,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId)
                     .OrderBy(row => row.Name);
 
-                var actual = target.GetSelection(itemSelection).ToList();
+                var actual = target.SelectEntities(itemSelection).ToList();
                 Assert.AreEqual(expected.First(), actual.First(), string.Join(Environment.NewLine, expected.First().GetDifferences(actual.First())));
 
                 CollectionAssert.AreEqual(expected, actual);
@@ -789,7 +788,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId)
                     .OrderByDescending(row => row.Name);
 
-                var actualDesc = target.GetSelection(itemSelectionDesc).ToList();
+                var actualDesc = target.SelectEntities(itemSelectionDesc).ToList();
                 Assert.AreEqual(
                     expectedDesc.First(),
                     actualDesc.First(),
@@ -818,13 +817,13 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.InsertItem(expected);
+                target.Insert(expected);
             }
 
             // New context again
             using (var target = providerFactory.Create())
             {
-                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
@@ -849,7 +848,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(topContainer2);
+                target.Insert(topContainer2);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -858,7 +857,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                target.InsertItem(subContainerA);
+                target.Insert(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -867,7 +866,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     IsSystem = false
                 };
 
-                target.InsertItem(categoryAttribute20);
+                target.Insert(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -876,7 +875,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(timBobIdentity);
+                target.Insert(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -885,7 +884,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(fooBarIdentity);
+                target.Insert(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -893,14 +892,14 @@ namespace Startitecture.Orm.Mapper.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                target.InsertItem(otherAggregate10);
+                target.Insert(otherAggregate10);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                target.InsertItem(template23);
+                target.Insert(template23);
 
                 expected = new DomainAggregateRow
                 {
@@ -920,7 +919,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                target.InsertItem(expected);
+                target.Insert(expected);
             }
 
             using (var target = providerFactory.Create())
@@ -937,7 +936,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
                     .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
 
-                var actual = target.GetFirstOrDefault(itemSelection);
+                var actual = target.FirstOrDefault(itemSelection);
 
                 Assert.IsNotNull(actual);
                 Assert.IsNull(actual.AggregateOption);
@@ -956,7 +955,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = providerFactory.Create())
             {
-                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
+                var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsNull(actual);
             }
         }
@@ -980,13 +979,13 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.InsertItem(expected);
+                target.Insert(expected);
             }
 
             // New context again
             using (var target = providerFactory.Create())
             {
-                var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsTrue(actual);
             }
         }
@@ -1002,17 +1001,17 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = providerFactory.Create())
             {
-                var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
+                var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsFalse(actual);
             }
         }
 
         /// <summary>
-        /// The delete items test.
+        /// The delete entities test.
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void DeleteItems_ExistingField_ItemDeleted()
+        public void Delete_ExistingField_ItemDeleted()
         {
             FieldRow expected;
 
@@ -1026,7 +1025,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.InsertItem(expected);
+                target.Insert(expected);
             }
 
             Assert.AreNotEqual(0, expected.FieldId);
@@ -1034,21 +1033,21 @@ namespace Startitecture.Orm.Mapper.Tests
             // New context again
             using (var target = providerFactory.Create())
             {
-                target.DeleteItems(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                target.Delete(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
 
-                var actual = target.Contains(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsFalse(actual);
             }
         }
 
         /// <summary>
-        /// The delete items test.
+        /// The delete entities test.
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void DeleteItems_ExistingSetOfFields_ItemsDeleted()
+        public void Delete_ExistingSetOfFields_ItemsDeleted()
         {
-            var description = $"Mah Field Description {nameof(this.DeleteItems_ExistingSetOfFields_ItemsDeleted)}";
+            var description = $"Mah Field Description {nameof(this.Delete_ExistingSetOfFields_ItemsDeleted)}";
 
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
@@ -1060,7 +1059,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = description
                 };
 
-                target.InsertItem(field1);
+                target.Insert(field1);
 
                 var field2 = new FieldRow
                 {
@@ -1068,7 +1067,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = description
                 };
 
-                target.InsertItem(field2);
+                target.Insert(field2);
 
                 var field3 = new FieldRow
                 {
@@ -1076,28 +1075,28 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = description
                 };
 
-                target.InsertItem(field3);
+                target.Insert(field3);
             }
 
             // New context again
             using (var target = providerFactory.Create())
             {
                 var itemSelection = Select.From<FieldRow>().WhereEqual(row => row.Description, description);
-                var affected = target.DeleteItems(itemSelection);
+                var affected = target.Delete(itemSelection);
 
                 Assert.AreEqual(3, affected);
 
-                var actual = target.GetSelection(itemSelection);
+                var actual = target.SelectEntities(itemSelection);
                 Assert.AreEqual(0, actual.Count());
             }
         }
 
         /// <summary>
-        /// The insert item test.
+        /// The insert entity test.
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void InsertItem_NewField_MatchesExpected()
+        public void Insert_NewField_MatchesExpected()
         {
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
@@ -1107,8 +1106,8 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 try
                 {
-                    var item = new FieldRow { Name = "MahField", Description = "Mah Field Description" };
-                    var actual = target.InsertItem(item);
+                    var entity = new FieldRow { Name = "MahField", Description = "Mah Field Description" };
+                    var actual = target.Insert(entity);
                     Assert.AreNotEqual(0, actual.FieldId);
                 }
                 finally
@@ -1137,7 +1136,7 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description"
                 };
 
-                target.InsertItem(item);
+                target.Insert(item);
             }
 
             // Completely new context to test that caching is not involved.
@@ -1151,13 +1150,13 @@ namespace Startitecture.Orm.Mapper.Tests
                     Description = "Mah Field Description The Second of That Name"
                 };
 
-                target.UpdateItem(expected);
+                target.UpdateSingle(expected);
             }
 
             // New context again
             using (var target = providerFactory.Create())
             {
-                var actual = target.GetFirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
+                var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
@@ -1186,7 +1185,7 @@ namespace Startitecture.Orm.Mapper.Tests
                                LastName = "Last Name"
                            };
 
-                target.InsertItem(item);
+                target.Insert(item);
             }
 
             // Completely new context to test that caching is not involved.
@@ -1203,13 +1202,13 @@ namespace Startitecture.Orm.Mapper.Tests
                                    LastName = "New Last Name"
                                };
 
-                target.UpdateItem(expected, row => row.FirstName, row => row.LastName);
+                target.UpdateSingle(expected, row => row.FirstName, row => row.LastName);
             }
 
             // New context again
             using (var target = providerFactory.Create())
             {
-                var actual = target.GetFirstOrDefault(Select.From<DomainIdentityRow>().WhereEqual(row => row.DomainIdentityId, item.DomainIdentityId));
+                var actual = target.FirstOrDefault(Select.From<DomainIdentityRow>().WhereEqual(row => row.DomainIdentityId, item.DomainIdentityId));
                 Assert.IsNotNull(actual);
                 Assert.AreNotEqual(expected.MiddleName, actual.MiddleName);
                 Assert.AreEqual(expected.FirstName, actual.FirstName);
@@ -1229,14 +1228,14 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var provider = providerFactory.Create())
             {
                 // Delete the attachment documents based on finding their versions.
-                provider.DeleteItems(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<OtherAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<DomainAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<SubContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<TopContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<CategoryAttributeRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<TemplateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.DeleteItems(Select.From<DomainIdentityRow>().WhereEqual(row => row.UniqueIdentifier, "UNIT_TEST:%"));
+                provider.Delete(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.Delete(Select.From<OtherAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.Delete(Select.From<DomainAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.Delete(Select.From<SubContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.Delete(Select.From<TopContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.Delete(Select.From<CategoryAttributeRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.Delete(Select.From<TemplateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
+                provider.Delete(Select.From<DomainIdentityRow>().WhereEqual(row => row.UniqueIdentifier, "UNIT_TEST:%"));
             }
         }
     }

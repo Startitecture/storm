@@ -15,7 +15,6 @@
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.SqlClient\Startitecture.Orm.SqlClient.csproj" />
-    <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Testing.Entities\Startitecture.Orm.Testing.Entities.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Testing.Moq\Startitecture.Orm.Testing.Moq.csproj" />

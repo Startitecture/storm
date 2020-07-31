@@ -47,6 +47,11 @@ namespace Startitecture.Orm.Common
         IEntityDefinitionProvider DefinitionProvider { get; }
 
         /// <summary>
+        /// Gets the name qualifier for the database context.
+        /// </summary>
+        INameQualifier NameQualifier { get; }
+
+        /// <summary>
         /// Open a connection that will be used for all subsequent queries.
         /// </summary>
         /// <remarks>
@@ -189,7 +194,7 @@ namespace Startitecture.Orm.Common
         /// Performs an SQL Insert
         /// </summary>
         /// <typeparam name="T">
-        /// The type of item being inserted.
+        /// The type of entity being inserted.
         /// </typeparam>
         /// <param name="poco">
         /// The POCO object that specifies the column values to be inserted

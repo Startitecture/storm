@@ -19,8 +19,8 @@ namespace Startitecture.Orm.Testing.Moq
     using global::Moq;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
-    using Startitecture.Orm.Sql;
 
     /// <summary>
     /// The extension methods.

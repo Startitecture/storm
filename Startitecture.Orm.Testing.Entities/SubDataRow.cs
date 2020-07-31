@@ -9,6 +9,7 @@ namespace Startitecture.Orm.Testing.Entities
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
 
     /// <summary>

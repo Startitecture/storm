@@ -29,8 +29,8 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The POCO factories.
         /// </summary>
-        private static readonly MemoryCache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo> PocoFactories =
-            new MemoryCache<Tuple<string, string, PocoDataRequest>, PocoDelegateInfo>();
+        private static readonly MemoryCache<Tuple<string, PocoDataRequest>, PocoDelegateInfo> PocoFactories =
+            new MemoryCache<Tuple<string, PocoDataRequest>, PocoDelegateInfo>();
 
         /// <summary>
         /// The relation properties cache.
@@ -88,60 +88,66 @@ namespace Startitecture.Orm.Mapper
             }
 
             var reader = dataRequest.DataReader;
-            var entityDefinition = this.definitionProvider.Resolve<T>();
-            var qualifiedName = entityDefinition.QualifiedName;
-            var typeQualifiedName = $"{typeof(T).FullName}.{qualifiedName}";
 
-            var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.Ordinal).ToList());
-            var poco = (T)this.pocoMemoryCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, typeQualifiedName, entityDefinition, reader));
-
-            var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
-
-            foreach (var relationAttribute in relationAttributes)
+            if (typeof(T) == typeof(object))
             {
-                // TODO: Change this brittle code. We need to match on aliases to get the right IDs.
-                var relatedDefinition = this.definitionProvider.Resolve(relationAttribute.PropertyInfo.PropertyType);
-                var relationReferenceName = string.IsNullOrWhiteSpace(relationAttribute.Alias)
-                                                ? $"{relatedDefinition.EntityContainer}.{relatedDefinition.EntityName}"
-                                                : relationAttribute.Alias;
-
-                var keyDefinitions = entityDefinition.ReturnableAttributes.Where(
-                        x => (string.IsNullOrWhiteSpace(x.Entity.Alias) ? $"{x.Entity.Container}.{x.Entity.Name}" : x.Entity.Alias)
-                             == relationReferenceName && x.IsPrimaryKey)
-                    .OrderBy(x => x.Ordinal);
-
-                var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions.ToList());
-
-                var entityReference = new EntityReference
-                                          {
-                                              ContainerType = typeof(T),
-                                              EntityType = relationAttribute.PropertyInfo.PropertyType,
-                                              EntityAlias = relationAttribute.Alias
-                                          };
-
-                var relatedEntity = this.pocoMemoryCache.Get(
-                    relatedPocoKey,
-                    () => this.GetRelatedEntity(dataRequest, typeQualifiedName, entityDefinition, reader, entityReference));
-
-                // Prevents "ghost" POCO properties when resolving second-order or higher relations.
-                if (relatedEntity == null)
-                {
-                    continue;
-                }
-
-                // Check whether this is a first-order relation.
-                if (relationAttribute.EntityNode == relationAttribute.EntityNode.List.First)
-                {
-                    relationAttribute.SetValueDelegate.DynamicInvoke(poco, relatedEntity);
-                }
-                else
-                {
-                    var relationContainer = NavigateToEntity(relationAttribute.ReferenceNode, poco);
-                    relationAttribute.SetValueDelegate.DynamicInvoke(relationContainer, relatedEntity);
-                }
+                // TODO: See if we can infer the object graph from the included attributes vs. the flatness.
+                return GetPocoFromReader<dynamic>(dataRequest, typeof(T).FullName, dataRequest.DataReader);
             }
+            else
+            {
+                var entityDefinition = this.definitionProvider.Resolve<T>();
+                var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.Ordinal).ToList());
+                var poco = (T)this.pocoMemoryCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, entityDefinition.QualifiedName, reader));
 
-            return poco;
+                var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
+
+                foreach (var relationAttribute in relationAttributes)
+                {
+                    // TODO: Change this brittle code. We need to match on aliases to get the right IDs.
+                    var relatedDefinition = this.definitionProvider.Resolve(relationAttribute.PropertyInfo.PropertyType);
+                    var relationReferenceName = string.IsNullOrWhiteSpace(relationAttribute.Alias)
+                                                    ? $"{relatedDefinition.EntityContainer}.{relatedDefinition.EntityName}"
+                                                    : relationAttribute.Alias;
+
+                    var keyDefinitions = entityDefinition.ReturnableAttributes.Where(
+                            x => (string.IsNullOrWhiteSpace(x.Entity.Alias) ? $"{x.Entity.Container}.{x.Entity.Name}" : x.Entity.Alias)
+                                 == relationReferenceName && x.IsPrimaryKey)
+                        .OrderBy(x => x.Ordinal);
+
+                    var relatedPocoKey = GetPocoKey(relatedDefinition, reader, keyDefinitions.ToList());
+
+                    var entityReference = new EntityReference
+                                              {
+                                                  ContainerType = typeof(T),
+                                                  EntityType = relationAttribute.PropertyInfo.PropertyType,
+                                                  EntityAlias = relationAttribute.Alias
+                                              };
+
+                    var relatedEntity = this.pocoMemoryCache.Get(
+                        relatedPocoKey,
+                        () => this.GetRelatedEntity(entityDefinition.QualifiedName, dataRequest, reader, entityReference));
+
+                    // Prevents "ghost" POCO properties when resolving second-order or higher relations.
+                    if (relatedEntity == null)
+                    {
+                        continue;
+                    }
+
+                    // Check whether this is a first-order relation.
+                    if (relationAttribute.EntityNode == relationAttribute.EntityNode.List.First)
+                    {
+                        relationAttribute.SetValueDelegate.DynamicInvoke(poco, relatedEntity);
+                    }
+                    else
+                    {
+                        var relationContainer = NavigateToEntity(relationAttribute.ReferenceNode, poco);
+                        relationAttribute.SetValueDelegate.DynamicInvoke(relationContainer, relatedEntity);
+                    }
+                }
+
+                return poco;                
+            }
         }
 
         /// <summary>
@@ -164,7 +170,6 @@ namespace Startitecture.Orm.Mapper
             IDataRecord record,
             ICollection<EntityAttributeDefinition> keyDefinitions)
         {
-            // TODO: Ensure the order of keys according to the ordinality of the columns to skip re-ordering operations.
             var pocoKeyBuilder = new StringBuilder($"{entityDefinition.EntityContainer}.{entityDefinition.EntityName}");
 
             if (keyDefinitions.Count == 0)
@@ -182,7 +187,7 @@ namespace Startitecture.Orm.Mapper
                     var keyValue = record.GetValue(ordinal);
                     pocoKeyBuilder.Append($".{definition.PhysicalName}.{keyValue}");
 #if DEBUG
-                    Trace.WriteLine($"Got {definition.ReferenceName} key value '{keyValue}' at ordinal {ordinal}");
+                    Trace.WriteLine($"Got {definition.ReferenceName} key value '{keyValue}' at ordinal {definition.Ordinal}");
 #endif
                 }
                 catch (IndexOutOfRangeException ex)
@@ -204,11 +209,8 @@ namespace Startitecture.Orm.Mapper
         /// <param name="dataRequest">
         /// The data request.
         /// </param>
-        /// <param name="typeQualifiedName">
-        /// The type qualified name.
-        /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition.
+        /// <param name="entityName">
+        /// The entity name.
         /// </param>
         /// <param name="record">
         /// The data record to read.
@@ -219,14 +221,10 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The POCO object as a type of <typeparamref name="T"/>.
         /// </returns>
-        private static T GetPocoFromReader<T>(
-            PocoDataRequest dataRequest,
-            string typeQualifiedName,
-            IEntityDefinition entityDefinition,
-            IDataRecord record)
+        private static T GetPocoFromReader<T>(PocoDataRequest dataRequest, string entityName, IDataRecord record)
         {
-            var baseKey = new Tuple<string, string, PocoDataRequest>(typeQualifiedName, entityDefinition.EntityName, dataRequest);
-            var baseDirectAttributes = entityDefinition.ReturnableAttributes.Where(x => x.IsReferencedDirect).ToList();
+            var baseKey = new Tuple<string, PocoDataRequest>(entityName, dataRequest);
+            var baseDirectAttributes = dataRequest.AttributeDefinitions.Where(x => x.IsReferencedDirect).ToList();
             var basePocoDelegate = PocoFactories.Get(baseKey, () => FlatPocoFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
 
             T poco;
@@ -337,14 +335,11 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Gets a related entity POCO from the reader.
         /// </summary>
+        /// <param name="entityAggregateName">
+        /// The entity aggregate name.
+        /// </param>
         /// <param name="dataRequest">
         /// The data request.
-        /// </param>
-        /// <param name="typeQualifiedName">
-        /// The type qualified name.
-        /// </param>
-        /// <param name="entityDefinition">
-        /// The entity definition.
         /// </param>
         /// <param name="reader">
         /// The reader.
@@ -355,25 +350,23 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// The related POCO as an <see cref="object"/>.
         /// </returns>
-        private object GetRelatedEntity(
-            PocoDataRequest dataRequest,
-            string typeQualifiedName,
-            IEntityDefinition entityDefinition,
-            IDataRecord reader,
-            EntityReference entityReference)
+        private object GetRelatedEntity(string entityAggregateName, PocoDataRequest dataRequest, IDataRecord reader, EntityReference entityReference)
         {
             var relatedEntityLocation = this.definitionProvider.GetEntityLocation(entityReference);
             var relatedQualifiedName = string.IsNullOrWhiteSpace(relatedEntityLocation.Alias)
                                            ? $"{relatedEntityLocation.Container}.{relatedEntityLocation.Name}"
                                            : relatedEntityLocation.Alias;
 
-            var relatedKey = new Tuple<string, string, PocoDataRequest>(typeQualifiedName, relatedQualifiedName, dataRequest);
+            var relatedKey = new Tuple<string, PocoDataRequest>($"{entityAggregateName}:{relatedQualifiedName}", dataRequest);
 
             // TODO: Cache attributes with their locations, or build explicitly.
-            var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
+            ////var relatedAttributes = entityDefinition.ReturnableAttributes.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
+            var relatedAttributes = dataRequest.AttributeDefinitions.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
             var relatedType = relatedEntityLocation.EntityType;
 
-            var relatedPocoDelegate = PocoFactories.Get(relatedKey, () => FlatPocoFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
+            var relatedPocoDelegate = PocoFactories.Get(
+                relatedKey,
+                () => FlatPocoFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
 
             object relatedEntity;
 #if DEBUG

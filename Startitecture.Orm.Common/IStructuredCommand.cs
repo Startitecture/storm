@@ -4,7 +4,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Sql
+namespace Startitecture.Orm.Common
 {
     /// <summary>
     /// The structured SQL command interface.

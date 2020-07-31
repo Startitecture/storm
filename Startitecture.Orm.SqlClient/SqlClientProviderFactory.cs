@@ -8,11 +8,12 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Data.Common;
-    using System.Data.SqlClient;
     using System.Diagnostics;
     using System.Linq;
 
     using JetBrains.Annotations;
+
+    using Microsoft.Data.SqlClient;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
@@ -82,7 +83,7 @@ namespace Startitecture.Orm.SqlClient
                 this.definitionProvider,
                 Singleton<TransactSqlQualifier>.Instance);
 
-            return new DatabaseRepositoryProvider(databaseFactory, Singleton<SqlClientAdapterFactory>.Instance);
+            return new DatabaseRepositoryProvider(databaseFactory, new TransactSqlFactory(this.definitionProvider));
         }
     }
 }

@@ -58,37 +58,9 @@ namespace Startitecture.Orm.Mapper
         private static readonly MethodInfo IsDbNullMethod = typeof(IDataRecord).GetMethod("IsDBNull");
 
         /// <summary>
-        /// The item Get method for lists.
+        /// The entity Get method for lists.
         /// </summary>
-        private static readonly MethodInfo ListItemMethod = typeof(List<Func<object, object>>).GetProperty("Item").GetGetMethod();
-
-        /// <summary>
-        /// A value indicating whether the factory will consider direct attributes only for non-dynamic POCOs.
-        /// </summary>
-        private readonly bool directOnly;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FlatPocoFactory"/> class.
-        /// </summary>
-        public FlatPocoFactory()
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FlatPocoFactory"/> class.
-        /// </summary>
-        /// <param name="directOnly">
-        /// A value indicating whether the factory should consider direct attributes only.
-        /// </param>
-        public FlatPocoFactory(bool directOnly)
-        {
-            this.directOnly = directOnly;
-        }
-
-        /// <summary>
-        /// Gets a <see cref="FlatPocoFactory"/> that populates only the direct attributes of a POCO.
-        /// </summary>
-        public static FlatPocoFactory DirectFactory { get; } = new FlatPocoFactory(true);
+        private static readonly MethodInfo ListItemMethod = typeof(List<Func<object, object>>).GetProperty("Item")?.GetGetMethod();
 
         /// <summary>
         /// Gets a <see cref="FlatPocoFactory"/> that populates all returnable attributes of a POCO.
@@ -113,7 +85,7 @@ namespace Startitecture.Orm.Mapper
         public static PocoDelegateInfo CreateDelegate(
             [NotNull] PocoDataRequest dataRequest,
             [NotNull] Type type,
-            [NotNull] IList<EntityAttributeDefinition> attributeDefinitions)
+            [NotNull] IEnumerable<EntityAttributeDefinition> attributeDefinitions)
         {
             if (dataRequest == null)
             {
@@ -130,11 +102,10 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(attributeDefinitions));
             }
 
+            var definitions = attributeDefinitions.ToList();
+
             // Create the method
             var name = $"poco_factory_{Guid.NewGuid()}";
-
-            ////var delegateInfo = new PocoDelegateInfo(name, type, attributeDefinitions);
-
             var method = new DynamicMethod(name, type, new[] { typeof(IDataReader) }, true);
             var generator = method.GetILGenerator();
             var mapper = Mappers.GetMapper(type);
@@ -158,17 +129,13 @@ namespace Startitecture.Orm.Mapper
                 for (var i = dataRequest.FirstColumn; i < dataRequest.FirstColumn + dataRequest.FieldCount; i++)
                 {
                     var sourceType = reader.GetFieldType(i);
+                    var fieldName = reader.GetName(i).Replace(".", string.Empty); // Remove period from dot-qualified names.
 
                     generator.Emit(OpCodes.Dup); // obj, obj
-                    generator.Emit(OpCodes.Ldstr, reader.GetName(i)); // obj, obj, fieldname
+                    generator.Emit(OpCodes.Ldstr, fieldName); // obj, obj, fieldname
 
                     // Get the converter
                     var converter = mapper.GetFromDbConverter(null, sourceType);
-
-                    /*
-                                if (ForceDateTimesToUtc && converter == null && sourceType == typeof(DateTime))
-                                converter = delegate(object src) { return new DateTime(((DateTime)src).Ticks, DateTimeKind.Utc); };
-                                */
 
                     // Setup stack for call to converter
                     AddConverterToStack(generator, converter);
@@ -256,8 +223,6 @@ namespace Startitecture.Orm.Mapper
                 const BindingFlags InstanceConstructors = BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic;
                 generator.Emit(OpCodes.Newobj, type.GetConstructor(InstanceConstructors, null, Array.Empty<Type>(), null));
 
-                ////int columnsMapped = attributeDefinitions.Count;
-
                 // Enumerate all fields generating a set assignment for the column
                 for (var i = dataRequest.FirstColumn; i < dataRequest.FirstColumn + dataRequest.FieldCount; i++)
                 {
@@ -266,14 +231,12 @@ namespace Startitecture.Orm.Mapper
 
                     // We may need to set multiple attributes based on a single reader column when there are multiple paths in a POCO to 
                     // the same object reference.
-                    var attribute = attributeDefinitions.FirstOrDefault(x => x.ReferenceName == key);
+                    var attribute = definitions.FirstOrDefault(x => x.ReferenceName == key);
 
                     if (attribute == EntityAttributeDefinition.Empty)
                     {
                         continue;
                     }
-
-                    ////delegateInfo.MapDefinition(attribute);
 
                     // Get the source type for this column
                     var sourceType = reader.GetFieldType(i);
@@ -306,18 +269,18 @@ namespace Startitecture.Orm.Mapper
 
                     if (converter == null)
                     {
-                        var valuegetter = typeof(IDataRecord).GetMethod(string.Concat("Get", sourceType.Name), new[] { typeof(int) });
+                        var valueGetter = typeof(IDataRecord).GetMethod(string.Concat("Get", sourceType.Name), new[] { typeof(int) });
 
                         var nullableType = Nullable.GetUnderlyingType(destinationType);
 
-                        var valueGetterMatchesType = valuegetter != null && valuegetter.ReturnType == sourceType
-                                                     && (valuegetter.ReturnType == destinationType || valuegetter.ReturnType == nullableType);
+                        var valueGetterMatchesType = valueGetter != null && valueGetter.ReturnType == sourceType
+                                                     && (valueGetter.ReturnType == destinationType || valueGetter.ReturnType == nullableType);
 
                         if (valueGetterMatchesType)
                         {
                             generator.Emit(OpCodes.Ldarg_0); // *,rdr
                             generator.Emit(OpCodes.Ldc_I4, i); // *,rdr,i
-                            generator.Emit(OpCodes.Callvirt, valuegetter); // *,value
+                            generator.Emit(OpCodes.Callvirt, valueGetter); // *,value
 
                             // Convert to Nullable
                             if (nullableType != null)
@@ -364,13 +327,6 @@ namespace Startitecture.Orm.Mapper
                     generator.MarkLabel(nextLabel);
                 }
 
-                ////if (columnsMapped != 0)
-                ////{
-                ////    throw new OperationException(
-                ////        delegateInfo,
-                ////        $"Expected {dataRequest.FieldCount} columns, {columnsMapped} columns were not mapped.");
-                ////}
-
                 var onLoadedMethod = RecurseInheritedTypes(type, x => x.GetMethod("OnLoaded", InstanceConstructors, null, Array.Empty<Type>(), null));
 
                 if (onLoadedMethod != null)
@@ -397,7 +353,6 @@ namespace Startitecture.Orm.Mapper
 
             // Cache it, return it
             var mappingDelegate = method.CreateDelegate(Expression.GetFuncType(typeof(IDataReader), type));
-            ////delegateInfo.SetDelegate(mappingDelegate);
             return new PocoDelegateInfo(mappingDelegate);
         }
 
@@ -442,12 +397,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(dataRequest));
             }
 
-            var entityDefinition = dataRequest.EntityDefinition;
-            var attributeDefinitions = this.directOnly
-                               ? entityDefinition.DirectAttributes.ToList()
-                               : entityDefinition.ReturnableAttributes.ToList();
-
-            return CreateDelegate(dataRequest, type, attributeDefinitions);
+            return CreateDelegate(dataRequest, type, dataRequest.AttributeDefinitions);
         }
 
         /// <summary>
@@ -506,13 +456,6 @@ namespace Startitecture.Orm.Mapper
                     return converter;
                 }
             }
-
-            ////// Standard DateTime->Utc mapper
-            ////if (column != null && column.ForceToUtc && sourceType == typeof(DateTime)
-            ////    && (destinationType == typeof(DateTime) || destinationType == typeof(DateTime?)))
-            ////{
-            ////    return src => new DateTime(((DateTime)src).Ticks, DateTimeKind.Utc);
-            ////}
 
             // Forced type conversion including integral types -> enum
             if (destinationType.IsEnum && IsIntegralType(sourceType))

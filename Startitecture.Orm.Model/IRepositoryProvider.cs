@@ -17,7 +17,7 @@ namespace Startitecture.Orm.Model
     using JetBrains.Annotations;
 
     /// <summary>
-    /// Provides an interface to concrete repositories.
+    /// Provides an interface to concrete entity repositories.
     /// </summary>
     public interface IRepositoryProvider : IDisposable
     {
@@ -42,7 +42,7 @@ namespace Startitecture.Orm.Model
         bool EnableCaching { get; set; }
 
         /// <summary>
-        /// Gets or sets the amount of time after which cached items will expire.
+        /// Gets or sets the amount of time after which cached entities will expire.
         /// </summary>
         TimeSpan CacheExpiration { get; set; }
 
@@ -74,19 +74,19 @@ namespace Startitecture.Orm.Model
         IDbTransaction StartTransaction(IsolationLevel isolationLevel);
 
         /// <summary>
-        /// Determines whether an item exists given the specified unique key.
+        /// Determines whether an entity exists given the specified unique key.
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
+        /// <typeparam name="T">
+        /// The type of entity in the repository.
         /// </typeparam>
         /// <param name="selection">
-        /// A selection for the specified item or items to query for existence. 
+        /// A selection for the specified entity or entities to query for existence. 
         /// </param>
         /// <returns>
-        /// <c>true</c> if the item exists; otherwise, <c>false</c>.
+        /// <c>true</c> if the entity exists; otherwise, <c>false</c>.
         /// </returns>
-        bool Contains<TDataItem>(EntitySelection<TDataItem> selection)
-            where TDataItem : ITransactionContext;
+        bool Contains<T>(EntitySet<T> selection)
+            where T : ITransactionContext;
 
         /// <summary>
         /// Gets a scalar result from the specified query.
@@ -103,99 +103,108 @@ namespace Startitecture.Orm.Model
         T GetScalar<T>(ISelection selection);
 
         /// <summary>
-        /// Gets the first item matching the selection, or the default value if the item cannot be found.
+        /// Gets the first entity matching the selection, or the default value if the entity cannot be found.
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
+        /// <typeparam name="T">
+        /// The type of entity in the repository.
         /// </typeparam>
         /// <param name="selection">
-        /// A selection for the specified item to return. 
+        /// A selection for the specified entity to return. 
         /// </param>
         /// <returns>
-        /// The first <typeparamref name="TDataItem"/> item matching the filter, or the default value if no matching item is found.
+        /// The first <typeparamref name="T"/> entity matching the filter, or the default value if no matching entity is found.
         /// </returns>
-        TDataItem GetFirstOrDefault<TDataItem>(EntitySelection<TDataItem> selection)
-            where TDataItem : ITransactionContext;
+        T FirstOrDefault<T>(EntitySelection<T> selection)
+            where T : ITransactionContext;
 
         /// <summary>
-        /// Selects a matching list of items from the repository.
+        /// Gets the first entity matching the selection, or the default value if the entity cannot be found.
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
+        /// <param name="selection">
+        /// A selection for the specified entity to return. 
+        /// </param>
+        /// <returns>
+        /// The first entity matching the filter, or the default value if no matching entity is found.
+        /// </returns>
+        dynamic FirstOrDefault(ISelection selection);
+
+        /// <summary>
+        /// Selects a matching list of entities from the repository.
+        /// </summary>
+        /// <typeparam name="T">
+        /// The type of entity in the repository.
         /// </typeparam>
         /// <param name="selection">
-        /// A selection for the specified items to return. 
+        /// A selection for the specified entities to return. 
         /// </param>
         /// <returns>
-        /// A collection of items that match the filter.
+        /// A collection of entities that match the filter.
         /// </returns>
-        IEnumerable<TDataItem> GetSelection<TDataItem>(EntitySelection<TDataItem> selection)
-            where TDataItem : ITransactionContext;
+        IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection)
+            where T : ITransactionContext;
 
         /// <summary>
-        /// Deletes the items matching the filter.
+        /// Inserts an entity into the repository.
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
+        /// <typeparam name="T">
+        /// The type of entity in the repository.
         /// </typeparam>
-        /// <param name="selection">
-        /// A selection for the specified items to delete. 
+        /// <param name="entity">
+        /// The entity to insert.
         /// </param>
         /// <returns>
-        /// The number of deleted items as an <see cref="int"/>.
+        /// The inserted <typeparamref name="T"/>.
         /// </returns>
-        int DeleteItems<TDataItem>(EntitySelection<TDataItem> selection)
-            where TDataItem : ITransactionContext;
+        T Insert<T>(T entity) 
+            where T : ITransactionContext;
 
         /// <summary>
-        /// Inserts a data item into the repository.
+        /// Updates a set of entities in the repository.
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
-        /// </typeparam>
-        /// <param name="dataItem">
-        /// The data item to insert.
+        /// <param name="updateSet">
+        /// The update set that defines the entities and entity attributes to update.
         /// </param>
+        /// <typeparam name="T">
+        /// The type of entity to update.
+        /// </typeparam>
         /// <returns>
-        /// The inserted <typeparamref name="TDataItem"/>.
+        /// The number of affected entities as an <see cref="int"/>.
         /// </returns>
-        TDataItem InsertItem<TDataItem>(TDataItem dataItem) 
-            where TDataItem : ITransactionContext;
+        /// <remarks>
+        /// The number of affected entities can include rows affected by triggers on the target table.
+        /// </remarks> 
+        int Update<T>(UpdateSet<T> updateSet)
+            where T : ITransactionContext;
 
         /// <summary>
-        /// Updates a selection of items in the repository.
+        /// Updates a selection of entities in the repository.
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
+        /// <typeparam name="T">
+        /// The type of entity in the repository.
         /// </typeparam>
-        /// <param name="dataItem">
-        /// The item that contains the update.
+        /// <param name="entity">
+        /// The entity that contains the update.
         /// </param>
         /// <param name="setExpressions">
         /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
         /// </param>
-        void UpdateItem<TDataItem>(TDataItem dataItem, params Expression<Func<TDataItem, object>>[] setExpressions);
+        void UpdateSingle<T>(T entity, params Expression<Func<T, object>>[] setExpressions)
+            where T : ITransactionContext;
 
         /// <summary>
-        /// Updates a selection of items in the repository.
+        /// Deletes the entities matching the filter.
         /// </summary>
-        /// <typeparam name="TDataItem">
-        /// The type of data item in the repository.
+        /// <typeparam name="T">
+        /// The type of entity in the repository.
         /// </typeparam>
-        /// <param name="dataItem">
-        /// The item that contains the update.
-        /// </param>
         /// <param name="selection">
-        /// The selection to update.
-        /// </param>
-        /// <param name="setExpressions">
-        /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
+        /// A selection for the specified entities to delete. 
         /// </param>
         /// <returns>
-        /// The number of updated rows.
+        /// The number of deleted entities as an <see cref="int"/>.
         /// </returns>
-        int Update<TDataItem>(TDataItem dataItem, EntitySelection<TDataItem> selection, params Expression<Func<TDataItem, object>>[] setExpressions)
-            where TDataItem : ITransactionContext;
+        int Delete<T>(EntitySelection<T> selection)
+            where T : ITransactionContext;
 
         /// <summary>
         /// Executes the specified operation.
@@ -252,7 +261,7 @@ namespace Startitecture.Orm.Model
         /// The parameter values.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of items in the type of <typeparamref name="T"/>.
+        /// An <see cref="IEnumerable{T}"/> of entities in the type of <typeparamref name="T"/>.
         /// </returns>
         IEnumerable<T> ExecuteForResult<T>([NotNull] string executionStatement, [NotNull] params object[] parameterValues);
     }

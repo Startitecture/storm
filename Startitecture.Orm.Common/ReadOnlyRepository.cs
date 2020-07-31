@@ -134,13 +134,16 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            var dataItem = this.GetExampleEntity(candidate);
-            var uniqueItemSelection = this.GetUniqueItemSelection(dataItem);
-            return this.RepositoryProvider.Contains(uniqueItemSelection);
+            var exampleEntity = this.GetExampleEntity(candidate);
+            var entitySet = this.uniqueKeyExpressions.Any() ?
+                                this.GetUniqueKeySet(exampleEntity) : 
+                                new EntitySet<TEntity>().MatchKey(exampleEntity, this.RepositoryProvider.EntityDefinitionProvider);
+
+            return this.RepositoryProvider.Contains(entitySet);
         }
 
         /// <inheritdoc />
-        public bool Contains<TItem>([NotNull] EntitySelection<TItem> selection)
+        public bool Contains<TItem>([NotNull] EntitySet<TItem> selection)
         {
             if (selection == null)
             {
@@ -165,16 +168,16 @@ namespace Startitecture.Orm.Common
 
             TModel entity;
 
-            var selectionItem = this.GetExampleEntity(candidate);
-            var uniqueItemSelection = this.GetUniqueItemSelection(selectionItem);
+            var exampleEntity = this.GetExampleEntity(candidate);
+            var entitySelection = this.GetUniqueItemSelection(exampleEntity);
 
             // Because we want to hydrate the entire entity, we need to add joins if available.
             foreach (var relation in this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>().DefaultRelations)
             {
-                uniqueItemSelection.AddRelation(relation);
+                entitySelection.AddRelation(relation);
             }
 
-            var cacheResult = this.QueryCache(uniqueItemSelection);
+            var cacheResult = this.QueryCache(entitySelection);
 
             if (cacheResult.Hit)
             {
@@ -182,7 +185,7 @@ namespace Startitecture.Orm.Common
             }
             else
             {
-                var dataItem = this.RepositoryProvider.GetFirstOrDefault(uniqueItemSelection);
+                var dataItem = this.RepositoryProvider.FirstOrDefault(entitySelection);
 
                 if (Evaluate.IsNull(dataItem))
                 {
@@ -206,20 +209,20 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var item = this.RepositoryProvider.GetFirstOrDefault(selection.MapTo<TEntity>());
-            return item != null ? this.EntityMapper.Map<TModel>(item) : default;
+            var entity = this.RepositoryProvider.FirstOrDefault(selection.MapTo<TEntity>());
+            return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
         }
 
         /// <inheritdoc />
         public IEnumerable<TModel> SelectAll()
         {
             var exampleSelection = new EntitySelection<TEntity>();
-            var dataItems = this.RepositoryProvider.GetSelection(exampleSelection);
-            return this.SelectResults(dataItems);
+            var entities = this.RepositoryProvider.SelectEntities(exampleSelection);
+            return this.SelectResults(entities);
         }
 
         /// <inheritdoc />
-        public IEnumerable<TModel> Select<TItem>([NotNull] EntitySelection<TItem> selection)
+        public IEnumerable<TModel> SelectEntities<TItem>([NotNull] EntitySelection<TItem> selection)
         {
             if (selection == null)
             {
@@ -227,8 +230,8 @@ namespace Startitecture.Orm.Common
             }
 
             var mappedSelection = selection.MapTo<TEntity>();
-            var dataItems = this.RepositoryProvider.GetSelection(mappedSelection);
-            return this.SelectResults(dataItems);
+            var entities = this.RepositoryProvider.SelectEntities(mappedSelection);
+            return this.SelectResults(entities);
         }
 
         /// <summary>
@@ -247,14 +250,14 @@ namespace Startitecture.Orm.Common
                 return new UniqueQuery<TEntity>(this.RepositoryProvider.EntityDefinitionProvider, entity);
             }
 
-            var itemSelection = new EntitySelection<TEntity>();
+            var entitySelection = new EntitySelection<TEntity>();
 
             foreach (var keyExpression in this.uniqueKeyExpressions)
             {
-                itemSelection.WhereEqual(keyExpression, keyExpression.Compile().Invoke(entity));
+                entitySelection.WhereEqual(keyExpression, keyExpression.Compile().Invoke(entity));
             }
 
-            return itemSelection;
+            return entitySelection;
         }
 
         /// <summary>
@@ -299,7 +302,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(key));
             }
 
-            TEntity dataItem;
+            TEntity exampleEntity;
             var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>();
 
             var keyDefinitions = this.uniqueKeyExpressions.Count == 0
@@ -312,12 +315,12 @@ namespace Startitecture.Orm.Common
             if (keyType.IsValueType || key is string)
             {
                 // If the example is a value type, create a new data item as an example and set the key. Assumption is that the two are compatible.
-                dataItem = new TEntity();
+                exampleEntity = new TEntity();
                 var keyDefinition = keyDefinitions.First();
 
                 try
                 {
-                    keyDefinition.SetValueDelegate.DynamicInvoke(dataItem, key);
+                    keyDefinition.SetValueDelegate.DynamicInvoke(exampleEntity, key);
                 }
                 catch (ArgumentException ex)
                 {
@@ -361,19 +364,19 @@ namespace Startitecture.Orm.Common
                 switch (key)
                 {
                     case TEntity entity:
-                        dataItem = entity;
+                        exampleEntity = entity;
                         break;
                     case ExpandoObject expando:
                         
                         // Handle dynamics 
-                        dataItem = new TEntity();
+                        exampleEntity = new TEntity();
 
                         foreach (var attribute in keyDefinitions)
                         {
                             try
                             {
                                 attribute.SetValueDelegate.DynamicInvoke(
-                                    dataItem,
+                                    exampleEntity,
                                     expando.FirstOrDefault(pair => pair.Key == attribute.PropertyName).Value);
                             }
                             catch (ArgumentException ex)
@@ -419,7 +422,7 @@ namespace Startitecture.Orm.Common
                     default:
 
                         // Handle anonymous types, require all key definitions to be set.
-                        dataItem = new TEntity();
+                        exampleEntity = new TEntity();
                         bool anyNull = false;
 
                         foreach (var attribute in keyDefinitions)
@@ -434,7 +437,7 @@ namespace Startitecture.Orm.Common
                                     break;
                                 }
 
-                                attribute.SetValueDelegate.DynamicInvoke(dataItem, value);
+                                attribute.SetValueDelegate.DynamicInvoke(exampleEntity, value);
                             }
                             catch (ArgumentException ex)
                             {
@@ -477,15 +480,36 @@ namespace Startitecture.Orm.Common
                         // If any key definitions are null, our last resort is to try the mapper.
                         if (anyNull)
                         {
-                            dataItem = this.EntityMapper.Map<TEntity>(key);
+                            exampleEntity = this.EntityMapper.Map<TEntity>(key);
                         }
 
                         break;
                 }
             }
 
-            dataItem.SetTransactionProvider(this.RepositoryProvider);
-            return dataItem;
+            exampleEntity.SetTransactionProvider(this.RepositoryProvider);
+            return exampleEntity;
+        }
+
+        /// <summary>
+        /// Gets a unique key set for the <paramref name="exampleEntity"/>.
+        /// </summary>
+        /// <param name="exampleEntity">
+        /// The example entity to get a unique key set for.
+        /// </param>
+        /// <returns>
+        /// An <see cref="EntitySet{TEntity}"/> based on the unique keys specified in the <see cref="ReadOnlyRepository{TModel,TEntity}"/>.
+        /// </returns>
+        private EntitySet<TEntity> GetUniqueKeySet(TEntity exampleEntity)
+        {
+            var set = new EntitySet<TEntity>();
+
+            foreach (var keyExpression in this.uniqueKeyExpressions)
+            {
+                set.WhereEqual(keyExpression, keyExpression.Compile().Invoke(exampleEntity));
+            }
+
+            return set;
         }
 
         /// <summary>
@@ -535,18 +559,18 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Selects results and adds them to the cache.
         /// </summary>
-        /// <param name="dataItems">
+        /// <param name="entities">
         /// The data items to select into the results collection.
         /// </param>
         /// <returns>
         /// A collection of entities based on the specified data items.
         /// </returns>
-        private IEnumerable<TModel> SelectResults(IEnumerable<TEntity> dataItems)
+        private IEnumerable<TModel> SelectResults(IEnumerable<TEntity> entities)
         {
             var results = new List<TModel>();
 
             // Order the list of data items if desired.
-            var items = this.selectionComparer == null ? dataItems : dataItems.OrderBy(x => x, this.selectionComparer);
+            var items = this.selectionComparer == null ? entities : entities.OrderBy(x => x, this.selectionComparer);
 
             // TODO: Put results in the container for usage by the construct entity hook.
             foreach (var dataItem in items)

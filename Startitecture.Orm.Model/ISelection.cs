@@ -6,29 +6,13 @@
 
 namespace Startitecture.Orm.Model
 {
-    using System;
     using System.Collections.Generic;
 
     /// <summary>
     /// The selection interface.
     /// </summary>
-    public interface ISelection
+    public interface ISelection : IEntitySet
     {
-        /// <summary>
-        /// Gets the type of the entity to select.
-        /// </summary>
-        Type EntityType { get; }
-
-        /// <summary>
-        /// Gets the entity relations represented in the selection.
-        /// </summary>
-        IEnumerable<IEntityRelation> Relations { get; }
-
-        /// <summary>
-        /// Gets the property values for the selection filter.
-        /// </summary>
-        IEnumerable<object> PropertyValues { get; }
-
         /// <summary>
         /// Gets the selection expressions.
         /// </summary>
@@ -40,23 +24,8 @@ namespace Startitecture.Orm.Model
         IEnumerable<OrderExpression> OrderByExpressions { get; }
 
         /// <summary>
-        /// Gets the filters for the selection.
-        /// </summary>
-        IEnumerable<ValueFilter> Filters { get; }
-
-        /// <summary>
         /// Gets the page options for the selection.
         /// </summary>
         ResultPage Page { get; }
-
-        /// <summary>
-        /// Gets the child selection, if any, for the selection.
-        /// </summary>
-        LinkedSelection LinkedSelection { get; }
-
-        /// <summary>
-        /// Gets the table expression for this selection.
-        /// </summary>
-        EntityExpression ParentExpression { get; }
     }
 }

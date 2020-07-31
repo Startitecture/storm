@@ -69,18 +69,6 @@ namespace Startitecture.Orm.Model
         /// </summary>
         IEnumerable<IEntityRelation> DefaultRelations { get; }
 
-        /////// <summary>
-        /////// Finds the first <see cref="EntityAttributeDefinition"/> matching the property name.
-        /////// </summary>
-        /////// <param name="propertyName">
-        /////// The property name.
-        /////// </param>
-        /////// <returns>
-        /////// The <see cref="EntityAttributeDefinition"/> that matches the property name, or 
-        /////// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
-        /////// </returns>
-        ////EntityAttributeDefinition Find([NotNull] string propertyName);
-
         /// <summary>
         /// Finds the first <see cref="EntityAttributeDefinition"/> matching the <paramref name="attributeLocation"/>.
         /// </summary>
@@ -126,5 +114,16 @@ namespace Startitecture.Orm.Model
         /// attribute may not be found.
         /// </remarks>
         EntityAttributeDefinition Find([NotNull] LambdaExpression attributeExpression);
+
+        /// <summary>
+        /// Determines whether a specified <paramref name="attributeDefinition"/> is updateable.
+        /// </summary>
+        /// <param name="attributeDefinition">
+        /// The attribute definition to evaluate.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the <paramref name="attributeDefinition"/> can be updated on an existing entity; otherwise, <c>false</c>.
+        /// </returns>
+        bool IsUpdateable(EntityAttributeDefinition attributeDefinition);
     }
 }

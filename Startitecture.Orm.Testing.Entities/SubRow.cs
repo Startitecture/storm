@@ -15,6 +15,7 @@ namespace Startitecture.Orm.Testing.Entities
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;

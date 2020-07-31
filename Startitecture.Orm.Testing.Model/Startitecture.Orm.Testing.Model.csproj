@@ -40,7 +40,6 @@
     <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
-    <ProjectReference Include="..\Startitecture.Orm.Sql\Startitecture.Orm.Sql.csproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="FieldsMessages.resx">

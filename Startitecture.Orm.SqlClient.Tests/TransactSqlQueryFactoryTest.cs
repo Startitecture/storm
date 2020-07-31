@@ -26,7 +26,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_SelectionStatementForDirectData_MatchesExpected()
+        public void CreateSelectionStatement_DirectData_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -79,8 +79,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -88,7 +88,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_DefaultSelectionStatementForDirectData_AllColumnsIncluded()
+        public void CreateSelectionStatement_DirectDataDefaultColumns_AllColumnsIncluded()
         {
             var transactionSelection = Select.From<DataRow>()
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
@@ -151,8 +151,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -160,7 +160,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_CountStatementForDirectData_MatchesExpected()
+        public void CreateSelectionStatement_CountDirectData_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>().Count(row => row.FakeDataId)
@@ -196,8 +196,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -205,7 +205,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_PageStatementForDirectData_MatchesExpected()
+        public void CreateSelectionStatement_PagedDirectData_MatchesExpected()
         {
             var tableExpression = Select.From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
@@ -303,8 +303,8 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -312,17 +312,10 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_ContainsStatementForDirectData_MatchesExpected()
+        public void CreateExistsStatement_DirectData_MatchesExpected()
         {
             var transactionSelection = Select
-                .From<DataRow>(
-                    row => row.FakeDataId,
-                    row => row.NormalColumn,
-                    row => row.NullableColumn,
-                    row => row.NullableValueColumn,
-                    row => row.ValueColumn,
-                    row => row.AnotherColumn,
-                    row => row.AnotherValueColumn)
+                .From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -342,7 +335,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"IF EXISTS (
 SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -361,8 +354,121 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsContains(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateExistsStatement(transactionSelection);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ direct data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_DirectData_MatchesExpected()
+        {
+            var match = new DataRow
+                            {
+                                NormalColumn = "NormalColumn",
+                                NullableColumn = "CouldHaveBeenNull",
+                                ValueColumn = 2,
+                                NullableValueColumn = null,
+                                AnotherValueColumn = 12,
+                                AnotherColumn = "Some Other Value"
+                            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = @1,
+[dbo].[FakeData].[ValueColumn] = @2,
+[dbo].[FakeData].[AnotherValueColumn] = @3,
+[dbo].[FakeData].[AnotherColumn] = @4,
+[dbo].[FakeData].[NullableValueColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @5 AND
+[dbo].[FakeData].[NullableColumn] LIKE @6 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ direct data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_DirectDataSpecificSetValues_MatchesExpected()
+        {
+            var match = new DataRow
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @1 AND
+[dbo].[FakeData].[NullableColumn] LIKE @2 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -370,7 +476,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_DeletionStatementForDirectData_MatchesExpected()
+        public void CreateDeletionStatement_DirectData_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -412,8 +518,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsDelete(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -421,7 +527,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_SelectionStatementForDirectDataRaisedRow_MatchesExpected()
+        public void CreateSelectionStatement_DirectDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -474,8 +580,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -483,7 +589,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_CountStatementForDirectDataRaisedRow_MatchesExpected()
+        public void CreateSelectionStatement_CountDirectDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>().Count(row => row.FakeDataId)
@@ -519,8 +625,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -528,7 +634,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_PageStatementForDirectDataRaisedRow_MatchesExpected()
+        public void CreateSelectionStatement_PagedDirectDataRaisedRow_MatchesExpected()
         {
             var tableExpression = Select.From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
@@ -626,8 +732,8 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -635,17 +741,10 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_ContainsStatementForDirectDataRaisedRow_MatchesExpected()
+        public void CreateExistsStatement_DirectDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select
-                .From<DataRow>(
-                    row => row.FakeDataId,
-                    row => row.NormalColumn,
-                    row => row.NullableColumn,
-                    row => row.NullableValueColumn,
-                    row => row.ValueColumn,
-                    row => row.AnotherColumn,
-                    row => row.AnotherValueColumn)
+                .From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -665,7 +764,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"IF EXISTS (
 SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -684,8 +783,124 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsContains(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateExistsStatement(transactionSelection);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ direct data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_RaisedDirectData_MatchesExpected()
+        {
+            var match = new DataRow
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = @1,
+[dbo].[FakeData].[ValueColumn] = @2,
+[dbo].[FakeData].[AnotherValueColumn] = @3,
+[dbo].[FakeData].[AnotherColumn] = @4,
+[dbo].[FakeData].[NullableValueColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @5 AND
+[dbo].[FakeData].[NullableColumn] LIKE @6 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ direct data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_RaisedDirectDataSpecificSetValues_MatchesExpected()
+        {
+            var match = new DataRow
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateSet = new UpdateSet<DataRow>().Set(
+                dataRow,
+                row => row.NormalColumn,
+                row => row.NullableColumn).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @1 AND
+[dbo].[FakeData].[NullableColumn] LIKE @2 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -693,7 +908,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement direct data matches expected. Deletion statements ignore ORDER BY.
         /// </summary>
         [TestMethod]
-        public void Create_DeletionStatementForDirectDataRaisedRow_MatchesExpected()
+        public void CreateDeletionStatement_DirectDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -738,8 +953,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsDelete(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -747,7 +962,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_SelectionStatementForRelatedData_MatchesExpected()
+        public void CreateSelectionStatement_RelatedData_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -800,8 +1015,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -809,7 +1024,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_CountStatementForRelatedData_MatchesExpected()
+        public void CreateSelectionStatement_CountRelatedData_MatchesExpected()
         {
             var transactionSelection = Select.From<DataRow>()
                 .Count(row => row.FakeDataId)
@@ -841,8 +1056,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -850,7 +1065,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_PageStatementForRelatedData_MatchesExpected()
+        public void CreateSelectionStatement_PagedRelatedData_MatchesExpected()
         {
             var tableExpression = Select.From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
@@ -944,8 +1159,8 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -953,19 +1168,10 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_ContainsStatementForRelatedData_MatchesExpected()
+        public void CreateExistsStatement_RelatedData_MatchesExpected()
         {
             var transactionSelection = Select
-                .From<DataRow>(
-                    row => row.FakeDataId,
-                    row => row.NormalColumn,
-                    row => row.Related.RelatedId,
-                    row => row.Related.RelatedProperty,
-                    row => row.Related.RelatedId,
-                    row => row.RelatedAlias.RelatedProperty,
-                    row => row.OtherAlias.RelatedId,
-                    row => row.OtherAlias.RelatedProperty,
-                    row => row.ParentFakeDataId)
+                .From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -983,7 +1189,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"IF EXISTS (
 SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1000,8 +1206,133 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsContains(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateExistsStatement(transactionSelection);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ related data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_RelatedData_MatchesExpected()
+        {
+            var match = new DataRow
+                            {
+                                NormalColumn = "NormalColumn",
+                                RelatedAlias = new FakeRelatedRow
+                                                   {
+                                                       RelatedProperty = "Related"
+                                                   },
+                                NullableColumn = "CouldHaveBeenNull",
+                                ValueColumn = 2,
+                                NullableValueColumn = null,
+                                AnotherValueColumn = 12,
+                                AnotherColumn = "Some Other Value"
+                            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = @1,
+[dbo].[FakeData].[ValueColumn] = @2,
+[dbo].[FakeData].[AnotherValueColumn] = @3,
+[dbo].[FakeData].[AnotherColumn] = @4,
+[dbo].[FakeData].[NullableValueColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @5 AND
+[dbo].[FakeData].[NullableColumn] LIKE @6 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[RelatedAlias].[RelatedProperty] LIKE @7 AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ related data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_RelatedDataSpecificSetValues_MatchesExpected()
+        {
+            var match = new DataRow
+                            {
+                                NormalColumn = "NormalColumn",
+                                RelatedAlias = new FakeRelatedRow
+                                                   {
+                                                       RelatedProperty = "Related"
+                                                   },
+                                NullableColumn = "CouldHaveBeenNull",
+                                ValueColumn = 2,
+                                NullableValueColumn = null,
+                            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @1 AND
+[dbo].[FakeData].[NullableColumn] LIKE @2 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[RelatedAlias].[RelatedProperty] LIKE @3 AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1009,7 +1340,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_DeletionStatementForRelatedData_MatchesExpected()
+        public void CreateDeletionStatement_RelatedData_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -1049,8 +1380,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsDelete(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1058,7 +1389,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_SelectionStatementForRelatedDataRaisedRow_MatchesExpected()
+        public void CreateSelectionStatement_RelatedDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -1111,8 +1442,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1120,7 +1451,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_CountStatementForRelatedDataRaisedRow_MatchesExpected()
+        public void CreateSelectionStatement_CountRelatedDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select.From<DataRow>()
                 .Count(row => row.FakeDataId)
@@ -1152,8 +1483,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1161,7 +1492,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_PageStatementForRelatedDataRaisedRow_MatchesExpected()
+        public void CreateSelectionStatement_PagedRelatedDataRaisedRow_MatchesExpected()
         {
             var tableExpression = Select
                 .From<DataRow>(row => row.FakeDataId)
@@ -1257,8 +1588,8 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1266,19 +1597,10 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_ContainsStatementForRelatedDataRaisedRow_MatchesExpected()
+        public void CreateExistsStatement_RelatedDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select
-                .From<DataRow>(
-                    row => row.FakeDataId,
-                    row => row.NormalColumn,
-                    row => row.ParentFakeDataId,
-                    row => row.Related.RelatedId,
-                    row => row.Related.RelatedProperty,
-                    row => row.RelatedAlias.RelatedId,
-                    row => row.RelatedAlias.RelatedProperty,
-                    row => row.OtherAlias.RelatedId,
-                    row => row.OtherAlias.RelatedProperty)
+                .From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -1296,7 +1618,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"IF EXISTS (
 SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1313,8 +1635,127 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsContains(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateExistsStatement(transactionSelection);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ related data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_RaisedRelatedData_MatchesExpected()
+        {
+            var match = new DataRow
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related" },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = @1,
+[dbo].[FakeData].[ValueColumn] = @2,
+[dbo].[FakeData].[AnotherValueColumn] = @3,
+[dbo].[FakeData].[AnotherColumn] = @4,
+[dbo].[FakeData].[NullableValueColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @5 AND
+[dbo].[FakeData].[NullableColumn] LIKE @6 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[RelatedAlias].[RelatedProperty] LIKE @7 AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The update statement_ related data_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateUpdateStatement_RaisedRelatedDataSpecificSetValues_MatchesExpected()
+        {
+            var match = new DataRow
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow { RelatedProperty = "Related" },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
+
+            var baseline = new DataRow { FakeDataId = 10 };
+            var boundary = new DataRow { FakeDataId = 20 };
+            var selection = Select.Where<DataRow>()
+                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
+                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
+                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
+                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                .Between(baseline, boundary, row => row.FakeDataId);
+
+            var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
+            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn).Where(selection);
+
+            const string Expected = @"UPDATE [dbo].[FakeData]
+SET
+[dbo].[FakeData].[NormalColumn] = @0,
+[dbo].[FakeData].[NullableColumn] = NULL
+FROM [dbo].[FakeData]
+INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [OtherAlias] ON [dbo].[FakeData].[FakeRowId] = [OtherAlias].[FakeDataId]
+INNER JOIN [dbo].[DependencyEntity] AS [RelatedDependency] ON [OtherAlias].[RelatedId] = [RelatedDependency].[ComplexEntityId]
+INNER JOIN [someschema].[Related] AS [RelatedAlias] ON [dbo].[FakeData].[FakeRowId] = [RelatedAlias].[FakeDataId]
+LEFT JOIN [dbo].[SubData] ON [dbo].[FakeData].[FakeRowId] = [dbo].[SubData].[FakeSubDataId]
+WHERE
+[dbo].[FakeData].[ValueColumn] = @1 AND
+[dbo].[FakeData].[NullableColumn] LIKE @2 AND
+[dbo].[FakeData].[NullableValueColumn] IS NULL AND
+[RelatedAlias].[RelatedProperty] LIKE @3 AND
+[dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1322,7 +1763,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_DeletionStatementForRelatedDataRaisedRow_MatchesExpected()
+        public void CreateDeletionStatement_RelatedDataRaisedRow_MatchesExpected()
         {
             var transactionSelection = Select
                 .From<DataRow>(
@@ -1362,8 +1803,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsDelete(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1371,7 +1812,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement union related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_SelectionStatementForUnionRelatedData_MatchesExpected()
+        public void CreateSelectionStatement_UnionRelatedData_MatchesExpected()
         {
             var match1 = new DataRow
             {
@@ -1541,8 +1982,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1550,7 +1991,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement union related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_ContainsStatementForUnionRelatedData_MatchesExpected()
+        public void CreateExistsStatement_UnionRelatedData_MatchesExpected()
         {
             var match1 = new DataRow
                              {
@@ -1595,12 +2036,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
             var boundary3 = new DataRow { FakeDataId = 70 };
 
             var transactionSelection = Select
-                .From<DataRow>(
-                    row => row.FakeDataId,
-                    row => row.NormalColumn,
-                    row => row.Related.RelatedId,
-                    row => row.RelatedAlias.RelatedProperty,
-                    row => row.OtherAlias.RelatedProperty)
+                .From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -1617,12 +2053,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
                 .OrderBy(row => row.NormalColumn)
                 .Union(
                     Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.Related.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
+                        .From<DataRow>(row => row.FakeDataId)
                         .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                         .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -1638,12 +2069,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
                         .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                         .OrderBy(row => row.NormalColumn)
                         .Union(
-                            Select.From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.Related.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
+                            Select.From<DataRow>(row => row.FakeDataId)
                                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -1661,7 +2087,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"IF EXISTS (
 (SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1677,7 +2103,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1693,7 +2119,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @5 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1710,8 +2136,8 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsContains(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1719,7 +2145,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement union related data matches expected. Deletion statements ignore UNIONs.
         /// </summary>
         [TestMethod]
-        public void Create_DeletionStatementForUnionRelatedData_MatchesExpected()
+        public void CreateDeletionStatement_UnionRelatedData_MatchesExpected()
         {
             var match1 = new DataRow
                              {
@@ -1822,8 +2248,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsDelete(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -1831,7 +2257,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         /// The selection statement union related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_SelectionStatementForUnionRelatedDataRaisedRow_MatchesExpected()
+        public void CreateSelectionStatement_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
                              {
@@ -2002,8 +2428,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsSelect(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -2011,7 +2437,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement union related data matches expected.
         /// </summary>
         [TestMethod]
-        public void Create_ContainsStatementForUnionRelatedDataRaisedRow_MatchesExpected()
+        public void CreateExistsStatement_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
                              {
@@ -2056,12 +2482,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
             var boundary3 = new DataRow { FakeDataId = 70 };
 
             var transactionSelection = Select
-                .From<DataRow>(
-                    row => row.FakeDataId,
-                    row => row.NormalColumn,
-                    row => row.RelatedAlias.RelatedId,
-                    row => row.RelatedAlias.RelatedProperty,
-                    row => row.OtherAlias.RelatedProperty)
+                .From<DataRow>(row => row.FakeDataId)
                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -2078,12 +2499,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
                 .OrderBy(row => row.NormalColumn)
                 .Union(
                     Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.RelatedAlias.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
+                        .From<DataRow>(row => row.FakeDataId)
                         .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                         .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -2100,12 +2516,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
                         .OrderBy(row => row.NormalColumn)
                         .Union(
                             Select
-                                .From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.RelatedAlias.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
+                                .From<DataRow>(row => row.FakeDataId)
                                 .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
@@ -2123,7 +2534,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"IF EXISTS (
 (SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2139,7 +2550,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2155,7 +2566,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @5 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    1
+    [dbo].[FakeData].[FakeRowId]
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2172,8 +2583,8 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsContains(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 
@@ -2181,7 +2592,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         /// The selection statement union related data matches expected. Deletion statements ignore linked statements.
         /// </summary>
         [TestMethod]
-        public void Create_DeletionStatementForUnionRelatedDataRaisedRow_MatchesExpected()
+        public void CreateDeletionStatement_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
                              {
@@ -2297,8 +2708,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlQueryFactory(definitionProvider);
-            var actual = target.Create(transactionSelection.AsDelete(definitionProvider.Resolve<DataRow>()));
+            var target = new TransactSqlFactory(definitionProvider);
+            var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
 

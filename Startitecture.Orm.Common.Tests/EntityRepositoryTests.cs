@@ -64,10 +64,10 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.GetFirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
+            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
                 .Returns(default(ComplexRaisedRow));
 
-            repositoryProvider.Setup(provider => provider.InsertItem(It.IsAny<ComplexRaisedRow>()))
+            repositoryProvider.Setup(provider => provider.Insert(It.IsAny<ComplexRaisedRow>()))
                 .Callback((ComplexRaisedRow row) => row.ComplexEntityId = 43)
                 .Returns((ComplexRaisedRow row) => row);
 
@@ -129,15 +129,15 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.GetFirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
+            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
                 .Returns(mapper.Map<ComplexRaisedRow>(baseline));
 
             repositoryProvider.Setup(
                     provider => provider.Contains(
-                        It.Is<EntitySelection<ComplexRaisedRow>>(selection => (int?)selection.PropertyValues.FirstOrDefault() == 22)))
+                        It.Is<EntitySet<ComplexRaisedRow>>(selection => (int?)selection.PropertyValues.FirstOrDefault() == 22)))
                 .Returns(true);
 
-            repositoryProvider.Setup(provider => provider.Update(It.IsAny<ComplexRaisedRow>(), It.IsAny<EntitySelection<ComplexRaisedRow>>()))
+            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<ComplexRaisedRow>>()))
                 .Returns(1);
 
             using (var provider = repositoryProvider.Object)
@@ -189,7 +189,7 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.DeleteItems(It.IsAny<EntitySelection<ComplexRaisedRow>>())).Returns(1);
+            repositoryProvider.Setup(provider => provider.Delete(It.IsAny<EntitySelection<ComplexRaisedRow>>())).Returns(1);
 
             int actual;
 
@@ -212,7 +212,7 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.DeleteItems(It.IsAny<EntitySelection<SubSubRow>>())).Returns(5);
+            repositoryProvider.Setup(provider => provider.Delete(It.IsAny<EntitySelection<SubSubRow>>())).Returns(5);
 
             int actual;
 

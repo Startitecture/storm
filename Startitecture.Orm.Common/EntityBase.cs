@@ -3,11 +3,11 @@
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   The transaction item base.
+//   The transaction entity base.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Mapper
+namespace Startitecture.Orm.Common
 {
     using System;
 
@@ -15,7 +15,7 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The transaction item base.
+    /// The transaction entity base.
     /// </summary>
     public class EntityBase : ITransactionContext
     {

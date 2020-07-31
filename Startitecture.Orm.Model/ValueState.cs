@@ -1,54 +1,56 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DependentRow.cs" company="Startitecture">
+// <copyright file="ValueState.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Testing.Entities
+namespace Startitecture.Orm.Model
 {
     using System;
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using System.ComponentModel.DataAnnotations.Schema;
-    using System.Globalization;
+
+    using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Common;
-    using Startitecture.Orm.Mapper;
 
     /// <summary>
-    /// The fake dependent row.
+    /// The value state.
     /// </summary>
-    [Table("DependentEntity")]
-    public class DependentRow : EntityBase, IEquatable<DependentRow>
+    public class ValueState : IEquatable<ValueState>
     {
         /// <summary>
         /// The comparison properties.
         /// </summary>
-        private static readonly Func<DependentRow, object>[] ComparisonProperties =
+        private static readonly Func<ValueState, object>[] ComparisonProperties =
             {
-                item => item.DependentIntegerValue,
-                item => item.DependentTimeValue
+                item => item.AttributeLocation,
+                item => item.Value
             };
 
         /// <summary>
-        /// Gets or sets the fake dependent entity id.
+        /// Initializes a new instance of the <see cref="ValueState"/> class.
         /// </summary>
-        [Column]
-        [Key]
-        public int FakeDependentEntityId { get; set; }
+        /// <param name="attributeLocation">
+        /// The attribute location.
+        /// </param>
+        /// <param name="value">
+        /// The value.
+        /// </param>
+        public ValueState([NotNull] AttributeLocation attributeLocation, object value)
+        {
+            this.AttributeLocation = attributeLocation ?? throw new ArgumentNullException(nameof(attributeLocation));
+            this.Value = value;
+        }
 
         /// <summary>
-        /// Gets or sets the dependent integer value.
+        /// Gets the attribute location.
         /// </summary>
-        [Column]
-        public int DependentIntegerValue { get; set; }
+        public AttributeLocation AttributeLocation { get; }
 
         /// <summary>
-        /// Gets or sets the dependent time value.
+        /// Gets the value.
         /// </summary>
-        [Column]
-        public DateTimeOffset DependentTimeValue { get; set; }
+        public object Value { get; }
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -62,9 +64,9 @@ namespace Startitecture.Orm.Testing.Entities
         /// <returns>
         /// <c>true</c> if the values are equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator ==(DependentRow valueA, DependentRow valueB)
+        public static bool operator ==(ValueState valueA, ValueState valueB)
         {
-            return EqualityComparer<DependentRow>.Default.Equals(valueA, valueB);
+            return EqualityComparer<ValueState>.Default.Equals(valueA, valueB);
         }
 
         /// <summary>
@@ -79,7 +81,7 @@ namespace Startitecture.Orm.Testing.Entities
         /// <returns>
         /// <c>true</c> if the values are not equal; otherwise, <c>false</c>.
         /// </returns>
-        public static bool operator !=(DependentRow valueA, DependentRow valueB)
+        public static bool operator !=(ValueState valueA, ValueState valueB)
         {
             return !(valueA == valueB);
         }
@@ -93,11 +95,11 @@ namespace Startitecture.Orm.Testing.Entities
         /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return Convert.ToString(this.DependentIntegerValue, CultureInfo.CurrentCulture);
+            return $"{this.AttributeLocation}='{this.Value}'";
         }
 
         /// <summary>
-        /// Serves as the default hash function. 
+        /// Serves as the default hash function.
         /// </summary>
         /// <returns>
         /// A hash code for the current object.
@@ -114,7 +116,10 @@ namespace Startitecture.Orm.Testing.Entities
         /// <returns>
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
+        /// <param name="obj">
+        /// The object to compare with the current object.
+        /// </param>
+        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -126,8 +131,10 @@ namespace Startitecture.Orm.Testing.Entities
         /// <returns>
         /// true if the current object is equal to the <paramref name="other"/> parameter; otherwise, false.
         /// </returns>
-        /// <param name="other">An object to compare with this object.</param>
-        public bool Equals(DependentRow other)
+        /// <param name="other">
+        /// An object to compare with this object.
+        /// </param>
+        public bool Equals(ValueState other)
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }

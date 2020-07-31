@@ -37,14 +37,6 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private static readonly Regex ParameterPrefixRegex = new Regex(@"(?<!@)@\w+", RegexOptions.Compiled);
 
-/*
-        /// <summary>
-        /// The poco factories.
-        /// </summary>
-        private static readonly MemoryCache<Tuple<string, string, int, int>, Delegate> PocoFactories =
-            new MemoryCache<Tuple<string, string, int, int>, Delegate>();
-*/
-
         #endregion
 
         #region Fields
@@ -89,13 +81,6 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private IDbTransaction transaction;
 
-/*
-        /// <summary>
-        /// The transaction cancelled.
-        /// </summary>
-        private bool transactionCancelled;
-*/
-
         /// <summary>
         /// The transaction depth.
         /// </summary>
@@ -126,15 +111,10 @@ namespace Startitecture.Orm.Mapper
         /// </remarks>
         public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
         {
-            if (nameQualifier == null)
-            {
-                throw new ArgumentNullException(nameof(nameQualifier));
-            }
-
             this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-
-            this.isConnectionUserProvided = true;
             this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
+            this.isConnectionUserProvided = true;
             this.connectionString = connection.ConnectionString;
             this.CommonConstruct();
 
@@ -182,14 +162,10 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
-            if (nameQualifier == null)
-            {
-                throw new ArgumentNullException(nameof(nameQualifier));
-            }
-
+            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
             this.connectionString = connectionString;
             this.providerName = providerName;
-            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.CommonConstruct();
 
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
@@ -228,14 +204,10 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionString));
             }
 
-            if (nameQualifier == null)
-            {
-                throw new ArgumentNullException(nameof(nameQualifier));
-            }
-
-            this.connectionString = connectionString;
             this.factory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
             this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
+            this.connectionString = connectionString;
             this.CommonConstruct();
 
             this.pocoFactory = new RaisedPocoFactory(definitionProvider);
@@ -245,29 +217,23 @@ namespace Startitecture.Orm.Mapper
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets or sets the timeout value for all SQL statements.
-        /// </summary>
+        /// <inheritdoc />
         public int CommandTimeout { get; set; }
 
-        /// <summary>
-        /// Gets the currently open shared connection (or null if none)
-        /// </summary>
+        /// <inheritdoc />
         public IDbConnection Connection { get; private set; }
 
-        /// <summary>
-        /// Gets or sets a value indicating whether parameters named <code>?myparam</code> are populated from properties of the passed
-        /// in argument values.
-        /// </summary>
+        /// <inheritdoc />
         public bool EnableNamedParameters { get; set; }
 
-        /// <summary>
-        /// Gets or sets the timeout value for the next (and only next) SQL statement.
-        /// </summary>
+        /// <inheritdoc />
         public int OnetimeCommandTimeout { get; set; }
 
         /// <inheritdoc />
         public IEntityDefinitionProvider DefinitionProvider { get; }
+
+        /// <inheritdoc />
+        public INameQualifier NameQualifier { get; }
 
         #endregion
 
@@ -304,7 +270,6 @@ namespace Startitecture.Orm.Mapper
             if (this.Connection.State == ConnectionState.Closed)
             {
                 this.Connection.Open();
-                ////this.OnConnectionOpened(this.Connection);
             }
         }
 
@@ -322,8 +287,6 @@ namespace Startitecture.Orm.Mapper
             {
                 this.OpenSharedConnection();
                 this.transaction = this.Connection.BeginTransaction();
-                ////this.transactionCancelled = false;
-                ////this.OnBeginTransaction();
             }
 
             return this.transaction;
@@ -878,40 +841,6 @@ namespace Startitecture.Orm.Mapper
             this.databaseType.PreExecute(command);
             return command;
         }
-
-        /////// <summary>
-        /////// Starting with a regular SELECT statement, derives the SQL statements required to query a
-        /////// DB for a page of records and the total number of records
-        /////// </summary>
-        /////// <param name="skip">
-        /////// The number of rows to skip before the start of the page
-        /////// </param>
-        /////// <param name="take">
-        /////// The number of rows in the page
-        /////// </param>
-        /////// <param name="sql">
-        /////// The original SQL select statement
-        /////// </param>
-        /////// <param name="args">
-        /////// Arguments to any embedded parameters in the SQL
-        /////// </param>
-        /////// <param name="sqlCount">
-        /////// Outputs the SQL statement to query for the total number of matching rows
-        /////// </param>
-        /////// <param name="sqlPage">
-        /////// Outputs the SQL statement to retrieve a single page of matching rows
-        /////// </param>
-        ////private void BuildPageQueries(long skip, long take, string sql, ref object[] args, out string sqlCount, out string sqlPage)
-        ////{
-        ////    // Split the SQL
-        ////    if (PagingHelper.TrySplitSql(sql, out var pageStatement) == false)
-        ////    {
-        ////        throw new FormatException(ErrorMessages.PagedSqlCouldNotBeParsed);
-        ////    }
-
-        ////    sqlPage = this.databaseType.BuildPageQuery(skip, take, pageStatement, ref args);
-        ////    sqlCount = pageStatement.SqlCount;
-        ////}
 
         /// <summary>
         /// Provides common initialization for the various constructors
