@@ -104,7 +104,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void GetSelection_ExistingDomainAggregates_MatchesExpected()
+        public void SelectEntities_ExistingDomainAggregates_MatchesExpected()
         {
             List<DomainAggregateRow> expected;
 
@@ -298,10 +298,9 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void GetSelection_PagedExistingDomainAggregates_MatchesExpected()
+        public void DynamicSelect_ExistingDomainAggregates_MatchesExpected()
         {
-            List<DomainAggregateRow> expectedPage1;
-            List<DomainAggregateRow> expectedPage2;
+            List<DomainAggregateRow> expected;
 
             var providerFactory = new SqlClientProviderFactory(
                 ConfigurationRoot.GetConnectionString("OrmTestDb"),
@@ -444,46 +443,6 @@ namespace Startitecture.Orm.Common.Tests
 
                 target.Insert(domainAggregate3);
 
-                var domainAggregate4 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate4-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Fourth Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
-
-                target.Insert(domainAggregate4);
-
-                var domainAggregate5 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate5-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Fifth Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
-
-                target.Insert(domainAggregate5);
-
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
                 target.Insert(aggregateOption1);
 
@@ -495,6 +454,252 @@ namespace Startitecture.Orm.Common.Tests
                                              DomainAggregateId = domainAggregate2.DomainAggregateId,
                                              OtherAggregateId = otherAggregate10.OtherAggregateId
                                          };
+
+                target.Insert(associationRow);
+
+                expected = new List<DomainAggregateRow>
+                               {
+                                   domainAggregate1,
+                                   domainAggregate2,
+                                   domainAggregate3
+                               };
+            }
+
+            using (var target = providerFactory.Create())
+            {
+                var itemSelection = Select
+                    .From<DomainAggregateRow>(
+                        row => row.Name,
+                        row => row.CategoryAttribute.IsSystem,
+                        row => row.CreatedBy.UniqueIdentifier,
+                        row => row.SubContainer.TopContainer.Name)
+                    .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
+                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
+
+                var actual = target.DynamicSelect(itemSelection).OrderBy(x => x.Name).ToList();
+
+                foreach (var result in actual)
+                {
+                    var expectedItem = expected.FirstOrDefault(row => row.Name == result.Name);
+
+                    Assert.IsNotNull(expectedItem);
+                    Assert.AreEqual(expectedItem.CategoryAttribute.IsSystem, result.CategoryAttributeIsSystem);
+                    Assert.AreEqual(expectedItem.CreatedBy.UniqueIdentifier, result.CreatedByUniqueIdentifier);
+                    Assert.AreEqual(expectedItem.SubContainer.TopContainer.Name, result.TopContainerName);
+                }
+            }
+        }
+
+        /// <summary>
+        /// The get selection test.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void SelectEntities_PagedExistingDomainAggregates_MatchesExpected()
+        {
+            List<DomainAggregateRow> expectedPage1;
+            List<DomainAggregateRow> expectedPage2;
+
+            var providerFactory = new SqlClientProviderFactory(
+                ConfigurationRoot.GetConnectionString("OrmTestDb"),
+                new DataAnnotationsDefinitionProvider());
+
+            using (var target = providerFactory.Create())
+            {
+                var topContainer2 = new TopContainerRow
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
+
+                target.Insert(topContainer2);
+
+                var subContainerA = new SubContainerRow
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
+
+                target.Insert(subContainerA);
+
+                var categoryAttribute20 = new CategoryAttributeRow
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
+
+                target.Insert(categoryAttribute20);
+
+                var timBobIdentity = new DomainIdentityRow
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
+
+                target.Insert(timBobIdentity);
+
+                var fooBarIdentity = new DomainIdentityRow
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
+
+                target.Insert(fooBarIdentity);
+
+                var otherAggregate10 = new OtherAggregateRow
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
+
+                target.Insert(otherAggregate10);
+
+                var template23 = new TemplateRow
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
+
+                target.Insert(template23);
+
+                var aggregateOption1 = new AggregateOptionRow
+                {
+                    Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 2,
+                    Value = 439034.0332m
+                };
+
+                var aggregateOption2 = new AggregateOptionRow
+                {
+                    Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 4,
+                    Value = 32453253
+                };
+
+                var domainAggregate1 = new DomainAggregateRow
+                {
+                    AggregateOption = aggregateOption1,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                    Description = "My First Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
+
+                target.Insert(domainAggregate1);
+
+                var domainAggregate2 = new DomainAggregateRow
+                {
+                    AggregateOption = aggregateOption2,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                    Description = "My Second Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    OtherAggregate = otherAggregate10,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
+
+                target.Insert(domainAggregate2);
+
+                var domainAggregate3 = new DomainAggregateRow
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
+
+                target.Insert(domainAggregate3);
+
+                var domainAggregate4 = new DomainAggregateRow
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate4-{Generator.Next(int.MaxValue)}",
+                    Description = "My Fourth Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
+
+                target.Insert(domainAggregate4);
+
+                var domainAggregate5 = new DomainAggregateRow
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate5-{Generator.Next(int.MaxValue)}",
+                    Description = "My Fifth Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
+
+                target.Insert(domainAggregate5);
+
+                aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
+                target.Insert(aggregateOption1);
+
+                aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
+                target.Insert(aggregateOption2);
+
+                var associationRow = new AssociationRow
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    OtherAggregateId = otherAggregate10.OtherAggregateId
+                };
 
                 target.Insert(associationRow);
 
@@ -552,7 +757,7 @@ namespace Startitecture.Orm.Common.Tests
                     .WithAs(
                         tableExpression,
                         "pgCte",
-                        new EntityRelationSet<DomainAggregateRow>().InnerJoin(row => row.DomainAggregateId, row => row.DomainAggregateId));
+                        set => set.InnerJoin(row => row.DomainAggregateId, row => row.DomainAggregateId));
 
                 var actualPage1 = target.SelectEntities(selection).ToList();
                 Assert.AreEqual(
@@ -580,7 +785,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void GetSelection_ExistingDomainAggregatesOrdered_MatchesExpected()
+        public void SelectEntities_ExistingDomainAggregatesOrdered_MatchesExpected()
         {
             List<DomainAggregateRow> expected;
             List<DomainAggregateRow> expectedDesc;
@@ -592,137 +797,137 @@ namespace Startitecture.Orm.Common.Tests
             using (var target = providerFactory.Create())
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(topContainer2);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 target.Insert(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 target.Insert(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 target.Insert(otherAggregate10);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 2,
-                                               Value = 439034.0332m
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 2,
+                    Value = 439034.0332m
+                };
 
                 var aggregateOption2 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 4,
-                                               Value = 32453253
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 4,
+                    Value = 32453253
+                };
 
                 var domainAggregate1 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption1,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                               Description = "My First Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption1,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My First Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Insert(domainAggregate1);
 
                 var domainAggregate2 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption2,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Second Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               OtherAggregate = otherAggregate10,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption2,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                    Description = "My Second Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    OtherAggregate = otherAggregate10,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Insert(domainAggregate2);
 
                 var domainAggregate3 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Third Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Insert(domainAggregate3);
 
@@ -733,10 +938,10 @@ namespace Startitecture.Orm.Common.Tests
                 target.Insert(aggregateOption2);
 
                 var associationRow = new AssociationRow
-                                         {
-                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                             OtherAggregateId = otherAggregate10.OtherAggregateId
-                                         };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    OtherAggregateId = otherAggregate10.OtherAggregateId
+                };
 
                 target.Insert(associationRow);
 
@@ -803,7 +1008,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void GetFirstOrDefault_ExistingField_MatchesExpected()
+        public void FirstOrDefault_ExistingField_MatchesExpected()
         {
             FieldRow expected;
 
@@ -835,7 +1040,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void GetFirstOrDefault_ExistingDomainAggregate_ExpectedPropertiesAreNull()
+        public void FirstOrDefault_ExistingDomainAggregate_ExpectedPropertiesAreNull()
         {
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
@@ -949,7 +1154,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void GetFirstOrDefault_NonExistentField_ReturnsNull()
+        public void FirstOrDefault_NonExistentField_ReturnsNull()
         {
             var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
 
@@ -957,6 +1162,34 @@ namespace Startitecture.Orm.Common.Tests
             {
                 var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsNull(actual);
+            }
+        }
+
+        /// <summary>
+        /// The first or default test.
+        /// </summary>
+        [TestMethod]
+        public void DynamicFirstOrDefault_DynamicResults_MatchExpected()
+        {
+            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+
+            using (var target = providerFactory.Create())
+            {
+                var timBobIdentity = new DomainIdentityRow
+                                         {
+                                             FirstName = "Tim",
+                                             LastName = "Bob",
+                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                                         };
+
+                target.Insert(timBobIdentity);
+
+                var entitySelection = new EntitySelection<DomainIdentityRow>()
+                    .Select(row => row.UniqueIdentifier)
+                    .WhereEqual(row => row.DomainIdentityId, timBobIdentity.DomainIdentityId);
+
+                var actual = target.DynamicFirstOrDefault(entitySelection);
+                Assert.AreEqual(timBobIdentity.UniqueIdentifier, actual.UniqueIdentifier);
             }
         }
 
@@ -1178,12 +1411,12 @@ namespace Startitecture.Orm.Common.Tests
             using (var target = providerFactory.Create())
             {
                 item = new DomainIdentityRow
-                           {
-                               UniqueIdentifier = uniqueIdentifier,
-                               FirstName = "First Name",
-                               MiddleName = "Middle Name",
-                               LastName = "Last Name"
-                           };
+                {
+                    UniqueIdentifier = uniqueIdentifier,
+                    FirstName = "First Name",
+                    MiddleName = "Middle Name",
+                    LastName = "Last Name"
+                };
 
                 target.Insert(item);
             }
@@ -1194,13 +1427,13 @@ namespace Startitecture.Orm.Common.Tests
             using (var target = providerFactory.Create())
             {
                 expected = new DomainIdentityRow
-                               {
-                                   DomainIdentityId = item.DomainIdentityId,
-                                   UniqueIdentifier = uniqueIdentifier,
-                                   FirstName = "New First Name",
-                                   MiddleName = "Middle Name Should Not Match",
-                                   LastName = "New Last Name"
-                               };
+                {
+                    DomainIdentityId = item.DomainIdentityId,
+                    UniqueIdentifier = uniqueIdentifier,
+                    FirstName = "New First Name",
+                    MiddleName = "Middle Name Should Not Match",
+                    LastName = "New Last Name"
+                };
 
                 target.UpdateSingle(expected, row => row.FirstName, row => row.LastName);
             }

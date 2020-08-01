@@ -13,6 +13,8 @@ namespace Startitecture.Orm.AutoMapper
 
     using global::AutoMapper;
 
+    using JetBrains.Annotations;
+
     /// <summary>
     /// Extension methods for AutoMapper.
     /// </summary>
@@ -53,12 +55,37 @@ namespace Startitecture.Orm.AutoMapper
         /// The current <see cref="IMappingExpression{TSource,TDest}"/>.
         /// </returns>
         public static IMappingExpression<TSource, TDest> ResolveByKey<TSource, TReference, TDest, TTarget>(
-            this IMappingExpression<TSource, TDest> expression,
-            Expression<Func<TSource, TReference>> resolutionSource,
-            Expression<Func<TDest, TTarget>> resolutionTarget,
-            string constructorParam,
-            params Expression<Func<TReference, object>>[] keyAttributes)
+            [NotNull] this IMappingExpression<TSource, TDest> expression,
+            [NotNull] Expression<Func<TSource, TReference>> resolutionSource,
+            [NotNull] Expression<Func<TDest, TTarget>> resolutionTarget,
+            [NotNull] string constructorParam,
+            [NotNull] params Expression<Func<TReference, object>>[] keyAttributes)
         {
+            if (expression == null)
+            {
+                throw new ArgumentNullException(nameof(expression));
+            }
+
+            if (resolutionSource == null)
+            {
+                throw new ArgumentNullException(nameof(resolutionSource));
+            }
+
+            if (resolutionTarget == null)
+            {
+                throw new ArgumentNullException(nameof(resolutionTarget));
+            }
+
+            if (constructorParam == null)
+            {
+                throw new ArgumentNullException(nameof(constructorParam));
+            }
+
+            if (keyAttributes == null)
+            {
+                throw new ArgumentNullException(nameof(keyAttributes));
+            }
+
             expression.ForCtorParam(
                 constructorParam,
                 configurationExpression => configurationExpression.MapFrom(
@@ -108,7 +135,7 @@ namespace Startitecture.Orm.AutoMapper
                 return (TTarget)existing;
             }
 
-            var newItem = context.Mapper.Map<TTarget>(source, options => options.Items.Add(key, null));
+            var newItem = context.Mapper.Map<TTarget>(source);
             context.Options.Items[key] = newItem;
             return newItem;
         }

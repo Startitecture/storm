@@ -118,15 +118,15 @@ namespace Startitecture.Orm.Model
             where T : ITransactionContext;
 
         /// <summary>
-        /// Gets the first entity matching the selection, or the default value if the entity cannot be found.
+        /// Gets the first dynamic result matching the <paramref name="selection"/>, or the default value if the entity cannot be found.
         /// </summary>
         /// <param name="selection">
-        /// A selection for the specified entity to return. 
+        /// A selection for the specified result to return. 
         /// </param>
         /// <returns>
-        /// The first entity matching the filter, or the default value if no matching entity is found.
+        /// The first dynamic result matching the filter, or null if no matching entity is found.
         /// </returns>
-        dynamic FirstOrDefault(ISelection selection);
+        dynamic DynamicFirstOrDefault(ISelection selection);
 
         /// <summary>
         /// Selects a matching list of entities from the repository.
@@ -142,6 +142,17 @@ namespace Startitecture.Orm.Model
         /// </returns>
         IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection)
             where T : ITransactionContext;
+
+        /// <summary>
+        /// Selects a collection of dynamic objects matching the <paramref name="selection"/>.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection specifying the results to return.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of dynamic objects matching the selection.
+        /// </returns>
+        IEnumerable<dynamic> DynamicSelect(ISelection selection);
 
         /// <summary>
         /// Inserts an entity into the repository.

@@ -214,6 +214,17 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public dynamic DynamicFirstOrDefault<TItem>([NotNull] EntitySelection<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return this.RepositoryProvider.DynamicFirstOrDefault(selection.MapTo<TEntity>());
+        }
+
+        /// <inheritdoc />
         public IEnumerable<TModel> SelectAll()
         {
             var exampleSelection = new EntitySelection<TEntity>();
@@ -232,6 +243,17 @@ namespace Startitecture.Orm.Common
             var mappedSelection = selection.MapTo<TEntity>();
             var entities = this.RepositoryProvider.SelectEntities(mappedSelection);
             return this.SelectResults(entities);
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<dynamic> DynamicSelect<TItem>([NotNull] EntitySelection<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return this.RepositoryProvider.DynamicSelect(selection.MapTo<TEntity>());
         }
 
         /// <summary>

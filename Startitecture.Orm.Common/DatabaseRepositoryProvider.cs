@@ -311,7 +311,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public dynamic FirstOrDefault([NotNull] ISelection selection)
+        public dynamic DynamicFirstOrDefault([NotNull] ISelection selection)
         {
             if (selection == null)
             {
@@ -338,6 +338,35 @@ namespace Startitecture.Orm.Common
             try
             {
                 return this.DatabaseContext.Query<T>(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public IEnumerable<dynamic> DynamicSelect([NotNull] ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            this.CheckDisposed();
+            var statement = this.statementFactory.CreateSelectionStatement(selection);
+
+            try
+            {
+                return this.DatabaseContext.Query<dynamic>(statement, selection.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
             {

@@ -87,7 +87,7 @@ namespace Startitecture.Orm.Mapper
         public IDatabaseContext Create()
         {
             var providerFactory = DbProviderFactories.GetFactory(this.providerName);
-            return new Database(this.connectionString, providerFactory, this.definitionProvider, this.nameQualifier);
+            return new Database(this.connectionString, providerFactory, this.definitionProvider);
         }
     }
 }

@@ -143,7 +143,7 @@ namespace Startitecture.Orm.Model
         public EntitySelection<T> WithAs<TExpression>(
             [NotNull] EntitySelection<TExpression> tableExpression,
             [NotNull] string tableName,
-            [NotNull] EntityRelationSet<TExpression> tableRelationSet)
+            [NotNull] Action<EntityRelationSet<TExpression>> tableRelationSet)
         {
             if (tableExpression == null)
             {
@@ -160,7 +160,10 @@ namespace Startitecture.Orm.Model
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(tableName));
             }
 
-            this.ParentExpression = new EntityExpression(tableExpression, tableName, new List<IEntityRelation>(tableRelationSet.Relations));
+            var tableRelations = new EntityRelationSet<TExpression>();
+            tableRelationSet.Invoke(tableRelations);
+
+            this.ParentExpression = new EntityExpression(tableExpression, tableName, new List<IEntityRelation>(tableRelations.Relations));
             return this;
         }
 
@@ -1268,6 +1271,7 @@ namespace Startitecture.Orm.Model
             where TDestEntity : class, new()
         {
             var targetSelection = new EntitySelection<TDestEntity>();
+            targetSelection.ParentExpression = sourceSelection.ParentExpression;
             targetSelection.selectExpressions.AddRange(sourceSelection.selectExpressions);
             targetSelection.valueFilters.AddRange(sourceSelection.valueFilters);
             targetSelection.relations.AddRange(sourceSelection.relations);

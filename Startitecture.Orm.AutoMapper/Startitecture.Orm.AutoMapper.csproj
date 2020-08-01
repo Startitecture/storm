@@ -5,7 +5,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-alpha1</Version>
+    <Version>1.0.0-alpha2</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>Adds an IEntityMapper implementation based on AutoMapper.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
@@ -17,7 +17,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

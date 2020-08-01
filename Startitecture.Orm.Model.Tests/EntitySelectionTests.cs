@@ -29,14 +29,10 @@ namespace Startitecture.Orm.Model.Tests
         [TestMethod]
         public void WithAs_TableExpressionForDifferentTable_ParentExpressionIsSet()
         {
-            var entityRelationSet = new EntityRelationSet<ChildRaisedRow>().InnerJoin(
-                row => row.ComplexEntityId,
-                row => row.ComplexEntity.ComplexEntityId);
-
             var target = new EntitySelection<ComplexRaisedRow>().WithAs(
                     Select.From<ChildRaisedRow>(row => row.ComplexEntityId),
                     "childCte",
-                    entityRelationSet)
+                    set => set.InnerJoin(row => row.ComplexEntityId, row => row.ComplexEntity.ComplexEntityId))
                 .Select(row => row.ComplexEntityId, row => row.UniqueName);
 
             Assert.IsNotNull(target.ParentExpression);
@@ -1102,6 +1098,29 @@ namespace Startitecture.Orm.Model.Tests
         /// The map to test.
         /// </summary>
         [TestMethod]
+        public void MapTo_DtoItemSelectionToRowItemSelectionWithParentExpression_AllAttributesMapped()
+        {
+            var expected = new EntitySelection<SelectionTestDto>();
+            expected.WithAs(
+                    Select.From<SelectionTestDto>(dto => dto.SelectionTestId).WhereEqual(dto => dto.ParentId, 3),
+                    "cte",
+                    set => set.InnerJoin(dto => dto.SelectionTestId, dto => dto.SelectionTestId))
+                .Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
+                .Skip(10)
+                .Take(10)
+                .WhereEqual(dto => dto.Parent.UniqueName, "Test1")
+                .Between(dto => dto.SomeDate, DateTime.Today, DateTime.Today.AddDays(-1))
+                .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId);
+
+            var actual = expected.MapTo<SelectionTestRow>();
+
+            AssertSelectionEquality(expected, actual);
+        }
+
+        /// <summary>
+        /// The map to test.
+        /// </summary>
+        [TestMethod]
         public void MapTo_DtoItemSelectionToRowItemSelection_AllAttributesMapped()
         {
             var expected = new EntitySelection<SelectionTestDto>();
@@ -1146,6 +1165,7 @@ namespace Startitecture.Orm.Model.Tests
         private static void AssertSelectionEquality(ISelection expected, ISelection actual)
         {
             Assert.AreEqual(expected.Page, actual.Page);
+            Assert.AreEqual(expected.ParentExpression, actual.ParentExpression);
             CollectionAssert.AreEqual(expected.Filters.ToList(), actual.Filters.ToList());
             CollectionAssert.AreEqual(expected.Relations.ToList(), actual.Relations.ToList());
             var expectedExpressions = expected.SelectExpressions.Select(expression => expression.AttributeExpression);

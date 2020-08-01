@@ -227,7 +227,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                 .Skip(5)
                 .Take(5);
 
-            var transactionSelection = Select.From<DataRow>(
+            var transactionSelection = Select
+                .From<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -251,7 +252,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                 .OrderBy(row => row.Related.RelatedProperty)
                 .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                 .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", new EntityRelationSet<DataRow>().InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -680,7 +681,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                 .OrderBy(row => row.Related.RelatedProperty)
                 .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                 .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", new EntityRelationSet<DataRow>().InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -1109,7 +1110,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                 .OrderBy(row => row.Related.RelatedProperty)
                 .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                 .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", new EntityRelationSet<DataRow>().InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -1538,7 +1539,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                 .OrderBy(row => row.Related.RelatedProperty)
                 .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                 .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", new EntityRelationSet<DataRow>().InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
 
             const string Expected = @";WITH [pgCte] AS
     (

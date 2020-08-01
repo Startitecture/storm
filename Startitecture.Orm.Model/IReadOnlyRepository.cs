@@ -41,7 +41,7 @@ namespace Startitecture.Orm.Model
         /// Determines whether an item exists in the repository.
         /// </summary>
         /// <param name="selection">
-        /// The selection to test.
+        /// The selection to use to query the repository.
         /// </param>
         /// <typeparam name="TItem">
         /// The type of item with the properties to test.
@@ -79,7 +79,7 @@ namespace Startitecture.Orm.Model
         /// The type of item to search for.
         /// </typeparam>
         /// <param name="selection">
-        /// The item selection.
+        /// The selection to use to query the repository.
         /// </param>
         /// <returns>
         /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a 
@@ -91,6 +91,20 @@ namespace Startitecture.Orm.Model
         TModel FirstOrDefault<TItem>(EntitySelection<TItem> selection);
 
         /// <summary>
+        /// Gets the first matching result of the <paramref name="selection"/> as a dynamic object.
+        /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item the selection is based on.
+        /// </typeparam>
+        /// <param name="selection">
+        /// The selection to use to query the repository.
+        /// </param>
+        /// <returns>
+        /// The first result of the <paramref name="selection"/> as a dynamic object, or null if no results were found.
+        /// </returns>
+        dynamic DynamicFirstOrDefault<TItem>(EntitySelection<TItem> selection);
+
+        /// <summary>
         /// Selects all the domain models of the type <typeparamref name="TModel"/> in the repository.
         /// </summary>
         /// <returns>
@@ -99,10 +113,10 @@ namespace Startitecture.Orm.Model
         IEnumerable<TModel> SelectAll();
 
         /// <summary>
-        /// Selects a list of domain models using a selection for the specified data item type.
+        /// Returns a collection of domain models matching the <paramref name="selection"/> for the specified data item type.
         /// </summary>
         /// <param name="selection">
-        /// The selection to use to filter repository results.
+        /// The selection to use to query the repository.
         /// </param>
         /// <typeparam name="TItem">
         /// The type of data item that represents the <typeparamref name="TModel"/>.
@@ -114,5 +128,19 @@ namespace Startitecture.Orm.Model
         /// <paramref name="selection"/> is null.
         /// </exception>
         IEnumerable<TModel> SelectEntities<TItem>(EntitySelection<TItem> selection);
+
+        /// <summary>
+        /// Returns a collection of dynamic objects matching the <paramref name="selection"/>.
+        /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item the selection is based on.
+        /// </typeparam>
+        /// <param name="selection">
+        /// The selection to use to query the repository.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of dynamic objects matching the <paramref name="selection"/>.
+        /// </returns>
+        IEnumerable<dynamic> DynamicSelect<TItem>(EntitySelection<TItem> selection);
     }
 }

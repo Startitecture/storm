@@ -100,20 +100,16 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The entity definition provider.
         /// </param>
-        /// <param name="nameQualifier">
-        /// The name qualifier for the target connection.
-        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="connection"/>, <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
+        /// <paramref name="connection"/> or <paramref name="definitionProvider"/> is null.
         /// </exception>
         /// <remarks>
         /// The supplied IDbConnection will not be closed/disposed - that remains the responsibility of the caller.
         /// </remarks>
-        public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
+        public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
             this.isConnectionUserProvided = true;
             this.connectionString = connection.ConnectionString;
             this.CommonConstruct();
@@ -134,14 +130,11 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The entity definition provider.
         /// </param>
-        /// <param name="nameQualifier">
-        /// The name qualifier for the connection.
-        /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
+        /// <paramref name="definitionProvider"/> is null.
         /// </exception>
         /// <remarks>
         /// This class will automatically close and dispose any connections it creates.
@@ -149,8 +142,7 @@ namespace Startitecture.Orm.Mapper
         public Database(
             [NotNull] string connectionString,
             [NotNull] string providerName,
-            [NotNull] IEntityDefinitionProvider definitionProvider,
-            [NotNull] INameQualifier nameQualifier)
+            [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -163,7 +155,6 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
             this.connectionString = connectionString;
             this.providerName = providerName;
             this.CommonConstruct();
@@ -184,20 +175,16 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The entity definition provider.
         /// </param>
-        /// <param name="nameQualifier">
-        /// The name qualifier for the connection.
-        /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="providerFactory"/>, <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
+        /// <paramref name="providerFactory"/> or <paramref name="definitionProvider"/>.
         /// </exception>
         public Database(
             [NotNull] string connectionString,
             [NotNull] DbProviderFactory providerFactory,
-            [NotNull] IEntityDefinitionProvider definitionProvider,
-            [NotNull] INameQualifier nameQualifier)
+            [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -206,7 +193,6 @@ namespace Startitecture.Orm.Mapper
 
             this.factory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
             this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
             this.connectionString = connectionString;
             this.CommonConstruct();
 
@@ -231,9 +217,6 @@ namespace Startitecture.Orm.Mapper
 
         /// <inheritdoc />
         public IEntityDefinitionProvider DefinitionProvider { get; }
-
-        /// <inheritdoc />
-        public INameQualifier NameQualifier { get; }
 
         #endregion
 
@@ -293,13 +276,6 @@ namespace Startitecture.Orm.Mapper
         }
 
         #endregion
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
 
         #region Execution
 
@@ -446,30 +422,6 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        #endregion
-
-        #region IEnumerable
-
-        /// <summary>
-        /// Runs a query that should always return at least one return
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The first record in the result set
-        /// </returns>
-        public T First<T>(string sql, params object[] args)
-        {
-            return this.Query<T>(sql, args).First();
-        }
-
         /// <summary>
         /// Runs a query and returns the first record, or the default value if no matching records
         /// </summary>
@@ -488,49 +440,6 @@ namespace Startitecture.Orm.Mapper
         public T FirstOrDefault<T>(string sql, params object[] args)
         {
             return this.Query<T>(sql, args).FirstOrDefault();
-        }
-
-        /// <summary>
-        /// Runs a query that should always return a single row.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The single record matching the specified primary key value
-        /// </returns>
-        /// <remarks>
-        /// Throws an exception if there are zero or more than one matching record
-        /// </remarks>
-        public T Single<T>(string sql, params object[] args)
-        {
-            return this.Query<T>(sql, args).Single();
-        }
-
-        /// <summary>
-        /// Runs a query that should always return either a single row, or no rows
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The single record matching the specified primary key value, or default(T) if no matching rows
-        /// </returns>
-        public T SingleOrDefault<T>(string sql, params object[] args)
-        {
-            return this.Query<T>(sql, args).SingleOrDefault();
         }
 
         #endregion
@@ -670,6 +579,13 @@ namespace Startitecture.Orm.Mapper
         }
 
         #endregion
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         #endregion
 

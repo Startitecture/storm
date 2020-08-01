@@ -52,7 +52,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var nameQualifier = new TransactSqlQualifier();
 
-            using (var target = new Database(connectionString, providerName, definitionProvider, nameQualifier))
+            using (var target = new Database(connectionString, providerName, definitionProvider))
             {
                 var transaction = target.BeginTransaction() as SqlTransaction;
                 Assert.IsNotNull(transaction);
@@ -77,7 +77,7 @@ namespace Startitecture.Orm.Mapper.Tests
         public void Database_SqlConnectionChangeDatabase_DatabaseChanged()
         {
             using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
-            using (var database = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
+            using (var database = new Database(connection, new DataAnnotationsDefinitionProvider()))
             {
                 connection.Open();
                 database.Connection.ChangeDatabase("master");
@@ -96,7 +96,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var mockConnection = new Mock<IDbConnection>();
 
             using (var connection = mockConnection.Object)
-            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
+            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider()))
             {
                 var mockCommand = CreateMockCommand(mockConnection);
                 using (mockCommand.Object)
@@ -135,7 +135,7 @@ namespace Startitecture.Orm.Mapper.Tests
             var mockConnection = new Mock<IDbConnection>();
 
             using (var connection = mockConnection.Object)
-            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider(), new TransactSqlQualifier()))
+            using (var target = new Database(connection, new DataAnnotationsDefinitionProvider()))
             {
                 var mockCommand = CreateMockCommand(mockConnection);
 

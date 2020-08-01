@@ -33,6 +33,7 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Gets or sets a value indicating whether parameters named <code>?myparam</code> are populated from properties of the passed
         /// in argument values.
+        /// TODO: Validate and test or remove this feature.
         /// </summary>
         bool EnableNamedParameters { get; set; }
 
@@ -45,11 +46,6 @@ namespace Startitecture.Orm.Common
         /// Gets the definition provider for the database context.
         /// </summary>
         IEntityDefinitionProvider DefinitionProvider { get; }
-
-        /// <summary>
-        /// Gets the name qualifier for the database context.
-        /// </summary>
-        INameQualifier NameQualifier { get; }
 
         /// <summary>
         /// Open a connection that will be used for all subsequent queries.
@@ -120,23 +116,6 @@ namespace Startitecture.Orm.Common
         IEnumerable<T> Query<T>(string sql, params object[] args);
 
         /// <summary>
-        /// Runs a query that should always return at least one return
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The first record in the result set
-        /// </returns>
-        T First<T>(string sql, params object[] args);
-
-        /// <summary>
         /// Runs a query and returns the first record, or the default value if no matching records
         /// </summary>
         /// <typeparam name="T">
@@ -152,43 +131,6 @@ namespace Startitecture.Orm.Common
         /// The first record in the result set, or default(T) if no matching rows
         /// </returns>
         T FirstOrDefault<T>(string sql, params object[] args);
-
-        /// <summary>
-        /// Runs a query that should always return a single row.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The single record matching the specified primary key value
-        /// </returns>
-        /// <remarks>
-        /// Throws an exception if there are zero or more than one matching record
-        /// </remarks>
-        T Single<T>(string sql, params object[] args);
-
-        /// <summary>
-        /// Runs a query that should always return either a single row, or no rows
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The single record matching the specified primary key value, or default(T) if no matching rows
-        /// </returns>
-        T SingleOrDefault<T>(string sql, params object[] args);
 
         /// <summary>
         /// Performs an SQL Insert

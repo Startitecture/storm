@@ -17,7 +17,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Startitecture.Orm.Testing.Entities
 {
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Schema;
 
     /// <summary>

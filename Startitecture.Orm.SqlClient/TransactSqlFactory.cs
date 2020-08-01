@@ -568,7 +568,7 @@ SET
                 case AggregateFunction.Count:
                     return $"{aggregateFunction.ToString().ToUpperInvariant()}({this.GetQualifiedColumnName(attribute)})";
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(aggregateFunction), aggregateFunction, @"The specified argument was out of range.");
+                    throw new ArgumentOutOfRangeException(nameof(aggregateFunction));
             }
         }
 
