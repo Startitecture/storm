@@ -107,6 +107,13 @@ steps:
     artifact: 'Storm Test DACPAC'
     publishLocation: 'pipeline'
 
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Database Publish Profile'
+  inputs:
+    targetPath: '$(System.DefaultWorkingDirectory)/Startitecture.Orm.Testing.Schema/Startitecture.Orm.Testing.Schema.publish.xml'
+    artifact: 'Storm Test Publish Profile'
+    publishLocation: pipeline
+
 - task: CmdLine@2
   displayName: 'Mirror to Github'
   env:
