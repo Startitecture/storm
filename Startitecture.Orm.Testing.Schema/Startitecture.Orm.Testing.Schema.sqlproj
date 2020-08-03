@@ -112,6 +112,7 @@
   <ItemGroup>
     <None Include="Startitecture.Orm.Testing.Schema.publish.xml" />
     <None Include="Scripts\PostDeployment\AggregateOptionTypeData.sql" />
+    <None Include="Azure.publish.xml" />
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\PostDeployment\Script.PostDeployment.sql" />
