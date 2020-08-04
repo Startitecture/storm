@@ -71,7 +71,6 @@
     <Folder Include="Scripts" />
     <Folder Include="Scripts\PreDeployment" />
     <Folder Include="Scripts\PostDeployment" />
-    <Folder Include="dbo\Procedures" />
     <Folder Include="dbo\Table Types" />
     <Folder Include="Storage" />
   </ItemGroup>
@@ -102,7 +101,6 @@
     <Build Include="dbo\Tables\AggregateEventStart.sql" />
     <Build Include="dbo\Tables\AggregateEventCompletion.sql" />
     <Build Include="dbo\Tables\DateElement.sql" />
-    <Build Include="dbo\Procedures\spGenerateMergeScript.sql" />
     <Build Include="dbo\Table Types\FieldValueTableType.sql" />
     <Build Include="dbo\Table Types\FieldValueElementTableType.sql" />
     <Build Include="dbo\Table Types\FieldTableType.sql" />
@@ -121,8 +119,8 @@
     <RefactorLog Include="Startitecture.Orm.Testing.Schema.refactorlog" />
   </ItemGroup>
   <ItemGroup>
-    <ArtifactReference Include="$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
-      <HintPath>$(DacPacRootPath)\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
+    <ArtifactReference Include="C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac">
+      <HintPath>C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\Common7\IDE\Extensions\Microsoft\SQLDB\Extensions\SqlServer\130\SqlSchemas\master.dacpac</HintPath>
       <SuppressMissingDependenciesErrors>False</SuppressMissingDependenciesErrors>
       <DatabaseVariableLiteralValue>master</DatabaseVariableLiteralValue>
     </ArtifactReference>

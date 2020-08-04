@@ -8,5 +8,62 @@
     <BlockWhenDriftDetected>False</BlockWhenDriftDetected>
     <RegisterDataTierApplication>True</RegisterDataTierApplication>
     <TargetConnectionString>Data Source=(localdb)\ProjectsV13;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=True</TargetConnectionString>
+    <BlockOnPossibleDataLoss>True</BlockOnPossibleDataLoss>
+    <DropObjectsNotInSource>True</DropObjectsNotInSource>
+    <DoNotDropAsymmetricKeys>True</DoNotDropAsymmetricKeys>
+    <DoNotDropCertificates>True</DoNotDropCertificates>
+    <DoNotDropColumnEncryptionKeys>True</DoNotDropColumnEncryptionKeys>
+    <DoNotDropColumnMasterKeys>True</DoNotDropColumnMasterKeys>
+    <DoNotDropCredentials>True</DoNotDropCredentials>
+    <DoNotDropCryptographicProviders>True</DoNotDropCryptographicProviders>
+    <DoNotDropDatabaseRoles>True</DoNotDropDatabaseRoles>
+    <DoNotDropDatabaseScopedCredentials>True</DoNotDropDatabaseScopedCredentials>
+    <DoNotDropExternalDataSources>True</DoNotDropExternalDataSources>
+    <DoNotDropExternalTables>True</DoNotDropExternalTables>
+    <DoNotDropFilegroups>True</DoNotDropFilegroups>
+    <DoNotDropFiles>True</DoNotDropFiles>
+    <DoNotDropFullTextCatalogs>False</DoNotDropFullTextCatalogs>
+    <DoNotDropFullTextStoplists>False</DoNotDropFullTextStoplists>
+    <DoNotDropLogins>True</DoNotDropLogins>
+    <DoNotDropLinkedServerLogins>True</DoNotDropLinkedServerLogins>
+    <DoNotDropLinkedServers>True</DoNotDropLinkedServers>
+    <DoNotDropPartitionFunctions>False</DoNotDropPartitionFunctions>
+    <DoNotDropPartitionSchemes>False</DoNotDropPartitionSchemes>
+    <DoNotDropPermissions>True</DoNotDropPermissions>
+    <DoNotDropRoleMembership>True</DoNotDropRoleMembership>
+    <DoNotDropSecurityPolicies>True</DoNotDropSecurityPolicies>
+    <DoNotDropServerAuditSpecifications>True</DoNotDropServerAuditSpecifications>
+    <DoNotDropServerRoleMembership>True</DoNotDropServerRoleMembership>
+    <DoNotDropServerRoles>True</DoNotDropServerRoles>
+    <DoNotDropSignatures>True</DoNotDropSignatures>
+    <DoNotDropSymmetricKeys>True</DoNotDropSymmetricKeys>
+    <DoNotDropSynonyms>False</DoNotDropSynonyms>
+    <DoNotDropUsers>True</DoNotDropUsers>
+    <DoNotDropAudits>True</DoNotDropAudits>
+    <DoNotDropDatabaseAuditSpecifications>True</DoNotDropDatabaseAuditSpecifications>
+    <ExcludeUsers>True</ExcludeUsers>
+    <ExcludeSymmetricKeys>True</ExcludeSymmetricKeys>
+    <ExcludeSignatures>True</ExcludeSignatures>
+    <ExcludeServerRoleMembership>True</ExcludeServerRoleMembership>
+    <ExcludeServerAuditSpecifications>True</ExcludeServerAuditSpecifications>
+    <ExcludeSecurityPolicies>True</ExcludeSecurityPolicies>
+    <IgnoreRoleMembership>True</IgnoreRoleMembership>
+    <IgnorePermissions>True</IgnorePermissions>
+    <ExcludeLogins>True</ExcludeLogins>
+    <ExcludeLinkedServerLogins>True</ExcludeLinkedServerLogins>
+    <ExcludeLinkedServers>True</ExcludeLinkedServers>
+    <ExcludeFiles>True</ExcludeFiles>
+    <ExcludeExternalTables>True</ExcludeExternalTables>
+    <ExcludeDatabaseRoles>True</ExcludeDatabaseRoles>
+    <ExcludeDatabaseScopedCredentials>True</ExcludeDatabaseScopedCredentials>
+    <ExcludeDatabaseAuditSpecifications>True</ExcludeDatabaseAuditSpecifications>
+    <ExcludeCryptographicProviders>True</ExcludeCryptographicProviders>
+    <ExcludeCredentials>True</ExcludeCredentials>
+    <ExcludeColumnMasterKeys>True</ExcludeColumnMasterKeys>
+    <ExcludeColumnEncryptionKeys>True</ExcludeColumnEncryptionKeys>
+    <ExcludeCertificates>True</ExcludeCertificates>
+    <ExcludeAudits>True</ExcludeAudits>
+    <ExcludeAsymmetricKeys>True</ExcludeAsymmetricKeys>
+    <ExcludeApplicationRoles>True</ExcludeApplicationRoles>
   </PropertyGroup>
 </Project>
