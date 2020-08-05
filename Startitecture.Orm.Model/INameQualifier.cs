@@ -36,6 +36,9 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The qualified name of the attribute as a <see cref="string"/>.
         /// </returns>
+        /// <remarks>
+        /// The qualified name is the entity (aliased, if applicable) and the physical attribute name as referenced in the FROM clause.
+        /// </remarks>
         string Qualify(EntityAttributeDefinition attribute);
 
         /// <summary>
@@ -50,6 +53,9 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The qualified name of the attribute as a <see cref="string"/>.
         /// </returns>
+        /// <remarks>
+        /// The qualified name is the entity (aliased, if applicable) and the physical attribute name as referenced in the FROM clause.
+        /// </remarks>
         string Qualify(EntityAttributeDefinition attribute, EntityLocation entityLocation);
 
         /// <summary>
@@ -61,6 +67,9 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The <see cref="string"/> representation of the <paramref name="attribute"/>.
         /// </returns>
+        /// <remarks>
+        /// The canonical name is the fully aliased (if applicable) entity and attribute names.
+        /// </remarks>
         string GetCanonicalName(EntityAttributeDefinition attribute);
 
         /// <summary>

@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.SqlClient
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
@@ -63,7 +63,7 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="nameQualifier">
         /// The SQL name qualifier.
         /// </param>
-        /// <exception cref="ArgumentNullException">
+        /// <exception cref="System.ArgumentNullException">
         /// <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
         /// </exception>
         public JoinClause([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
@@ -106,7 +106,7 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The JOIN clause as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="ArgumentOutOfRangeException">
+        /// <exception cref="System.ArgumentOutOfRangeException">
         /// <paramref name="relationType"/> is not one of the named enumerations.
         /// </exception>
         private static string GetJoinClause(EntityRelationType relationType)

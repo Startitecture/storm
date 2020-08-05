@@ -69,7 +69,7 @@ namespace Startitecture.Orm.Mapper
 
             if (tableTypeAttribute == null)
             {
-                var requiredAttributeName = typeof(TableTypeAttribute).Name;
+                var requiredAttributeName = nameof(TableTypeAttribute);
                 throw new OperationException(
                     structureType,
                     string.Format(CultureInfo.CurrentCulture, ErrorMessages.AttributeRequiredForType, structureType, requiredAttributeName));
