@@ -139,17 +139,18 @@ namespace Startitecture.Orm.Mapper
                 {
                     var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
                     var mappingDelegate = FlatPocoFactory.ReturnableFactory.CreateDelegate<TStructure>(pocoDataRequest).MappingDelegate;
-                    var pocoDelegate = mappingDelegate as Func<IDataReader, TStructure>;
 
-                    if (pocoDelegate == null)
+                    if (mappingDelegate is Func<IDataReader, TStructure> pocoDelegate)
+                    {
+                        var poco = pocoDelegate.Invoke(reader);
+                        returnList.Add(poco);
+                    }
+                    else
                     {
                         throw new OperationException(
                             pocoDataRequest,
                             string.Format(CultureInfo.CurrentCulture, ErrorMessages.DelegateCouldNotBeCreatedWithReader, pocoDataRequest));
                     }
-
-                    var poco = pocoDelegate.Invoke(reader);
-                    returnList.Add(poco);
                 }
             }
 

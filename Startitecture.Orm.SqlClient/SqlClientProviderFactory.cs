@@ -15,7 +15,6 @@ namespace Startitecture.Orm.SqlClient
 
     using Microsoft.Data.SqlClient;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
@@ -80,8 +79,7 @@ namespace Startitecture.Orm.SqlClient
             var databaseFactory = new DefaultDatabaseFactory(
                 this.connectionString,
                 ProviderInvariantName,
-                this.definitionProvider,
-                Singleton<TransactSqlQualifier>.Instance);
+                this.definitionProvider);
 
             return new DatabaseRepositoryProvider(databaseFactory, new TransactSqlFactory(this.definitionProvider));
         }

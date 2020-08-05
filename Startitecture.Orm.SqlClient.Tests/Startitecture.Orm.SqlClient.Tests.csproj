@@ -44,5 +44,4 @@
     <ProjectReference Include="..\Startitecture.Orm.Testing.Model\Startitecture.Orm.Testing.Model.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Testing.Moq\Startitecture.Orm.Testing.Moq.csproj" />
   </ItemGroup>
-
 </Project>

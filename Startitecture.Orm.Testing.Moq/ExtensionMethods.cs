@@ -155,7 +155,7 @@ namespace Startitecture.Orm.Testing.Moq
                 throw new ArgumentNullException(nameof(attributes));
             }
 
-            var attributeIndexDictionary = attributes.Distinct(Singleton<ReferenceNameComparer>.Instance)
+            var attributeIndexDictionary = attributes.Distinct(new ReferenceNameComparer())
                 .Select(
                     (definition, i) => new
                                            {
@@ -465,7 +465,6 @@ namespace Startitecture.Orm.Testing.Moq
 
         /// <summary>
         /// The reference name comparer.
-        /// TODO: Extend this to EntitySelection
         /// </summary>
         private class ReferenceNameComparer : EqualityComparer<EntityAttributeDefinition>
         {

@@ -129,7 +129,12 @@ namespace Startitecture.Orm.Mapper
                 for (var i = dataRequest.FirstColumn; i < dataRequest.FirstColumn + dataRequest.FieldCount; i++)
                 {
                     var sourceType = reader.GetFieldType(i);
+
+                    #if NET472
                     var fieldName = reader.GetName(i).Replace(".", string.Empty); // Remove period from dot-qualified names.
+                    #else
+                    var fieldName = reader.GetName(i).Replace(".", string.Empty, true, CultureInfo.InvariantCulture); // Remove period from dot-qualified names.
+                    #endif
 
                     generator.Emit(OpCodes.Dup); // obj, obj
                     generator.Emit(OpCodes.Ldstr, fieldName); // obj, obj, fieldname

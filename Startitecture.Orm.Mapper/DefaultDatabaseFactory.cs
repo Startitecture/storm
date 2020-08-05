@@ -36,11 +36,6 @@ namespace Startitecture.Orm.Mapper
         private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
-        /// The name qualifier.
-        /// </summary>
-        private readonly INameQualifier nameQualifier;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="DefaultDatabaseFactory"/> class.
         /// </summary>
         /// <param name="connectionString">
@@ -52,9 +47,6 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <param name="nameQualifier">
-        /// The name Qualifier.
-        /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
@@ -64,8 +56,7 @@ namespace Startitecture.Orm.Mapper
         public DefaultDatabaseFactory(
             [NotNull] string connectionString,
             [NotNull] string providerName,
-            [NotNull] IEntityDefinitionProvider definitionProvider,
-            [NotNull] INameQualifier nameQualifier)
+            [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -78,7 +69,6 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.nameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
             this.connectionString = connectionString;
             this.providerName = providerName;
         }
