@@ -62,6 +62,21 @@ steps:
     mergeTestResults: true
     testRunTitle: 'Storm-CI'
 
+- task: CopyFiles@2
+  displayName: 'Copy Test Assemblies'
+  inputs:
+    SourceFolder: '$(System.DefaultWorkingDirectory)'
+    Contents: '**/*.Tests/bin/$(buildConfiguration)/**'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)/Tests'
+    CleanTargetFolder: true
+
+- task: PublishPipelineArtifact@1
+  displayName: 'Publish Test Assemblies'
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/Tests'
+    artifact: 'Tests'
+    publishLocation: 'pipeline'
+
 - task: NuGetCommand@2
   displayName: 'Push NuGet Packages'
   inputs:
