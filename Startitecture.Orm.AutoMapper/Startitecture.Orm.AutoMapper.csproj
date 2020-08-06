@@ -5,13 +5,13 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-alpha2</Version>
+    <Version>1.0.0-alpha3</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>Adds an IEntityMapper implementation based on AutoMapper.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>Storm Logo.png</PackageIcon>
-    <PackageTags>#orm #microorm #objectrelationalmapper #crud #query #objectmapper #mapper #automapper</PackageTags>
+    <PackageTags>orm microorm objectrelationalmapper crud query objectmapper mapper automapper</PackageTags>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
   </PropertyGroup>
