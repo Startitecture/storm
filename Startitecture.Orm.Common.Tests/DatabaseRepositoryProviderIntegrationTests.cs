@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DatabaseRepositoryProviderTests.cs" company="Startitecture">
+// <copyright file="DatabaseRepositoryProviderIntegrationTests.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -8,13 +8,10 @@ namespace Startitecture.Orm.Common.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
 
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Moq;
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;

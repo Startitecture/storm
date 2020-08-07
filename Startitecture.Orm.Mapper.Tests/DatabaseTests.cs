@@ -19,7 +19,6 @@ namespace Startitecture.Orm.Mapper.Tests
     using Moq;
 
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
@@ -50,7 +49,6 @@ namespace Startitecture.Orm.Mapper.Tests
 #endif
             var connectionString = ConfigurationRoot.GetConnectionString("MasterDatabase");
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var nameQualifier = new TransactSqlQualifier();
 
             using (var target = new Database(connectionString, providerName, definitionProvider))
             {
