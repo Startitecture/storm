@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Mapper.Internal
+namespace Startitecture.Orm.Mapper
 {
     using System;
     using System.Collections.Generic;
@@ -44,20 +44,20 @@ namespace Startitecture.Orm.Mapper.Internal
         /// </returns>
         public static object EnumFromString(Type enumType, string value)
         {
-            Dictionary<string, object> map = Types.Get(
+            var map = Types.Get(
                 enumType, 
                 () =>
                     {
-                        Array values = Enum.GetValues(enumType);
+                        var values = Enum.GetValues(enumType);
 
-                        var newmap = new Dictionary<string, object>(values.Length, StringComparer.InvariantCultureIgnoreCase);
+                        var dictionary = new Dictionary<string, object>(values.Length, StringComparer.InvariantCultureIgnoreCase);
 
-                        foreach (object v in values)
+                        foreach (var v in values)
                         {
-                            newmap.Add(v.ToString(), v);
+                            dictionary.Add(v.ToString(), v);
                         }
 
-                        return newmap;
+                        return dictionary;
                     });
 
             return map[value];

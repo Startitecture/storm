@@ -1,9 +1,9 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Database.cs" company="Startitecture">
+// <copyright file="DatabaseContext.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   The main Database class.  You can either use this class directly, or derive from it.
+//   Exposes a minimal database context to a repository provider.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,31 +14,18 @@ namespace Startitecture.Orm.Mapper
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
-    using System.Linq;
-    using System.Text.RegularExpressions;
 
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Mapper.DatabaseTypes;
-    using Startitecture.Orm.Mapper.Internal;
     using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
-    /// The main Database class. You can either use this class directly, or derive from it.
+    /// Exposes a minimal database context to a repository provider.
     /// </summary>
-    public class Database : IDatabaseContext
+    public class DatabaseContext : IDatabaseContext
     {
-        #region Static Fields
-
-        /// <summary>
-        /// The Regex for parameter prefixes.
-        /// </summary>
-        private static readonly Regex ParameterPrefixRegex = new Regex(@"(?<!@)@\w+", RegexOptions.Compiled);
-
-        #endregion
-
         #region Fields
 
         /// <summary>
@@ -61,20 +48,15 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private readonly RaisedPocoFactory pocoFactory;
 
-        /// <summary>
-        /// The database type.
-        /// </summary>
-        private DatabaseType databaseType;
+        /////// <summary>
+        /////// The database type.
+        /////// </summary>
+        ////private DatabaseType databaseType;
 
         /// <summary>
         /// The factory.
         /// </summary>
         private DbProviderFactory factory;
-
-        /// <summary>
-        /// The parameter prefix.
-        /// </summary>
-        private string paramPrefix;
 
         /// <summary>
         /// The transaction.
@@ -91,7 +73,7 @@ namespace Startitecture.Orm.Mapper
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Database"/> class. 
+        /// Initializes a new instance of the <see cref="DatabaseContext"/> class. 
         /// Construct a database using a supplied IDbConnection
         /// </summary>
         /// <param name="connection">
@@ -100,16 +82,20 @@ namespace Startitecture.Orm.Mapper
         /// <param name="definitionProvider">
         /// The entity definition provider.
         /// </param>
+        /// <param name="statementCompiler">
+        /// The name qualifier for the database.
+        /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="connection"/> or <paramref name="definitionProvider"/> is null.
+        /// <paramref name="connection"/>, <paramref name="definitionProvider"/>, or <paramref name="statementCompiler"/> is null.
         /// </exception>
         /// <remarks>
         /// The supplied IDbConnection will not be closed/disposed - that remains the responsibility of the caller.
         /// </remarks>
-        public Database([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public DatabaseContext([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] IStatementCompiler statementCompiler)
         {
-            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.StatementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
             this.isConnectionUserProvided = true;
             this.connectionString = connection.ConnectionString;
             this.CommonConstruct();
@@ -118,7 +104,7 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Database"/> class. 
+        /// Initializes a new instance of the <see cref="DatabaseContext"/> class. 
         /// Construct a database using a supplied connections string and optionally a provider name
         /// </summary>
         /// <param name="connectionString">
@@ -127,22 +113,22 @@ namespace Startitecture.Orm.Mapper
         /// <param name="providerName">
         /// The name of the DB provider to use
         /// </param>
-        /// <param name="definitionProvider">
-        /// The entity definition provider.
+        /// <param name="statementCompiler">
+        /// The name qualifier for the database.
         /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="definitionProvider"/> is null.
+        /// <paramref name="statementCompiler"/> is null.
         /// </exception>
         /// <remarks>
         /// This class will automatically close and dispose any connections it creates.
         /// </remarks>
-        public Database(
+        public DatabaseContext(
             [NotNull] string connectionString,
             [NotNull] string providerName,
-            [NotNull] IEntityDefinitionProvider definitionProvider)
+            [NotNull] IStatementCompiler statementCompiler)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -154,16 +140,17 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
-            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.StatementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
+            this.DefinitionProvider = statementCompiler.DefinitionProvider;
             this.connectionString = connectionString;
             this.providerName = providerName;
             this.CommonConstruct();
 
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
+            this.pocoFactory = new RaisedPocoFactory(this.DefinitionProvider);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Database"/> class. 
+        /// Initializes a new instance of the <see cref="DatabaseContext"/> class. 
         /// Construct a Database using a supplied connection string and a DbProviderFactory
         /// </summary>
         /// <param name="connectionString">
@@ -172,19 +159,19 @@ namespace Startitecture.Orm.Mapper
         /// <param name="providerFactory">
         /// The DbProviderFactory to use for instantiating IDbConnections.
         /// </param>
-        /// <param name="definitionProvider">
+        /// <param name="statementCompiler">
         /// The entity definition provider.
         /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="providerFactory"/> or <paramref name="definitionProvider"/>.
+        /// <paramref name="providerFactory"/> or <paramref name="statementCompiler"/> is null.
         /// </exception>
-        public Database(
+        public DatabaseContext(
             [NotNull] string connectionString,
             [NotNull] DbProviderFactory providerFactory,
-            [NotNull] IEntityDefinitionProvider definitionProvider)
+            [NotNull] IStatementCompiler statementCompiler)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -192,11 +179,12 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.factory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
-            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.StatementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
+            this.DefinitionProvider = statementCompiler.DefinitionProvider;
             this.connectionString = connectionString;
             this.CommonConstruct();
 
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
+            this.pocoFactory = new RaisedPocoFactory(statementCompiler.DefinitionProvider);
         }
 
         #endregion
@@ -217,6 +205,9 @@ namespace Startitecture.Orm.Mapper
 
         /// <inheritdoc />
         public IEntityDefinitionProvider DefinitionProvider { get; }
+
+        /// <inheritdoc />
+        public IStatementCompiler StatementCompiler { get; }
 
         #endregion
 
@@ -422,30 +413,11 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Runs a query and returns the first record, or the default value if no matching records
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The first record in the result set, or default(T) if no matching rows
-        /// </returns>
-        public T FirstOrDefault<T>(string sql, params object[] args)
-        {
-            return this.Query<T>(sql, args).FirstOrDefault();
-        }
-
         #endregion
 
         #region Insert
 
+/*
         /// <summary>
         /// Performs an SQL Insert
         /// </summary>
@@ -577,6 +549,7 @@ namespace Startitecture.Orm.Mapper
                 return result;
             }
         }
+*/
 
         #endregion
 
@@ -617,92 +590,29 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Add a parameter to a DB command
         /// </summary>
-        /// <param name="cmd">
+        /// <param name="command">
         /// A reference to the IDbCommand to which the parameter is to be added
         /// </param>
         /// <param name="value">
         /// The value to assign to the parameter
         /// </param>
-        private void AddParam(IDbCommand cmd, object value)
+        private void AddParam(IDbCommand command, object value)
         {
             // Support passed in parameters
+            var parameterName = command.Parameters.Count.ToString();
+
             if (value is IDbDataParameter dataParameter)
             {
-                dataParameter.ParameterName = $"{this.paramPrefix}{cmd.Parameters.Count}";
-                cmd.Parameters.Add(dataParameter);
+                dataParameter.ParameterName = parameterName;
+                command.Parameters.Add(dataParameter);
                 return;
             }
 
             // Create the parameter
-            var parameter = cmd.CreateParameter();
-            parameter.ParameterName = $"{this.paramPrefix}{cmd.Parameters.Count}";
-
-            // Assign the parameter value
-            if (value == null)
-            {
-                parameter.Value = DBNull.Value;
-            }
-            else
-            {
-                // Give the database type first crack at converting to DB required type
-                value = this.databaseType.MapParameterValue(value);
-
-                var type = value.GetType();
-                if (type.IsEnum)
-                {
-                    // PostgreSQL .NET driver wont cast enum to int
-                    parameter.Value = (int)value;
-                }
-                else if (type == typeof(Guid))
-                {
-                    parameter.Value = value.ToString();
-                    parameter.DbType = DbType.String;
-                    parameter.Size = 40;
-                }
-                else if (type == typeof(string))
-                {
-                    // out of memory exception occurs if trying to save more than 4000 characters to SQL Server CE NText column. 
-                    // Set before attempting to set Size, or Size will always max out at 4000
-                    var length = (value as string ?? Convert.ToString(value, CultureInfo.CurrentCulture))?.Length;
-
-                    if (length + 1 > 4000 && parameter.GetType().Name == "SqlCeParameter")
-                    {
-                        parameter.GetType().GetProperty("SqlDbType")?.SetValue(parameter, SqlDbType.NText, null);
-                    }
-
-                    // Help query plan caching by using common size
-                    parameter.Size = Math.Max(length.GetValueOrDefault() + 1, 4000);
-                    parameter.Value = value;
-                }
-                else if (type == typeof(AnsiString))
-                {
-                    // Thanks @DataChomp for pointing out the SQL Server indexing performance hit of using wrong string type on varchar
-                    parameter.Size = Math.Max((value as AnsiString ?? new AnsiString(string.Empty)).Value.Length + 1, 4000);
-                    parameter.Value = (value as AnsiString ?? new AnsiString(string.Empty)).Value;
-                    parameter.DbType = DbType.AnsiString;
-                }
-                else if (value.GetType().Name == "SqlGeography")
-                {
-                    // SqlGeography is a CLR Type
-                    parameter.GetType().GetProperty("UdtTypeName")?.SetValue(parameter, "geography", null);
-
-                    // geography is the equivalent SQL Server Type
-                    parameter.Value = value;
-                }
-                else if (value.GetType().Name == "SqlGeometry")
-                {
-                    // SqlGeometry is a CLR Type
-                    parameter.GetType().GetProperty("UdtTypeName")?.SetValue(parameter, "geometry", null); // geography is the equivalent SQL Server Type
-                    parameter.Value = value;
-                }
-                else
-                {
-                    parameter.Value = value;
-                }
-            }
+            var parameter = this.StatementCompiler.CreateParameter(command, parameterName, value);
 
             // Add to the collection
-            cmd.Parameters.Add(parameter);
+            command.Parameters.Add(parameter);
         }
 
         /// <summary>
@@ -722,25 +632,17 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         private IDbCommand CreateCommand(IDbConnection connection, string sql, params object[] parameters)
         {
-            // Perform named argument replacements
-            if (this.EnableNamedParameters)
-            {
-                var newArgs = new List<object>();
-                sql = ParametersHelper.ProcessParams(sql, parameters, newArgs);
-                parameters = newArgs.ToArray();
-            }
+            ////// Perform parameter prefix replacements
+            ////if (this.paramPrefix != "@")
+            ////{
+            ////    sql = ParameterPrefixRegex.Replace(sql, m => this.paramPrefix + m.Value.Substring(1));
+            ////}
 
-            // Perform parameter prefix replacements
-            if (this.paramPrefix != "@")
-            {
-                sql = ParameterPrefixRegex.Replace(sql, m => this.paramPrefix + m.Value.Substring(1));
-            }
-
-#if NETSTANDARD
-            sql = sql.Replace("@@", "@", StringComparison.Ordinal); // <- double @@ escapes a single @
-#else
-            sql = sql.Replace("@@", "@"); // <- double @@ escapes a single @
-#endif
+////#if NETSTANDARD
+////            sql = sql.Replace("@@", "@", StringComparison.Ordinal); // <- double @@ escapes a single @
+////#else
+////            sql = sql.Replace("@@", "@"); // <- double @@ escapes a single @
+////#endif
 
             // Create the command and add parameters
             var command = connection.CreateCommand();
@@ -753,8 +655,6 @@ namespace Startitecture.Orm.Mapper
                 this.AddParam(command, item);
             }
 
-            // Notify the DB type
-            this.databaseType.PreExecute(command);
             return command;
         }
 
@@ -765,7 +665,7 @@ namespace Startitecture.Orm.Mapper
         {
             // Reset
             this.transactionDepth = 0;
-            this.EnableNamedParameters = true;
+            ////this.EnableNamedParameters = true;
 
             // If a provider name was supplied, get the IDbProviderFactory for it
             if (this.providerName != null)
@@ -774,11 +674,11 @@ namespace Startitecture.Orm.Mapper
             }
 
             // Resolve the DB Type
-            var typeName = (this.factory?.GetType() ?? this.Connection.GetType()).Name;
-            this.databaseType = DatabaseType.Resolve(typeName, this.providerName);
+            ////var typeName = (this.factory?.GetType() ?? this.Connection.GetType()).Name;
+            ////this.databaseType = DatabaseType.Resolve(typeName, this.providerName);
 
             // What character is used for delimiting parameters in SQL
-            this.paramPrefix = this.databaseType.GetParameterPrefix(this.connectionString);
+            ////this.paramPrefix = this.databaseType.GetParameterPrefix(this.connectionString);
         }
 
         #endregion

@@ -9,6 +9,9 @@ namespace Startitecture.Orm.SqlClient.Tests
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Moq;
+
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.SqlClient;
@@ -79,7 +82,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -151,7 +154,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -196,7 +199,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -304,7 +307,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -355,7 +358,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -414,7 +417,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -468,7 +471,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -519,7 +522,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -581,7 +584,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -626,7 +629,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -733,7 +736,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -784,7 +787,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -843,7 +846,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -900,7 +903,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -954,7 +957,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1016,7 +1019,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1057,7 +1060,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1160,7 +1163,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1207,7 +1210,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1272,7 +1275,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1332,7 +1335,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1381,7 +1384,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1443,7 +1446,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1484,7 +1487,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1589,7 +1592,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1636,7 +1639,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1698,7 +1701,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1755,7 +1758,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1804,7 +1807,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1983,7 +1986,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2137,7 +2140,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2249,7 +2252,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2429,7 +2432,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2584,7 +2587,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2709,7 +2712,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlFactory(definitionProvider);
+            var target = new TransactSqlCompiler(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }

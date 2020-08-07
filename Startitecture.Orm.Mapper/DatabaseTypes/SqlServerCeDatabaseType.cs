@@ -11,8 +11,6 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
 {
     using System.Linq;
 
-    using Startitecture.Orm.Mapper.Internal;
-
     /// <summary>
     /// The SQL Server CE database type.
     /// </summary>
@@ -46,7 +44,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <summary>
         /// Performs an insert operation
         /// </summary>
-        /// <param name="database">
+        /// <param name="databaseContext">
         /// The calling database object.
         /// </param>
         /// <param name="command">
@@ -58,11 +56,11 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <returns>
         /// The ID of the newly inserted record.
         /// </returns>
-        public override object ExecuteInsert(Database database, System.Data.IDbCommand command, string primaryKeyName)
+        public override object ExecuteInsert(DatabaseContext databaseContext, System.Data.IDbCommand command, string primaryKeyName)
         {
             command.ExecuteNonQuery();
             //// Database.ExecuteNonQueryHelper(command);
-            return database.ExecuteScalar<object>("SELECT @@@IDENTITY AS NewID;");
+            return databaseContext.ExecuteScalar<object>("SELECT @@@IDENTITY AS NewID;");
         }
     }
 }

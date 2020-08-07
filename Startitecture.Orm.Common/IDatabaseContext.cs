@@ -3,7 +3,7 @@
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Defines the IDatabaseContext type.
+//   Provides an interface for classes that contain database contexts.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -46,6 +46,11 @@ namespace Startitecture.Orm.Common
         /// Gets the definition provider for the database context.
         /// </summary>
         IEntityDefinitionProvider DefinitionProvider { get; }
+
+        /// <summary>
+        /// Gets the statement compiler for the database context.
+        /// </summary>
+        IStatementCompiler StatementCompiler { get; }
 
         /// <summary>
         /// Open a connection that will be used for all subsequent queries.
@@ -114,36 +119,5 @@ namespace Startitecture.Orm.Common
         /// In cases where this is an issue, consider using Fetch which returns the results as a List rather than an IEnumerable.
         /// </remarks>
         IEnumerable<T> Query<T>(string sql, params object[] args);
-
-        /// <summary>
-        /// Runs a query and returns the first record, or the default value if no matching records
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement
-        /// </param>
-        /// <returns>
-        /// The first record in the result set, or default(T) if no matching rows
-        /// </returns>
-        T FirstOrDefault<T>(string sql, params object[] args);
-
-        /// <summary>
-        /// Performs an SQL Insert
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type of entity being inserted.
-        /// </typeparam>
-        /// <param name="poco">
-        /// The POCO object that specifies the column values to be inserted
-        /// </param>
-        /// <returns>
-        /// The auto allocated primary key of the new record, or null for non-auto-increment tables
-        /// </returns>
-        object Insert<T>(T poco);
     }
 }

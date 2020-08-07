@@ -40,11 +40,6 @@ namespace Startitecture.Orm.Common
         private const string CacheKeyFormat = "{0}=[{1}]";
 
         /// <summary>
-        /// The repository adapter.
-        /// </summary>
-        private readonly IStatementFactory statementFactory;
-
-        /// <summary>
         /// The entity cache.
         /// </summary>
         private readonly ObjectCache entityCache;
@@ -57,53 +52,39 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
         /// </summary>
-        /// <param name="databaseFactory">
-        /// The database factory.
-        /// </param>
-        /// <param name="statementFactory">
-        /// The repository adapter.
+        /// <param name="databaseContextFactory">
+        /// The database context factory.
         /// </param>
         public DatabaseRepositoryProvider(
-            [NotNull] IDatabaseFactory databaseFactory,
-            [NotNull] IStatementFactory statementFactory)
-            : this(databaseFactory, statementFactory, MemoryCache.Default)
+            [NotNull] IDatabaseContextFactory databaseContextFactory)
+            : this(databaseContextFactory, MemoryCache.Default)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
         /// </summary>
-        /// <param name="databaseFactory">
-        /// The database factory.
-        /// </param>
-        /// <param name="statementFactory">
-        /// The repository adapter.
+        /// <param name="databaseContextFactory">
+        /// The database context factory.
         /// </param>
         /// <param name="entityCache">
         /// The entity cache.
         /// </param>
         public DatabaseRepositoryProvider(
-            [NotNull] IDatabaseFactory databaseFactory,
-            [NotNull] IStatementFactory statementFactory,
+            [NotNull] IDatabaseContextFactory databaseContextFactory,
             [NotNull] ObjectCache entityCache)
         {
-            if (statementFactory == null)
+            if (databaseContextFactory == null)
             {
-                throw new ArgumentNullException(nameof(statementFactory));
-            }
-
-            if (databaseFactory == null)
-            {
-                throw new ArgumentNullException(nameof(databaseFactory));
+                throw new ArgumentNullException(nameof(databaseContextFactory));
             }
 
             this.entityCache = entityCache ?? throw new ArgumentNullException(nameof(entityCache));
 
             try
             {
-                this.DatabaseContext = databaseFactory.Create();
+                this.DatabaseContext = databaseContextFactory.Create();
                 this.EntityDefinitionProvider = this.DatabaseContext.DefinitionProvider;
-                this.statementFactory = statementFactory;
             }
             catch (InvalidOperationException ex)
             {
@@ -221,7 +202,7 @@ namespace Startitecture.Orm.Common
 
             this.CheckDisposed();
 
-            var sql = this.statementFactory.CreateExistsStatement(selection);
+            var sql = this.DatabaseContext.StatementCompiler.CreateExistsStatement(selection);
 
             try
             {
@@ -251,7 +232,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.statementFactory.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
 
             try
             {
@@ -333,7 +314,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.statementFactory.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
 
             try
             {
@@ -362,7 +343,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.statementFactory.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
 
             try
             {
@@ -392,11 +373,22 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            object result;
+            var statement = this.DatabaseContext.StatementCompiler.CreateInsertionStatement<T>();
+            var entityDefinition = this.EntityDefinitionProvider.Resolve<T>();
+            var values = entityDefinition.InsertableAttributes.Select(definition => definition.GetValueMethod.Invoke(entity, null)).ToArray();
 
             try
             {
-                result = this.DatabaseContext.Insert(entity);
+                if (entityDefinition.AutoNumberPrimaryKey.HasValue)
+                {
+                    var autoNumber = this.DatabaseContext.ExecuteScalar<object>(statement, values);
+                    entityDefinition.AutoNumberPrimaryKey.Value.SetValueDelegate.DynamicInvoke(entity, autoNumber);
+                }
+                else
+                {
+                    this.DatabaseContext.Execute(statement, values);
+                }
+                ////result = this.DatabaseContext.Insert(entity);
             }
             catch (InvalidOperationException ex)
             {
@@ -411,11 +403,11 @@ namespace Startitecture.Orm.Common
                 throw new RepositoryException(entity, ex.Message, ex);
             }
 
-            if (result == null)
-            {
-                string message = string.Format(CultureInfo.CurrentCulture, $"Failed to insert ({typeof(T).Name}) {entity}");
-                throw new RepositoryException(entity, message);
-            }
+            ////if (result == null)
+            ////{
+            ////    string message = string.Format(CultureInfo.CurrentCulture, $"Failed to insert ({typeof(T).Name}) {entity}");
+            ////    throw new RepositoryException(entity, message);
+            ////}
 
             entity.SetTransactionProvider(this);
             return entity;
@@ -430,7 +422,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(updateSet));
             }
 
-            var updateStatement = this.statementFactory.CreateUpdateStatement(updateSet);
+            var updateStatement = this.DatabaseContext.StatementCompiler.CreateUpdateStatement(updateSet);
 
             try
             {
@@ -471,7 +463,7 @@ namespace Startitecture.Orm.Common
                              ? new UpdateSet<T>().Set(entity, setExpressions).Where(selection)
                              : new UpdateSet<T>().Set(entity, this.EntityDefinitionProvider).Where(selection);
 
-            var updateStatement = this.statementFactory.CreateUpdateStatement(update);
+            var updateStatement = this.DatabaseContext.StatementCompiler.CreateUpdateStatement(update);
 
             try
             {
@@ -502,7 +494,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.statementFactory.CreateDeletionStatement(selection);
+            var statement = this.DatabaseContext.StatementCompiler.CreateDeletionStatement(selection);
 
             try
             {
@@ -638,12 +630,11 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var statement = this.statementFactory.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
 
             try
             {
-                ////Trace.TraceInformation("Using unique query: {0} [{1}]", sql.SQL, String.Join(", ", sql.Arguments));
-                return this.DatabaseContext.FirstOrDefault<T>(statement, selection.PropertyValues.ToArray());
+                return this.DatabaseContext.Query<T>(statement, selection.PropertyValues.ToArray()).FirstOrDefault();
             }
             catch (InvalidOperationException ex)
             {

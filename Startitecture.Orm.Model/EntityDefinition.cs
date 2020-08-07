@@ -47,6 +47,11 @@ namespace Startitecture.Orm.Model
         private readonly Lazy<EntityAttributeDefinition?> autoNumberPrimaryKey;
 
         /// <summary>
+        /// The insertable attributes.
+        /// </summary>
+        private readonly Lazy<List<EntityAttributeDefinition>> insertableAttributes;
+
+        /// <summary>
         /// The updateable attributes.
         /// </summary>
         private readonly Lazy<List<EntityAttributeDefinition>> updateableAttributes;
@@ -90,6 +95,10 @@ namespace Startitecture.Orm.Model
             this.primaryKeyAttributes = new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Where(x => x.IsPrimaryKey).ToList);
             this.autoNumberPrimaryKey = new Lazy<EntityAttributeDefinition?>(this.GetAutoNumberPrimaryKey);
 
+            // Do not include identity columns.
+            this.insertableAttributes = new Lazy<List<EntityAttributeDefinition>>(
+                this.directAttributes.Value.Where(definition => definition.IsIdentityColumn == false).ToList);
+
             // Do not include primary keys. // TODO: Also identify calculated columns.
             this.updateableAttributes =
                 new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Except(this.primaryKeyAttributes.Value).ToList);
@@ -120,6 +129,9 @@ namespace Startitecture.Orm.Model
 
         /// <inheritdoc />
         public IEnumerable<EntityAttributeDefinition> DirectAttributes => this.directAttributes.Value;
+
+        /// <inheritdoc />
+        public IEnumerable<EntityAttributeDefinition> InsertableAttributes => this.insertableAttributes.Value;
 
         /// <inheritdoc />
         public IEnumerable<EntityAttributeDefinition> PrimaryKeyAttributes => this.primaryKeyAttributes.Value;

@@ -13,7 +13,6 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
     using System.Data;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Mapper.Internal;
     using Startitecture.Orm.Schema;
     using Startitecture.Resources;
 
@@ -43,7 +42,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <param name="command">
         /// The command to execute.
         /// </param>
-        public override void PreExecute(IDbCommand command)
+        public virtual void PreExecute(IDbCommand command)
         {
             command.GetType().GetProperty("BindByName")?.SetValue(command, true, null);
         }
@@ -111,7 +110,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <summary>
         /// Performs an insert operation
         /// </summary>
-        /// <param name="database">
+        /// <param name="databaseContext">
         /// The calling database object.
         /// </param>
         /// <param name="command">
@@ -123,7 +122,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <returns>
         /// The ID of the newly inserted record.
         /// </returns>
-        public override object ExecuteInsert(Database database, IDbCommand command, string primaryKeyName)
+        public override object ExecuteInsert(DatabaseContext databaseContext, IDbCommand command, string primaryKeyName)
         {
             if (primaryKeyName != null)
             {

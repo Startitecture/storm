@@ -21,7 +21,6 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Mapper.Internal;
     using Startitecture.Orm.Model;
     using Startitecture.Resources;
 

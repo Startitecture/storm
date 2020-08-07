@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="DefaultDatabaseFactory.cs" company="Startitecture">
+// <copyright file="DefaultDatabaseContextFactory.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -12,13 +12,12 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
     /// The default database factory.
     /// </summary>
-    public class DefaultDatabaseFactory : IDatabaseFactory
+    public class DefaultDatabaseContextFactory : IDatabaseContextFactory
     {
         /// <summary>
         /// The connection string.
@@ -33,10 +32,10 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The definition provider.
         /// </summary>
-        private readonly IEntityDefinitionProvider definitionProvider;
+        private readonly IStatementCompiler statementCompiler;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DefaultDatabaseFactory"/> class.
+        /// Initializes a new instance of the <see cref="DefaultDatabaseContextFactory"/> class.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string.
@@ -44,19 +43,19 @@ namespace Startitecture.Orm.Mapper
         /// <param name="providerName">
         /// The provider name.
         /// </param>
-        /// <param name="definitionProvider">
+        /// <param name="statementCompiler">
         /// The definition provider.
         /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="definitionProvider"/> is null
+        /// <paramref name="statementCompiler"/> is null
         /// </exception>
-        public DefaultDatabaseFactory(
+        public DefaultDatabaseContextFactory(
             [NotNull] string connectionString,
             [NotNull] string providerName,
-            [NotNull] IEntityDefinitionProvider definitionProvider)
+            [NotNull] IStatementCompiler statementCompiler)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -68,7 +67,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
-            this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.statementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
             this.connectionString = connectionString;
             this.providerName = providerName;
         }
@@ -77,7 +76,7 @@ namespace Startitecture.Orm.Mapper
         public IDatabaseContext Create()
         {
             var providerFactory = DbProviderFactories.GetFactory(this.providerName);
-            return new Database(this.connectionString, providerFactory, this.definitionProvider);
+            return new DatabaseContext(this.connectionString, providerFactory, this.statementCompiler);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StatementFactory.cs" company="Startitecture">
+// <copyright file="StatementCompiler.cs" company="Startitecture">
 //   Copyright 2017 Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -8,6 +8,7 @@ namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
@@ -22,7 +23,7 @@ namespace Startitecture.Orm.Common
     /// <summary>
     /// The statement factory.
     /// </summary>
-    public class StatementFactory : IStatementFactory
+    public abstract class StatementCompiler : IStatementCompiler
     {
         /// <summary>
         /// The select statement.
@@ -46,7 +47,7 @@ SET
         /// <summary>
         /// The SQL parameter format.
         /// </summary>
-        private const string SetParameterFormat = "{0} = @{1}";
+        private const string SetParameterFormat = "{0} = {1}";
 
         /// <summary>
         /// The null value.
@@ -106,12 +107,12 @@ SET
         /// <summary>
         /// The equality filter.
         /// </summary>
-        private const string EqualityFilter = "{0} {1} @{2}";
+        private const string EqualityFilter = "{0} {1} {2}";
 
         /// <summary>
         /// The between filter.
         /// </summary>
-        private const string BetweenFilter = "{0} BETWEEN @{1} AND @{2}";
+        private const string BetweenFilter = "{0} BETWEEN {1} AND {2}";
 
         /// <summary>
         /// The not null predicate.
@@ -131,22 +132,22 @@ SET
         /// <summary>
         /// The less than predicate.
         /// </summary>
-        private const string LessThanPredicate = "{0} < @{1}";
+        private const string LessThanPredicate = "{0} < {1}";
 
         /// <summary>
         /// The less than predicate.
         /// </summary>
-        private const string LessThanOrEqualToPredicate = "{0} <= @{1}";
+        private const string LessThanOrEqualToPredicate = "{0} <= {1}";
 
         /// <summary>
         /// The greater than predicate.
         /// </summary>
-        private const string GreaterThanPredicate = "{0} > @{1}";
+        private const string GreaterThanPredicate = "{0} > {1}";
 
         /// <summary>
         /// The greater than predicate.
         /// </summary>
-        private const string GreaterThanOrEqualToPredicate = "{0} >= @{1}";
+        private const string GreaterThanOrEqualToPredicate = "{0} >= {1}";
 
         /// <summary>
         /// The like operand.
@@ -179,11 +180,6 @@ SET
         private const string ExclusionPredicate = "{0} NOT IN ({1})";
 
         /// <summary>
-        /// The parameter format.
-        /// </summary>
-        private const string ParameterFormat = "@{0}";
-
-        /// <summary>
         /// The parameter separator.
         /// </summary>
         private const string ParameterSeparator = ", ";
@@ -194,33 +190,32 @@ SET
         private const int DefaultIndent = 0;
 
         /// <summary>
-        /// The definition provider.
-        /// </summary>
-        [NotNull]
-        private readonly IEntityDefinitionProvider definitionProvider;
-
-        /// <summary>
-        /// The name qualifier.
-        /// </summary>
-        private readonly INameQualifier nameQualifier;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="StatementFactory"/> class.
+        /// Initializes a new instance of the <see cref="StatementCompiler"/> class.
         /// </summary>
         /// <param name="definitionProvider">
-        /// The definition provider.
+        /// The definition Provider.
         /// </param>
         /// <param name="nameQualifier">
-        /// The name qualifier for the statement factory.
+        /// The name Qualifier.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
         /// </exception>
-        public StatementFactory([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
+        protected StatementCompiler([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
         {
-            this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.nameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
+            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
+            this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
         }
+
+        /// <summary>
+        /// Gets the definition provider.
+        /// </summary>
+        public IEntityDefinitionProvider DefinitionProvider { get; }
+
+        /// <summary>
+        /// Gets the name qualifier.
+        /// </summary>
+        public INameQualifier NameQualifier { get; }
 
         /// <inheritdoc />
         /// <remarks>
@@ -235,7 +230,7 @@ SET
                 throw new ArgumentNullException(nameof(entitySet));
             }
 
-            var entityDefinition = this.definitionProvider.Resolve(entitySet.EntityType);
+            var entityDefinition = this.DefinitionProvider.Resolve(entitySet.EntityType);
             var qualifiedColumns = new List<string>
                                        {
                                            '1'.ToString()
@@ -264,7 +259,7 @@ SET
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var entityDefinition = this.definitionProvider.Resolve(selection.EntityType);
+            var entityDefinition = this.DefinitionProvider.Resolve(selection.EntityType);
             var qualifiedColumns = this.GetQualifiedColumns(selection, entityDefinition);
             var selectionStatement = this.CreateSelectionStatement(selection, entityDefinition, qualifiedColumns, 0, 0);
             return selection.ParentExpression == null
@@ -282,7 +277,7 @@ SET
 
             var setClauses = new List<string>();
             int index = 0;
-            var entityDefinition = this.definitionProvider.Resolve(updateSet.EntityType);
+            var entityDefinition = this.DefinitionProvider.Resolve(updateSet.EntityType);
 
             foreach (var valueState in updateSet.AttributesToSet)
             {
@@ -294,11 +289,15 @@ SET
                     continue;
                 }
 
-                var qualifiedName = this.nameQualifier.Qualify(attributeDefinition);
+                var qualifiedName = this.NameQualifier.Qualify(attributeDefinition);
                 setClauses.Add(
                     valueState.Value == null
                         ? string.Format(CultureInfo.CurrentCulture, SetNullParameterFormat, qualifiedName)
-                        : string.Format(CultureInfo.CurrentCulture, SetParameterFormat, qualifiedName, index));
+                        : string.Format(
+                            CultureInfo.CurrentCulture,
+                            SetParameterFormat,
+                            qualifiedName,
+                            this.AddPrefix(index.ToString(CultureInfo.InvariantCulture))));
 
                 if (valueState.Value != null)
                 {
@@ -307,8 +306,8 @@ SET
             }
 
             var entityName =
-                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
-            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+                $"{this.NameQualifier.Escape(entityDefinition.EntityContainer)}.{this.NameQualifier.Escape(entityDefinition.EntityName)}";
+            var joinClause = new JoinClause(this.DefinitionProvider, this.NameQualifier);
             string joinClauseText = updateSet.Relations.Any()
                                         ? string.Concat(
                                             Environment.NewLine,
@@ -338,9 +337,9 @@ SET
                 throw new ArgumentNullException(nameof(entitySet));
             }
 
-            var entityDefinition = this.definitionProvider.Resolve(entitySet.EntityType); //// statementContext.EntityDefinition;
+            var entityDefinition = this.DefinitionProvider.Resolve(entitySet.EntityType); //// statementContext.EntityDefinition;
             var primaryTableName =
-                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}";
+                $"{this.NameQualifier.Escape(entityDefinition.EntityContainer)}.{this.NameQualifier.Escape(entityDefinition.EntityName)}";
             var filterStatement = this.CreateFilter(entityDefinition, entitySet.Filters, 0);
             var filter = entitySet.Filters.Any() ? string.Concat(Environment.NewLine, SqlWhereClause, filterStatement) : string.Empty;
 
@@ -349,7 +348,7 @@ SET
                 return string.Concat(DeleteFromStatement, primaryTableName, filter);
             }
 
-            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier);
+            var joinClause = new JoinClause(this.DefinitionProvider, this.NameQualifier);
 
             return string.Concat(
                 DeleteStatement,
@@ -361,6 +360,129 @@ SET
                 joinClause.Create(entitySet.Relations),
                 filter);
         }
+
+        /// <inheritdoc />
+        public virtual string CreateInsertionStatement<T>()
+            where T : ITransactionContext
+        {
+            var definition = this.DefinitionProvider.Resolve<T>();
+
+            var escapeTableName = $"{this.NameQualifier.Escape(definition.EntityContainer)}.{this.NameQualifier.Escape(definition.EntityName)}";
+            var columnNames = string.Join(", ", definition.InsertableAttributes.Select(this.NameQualifier.GetReferenceName));
+            var columnValues = string.Join(
+                ", ",
+                Enumerable.Range(0, definition.InsertableAttributes.Count()).Select(i => this.AddPrefix(i.ToString(CultureInfo.InvariantCulture))));
+
+            var commandText = $@"INSERT INTO {escapeTableName}
+({columnNames})
+VALUES ({columnValues})";
+
+            return definition.AutoNumberPrimaryKey.HasValue ? this.CaptureInsertedIdentity(commandText, definition) : commandText;
+        }
+
+        /// <inheritdoc />
+        public virtual string AddPrefix([NotNull] string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(parameterName));
+            }
+
+            return string.Concat('@', parameterName);
+        }
+
+        /// <inheritdoc />
+        public virtual IDbDataParameter CreateParameter([NotNull] IDbCommand command, [NotNull] string name, object value)
+        {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(name));
+            }
+
+            var parameter = command.CreateParameter();
+            parameter.ParameterName = this.AddPrefix(name);
+
+            if (value == null)
+            {
+                parameter.Value = DBNull.Value;
+            }
+            else
+            {
+                var type = value.GetType();
+                if (type.IsEnum)
+                {
+                    // PostgreSQL .NET driver wont cast enum to int
+                    parameter.Value = (int)value;
+                }
+                else if (type == typeof(Guid)) // TODO: why??
+                {
+                    parameter.Value = value.ToString();
+                    parameter.DbType = DbType.String;
+                    parameter.Size = 40;
+                }
+                else if (type == typeof(string))
+                {
+                    // out of memory exception occurs if trying to save more than 4000 characters to SQL Server CE NText column. 
+                    // Set before attempting to set Size, or Size will always max out at 4000
+                    var length = (value as string ?? Convert.ToString(value, CultureInfo.CurrentCulture))?.Length;
+
+                    if (length + 1 > 4000 && parameter.GetType().Name == "SqlCeParameter")
+                    {
+                        parameter.GetType().GetProperty("SqlDbType")?.SetValue(parameter, SqlDbType.NText, null);
+                    }
+
+                    // Help query plan caching by using common size
+                    parameter.Size = Math.Max(length.GetValueOrDefault() + 1, 4000);
+                    parameter.Value = value;
+                }
+                else if (type == typeof(AnsiString))
+                {
+                    // Thanks @DataChomp for pointing out the SQL Server indexing performance hit of using wrong string type on varchar
+                    parameter.Size = Math.Max((value as AnsiString ?? new AnsiString(string.Empty)).Value.Length + 1, 4000);
+                    parameter.Value = (value as AnsiString ?? new AnsiString(string.Empty)).Value;
+                    parameter.DbType = DbType.AnsiString;
+                }
+                else if (value.GetType().Name == "SqlGeography")
+                {
+                    // SqlGeography is a CLR Type
+                    parameter.GetType().GetProperty("UdtTypeName")?.SetValue(parameter, "geography", null);
+
+                    // geography is the equivalent SQL Server Type
+                    parameter.Value = value;
+                }
+                else if (value.GetType().Name == "SqlGeometry")
+                {
+                    // SqlGeometry is a CLR Type
+                    parameter.GetType().GetProperty("UdtTypeName")?.SetValue(parameter, "geometry", null); // geography is the equivalent SQL Server Type
+                    parameter.Value = value;
+                }
+                else
+                {
+                    parameter.Value = value;
+                }
+            }
+
+            return parameter;
+        }
+
+        /// <summary>
+        /// The capture inserted identity.
+        /// </summary>
+        /// <param name="commandText">
+        /// The command text.
+        /// </param>
+        /// <param name="definition">
+        /// The definition.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        protected abstract string CaptureInsertedIdentity(string commandText, IEntityDefinition definition);
 
         /// <summary>
         /// Gets an inclusion filter for the specified filter values and column.
@@ -379,12 +501,14 @@ SET
         /// </returns>
         protected virtual string GetInclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            var indexTokens = filterValues.Select((o, i) => string.Format(CultureInfo.InvariantCulture, ParameterFormat, filterIndex + i));
+            var indexTokens = filterValues.Select((o, i) => this.AddPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
+
             var inclusionToken = string.Format(
                 CultureInfo.InvariantCulture,
                 InclusionPredicate,
                 qualifiedName,
                 string.Join(ParameterSeparator, indexTokens));
+
             return inclusionToken;
         }
 
@@ -405,12 +529,14 @@ SET
         /// </returns>
         protected virtual string GetExclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            var indexTokens = filterValues.Select((o, i) => string.Format(CultureInfo.InvariantCulture, ParameterFormat, filterIndex + i));
+            var indexTokens = filterValues.Select((o, i) => this.AddPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
+
             var inclusionToken = string.Format(
                 CultureInfo.InvariantCulture,
                 ExclusionPredicate,
                 qualifiedName,
                 string.Join(ParameterSeparator, indexTokens));
+
             return inclusionToken;
         }
 
@@ -475,7 +601,7 @@ SET
                         EqualityFilter,
                         referenceName,
                         firstFilterValue is string ? LikeOperand : EqualityOperand,
-                        index++);
+                        this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture)));
 
                     filterTokens.Add(equalityItem);
                     break;
@@ -485,24 +611,55 @@ SET
                         EqualityFilter,
                         referenceName,
                         firstFilterValue is string ? NotLikeOperand : InequalityOperand,
-                        index++);
+                        this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture)));
 
                     filterTokens.Add(inequalityItem);
                     break;
                 case FilterType.LessThan:
-                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, LessThanPredicate, referenceName, index++));
+                    filterTokens.Add(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            LessThanPredicate,
+                            referenceName,
+                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+
                     break;
                 case FilterType.LessThanOrEqualTo:
-                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, LessThanOrEqualToPredicate, referenceName, index++));
+                    filterTokens.Add(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            LessThanOrEqualToPredicate,
+                            referenceName,
+                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+
                     break;
                 case FilterType.GreaterThan:
-                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, GreaterThanPredicate, referenceName, index++));
+                    filterTokens.Add(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            GreaterThanPredicate,
+                            referenceName,
+                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+
                     break;
                 case FilterType.GreaterThanOrEqualTo:
-                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, GreaterThanOrEqualToPredicate, referenceName, index++));
+                    filterTokens.Add(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            GreaterThanOrEqualToPredicate,
+                            referenceName,
+                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+
                     break;
                 case FilterType.Between:
-                    filterTokens.Add(string.Format(CultureInfo.InvariantCulture, BetweenFilter, referenceName, index++, index++));
+                    filterTokens.Add(
+                        string.Format(
+                            CultureInfo.InvariantCulture,
+                            BetweenFilter,
+                            referenceName,
+                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture)),
+                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+
                     break;
                 case FilterType.MatchesSet:
                     filterTokens.Add(this.GetInclusionFilter(referenceName, index, setValues));
@@ -632,12 +789,13 @@ SET
             var fromClause = string.Concat(
                 new string(' ', indent),
                 FromStatement,
-                $"{this.nameQualifier.Escape(entityDefinition.EntityContainer)}.{this.nameQualifier.Escape(entityDefinition.EntityName)}");
+                $"{this.NameQualifier.Escape(entityDefinition.EntityContainer)}.{this.NameQualifier.Escape(entityDefinition.EntityName)}");
 
-            var joinClause = new JoinClause(this.definitionProvider, this.nameQualifier)
+            var joinClause = new JoinClause(this.DefinitionProvider, this.NameQualifier)
                                  {
                                      Indent = indent
                                  };
+
             var joinClauseText = joinClause.Create(entitySet.Relations);
             var filter = new StringBuilder(new string(' ', indent)).Append(SqlWhereClause);
 
@@ -645,13 +803,13 @@ SET
             {
                 // TODO: Support LEFT JOIN? This will have to be done in the JOIN clause.
                 // For now, assume INNER JOIN and create an EXISTS clause.
-                var pageTableName = this.nameQualifier.Escape(entitySet.ParentExpression.TableName);
+                var pageTableName = this.NameQualifier.Escape(entitySet.ParentExpression.TableName);
                 var keyRelations = entitySet.ParentExpression.TableRelations.ToList();
 
                 var keyPredicate = string.Join(
                     string.Concat(FilterSeparator, Environment.NewLine),
                     keyRelations.Select(
-                        relation => $"{pageTableName}.{this.nameQualifier.Escape(entityDefinition.Find(relation.SourceExpression).ReferenceName)} = "
+                        relation => $"{pageTableName}.{this.NameQualifier.Escape(entityDefinition.Find(relation.SourceExpression).ReferenceName)} = "
                                     + $"{this.GetQualifiedColumnName(entityDefinition.Find(relation.RelationExpression))}"));
 
                 filter.Append(
@@ -717,7 +875,7 @@ WHERE {keyPredicate})");
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(selectionStatement));
             }
 
-            var pageTableName = this.nameQualifier.Escape(entitySet.ParentExpression.TableName);
+            var pageTableName = this.NameQualifier.Escape(entitySet.ParentExpression.TableName);
 
             var tableSelection = entitySet.ParentExpression.TableSelection;
             var qualifiedColumns = this.GetQualifiedColumns(tableSelection, definition);
@@ -871,8 +1029,8 @@ WHERE {keyPredicate})");
         /// </returns>
         private string GetQualifiedColumnName(EntityAttributeDefinition attribute)
         {
-            var qualifiedName = this.nameQualifier.Qualify(attribute);
-            var referenceName = this.nameQualifier.GetReferenceName(attribute);
+            var qualifiedName = this.NameQualifier.Qualify(attribute);
+            var referenceName = this.NameQualifier.GetReferenceName(attribute);
 
             var qualifiedColumnName = string.IsNullOrWhiteSpace(attribute.Alias)
                                           ? qualifiedName
@@ -880,7 +1038,7 @@ WHERE {keyPredicate})");
                                               CultureInfo.InvariantCulture,
                                               AliasColumnFormat,
                                               referenceName,
-                                              this.nameQualifier.Escape(attribute.Alias));
+                                              this.NameQualifier.Escape(attribute.Alias));
 
             return qualifiedColumnName;
         }
@@ -941,14 +1099,14 @@ WHERE {keyPredicate})");
 
             foreach (var filter in filters)
             {
-                var entityReference = this.definitionProvider.GetEntityReference(filter.AttributeLocation.PropertyInfo);
-                var entityLocation = this.definitionProvider.GetEntityLocation(entityReference);
+                var entityReference = this.DefinitionProvider.GetEntityReference(filter.AttributeLocation.PropertyInfo);
+                var entityLocation = this.DefinitionProvider.GetEntityLocation(entityReference);
 
                 var attribute = entityDefinition.Find(
                     filter.AttributeLocation.EntityReference.EntityAlias ?? entityLocation.Alias ?? entityLocation.Name,
                     filter.AttributeLocation.PropertyInfo.Name);
 
-                var referenceName = this.nameQualifier.GetReferenceName(attribute);
+                var referenceName = this.NameQualifier.GetReferenceName(attribute);
                 var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
 
                 index = this.AddTokens(filter.FilterType, filter.FilterValues.First(), filterTokens, referenceName, setValues, index);
@@ -969,12 +1127,12 @@ WHERE {keyPredicate})");
         private string CreateOrderByClause(IEnumerable<OrderExpression> orderExpressions)
         {
             var clauses = (from orderExpression in orderExpressions
-                           let reference = this.definitionProvider.GetEntityReference(orderExpression.PropertyExpression)
-                           let location = this.definitionProvider.GetEntityLocation(reference)
+                           let reference = this.DefinitionProvider.GetEntityReference(orderExpression.PropertyExpression)
+                           let location = this.DefinitionProvider.GetEntityLocation(reference)
                            let attribute =
-                               this.definitionProvider.Resolve(location.EntityType)
+                               this.DefinitionProvider.Resolve(location.EntityType)
                                    .DirectAttributes.FirstOrDefault(x => x.PropertyName == orderExpression.PropertyExpression.GetPropertyName())
-                           let referenceName = this.nameQualifier.Qualify(attribute, location)
+                           let referenceName = this.NameQualifier.Qualify(attribute, location)
                            select orderExpression.OrderDescending ? $"{referenceName} DESC" : referenceName).ToList();
 
             return string.Join(ParameterSeparator, clauses);

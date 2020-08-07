@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Mapper
+namespace Startitecture.Orm.Common
 {
     /// <summary>
     /// Wraps strings to force use of DBType.AnsiString.

@@ -11,10 +11,8 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
 {
     using System;
     using System.Data;
-    using System.Linq;
 
     using Startitecture.Core;
-    using Startitecture.Orm.Mapper.Internal;
     using Startitecture.Orm.Schema;
 
     /// <summary>
@@ -24,6 +22,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
     {
         #region Public Methods and Operators
 
+/*
         /// <summary>
         /// Look at the type and provider name being used and instantiate a suitable DatabaseType instance.
         /// </summary>
@@ -114,6 +113,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
             // Assume SQL Server
             return Singleton<SqlServerDatabaseType>.Instance;
         }
+*/
 
         /////// <summary>
         /////// Builds a SQL query suitable for performing page based queries to the database.
@@ -176,7 +176,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <summary>
         /// Performs an insert operation
         /// </summary>
-        /// <param name="database">
+        /// <param name="databaseContext">
         /// The calling database object.
         /// </param>
         /// <param name="command">
@@ -188,7 +188,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <returns>
         /// The ID of the newly inserted record.
         /// </returns>
-        public virtual object ExecuteInsert(Database database, IDbCommand command, string primaryKeyName)
+        public virtual object ExecuteInsert(DatabaseContext databaseContext, IDbCommand command, string primaryKeyName)
         {
             command.CommandText += ";\nSELECT @@IDENTITY AS NewID;";
             return command.ExecuteScalar(); //// Database.ExecuteScalarHelper(command);
@@ -220,23 +220,6 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         public virtual string GetExistsSql()
         {
             return "SELECT COUNT(*) FROM {0} WHERE {1}";
-        }
-
-        /// <summary>
-        /// Returns an SQL expression that can be used to specify the return value of auto incremented columns.
-        /// </summary>
-        /// <param name="primaryKeyName">
-        /// The primary key of the row being inserted.
-        /// </param>
-        /// <returns>
-        /// An expression describing how to return the new primary key value.
-        /// </returns>
-        /// <remarks>
-        /// See the SQLServer database provider for an example of how this method is used.
-        /// </remarks>
-        public virtual string GetInsertOutputClause(string primaryKeyName)
-        {
-            return string.Empty;
         }
 
         /// <summary>
@@ -274,17 +257,6 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
             return value;
         }
 
-        /// <summary>
-        /// Called immediately before a command is executed, allowing for modification of the IDbCommand before it's passed to the
-        /// database provider.
-        /// </summary>
-        /// <param name="command">
-        /// The command to execute.
-        /// </param>
-        public virtual void PreExecute(IDbCommand command)
-        {
-        }
-
-#endregion
+        #endregion
     }
 }

@@ -12,7 +12,7 @@ namespace Startitecture.Orm.Common
     /// <summary>
     /// Provides an interface for classes that create database instances.
     /// </summary>
-    public interface IDatabaseFactory
+    public interface IDatabaseContextFactory
     {
         /// <summary>
         /// Creates a new database instance.

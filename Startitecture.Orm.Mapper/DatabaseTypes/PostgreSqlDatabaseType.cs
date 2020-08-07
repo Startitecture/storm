@@ -35,7 +35,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <summary>
         /// Performs an insert operation
         /// </summary>
-        /// <param name="database">
+        /// <param name="databaseContext">
         /// The calling database object.
         /// </param>
         /// <param name="command">
@@ -47,7 +47,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
         /// <returns>
         /// The ID of the newly inserted record.
         /// </returns>
-        public override object ExecuteInsert(Database database, IDbCommand command, string primaryKeyName)
+        public override object ExecuteInsert(DatabaseContext databaseContext, IDbCommand command, string primaryKeyName)
         {
             if (primaryKeyName != null)
             {

@@ -37,6 +37,11 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the updateable attributes of the data item.
         /// </summary>
+        IEnumerable<EntityAttributeDefinition> InsertableAttributes { get; }
+
+        /// <summary>
+        /// Gets the updateable attributes of the data item.
+        /// </summary>
         IEnumerable<EntityAttributeDefinition> UpdateableAttributes { get; }
 
         /// <summary>
