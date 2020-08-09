@@ -368,7 +368,7 @@ SET
             var definition = this.DefinitionProvider.Resolve<T>();
 
             var escapeTableName = $"{this.NameQualifier.Escape(definition.EntityContainer)}.{this.NameQualifier.Escape(definition.EntityName)}";
-            var columnNames = string.Join(", ", definition.InsertableAttributes.Select(this.NameQualifier.GetReferenceName));
+            var columnNames = string.Join(", ", definition.InsertableAttributes.Select(attribute => this.NameQualifier.Escape(attribute.PhysicalName)));
             var columnValues = string.Join(
                 ", ",
                 Enumerable.Range(0, definition.InsertableAttributes.Count()).Select(i => this.AddPrefix(i.ToString(CultureInfo.InvariantCulture))));
@@ -377,7 +377,7 @@ SET
 ({columnNames})
 VALUES ({columnValues})";
 
-            return definition.AutoNumberPrimaryKey.HasValue ? this.CaptureInsertedIdentity(commandText, definition) : commandText;
+            return definition.RowIdentity.HasValue ? this.CaptureInsertedIdentity(commandText, definition) : commandText;
         }
 
         /// <inheritdoc />

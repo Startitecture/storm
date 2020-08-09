@@ -62,7 +62,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the auto-number primary key of the data item, if any.
         /// </summary>
-        EntityAttributeDefinition? AutoNumberPrimaryKey { get; }
+        EntityAttributeDefinition? RowIdentity { get; }
 
         /// <summary>
         /// Gets the qualified name of the entity.

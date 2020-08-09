@@ -379,10 +379,10 @@ namespace Startitecture.Orm.Common
 
             try
             {
-                if (entityDefinition.AutoNumberPrimaryKey.HasValue)
+                if (entityDefinition.RowIdentity.HasValue)
                 {
                     var autoNumber = this.DatabaseContext.ExecuteScalar<object>(statement, values);
-                    entityDefinition.AutoNumberPrimaryKey.Value.SetValueDelegate.DynamicInvoke(entity, autoNumber);
+                    entityDefinition.RowIdentity.Value.SetValueDelegate.DynamicInvoke(entity, autoNumber);
                 }
                 else
                 {

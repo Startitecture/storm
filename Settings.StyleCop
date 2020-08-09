@@ -3,8 +3,14 @@
     <Analyzer AnalyzerId="StyleCop.CSharp.DocumentationRules">
       <AnalyzerSettings>
         <StringProperty Name="CompanyName">Startitecture</StringProperty>
-        <StringProperty Name="Copyright">Copyright 2017 Startitecture. All rights reserved.</StringProperty>
+        <StringProperty Name="Copyright">Copyright (c) Startitecture. All rights reserved.</StringProperty>
       </AnalyzerSettings>
     </Analyzer>
   </Analyzers>
+  <GlobalSettings>
+    <CollectionProperty Name="RecognizedWords">
+      <Value>Postgre</Value>
+      <Value>Sql</Value>
+    </CollectionProperty>
+  </GlobalSettings>
 </StyleCopSettings>

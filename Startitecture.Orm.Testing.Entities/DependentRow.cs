@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DependentRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,12 +14,11 @@ namespace Startitecture.Orm.Testing.Entities
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Mapper;
 
     /// <summary>
     /// The fake dependent row.
     /// </summary>
-    [Table("DependentEntity")]
+    [Table("DependentEntity", Schema = "dbo")]
     public class DependentRow : EntityBase, IEquatable<DependentRow>
     {
         /// <summary>

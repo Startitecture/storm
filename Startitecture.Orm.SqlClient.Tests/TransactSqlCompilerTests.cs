@@ -1,17 +1,13 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlQueryFactoryTest.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+// <copyright file="TransactSqlCompilerTests.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-// ReSharper disable StringLiteralTypo
 namespace Startitecture.Orm.SqlClient.Tests
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-    using Moq;
-
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.SqlClient;
@@ -21,9 +17,42 @@ namespace Startitecture.Orm.SqlClient.Tests
     /// The example selection test.
     /// </summary>
     [TestClass]
-    public class TransactSqlQueryFactoryTest
+    public class TransactSqlCompilerTests
     {
         #region Public Methods and Operators
+
+        /// <summary>
+        /// The create insertion statement with identity column matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateInsertionStatement_WithIdentityColumn_MatchesExpected()
+        {
+            const string Expected = @"DECLARE @NewId int
+INSERT INTO [dbo].[FakeData]
+([NormalColumn], [NullableColumn], [ValueColumn], [AnotherValueColumn], [AnotherColumn], [NullableValueColumn])
+VALUES (@0, @1, @2, @3, @4, @5)
+SET @NewId = SCOPE_IDENTITY()
+SELECT @NewId";
+
+            var target = new TransactSqlCompiler(new DataAnnotationsDefinitionProvider());
+            var actual = target.CreateInsertionStatement<DataRow>();
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The create insertion statement without identity column matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateInsertionStatement_WithoutIdentityColumn_MatchesExpected()
+        {
+            const string Expected = @"INSERT INTO [dbo].[DependentEntity]
+([FakeDependentEntityId], [DependentIntegerValue], [DependentTimeValue])
+VALUES (@0, @1, @2)";
+
+            var target = new TransactSqlCompiler(new DataAnnotationsDefinitionProvider());
+            var actual = target.CreateInsertionStatement<DependentRow>();
+            Assert.AreEqual(Expected, actual);
+        }
 
         /// <summary>
         /// The selection statement direct data matches expected.

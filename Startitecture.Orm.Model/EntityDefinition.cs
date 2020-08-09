@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityDefinition.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The auto number primary key.
         /// </summary>
-        private readonly Lazy<EntityAttributeDefinition?> autoNumberPrimaryKey;
+        private readonly Lazy<EntityAttributeDefinition?> rowIdentity;
 
         /// <summary>
         /// The insertable attributes.
@@ -93,7 +93,7 @@ namespace Startitecture.Orm.Model
             // Do not include related attributes.
             this.directAttributes = new Lazy<List<EntityAttributeDefinition>>(this.returnableAttributes.Value.Where(x => x.IsDirect).ToList);
             this.primaryKeyAttributes = new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Where(x => x.IsPrimaryKey).ToList);
-            this.autoNumberPrimaryKey = new Lazy<EntityAttributeDefinition?>(this.GetAutoNumberPrimaryKey);
+            this.rowIdentity = new Lazy<EntityAttributeDefinition?>(this.GetRowIdentity);
 
             // Do not include identity columns.
             this.insertableAttributes = new Lazy<List<EntityAttributeDefinition>>(
@@ -137,7 +137,7 @@ namespace Startitecture.Orm.Model
         public IEnumerable<EntityAttributeDefinition> PrimaryKeyAttributes => this.primaryKeyAttributes.Value;
 
         /// <inheritdoc />
-        public EntityAttributeDefinition? AutoNumberPrimaryKey => this.autoNumberPrimaryKey.Value;
+        public EntityAttributeDefinition? RowIdentity => this.rowIdentity.Value;
 
         /// <inheritdoc />
         public string QualifiedName => $"{this.EntityContainer}.{this.EntityName}";
@@ -228,7 +228,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The primary key definition, or null if the object does not have a primary key definition.
         /// </returns>
-        private EntityAttributeDefinition? GetAutoNumberPrimaryKey()
+        private EntityAttributeDefinition? GetRowIdentity()
         {
             var entityAttributeDefinition = this.directAttributes.Value.FirstOrDefault(x => x.IsDirect && x.IsIdentityColumn);
             return entityAttributeDefinition == EntityAttributeDefinition.Empty ? default(EntityAttributeDefinition?) : entityAttributeDefinition;

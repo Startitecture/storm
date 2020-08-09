@@ -123,9 +123,9 @@ namespace Startitecture.Orm.Common
             var key = entityDefinition.PrimaryKeyAttributes.First().GetValueDelegate.DynamicInvoke(entity);
 
             // Assume identical key name
-            if (entityDefinition.AutoNumberPrimaryKey.HasValue)
+            if (entityDefinition.RowIdentity.HasValue)
             {
-                var keyProperty = typeof(TModel).GetProperty(entityDefinition.AutoNumberPrimaryKey.Value.PropertyName);
+                var keyProperty = typeof(TModel).GetProperty(entityDefinition.RowIdentity.Value.PropertyName);
 
                 if (keyProperty == null)
                 {
@@ -134,7 +134,7 @@ namespace Startitecture.Orm.Common
                         ErrorMessages.MatchingKeyPropertyNotFound,
                         model,
                         typeof(TEntity),
-                        entityDefinition.AutoNumberPrimaryKey.Value.PropertyName);
+                        entityDefinition.RowIdentity.Value.PropertyName);
 
                     throw new OperationException(model, message);
                 }

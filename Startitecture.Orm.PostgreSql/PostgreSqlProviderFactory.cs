@@ -1,10 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="SqlClientProviderFactory.cs" company="Startitecture">
+// <copyright file="PostgreSqlProviderFactory.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.SqlClient
+namespace Startitecture.Orm.PostgreSql
 {
     using System;
     using System.Data.Common;
@@ -13,7 +13,7 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
-    using Microsoft.Data.SqlClient;
+    using Npgsql;
 
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
@@ -21,14 +21,14 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Resources;
 
     /// <summary>
-    /// The SQL Server provider factory.
+    /// The postgre sql provider factory.
     /// </summary>
-    public class SqlClientProviderFactory : IRepositoryProviderFactory
+    public class PostgreSqlProviderFactory : IRepositoryProviderFactory
     {
         /// <summary>
         /// The provider invariant name.
         /// </summary>
-        private const string ProviderInvariantName = "System.Data.SqlClient";
+        private const string ProviderInvariantName = "Npgsql";
 
         /// <summary>
         /// The connection string.
@@ -41,7 +41,7 @@ namespace Startitecture.Orm.SqlClient
         private readonly IEntityDefinitionProvider definitionProvider;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SqlClientProviderFactory"/> class.
+        /// Initializes a new instance of the <see cref="PostgreSqlProviderFactory"/> class.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string.
@@ -49,13 +49,13 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null.
         /// </exception>
-        /// <exception cref="System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> is null or whitespace.
         /// </exception>
-        public SqlClientProviderFactory([NotNull] string connectionString, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public PostgreSqlProviderFactory([NotNull] string connectionString, [NotNull] IEntityDefinitionProvider definitionProvider)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -73,12 +73,13 @@ namespace Startitecture.Orm.SqlClient
             if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, ProviderInvariantName, StringComparison.Ordinal)) == false)
             {
                 Trace.WriteLine($"Registering {ProviderInvariantName} factory");
-                DbProviderFactories.RegisterFactory(ProviderInvariantName, SqlClientFactory.Instance);
+                DbProviderFactories.RegisterFactory(ProviderInvariantName, NpgsqlFactory.Instance);
             }
+
 #endif
-            var statementCompiler = new TransactSqlCompiler(this.definitionProvider);
-            var databaseFactory = new DefaultDatabaseContextFactory(this.connectionString, ProviderInvariantName, statementCompiler);
-            return new DatabaseRepositoryProvider(databaseFactory);
+            var statementCompiler = new PostgreSqlCompiler(this.definitionProvider);
+            var contextFactory = new DefaultDatabaseContextFactory(this.connectionString, ProviderInvariantName, statementCompiler);
+            return new DatabaseRepositoryProvider(contextFactory);
         }
     }
 }
