@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="SubEntityMappingProfile.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The fake sub entity mapping profile.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common.Tests
@@ -21,9 +24,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         public SubEntityMappingProfile()
         {
-            this.CreateMap<SubEntity, SubRow>()
-                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
-
+            this.CreateMap<SubEntity, SubRow>();
             this.CreateMap<SubRow, SubEntity>();
         }
     }

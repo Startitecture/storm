@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseContext.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Exposes a minimal database context to a repository provider.
@@ -18,7 +18,6 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
@@ -48,11 +47,6 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         private readonly RaisedPocoFactory pocoFactory;
 
-        /////// <summary>
-        /////// The database type.
-        /////// </summary>
-        ////private DatabaseType databaseType;
-
         /// <summary>
         /// The factory.
         /// </summary>
@@ -79,28 +73,26 @@ namespace Startitecture.Orm.Mapper
         /// <param name="connection">
         /// The IDbConnection to use
         /// </param>
-        /// <param name="definitionProvider">
-        /// The entity definition provider.
-        /// </param>
-        /// <param name="statementCompiler">
+        /// <param name="repositoryAdapter">
         /// The name qualifier for the database.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="connection"/>, <paramref name="definitionProvider"/>, or <paramref name="statementCompiler"/> is null.
+        /// <paramref name="connection"/> or <paramref name="repositoryAdapter"/> is null.
         /// </exception>
         /// <remarks>
         /// The supplied IDbConnection will not be closed/disposed - that remains the responsibility of the caller.
         /// </remarks>
-        public DatabaseContext([NotNull] IDbConnection connection, [NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] IStatementCompiler statementCompiler)
+        public DatabaseContext(
+            [NotNull] IDbConnection connection,
+            [NotNull] IRepositoryAdapter repositoryAdapter)
         {
             this.Connection = connection ?? throw new ArgumentNullException(nameof(connection));
-            this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
-            this.StatementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
+            this.RepositoryAdapter = repositoryAdapter ?? throw new ArgumentNullException(nameof(repositoryAdapter));
             this.isConnectionUserProvided = true;
             this.connectionString = connection.ConnectionString;
             this.CommonConstruct();
 
-            this.pocoFactory = new RaisedPocoFactory(definitionProvider);
+            this.pocoFactory = new RaisedPocoFactory(this.RepositoryAdapter.DefinitionProvider);
         }
 
         /// <summary>
@@ -113,14 +105,14 @@ namespace Startitecture.Orm.Mapper
         /// <param name="providerName">
         /// The name of the DB provider to use
         /// </param>
-        /// <param name="statementCompiler">
+        /// <param name="repositoryAdapter">
         /// The name qualifier for the database.
         /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="statementCompiler"/> is null.
+        /// <paramref name="repositoryAdapter"/> is null.
         /// </exception>
         /// <remarks>
         /// This class will automatically close and dispose any connections it creates.
@@ -128,7 +120,7 @@ namespace Startitecture.Orm.Mapper
         public DatabaseContext(
             [NotNull] string connectionString,
             [NotNull] string providerName,
-            [NotNull] IStatementCompiler statementCompiler)
+            [NotNull] IRepositoryAdapter repositoryAdapter)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -140,13 +132,12 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
-            this.StatementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
-            this.DefinitionProvider = statementCompiler.DefinitionProvider;
+            this.RepositoryAdapter = repositoryAdapter ?? throw new ArgumentNullException(nameof(repositoryAdapter));
             this.connectionString = connectionString;
             this.providerName = providerName;
             this.CommonConstruct();
 
-            this.pocoFactory = new RaisedPocoFactory(this.DefinitionProvider);
+            this.pocoFactory = new RaisedPocoFactory(this.RepositoryAdapter.DefinitionProvider);
         }
 
         /// <summary>
@@ -159,19 +150,19 @@ namespace Startitecture.Orm.Mapper
         /// <param name="providerFactory">
         /// The DbProviderFactory to use for instantiating IDbConnections.
         /// </param>
-        /// <param name="statementCompiler">
+        /// <param name="repositoryAdapter">
         /// The entity definition provider.
         /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="providerFactory"/> or <paramref name="statementCompiler"/> is null.
+        /// <paramref name="providerFactory"/> or <paramref name="repositoryAdapter"/> is null.
         /// </exception>
         public DatabaseContext(
             [NotNull] string connectionString,
             [NotNull] DbProviderFactory providerFactory,
-            [NotNull] IStatementCompiler statementCompiler)
+            [NotNull] IRepositoryAdapter repositoryAdapter)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -179,12 +170,11 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.factory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
-            this.StatementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
-            this.DefinitionProvider = statementCompiler.DefinitionProvider;
+            this.RepositoryAdapter = repositoryAdapter ?? throw new ArgumentNullException(nameof(repositoryAdapter));
             this.connectionString = connectionString;
             this.CommonConstruct();
 
-            this.pocoFactory = new RaisedPocoFactory(statementCompiler.DefinitionProvider);
+            this.pocoFactory = new RaisedPocoFactory(this.RepositoryAdapter.DefinitionProvider);
         }
 
         #endregion
@@ -198,16 +188,10 @@ namespace Startitecture.Orm.Mapper
         public IDbConnection Connection { get; private set; }
 
         /// <inheritdoc />
-        public bool EnableNamedParameters { get; set; }
-
-        /// <inheritdoc />
         public int OnetimeCommandTimeout { get; set; }
 
         /// <inheritdoc />
-        public IEntityDefinitionProvider DefinitionProvider { get; }
-
-        /// <inheritdoc />
-        public IStatementCompiler StatementCompiler { get; }
+        public IRepositoryAdapter RepositoryAdapter { get; }
 
         #endregion
 
@@ -390,7 +374,7 @@ namespace Startitecture.Orm.Mapper
 
             this.OpenSharedConnection();
 
-            var entityDefinition = this.DefinitionProvider.Resolve<T>();
+            var entityDefinition = this.RepositoryAdapter.DefinitionProvider.Resolve<T>();
 
             using (var cmd = this.CreateCommand(this.Connection, sql, args))
             using (var dataReader = cmd.ExecuteReader())
@@ -402,7 +386,7 @@ namespace Startitecture.Orm.Mapper
                         yield break;
                     }
 
-                    var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition)
+                    var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
                                               {
                                                   FirstColumn = 0
                                               };
@@ -413,143 +397,23 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        #endregion
-
-        #region Insert
-
-/*
-        /// <summary>
-        /// Performs an SQL Insert
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type of item being inserted.
-        /// </typeparam>
-        /// <param name="poco">
-        /// The POCO object that specifies the column values to be inserted
-        /// </param>
-        /// <returns>
-        /// The auto allocated primary key of the new record, or null for non-auto-increment tables
-        /// </returns>
-        /// <remarks>
-        /// The name of the table, it's primary key and whether it's an auto-allocated primary key are retrieved
-        /// from the POCO attributes
-        /// </remarks>
-        public object Insert<T>(T poco)
+        /// <inheritdoc />
+        public IValueMapper GetValueMapper([NotNull] Type sourceType, [NotNull] Type destinationType)
         {
-            if (poco == null)
+            if (sourceType == null)
             {
-                throw new ArgumentNullException(nameof(poco));
+                throw new ArgumentNullException(nameof(sourceType));
             }
 
-            var definition = this.DefinitionProvider.Resolve<T>();
-            var tableInfo = definition.ToTableInfo();
-
-            this.OpenSharedConnection();
-
-            using (var command = this.CreateCommand(this.Connection, string.Empty))
+            if (destinationType == null)
             {
-                var names = new List<string>();
-                var values = new List<string>();
-                int index = 0;
-
-                // Capture the primary key type. We'll use this later to change the declared type of the returned ID.
-                var primaryKeyAttribute = definition.PrimaryKeyAttributes.FirstOrDefault();
-
-                var primaryKeyType = primaryKeyAttribute == EntityAttributeDefinition.Empty
-                                         ? null
-                                         : definition.PrimaryKeyAttributes.First().PropertyInfo.PropertyType;
-
-                object result = null;
-
-                foreach (var column in definition.DirectAttributes)
-                {
-                    var columnName = column.ReferenceName;
-                    var value = column.GetValueDelegate.DynamicInvoke(poco);
-
-                    // Don't insert the primary key (except under oracle where we need bring in the next sequence value)
-                    if (column.IsDirect && column.IsIdentityColumn)
-                    {
-                        // Setup auto increment expression
-                        string autoIncExpression = this.databaseType.GetAutoIncrementExpression(tableInfo);
-
-                        if (autoIncExpression != null)
-                        {
-                            names.Add(columnName);
-                            values.Add(autoIncExpression);
-                        }
-
-                        continue;
-                    }
-
-                    if (column.IsDirect && column.IsPrimaryKey)
-                    {
-                        // Get the primary key value that we'll later return.
-                        result = value;
-                    }
-
-                    names.Add(this.databaseType.EscapeSqlIdentifier(columnName));
-                    values.Add($"{this.paramPrefix}{index++}");
-                    this.AddParam(command, value);
-                }
-
-                var escapeTableName = $"{tableInfo.TableName}";
-                var columnNames = string.Join(",", names.ToArray());
-                var columnValues = string.Join(",", values.ToArray());
-                var commandText = $"INSERT INTO {escapeTableName} ({columnNames}) VALUES ({columnValues})";
-
-                if (definition.AutoNumberPrimaryKey.HasValue)
-                {
-                    // TODO: This is SQL-only. Move into the database type thing.
-                    string type;
-
-                    if (primaryKeyType == typeof(int))
-                    {
-                        type = "int";
-                    }
-                    else if (primaryKeyType == typeof(long))
-                    {
-                        type = "bigint";
-                    }
-                    else if (primaryKeyType == typeof(short))
-                    {
-                        type = "smallint";
-                    }
-                    else if (primaryKeyType == typeof(byte))
-                    {
-                        type = "tinyint";
-                    }
-                    else
-                    {
-                        type = "decimal";
-                    }
-
-                    // Declare and return the ID without using the OUTPUT statement which triggers will mess with.
-                    commandText = string.Concat(
-                        $"DECLARE @NewId {type}",
-                        Environment.NewLine,
-                        commandText,
-                        Environment.NewLine,
-                        "SET @NewId = SCOPE_IDENTITY()",
-                        Environment.NewLine,
-                        "SELECT @NewId");
-                }
-
-                command.CommandText = commandText;
-
-                if (definition.AutoNumberPrimaryKey.HasValue)
-                {
-                    result = this.databaseType.ExecuteInsert(this, command, primaryKeyAttribute.ReferenceName);
-                    definition.AutoNumberPrimaryKey.Value.SetValueDelegate.DynamicInvoke(poco, result);
-                }
-                else
-                {
-                    command.ExecuteNonQuery();
-                }
-
-                return result;
+                throw new ArgumentNullException(nameof(destinationType));
             }
+
+            return this.RepositoryAdapter.ValueMappers.TryGetValue(new Tuple<Type, Type>(sourceType, destinationType), out var valueMapper)
+                       ? valueMapper
+                       : null;
         }
-*/
 
         #endregion
 
@@ -609,7 +473,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             // Create the parameter
-            var parameter = this.StatementCompiler.CreateParameter(command, parameterName, value);
+            var parameter = this.RepositoryAdapter.CreateParameter(command, parameterName, value);
 
             // Add to the collection
             command.Parameters.Add(parameter);

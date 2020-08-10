@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseRepositoryProviderTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -34,6 +34,9 @@ namespace Startitecture.Orm.Common.Tests
 
             var mockConnection = new Mock<IDbConnection>();
             mockDatabaseContext.Setup(context => context.Connection).Returns(mockConnection.Object);
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            mockDatabaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
 
             mockConnection.Setup(connection => connection.ChangeDatabase(It.IsAny<string>()))
                 .Callback((string s) => { mockConnection.Setup(connection => connection.Database).Returns(s); });
@@ -59,6 +62,9 @@ namespace Startitecture.Orm.Common.Tests
 
             var mockConnection = new Mock<IDbConnection>();
             mockDatabaseContext.Setup(context => context.Connection).Returns(mockConnection.Object);
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            mockDatabaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
 
             mockConnection.Setup(connection => connection.BeginTransaction(It.IsAny<IsolationLevel>()))
                 .Returns(
@@ -88,12 +94,12 @@ namespace Startitecture.Orm.Common.Tests
             var mockDatabaseContext = new Mock<IDatabaseContext>();
             mockDatabaseFactory.Setup(factory => factory.Create()).Returns(mockDatabaseContext.Object);
 
-            var statementCompiler = new Mock<IStatementCompiler>();
-            statementCompiler.Setup(compiler => compiler.CreateInsertionStatement<DependentRow>()).Returns(string.Empty);
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            mockDatabaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            mockDatabaseContext.Setup(context => context.DefinitionProvider).Returns(definitionProvider);
-            mockDatabaseContext.Setup(context => context.StatementCompiler).Returns(statementCompiler.Object);
+            repositoryAdapter.Setup(compiler => compiler.CreateInsertionStatement<DependentRow>()).Returns(string.Empty);
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(definitionProvider);
             mockDatabaseContext.Setup(context => context.ExecuteScalar<object>(It.IsAny<string>(), It.IsAny<object[]>())).Returns(234);
 
             var databaseFactory = mockDatabaseFactory.Object;
@@ -130,14 +136,15 @@ namespace Startitecture.Orm.Common.Tests
             var mockDatabaseContext = new Mock<IDatabaseContext>();
             mockDatabaseFactory.Setup(factory => factory.Create()).Returns(mockDatabaseContext.Object);
 
-            var statementCompiler = new Mock<IStatementCompiler>();
-            statementCompiler.Setup(compiler => compiler.CreateInsertionStatement<DependentRow>()).Returns(string.Empty);
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            mockDatabaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            mockDatabaseContext.Setup(context => context.DefinitionProvider).Returns(definitionProvider);
-            mockDatabaseContext.Setup(context => context.StatementCompiler).Returns(statementCompiler.Object);
+            repositoryAdapter.Setup(compiler => compiler.CreateInsertionStatement<DependentRow>()).Returns(string.Empty);
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(definitionProvider);
 
             var databaseFactory = mockDatabaseFactory.Object;
+
             using (var target = new DatabaseRepositoryProvider(databaseFactory))
             {
                 var expected = new DependentRow

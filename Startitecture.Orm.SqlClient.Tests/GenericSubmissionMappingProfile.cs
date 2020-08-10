@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="GenericSubmissionMappingProfile.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The generic submission mapping profile.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.SqlClient.Tests
@@ -22,19 +25,18 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// </summary>
         public GenericSubmissionMappingProfile()
         {
-            this.CreateMap<DomainIdentity, DomainIdentityRow>().ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+            this.CreateMap<DomainIdentity, DomainIdentityRow>();
             this.CreateMap<DomainIdentityRow, DomainIdentity>();
 
             this.CreateMap<GenericSubmission, GenericSubmissionRow>()
                 .ForMember(
                     row => row.SubmittedByDomainIdentifierId,
-                    expression => expression.MapFrom(submission => submission.SubmittedBy.DomainIdentityId.GetValueOrDefault()))
-                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+                    expression => expression.MapFrom(submission => submission.SubmittedBy.DomainIdentityId.GetValueOrDefault()));
 
             this.CreateMap<GenericSubmissionRow, GenericSubmission>();
 
             this.CreateMap<Field, Field>();
-            this.CreateMap<Field, FieldRow>().ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+            this.CreateMap<Field, FieldRow>();
             this.CreateMap<FieldRow, Field>();
 
             this.CreateMap<FieldTableTypeRow, Field>();

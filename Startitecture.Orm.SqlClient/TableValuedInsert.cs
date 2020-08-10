@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="TableValuedInsert.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -67,7 +67,7 @@ namespace Startitecture.Orm.SqlClient
             : base(structuredCommandProvider)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.StructuredCommandProvider.NameQualifier;
+            this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Startitecture.Orm.SqlClient
             : base(structuredCommandProvider, databaseTransaction)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.StructuredCommandProvider.NameQualifier;
+            this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(insertItems));
             }
 
-            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TEntity>();
+            this.itemDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TEntity>();
             this.Items.Clear();
             this.Items.AddRange(insertItems);
             this.insertColumnExpressions.Clear();
@@ -158,7 +158,7 @@ namespace Startitecture.Orm.SqlClient
         /// </returns>
         public TableValuedInsert<TStructure> SelectResults(params Expression<Func<TStructure, object>>[] matchProperties)
         {
-            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
             this.selectionAttributes.Clear();
             this.selectionAttributes.AddRange(matchProperties.Select(structureDefinition.Find));
             return this;
@@ -207,7 +207,7 @@ namespace Startitecture.Orm.SqlClient
         /// </returns>
         private string CompileCommandText()
         {
-            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
             var directAttributes = this.itemDefinition.DirectAttributes.ToList();
             var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.itemDefinition.Find) :
                                     this.itemDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.itemDefinition.UpdateableAttributes :

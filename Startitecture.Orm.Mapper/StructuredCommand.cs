@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="StructuredCommand.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Base class for structured SQL commands.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper
@@ -21,7 +24,7 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Resources;
 
     /// <summary>
-    /// The structured SQL command.
+    /// Base class for structured SQL commands.
     /// </summary>
     /// <typeparam name="TStructure">
     /// The type of the structure to use in the command.
@@ -77,7 +80,7 @@ namespace Startitecture.Orm.Mapper
 
             this.StructureTypeName = tableTypeAttribute.TypeName;
 
-            var structureDefinition = structuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+            var structureDefinition = structuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
             this.Parameter = $"{structureDefinition.EntityName}Table";
         }
 
@@ -111,7 +114,7 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         public void Execute()
         {
-            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.EntityDefinitionProvider);
+            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider);
 
             using (var dataTable = dataTableLoader.Load(this.Items))
             {
@@ -127,17 +130,17 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         public IEnumerable<TStructure> ExecuteForResults()
         {
-            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.EntityDefinitionProvider);
+            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider);
             var returnList = new List<TStructure>();
 
             using (var dataTable = dataTableLoader.Load(this.Items))
             using (var reader = this.ExecuteReader(dataTable))
             {
-                var entityDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+                var entityDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
 
                 while (reader.Read())
                 {
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, this.StructuredCommandProvider.DatabaseContext);
                     var mappingDelegate = FlatPocoFactory.ReturnableFactory.CreateDelegate<TStructure>(pocoDataRequest).MappingDelegate;
 
                     if (mappingDelegate is Func<IDataReader, TStructure> pocoDelegate)

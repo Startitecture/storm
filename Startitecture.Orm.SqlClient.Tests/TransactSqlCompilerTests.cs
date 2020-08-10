@@ -34,7 +34,7 @@ VALUES (@0, @1, @2, @3, @4, @5)
 SET @NewId = SCOPE_IDENTITY()
 SELECT @NewId";
 
-            var target = new TransactSqlCompiler(new DataAnnotationsDefinitionProvider());
+            var target = new TransactSqlAdapter(new DataAnnotationsDefinitionProvider());
             var actual = target.CreateInsertionStatement<DataRow>();
             Assert.AreEqual(Expected, actual);
         }
@@ -49,7 +49,7 @@ SELECT @NewId";
 ([FakeDependentEntityId], [DependentIntegerValue], [DependentTimeValue])
 VALUES (@0, @1, @2)";
 
-            var target = new TransactSqlCompiler(new DataAnnotationsDefinitionProvider());
+            var target = new TransactSqlAdapter(new DataAnnotationsDefinitionProvider());
             var actual = target.CreateInsertionStatement<DependentRow>();
             Assert.AreEqual(Expected, actual);
         }
@@ -111,7 +111,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -183,7 +183,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -228,7 +228,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -336,7 +336,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -387,7 +387,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -426,12 +426,12 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = @1,
-[dbo].[FakeData].[ValueColumn] = @2,
-[dbo].[FakeData].[AnotherValueColumn] = @3,
-[dbo].[FakeData].[AnotherColumn] = @4,
-[dbo].[FakeData].[NullableValueColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = @1,
+[ValueColumn] = @2,
+[AnotherValueColumn] = @3,
+[AnotherColumn] = @4,
+[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -446,7 +446,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -484,8 +484,8 @@ WHERE
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -500,7 +500,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -551,7 +551,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -613,7 +613,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -658,7 +658,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -765,7 +765,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -816,7 +816,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -855,12 +855,12 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = @1,
-[dbo].[FakeData].[ValueColumn] = @2,
-[dbo].[FakeData].[AnotherValueColumn] = @3,
-[dbo].[FakeData].[AnotherColumn] = @4,
-[dbo].[FakeData].[NullableValueColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = @1,
+[ValueColumn] = @2,
+[AnotherValueColumn] = @3,
+[AnotherColumn] = @4,
+[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -875,7 +875,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @7 AND @8";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -916,8 +916,8 @@ WHERE
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -932,7 +932,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -986,7 +986,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[AnotherValueColumn] IN (@6, @7, @8, @9)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1048,7 +1048,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1089,7 +1089,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1192,7 +1192,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1239,7 +1239,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1283,12 +1283,12 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = @1,
-[dbo].[FakeData].[ValueColumn] = @2,
-[dbo].[FakeData].[AnotherValueColumn] = @3,
-[dbo].[FakeData].[AnotherColumn] = @4,
-[dbo].[FakeData].[NullableValueColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = @1,
+[ValueColumn] = @2,
+[AnotherValueColumn] = @3,
+[AnotherColumn] = @4,
+[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1304,7 +1304,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1347,8 +1347,8 @@ WHERE
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1364,7 +1364,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1413,7 +1413,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1475,7 +1475,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn]";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1516,7 +1516,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1621,7 +1621,7 @@ WHERE [pgCte].[FakeRowId] = [dbo].[FakeData].[FakeRowId]) AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn] OPTION (RECOMPILE)";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1668,7 +1668,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -1709,12 +1709,12 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = @1,
-[dbo].[FakeData].[ValueColumn] = @2,
-[dbo].[FakeData].[AnotherValueColumn] = @3,
-[dbo].[FakeData].[AnotherColumn] = @4,
-[dbo].[FakeData].[NullableValueColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = @1,
+[ValueColumn] = @2,
+[AnotherValueColumn] = @3,
+[AnotherColumn] = @4,
+[NullableValueColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1730,7 +1730,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @8 AND @9";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1770,8 +1770,8 @@ WHERE
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
-[dbo].[FakeData].[NormalColumn] = @0,
-[dbo].[FakeData].[NullableColumn] = NULL
+[NormalColumn] = @0,
+[NullableColumn] = NULL
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1787,7 +1787,7 @@ WHERE
 [dbo].[FakeData].[FakeRowId] BETWEEN @4 AND @5";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateUpdateStatement(updateSet);
             Assert.AreEqual(Expected, actual);
         }
@@ -1836,7 +1836,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2015,7 +2015,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2169,7 +2169,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2281,7 +2281,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2461,7 +2461,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @10 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateSelectionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2616,7 +2616,7 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 ) SELECT 1  ELSE SELECT 0";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateExistsStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
@@ -2741,7 +2741,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 [dbo].[FakeData].[FakeRowId] BETWEEN @3 AND @4";
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var target = new TransactSqlCompiler(definitionProvider);
+            var target = new TransactSqlAdapter(definitionProvider);
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }

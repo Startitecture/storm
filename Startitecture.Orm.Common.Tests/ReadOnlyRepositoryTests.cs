@@ -1,13 +1,12 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ReadOnlyRepositoryTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Defines the ReadOnlyRepositoryTests type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-// ReSharper disable StringLiteralTypo
 namespace Startitecture.Orm.Common.Tests
 {
     using System;

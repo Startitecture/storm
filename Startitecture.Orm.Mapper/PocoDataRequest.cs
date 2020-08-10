@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="PocoDataRequest.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,6 +14,7 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
 
     /// <summary>
@@ -50,7 +51,13 @@ namespace Startitecture.Orm.Mapper
         /// <param name="entityDefinition">
         /// The definition of the type represented by the <paramref name="dataReader"/>.
         /// </param>
-        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] IEntityDefinition entityDefinition)
+        /// <param name="databaseContext">
+        /// The database context for the request.
+        /// </param>
+        public PocoDataRequest(
+            [NotNull] IDataReader dataReader,
+            [NotNull] IEntityDefinition entityDefinition,
+            [NotNull] IDatabaseContext databaseContext)
         {
             if (entityDefinition == null)
             {
@@ -58,6 +65,7 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
+            this.DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
             this.FieldCount = dataReader.FieldCount;
             this.attributeDefinitions.AddRange(entityDefinition.ReturnableAttributes);
 
@@ -77,22 +85,24 @@ namespace Startitecture.Orm.Mapper
         /// <param name="attributeDefinitions">
         /// The attribute definitions.
         /// </param>
+        /// <param name="databaseContext">
+        /// The database context for the request.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="dataReader"/> or <paramref name="attributeDefinitions"/> is null.
         /// </exception>
-        public PocoDataRequest([NotNull] IDataReader dataReader, [NotNull] IEnumerable<EntityAttributeDefinition> attributeDefinitions)
+        public PocoDataRequest(
+            [NotNull] IDataReader dataReader,
+            [NotNull] IEnumerable<EntityAttributeDefinition> attributeDefinitions,
+            [NotNull] IDatabaseContext databaseContext)
         {
-            if (dataReader == null)
-            {
-                throw new ArgumentNullException(nameof(dataReader));
-            }
-
             if (attributeDefinitions == null)
             {
                 throw new ArgumentNullException(nameof(attributeDefinitions));
             }
 
             this.DataReader = dataReader ?? throw new ArgumentNullException(nameof(dataReader));
+            this.DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
             this.FieldCount = dataReader.FieldCount;
             this.attributeDefinitions.AddRange(attributeDefinitions);
 
@@ -112,6 +122,11 @@ namespace Startitecture.Orm.Mapper
         /// Gets the entity definition.
         /// </summary>
         public IEnumerable<EntityAttributeDefinition> AttributeDefinitions => this.attributeDefinitions;
+
+        /// <summary>
+        /// Gets the database context for the request.
+        /// </summary>
+        public IDatabaseContext DatabaseContext { get; }
 
         /// <summary>
         /// Gets the field count.

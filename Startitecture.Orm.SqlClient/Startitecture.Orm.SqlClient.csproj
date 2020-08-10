@@ -10,10 +10,11 @@
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
-    <PackageTags>orm microorm objectrelationalmapper crud query storm</PackageTags>
+    <PackageTags>sql orm microorm objectrelationalmapper crud query storm</PackageTags>
     <PackageIcon>Storm Logo.png</PackageIcon>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NeutralLanguage>English (United States)</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

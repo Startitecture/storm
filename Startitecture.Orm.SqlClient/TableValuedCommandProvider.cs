@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="TableValuedCommandProvider.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -17,7 +17,6 @@ namespace Startitecture.Orm.SqlClient
 
     using Microsoft.Data.SqlClient;
 
-    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
@@ -39,18 +38,14 @@ namespace Startitecture.Orm.SqlClient
         public TableValuedCommandProvider([NotNull] IDatabaseContextProvider contextProvider)
         {
             this.contextProvider = contextProvider ?? throw new ArgumentNullException(nameof(contextProvider));
-            this.EntityDefinitionProvider = contextProvider.DatabaseContext.DefinitionProvider;
-            this.NameQualifier = new TransactSqlQualifier();
+            this.DatabaseContext = contextProvider.DatabaseContext;
         }
 
         /// <inheritdoc />
-        public IEntityDefinitionProvider EntityDefinitionProvider { get; }
-
-        /// <inheritdoc />
-        public INameQualifier NameQualifier { get; }
+        public IDatabaseContext DatabaseContext { get; }
 
         /// <summary>
-        /// Creates an <see cref="System.Data.IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
+        /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>
         /// <param name="structuredCommand">
         /// The structured command.

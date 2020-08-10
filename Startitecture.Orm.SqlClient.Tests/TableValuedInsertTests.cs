@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="TableValuedInsertTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The structured insert command tests
@@ -355,8 +355,12 @@ namespace Startitecture.Orm.SqlClient.Tests
             using (mockProvider.Object)
             {
                 var structuredCommandProvider = new Mock<IStructuredCommandProvider>();
-                structuredCommandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-                structuredCommandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+                var databaseContext = new Mock<IDatabaseContext>();
+                var repositoryAdapter = new Mock<IRepositoryAdapter>();
+                repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+                repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new TransactSqlQualifier());
+                databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+                structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
 
                 var valuesCommand = new TableValuedInsert<FieldValueTableTypeRow>(structuredCommandProvider.Object)
                     .InsertInto<FieldValueRow>(new List<FieldValueTableTypeRow>())
@@ -389,8 +393,12 @@ ON i.[FieldId] = tvp.[FieldId];
             using (mockProvider.Object)
             {
                 var structuredCommandProvider = new Mock<IStructuredCommandProvider>();
-                structuredCommandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-                structuredCommandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+                var databaseContext = new Mock<IDatabaseContext>();
+                var repositoryAdapter = new Mock<IRepositoryAdapter>();
+                repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+                repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new TransactSqlQualifier());
+                databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+                structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
 
                 var dateElementsCommand = new TableValuedInsert<FieldValueElementTableTypeRow>(structuredCommandProvider.Object)
                     .InsertInto<DateElementRow>(new List<FieldValueElementTableTypeRow>(), row => row.DateElementId, row => row.Value)

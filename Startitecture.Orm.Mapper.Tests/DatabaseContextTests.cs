@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseContextTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -46,7 +46,7 @@ namespace Startitecture.Orm.Mapper.Tests
 #endif
             var connectionString = ConfigurationRoot.GetConnectionString("MasterDatabase");
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var statementCompiler = new TransactSqlCompiler(definitionProvider);
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
 
             using (var target = new DatabaseContext(connectionString, providerName, statementCompiler))
             {
@@ -73,10 +73,10 @@ namespace Startitecture.Orm.Mapper.Tests
         public void Database_SqlConnectionChangeDatabase_DatabaseChanged()
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var statementCompiler = new TransactSqlCompiler(definitionProvider);
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
 
             using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
-            using (var database = new DatabaseContext(connection, definitionProvider, statementCompiler))
+            using (var database = new DatabaseContext(connection, statementCompiler))
             {
                 connection.Open();
                 database.Connection.ChangeDatabase("master");

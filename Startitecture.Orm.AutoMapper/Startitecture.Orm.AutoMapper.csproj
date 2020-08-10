@@ -11,9 +11,10 @@
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>Storm Logo.png</PackageIcon>
-    <PackageTags>orm microorm objectrelationalmapper crud query objectmapper mapper automapper</PackageTags>
+    <PackageTags>sql orm microorm objectrelationalmapper crud query objectmapper mapper automapper</PackageTags>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
+    <NeutralLanguage>English (United States)</NeutralLanguage>
   </PropertyGroup>
 
   <ItemGroup>

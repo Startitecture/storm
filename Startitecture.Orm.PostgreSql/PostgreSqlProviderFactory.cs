@@ -77,7 +77,7 @@ namespace Startitecture.Orm.PostgreSql
             }
 
 #endif
-            var statementCompiler = new PostgreSqlCompiler(this.definitionProvider);
+            var statementCompiler = new PostgreSqlAdapter(this.definitionProvider);
             var contextFactory = new DefaultDatabaseContextFactory(this.connectionString, ProviderInvariantName, statementCompiler);
             return new DatabaseRepositoryProvider(contextFactory);
         }

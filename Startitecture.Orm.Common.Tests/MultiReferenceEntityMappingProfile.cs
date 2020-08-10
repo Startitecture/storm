@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="MultiReferenceEntityMappingProfile.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The fake multi reference entity mapping profile.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common.Tests
@@ -21,8 +24,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         public MultiReferenceEntityMappingProfile()
         {
-            this.CreateMap<MultiReferenceEntity, MultiReferenceRow>()
-                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+            this.CreateMap<MultiReferenceEntity, MultiReferenceRow>();
         }
     }
 }

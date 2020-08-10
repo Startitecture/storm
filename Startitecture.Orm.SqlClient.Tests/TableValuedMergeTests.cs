@@ -1,8 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="TableValuedMergeTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace Startitecture.Orm.SqlClient.Tests
 {
     using System;
@@ -145,8 +146,12 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void SelectFromInserted_ItemsWithIdentityColumn_CommandTextMatchesExpected()
         {
             var commandProvider = new Mock<IStructuredCommandProvider>();
-            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+            var databaseContext = new Mock<IDatabaseContext>();
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new TransactSqlQualifier());
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+            commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
 
             var fieldValueCommand = new TableValuedMerge<FieldValueTableTypeRow>(commandProvider.Object);
 
@@ -181,8 +186,12 @@ ON i.[FieldId] = tvp.[FieldId];
         public void DeleteUnmatchedInSource_ItemsWithIdentityColumn_CommandTextMatchesExpected()
         {
             var commandProvider = new Mock<IStructuredCommandProvider>();
-            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+            var databaseContext = new Mock<IDatabaseContext>();
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new TransactSqlQualifier());
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+            commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
 
             var elementMergeCommand = new TableValuedMerge<FieldValueElementTableTypeRow>(commandProvider.Object);
 
@@ -220,8 +229,12 @@ ON i.[FieldValueId] = tvp.[FieldValueId] AND i.[Order] = tvp.[Order];
         public void DeleteUnmatchedInSource_ItemsWithoutIdentityColumn_CommandTextMatchesExpected()
         {
             var commandProvider = new Mock<IStructuredCommandProvider>();
-            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+            var databaseContext = new Mock<IDatabaseContext>();
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new TransactSqlQualifier());
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+            commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
 
             var target = new TableValuedMerge<GenericSubmissionValueTableTypeRow>(commandProvider.Object);
             target.MergeInto<GenericSubmissionValueRow>(new List<GenericSubmissionValueTableTypeRow>(), row => row.GenericSubmissionValueId)
@@ -255,8 +268,12 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
         public void OnFrom_RelatedItems_CommandTextMatchesExpected()
         {
             var commandProvider = new Mock<IStructuredCommandProvider>();
-            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-            commandProvider.Setup(provider => provider.NameQualifier).Returns(new TransactSqlQualifier());
+            var databaseContext = new Mock<IDatabaseContext>();
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new TransactSqlQualifier());
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+            commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
 
             const string Expected = @"DECLARE @inserted FieldValueElementTableType;
 MERGE [dbo].[DateElement] AS [Target]

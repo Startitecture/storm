@@ -1,16 +1,14 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FakeComplexEntityMappingProfile.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   
+//   The fake entity mapping profile.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common.Tests
 {
-    using AutoMapper;
-
     using global::AutoMapper;
 
     using Startitecture.Orm.Testing.Entities;
@@ -27,7 +25,6 @@ namespace Startitecture.Orm.Common.Tests
         public FakeComplexEntityMappingProfile()
         {
             this.CreateMap<ComplexEntity, ComplexRaisedRow>()
-                .ForMember(row => row.TransactionProvider, expression => expression.Ignore())
                 .ForMember(row => row.FakeEnumerationId, expression => expression.MapFrom(entity => entity.FakeEnumeration))
                 .ForMember(row => row.FakeOtherEnumerationId, expression => expression.MapFrom(entity => entity.FakeOtherEnumeration));
 

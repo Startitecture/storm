@@ -32,7 +32,7 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The definition provider.
         /// </summary>
-        private readonly IStatementCompiler statementCompiler;
+        private readonly IRepositoryAdapter repositoryAdapter;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="DefaultDatabaseContextFactory"/> class.
@@ -43,19 +43,19 @@ namespace Startitecture.Orm.Mapper
         /// <param name="providerName">
         /// The provider name.
         /// </param>
-        /// <param name="statementCompiler">
+        /// <param name="repositoryAdapter">
         /// The definition provider.
         /// </param>
         /// <exception cref="ArgumentException">
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="statementCompiler"/> is null
+        /// <paramref name="repositoryAdapter"/> is null
         /// </exception>
         public DefaultDatabaseContextFactory(
             [NotNull] string connectionString,
             [NotNull] string providerName,
-            [NotNull] IStatementCompiler statementCompiler)
+            [NotNull] IRepositoryAdapter repositoryAdapter)
         {
             if (string.IsNullOrWhiteSpace(connectionString))
             {
@@ -67,7 +67,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(providerName));
             }
 
-            this.statementCompiler = statementCompiler ?? throw new ArgumentNullException(nameof(statementCompiler));
+            this.repositoryAdapter = repositoryAdapter ?? throw new ArgumentNullException(nameof(repositoryAdapter));
             this.connectionString = connectionString;
             this.providerName = providerName;
         }
@@ -76,7 +76,7 @@ namespace Startitecture.Orm.Mapper
         public IDatabaseContext Create()
         {
             var providerFactory = DbProviderFactories.GetFactory(this.providerName);
-            return new DatabaseContext(this.connectionString, providerFactory, this.statementCompiler);
+            return new DatabaseContext(this.connectionString, providerFactory, this.repositoryAdapter);
         }
     }
 }

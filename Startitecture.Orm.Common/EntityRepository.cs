@@ -1,7 +1,10 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityRepository.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   A base class for entity repositories.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common
@@ -32,7 +35,7 @@ namespace Startitecture.Orm.Common
     /// a sliding expiration of 30 seconds.
     /// </remarks>
     public class EntityRepository<TModel, TEntity> : ReadOnlyRepository<TModel, TEntity>, IEntityRepository<TModel>
-        where TEntity : class, ITransactionContext, new()
+        where TEntity : class, new()
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="EntityRepository{TModel,TEntity}"/> class.
@@ -209,7 +212,6 @@ namespace Startitecture.Orm.Common
         private TEntity SaveEntity(TModel model)
         {
             var entity = new TEntity();
-            entity.SetTransactionProvider(this.RepositoryProvider);
             this.EntityMapper.MapTo(model, entity);
 
             if (this.Contains(entity))
@@ -228,11 +230,6 @@ namespace Startitecture.Orm.Common
             if (entity == null)
             {
                 throw new OperationException(model, $"The underlying provider returned a null entity when inserting '{model}'.");
-            }
-
-            if (object.ReferenceEquals(this.RepositoryProvider, entity.TransactionProvider) == false)
-            {
-                entity.SetTransactionProvider(this.RepositoryProvider);
             }
 
             return entity;

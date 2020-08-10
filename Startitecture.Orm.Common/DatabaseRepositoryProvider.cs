@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseRepositoryProvider.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Provides a concrete implementation for a database repository.
@@ -84,7 +84,7 @@ namespace Startitecture.Orm.Common
             try
             {
                 this.DatabaseContext = databaseContextFactory.Create();
-                this.EntityDefinitionProvider = this.DatabaseContext.DefinitionProvider;
+                this.EntityDefinitionProvider = this.DatabaseContext.RepositoryAdapter.DefinitionProvider;
             }
             catch (InvalidOperationException ex)
             {
@@ -193,7 +193,6 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public bool Contains<T>(EntitySet<T> selection)
-            where T : ITransactionContext
         {
             if (selection == null)
             {
@@ -202,7 +201,7 @@ namespace Startitecture.Orm.Common
 
             this.CheckDisposed();
 
-            var sql = this.DatabaseContext.StatementCompiler.CreateExistsStatement(selection);
+            var sql = this.DatabaseContext.RepositoryAdapter.CreateExistsStatement(selection);
 
             try
             {
@@ -232,7 +231,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
 
             try
             {
@@ -254,7 +253,6 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public T FirstOrDefault<T>(EntitySelection<T> selection)
-            where T : ITransactionContext
         {
             if (Evaluate.IsNull(selection))
             {
@@ -283,11 +281,6 @@ namespace Startitecture.Orm.Common
                 entity = this.FirstOrDefaultEntity<T>(selection);
             }
 
-            if (entity != null)
-            {
-                entity.SetTransactionProvider(this);
-            }
-
             return entity;
         }
 
@@ -306,7 +299,6 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection)
-            where T : ITransactionContext
         {
             if (selection == null)
             {
@@ -314,7 +306,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
 
             try
             {
@@ -343,7 +335,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
 
             try
             {
@@ -365,7 +357,6 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public T Insert<T>(T entity)
-            where T : ITransactionContext
         {
             if (Evaluate.IsNull(entity))
             {
@@ -373,7 +364,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.DatabaseContext.StatementCompiler.CreateInsertionStatement<T>();
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateInsertionStatement<T>();
             var entityDefinition = this.EntityDefinitionProvider.Resolve<T>();
             var values = entityDefinition.InsertableAttributes.Select(definition => definition.GetValueMethod.Invoke(entity, null)).ToArray();
 
@@ -403,26 +394,18 @@ namespace Startitecture.Orm.Common
                 throw new RepositoryException(entity, ex.Message, ex);
             }
 
-            ////if (result == null)
-            ////{
-            ////    string message = string.Format(CultureInfo.CurrentCulture, $"Failed to insert ({typeof(T).Name}) {entity}");
-            ////    throw new RepositoryException(entity, message);
-            ////}
-
-            entity.SetTransactionProvider(this);
             return entity;
         }
 
         /// <inheritdoc />
         public int Update<T>([NotNull] UpdateSet<T> updateSet)
-            where T : ITransactionContext
         {
             if (updateSet == null)
             {
                 throw new ArgumentNullException(nameof(updateSet));
             }
 
-            var updateStatement = this.DatabaseContext.StatementCompiler.CreateUpdateStatement(updateSet);
+            var updateStatement = this.DatabaseContext.RepositoryAdapter.CreateUpdateStatement(updateSet);
 
             try
             {
@@ -445,7 +428,6 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public void UpdateSingle<T>(T entity, params Expression<Func<T, object>>[] setExpressions)
-            where T : ITransactionContext
         {
             if (entity == null)
             {
@@ -458,12 +440,12 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var selection = Select.Where<T>().MatchKey(entity, this.DatabaseContext.DefinitionProvider);
+            var selection = Select.Where<T>().MatchKey(entity, this.DatabaseContext.RepositoryAdapter.DefinitionProvider);
             var update = setExpressions.Any()
                              ? new UpdateSet<T>().Set(entity, setExpressions).Where(selection)
                              : new UpdateSet<T>().Set(entity, this.EntityDefinitionProvider).Where(selection);
 
-            var updateStatement = this.DatabaseContext.StatementCompiler.CreateUpdateStatement(update);
+            var updateStatement = this.DatabaseContext.RepositoryAdapter.CreateUpdateStatement(update);
 
             try
             {
@@ -486,7 +468,6 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public int Delete<T>(EntitySelection<T> selection) 
-            where T : ITransactionContext
         {
             if (selection == null)
             {
@@ -494,7 +475,7 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var statement = this.DatabaseContext.StatementCompiler.CreateDeletionStatement(selection);
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateDeletionStatement(selection);
 
             try
             {
@@ -630,7 +611,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var statement = this.DatabaseContext.StatementCompiler.CreateSelectionStatement(selection);
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
 
             try
             {

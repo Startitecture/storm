@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IRepositoryProvider.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Provides an interface to concrete repositories.
@@ -85,8 +85,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// <c>true</c> if the entity exists; otherwise, <c>false</c>.
         /// </returns>
-        bool Contains<T>(EntitySet<T> selection)
-            where T : ITransactionContext;
+        bool Contains<T>(EntitySet<T> selection);
 
         /// <summary>
         /// Gets a scalar result from the specified query.
@@ -114,8 +113,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The first <typeparamref name="T"/> entity matching the filter, or the default value if no matching entity is found.
         /// </returns>
-        T FirstOrDefault<T>(EntitySelection<T> selection)
-            where T : ITransactionContext;
+        T FirstOrDefault<T>(EntitySelection<T> selection);
 
         /// <summary>
         /// Gets the first dynamic result matching the <paramref name="selection"/>, or the default value if the entity cannot be found.
@@ -140,8 +138,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A collection of entities that match the filter.
         /// </returns>
-        IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection)
-            where T : ITransactionContext;
+        IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection);
 
         /// <summary>
         /// Selects a collection of dynamic objects matching the <paramref name="selection"/>.
@@ -166,8 +163,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The inserted <typeparamref name="T"/>.
         /// </returns>
-        T Insert<T>(T entity) 
-            where T : ITransactionContext;
+        T Insert<T>(T entity);
 
         /// <summary>
         /// Updates a set of entities in the repository.
@@ -184,8 +180,7 @@ namespace Startitecture.Orm.Model
         /// <remarks>
         /// The number of affected entities can include rows affected by triggers on the target table.
         /// </remarks> 
-        int Update<T>(UpdateSet<T> updateSet)
-            where T : ITransactionContext;
+        int Update<T>(UpdateSet<T> updateSet);
 
         /// <summary>
         /// Updates a selection of entities in the repository.
@@ -199,8 +194,7 @@ namespace Startitecture.Orm.Model
         /// <param name="setExpressions">
         /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
         /// </param>
-        void UpdateSingle<T>(T entity, params Expression<Func<T, object>>[] setExpressions)
-            where T : ITransactionContext;
+        void UpdateSingle<T>(T entity, params Expression<Func<T, object>>[] setExpressions);
 
         /// <summary>
         /// Deletes the entities matching the filter.
@@ -214,8 +208,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The number of deleted entities as an <see cref="int"/>.
         /// </returns>
-        int Delete<T>(EntitySelection<T> selection)
-            where T : ITransactionContext;
+        int Delete<T>(EntitySelection<T> selection);
 
         /// <summary>
         /// Executes the specified operation.

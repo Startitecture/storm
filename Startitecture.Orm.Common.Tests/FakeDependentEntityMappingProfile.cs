@@ -1,13 +1,14 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FakeDependentEntityMappingProfile.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The fake dependent entity mapping profile.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common.Tests
 {
-    using AutoMapper;
-
     using global::AutoMapper;
 
     using Startitecture.Orm.Testing.Entities;
@@ -23,9 +24,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         public FakeDependentEntityMappingProfile()
         {
-            this.CreateMap<DependentEntity, DependentRow>()
-                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
-
+            this.CreateMap<DependentEntity, DependentRow>();
             this.CreateMap<DependentRow, DependentEntity>();
         }
     }

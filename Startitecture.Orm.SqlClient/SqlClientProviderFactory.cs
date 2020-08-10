@@ -76,7 +76,7 @@ namespace Startitecture.Orm.SqlClient
                 DbProviderFactories.RegisterFactory(ProviderInvariantName, SqlClientFactory.Instance);
             }
 #endif
-            var statementCompiler = new TransactSqlCompiler(this.definitionProvider);
+            var statementCompiler = new TransactSqlAdapter(this.definitionProvider);
             var databaseFactory = new DefaultDatabaseContextFactory(this.connectionString, ProviderInvariantName, statementCompiler);
             return new DatabaseRepositoryProvider(databaseFactory);
         }

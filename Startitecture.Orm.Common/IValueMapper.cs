@@ -1,25 +1,25 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IStatementCompilerFactory.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+// <copyright file="IValueMapper.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common
 {
     /// <summary>
-    /// The StatementCompilerFactory interface.
+    /// Provides an interface for mapping one value to another.
     /// </summary>
-    public interface IStatementCompilerFactory
+    public interface IValueMapper
     {
         /// <summary>
-        /// The create.
+        /// The convert.
         /// </summary>
-        /// <param name="databaseContext">
-        /// The database context.
+        /// <param name="input">
+        /// The input.
         /// </param>
         /// <returns>
-        /// The <see cref="IRepositoryAdapter"/>.
+        /// The <see cref="object"/>.
         /// </returns>
-        IRepositoryAdapter Create(IDatabaseContext databaseContext);
+        object Convert(object input);
     }
 }

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FlatPocoFactoryTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -16,7 +16,10 @@ namespace Startitecture.Orm.Mapper.Tests
     using Microsoft.CSharp.RuntimeBinder;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Moq;
+
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Moq;
@@ -36,13 +39,15 @@ namespace Startitecture.Orm.Mapper.Tests
             var target = new FlatPocoFactory();
             var fakeComplexRow = Generate.CreateFakeComplexRow();
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<ComplexFlatRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             PocoDelegateInfo actual;
 
             using (var reader = fakeComplexRow.MockDataReader(entityDefinition.ReturnableAttributes).Object)
             {
                 reader.Read();
-                var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
                 actual = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest);
             }
 
@@ -58,14 +63,15 @@ namespace Startitecture.Orm.Mapper.Tests
             var target = new FlatPocoFactory();
             var expected = Generate.CreateFakeComplexRow();
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<ComplexFlatRow>();
-
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
             Stopwatch stopwatch;
             ComplexFlatRow actual;
 
             using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
             {
                 reader.Read();
-                var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                 stopwatch = Stopwatch.StartNew();
                 var pocoDelegate = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, ComplexFlatRow>;
@@ -88,7 +94,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition)).MappingDelegate as
+                    target.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, ComplexFlatRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -103,7 +109,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition)).MappingDelegate as
+                    target.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, ComplexFlatRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -125,6 +131,8 @@ namespace Startitecture.Orm.Mapper.Tests
             var expected = Generate.CreateFakeComplexRow();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<ComplexFlatRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             Expression<Func<ComplexFlatRow, object>> expression1 = row => row.FakeComplexEntityId;
             Expression<Func<ComplexFlatRow, object>> expression2 = row => row.FakeDependentEntityDependentIntegerValue;
@@ -144,7 +152,7 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var reader = expected.MockDataReader(attributes).Object)
             {
                 reader.Read();
-                var pocoDataRequest = new PocoDataRequest(reader, attributes);
+                var pocoDataRequest = new PocoDataRequest(reader, attributes, databaseContext.Object);
 
                 var pocoDelegate = target.CreateDelegate<dynamic>(pocoDataRequest).MappingDelegate as Func<IDataReader, dynamic>;
                 Assert.IsNotNull(pocoDelegate);
@@ -176,13 +184,15 @@ namespace Startitecture.Orm.Mapper.Tests
                                };
 
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<OverriddenColumnNameRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
             Stopwatch stopwatch;
 
             OverriddenColumnNameRow actual;
             using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
             {
                 reader.Read();
-                var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                 stopwatch = Stopwatch.StartNew();
                 var pocoDelegate =
@@ -208,7 +218,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition)).MappingDelegate as
+                    target.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, OverriddenColumnNameRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -223,7 +233,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition)).MappingDelegate as
+                    target.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, OverriddenColumnNameRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -243,6 +253,8 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var target = new FlatPocoFactory();
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<OverriddenColumnNameRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
             var expected = new OverriddenColumnNameRow
                                {
                                    OverriddenColumnNameId = 12,
@@ -256,7 +268,7 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var dataReader = expected.MockDataReader(entityDefinition.DirectAttributes).Object)
             {
                 dataReader.Read();
-                var dataRequest = new PocoDataRequest(dataReader, entityDefinition);
+                var dataRequest = new PocoDataRequest(dataReader, entityDefinition, databaseContext.Object);
                 var func = target.CreateDelegate<dynamic>(dataRequest).MappingDelegate as Func<IDataReader, dynamic>;
                 Assert.IsNotNull(func);
 

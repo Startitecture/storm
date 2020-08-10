@@ -1,11 +1,12 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FlatPocoFactory.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Defines the FlatPocoFactory type.
+//   Creates flattened POCOs for POCO data requests.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace Startitecture.Orm.Mapper
 {
     using System;
@@ -21,6 +22,7 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
@@ -107,7 +109,6 @@ namespace Startitecture.Orm.Mapper
             var name = $"poco_factory_{Guid.NewGuid()}";
             var method = new DynamicMethod(name, type, new[] { typeof(IDataReader) }, true);
             var generator = method.GetILGenerator();
-            var mapper = Mappers.GetMapper(type);
             var reader = dataRequest.DataReader;
             
             if (type == typeof(object))
@@ -139,7 +140,7 @@ namespace Startitecture.Orm.Mapper
                     generator.Emit(OpCodes.Ldstr, fieldName); // obj, obj, fieldname
 
                     // Get the converter
-                    var converter = mapper.GetFromDbConverter(null, sourceType);
+                    var converter = GetConverter(sourceType, type, dataRequest.DatabaseContext);
 
                     // Setup stack for call to converter
                     AddConverterToStack(generator, converter);
@@ -185,7 +186,7 @@ namespace Startitecture.Orm.Mapper
             {
                 // Do we need to install a converter?
                 var sourceType = reader.GetFieldType(0);
-                var converter = GetConverter(mapper, null, sourceType, type);
+                var converter = GetConverter(sourceType, type, dataRequest.DatabaseContext);
 
                 // "if (!rdr.IsDBNull(i))"
                 generator.Emit(OpCodes.Ldarg_0); // rdr
@@ -266,7 +267,7 @@ namespace Startitecture.Orm.Mapper
                     generator.Emit(OpCodes.Dup); // poco,poco
 
                     // Do we need to install a converter?
-                    var converter = GetConverter(mapper, attribute.PropertyInfo, sourceType, destinationType);
+                    var converter = GetConverter(sourceType, destinationType, dataRequest.DatabaseContext);
 
                     // Fast
                     var handled = false;
@@ -433,32 +434,30 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Gets a converter for the specified column.
         /// </summary>
-        /// <param name="mapper">
-        /// The data mapper to apply.
-        /// </param>
-        /// <param name="column">
-        /// The column to convert.
-        /// </param>
         /// <param name="sourceType">
         /// The source type.
         /// </param>
         /// <param name="destinationType">
         /// The destination type.
         /// </param>
+        /// <param name="databaseContext">
+        /// The database context.
+        /// </param>
         /// <returns>
         /// A function that converts the source type to the destination type.
         /// </returns>
-        private static Func<object, object> GetConverter(IMapper mapper, PropertyInfo column, Type sourceType, Type destinationType)
+        private static Func<object, object> GetConverter(Type sourceType, Type destinationType, IDatabaseContext databaseContext)
         {
-            // Get converter from the mapper
-            if (column != null)
+            if (sourceType == destinationType)
             {
-                var converter = mapper.GetFromDbConverter(column, sourceType);
+                return null;
+            }
 
-                if (converter != null)
-                {
-                    return converter;
-                }
+            var valueMapper = databaseContext.GetValueMapper(sourceType, destinationType);
+
+            if (valueMapper != null)
+            {
+                return valueMapper.Convert;
             }
 
             // Forced type conversion including integral types -> enum

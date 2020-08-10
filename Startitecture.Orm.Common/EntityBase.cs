@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityBase.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The transaction entity base.
@@ -9,31 +9,10 @@
 
 namespace Startitecture.Orm.Common
 {
-    using System;
-
-    using Startitecture.Orm.Model;
-    using Startitecture.Orm.Schema;
-
     /// <summary>
-    /// The transaction entity base.
+    /// The base class for all entities created by the T4 template. Extend this class as needed for common properties and methods.
     /// </summary>
-    public class EntityBase : ITransactionContext
+    public partial class EntityBase
     {
-        /// <summary>
-        /// Gets the provider for the current transaction.
-        /// </summary>
-        [Ignore]
-        public IRepositoryProvider TransactionProvider { get; private set; }
-
-        /// <summary>
-        /// Sets the transaction provider for the current object.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider to use for the transaction context.
-        /// </param>
-        public void SetTransactionProvider([JetBrains.Annotations.NotNull] IRepositoryProvider repositoryProvider)
-        {
-            this.TransactionProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
-        }
     }
 }

@@ -1,7 +1,10 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FakeRelatedRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The fake related row.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Entities
@@ -9,15 +12,11 @@ namespace Startitecture.Orm.Testing.Entities
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-    using Startitecture.Orm.Common;
-    using Startitecture.Orm.Model;
-    using Startitecture.Orm.Schema;
-
     /// <summary>
     /// The fake related row.
     /// </summary>
     [Table("Related", Schema = "someschema")]
-    public class FakeRelatedRow : ITransactionContext
+    public class FakeRelatedRow
     {
         /// <summary>
         /// Gets or sets the related id.
@@ -37,22 +36,5 @@ namespace Startitecture.Orm.Testing.Entities
         /// </summary>
         [Column]
         public string RelatedProperty { get; set; }
-
-        /// <summary>
-        /// Gets the transaction provider.
-        /// </summary>
-        [Ignore]
-        public IRepositoryProvider TransactionProvider { get; private set; }
-
-        /// <summary>
-        /// The set transaction provider.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider.
-        /// </param>
-        public void SetTransactionProvider(IRepositoryProvider repositoryProvider)
-        {
-            this.TransactionProvider = repositoryProvider;
-        }
     }
 }

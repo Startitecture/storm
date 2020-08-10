@@ -6,12 +6,8 @@
 
 namespace Startitecture.Orm.AutoMapper.Tests
 {
-    using System;
-    using System.Diagnostics;
-
     using global::AutoMapper;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
 

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="RaisedPocoFactoryTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -15,7 +15,10 @@ namespace Startitecture.Orm.Mapper.Tests
     using Microsoft.CSharp.RuntimeBinder;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Moq;
+
     using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Moq;
@@ -34,6 +37,8 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<ComplexFlatRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
@@ -44,7 +49,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Start();
                     actual = target.CreatePoco<ComplexFlatRow>(pocoDataRequest);
@@ -60,7 +65,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Start();
                     target.CreatePoco<ComplexFlatRow>(pocoDataRequest);
@@ -72,7 +77,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Start();
                     target.CreatePoco<ComplexFlatRow>(pocoDataRequest);
@@ -90,6 +95,9 @@ namespace Startitecture.Orm.Mapper.Tests
         public void CreateDelegate_RaisedPocoFactoryForDynamic_DelegateSetsPocoAsExpected()
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
+
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var expected = Generate.CreateFakeComplexRow();
@@ -112,7 +120,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(attributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, attributes);
+                    var pocoDataRequest = new PocoDataRequest(reader, attributes, databaseContext.Object);
                     actual = target.CreatePoco<dynamic>(pocoDataRequest);
                 }
 
@@ -132,6 +140,8 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<ComplexRaisedRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
@@ -140,7 +150,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
                     var actual = target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
                     Assert.IsNotNull(actual);
                 }
@@ -155,6 +165,8 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<ComplexRaisedRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
@@ -165,7 +177,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Start();
                     var actual = target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
@@ -192,7 +204,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Start();
                     target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
@@ -205,7 +217,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Start();
                     target.CreatePoco<ComplexRaisedRow>(pocoDataRequest);
@@ -224,6 +236,8 @@ namespace Startitecture.Orm.Mapper.Tests
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var expected = Generate.CreateFakeRaisedComplexRow(true);
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
@@ -246,7 +260,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(attributes).Object)
                 {
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, attributes);
+                    var pocoDataRequest = new PocoDataRequest(reader, attributes, databaseContext.Object);
                     actual = target.CreatePoco<dynamic>(pocoDataRequest);
                 }
 
@@ -265,6 +279,8 @@ namespace Startitecture.Orm.Mapper.Tests
         public void CreateDelegate_RaisedPocoFactoryForDomainAggregateList_SharedEntitiesHaveReferenceEquality()
         {
             var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
@@ -420,7 +436,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     while (reader.Read())
                     {
-                        actual.Add(target.CreatePoco<DomainAggregateRow>(new PocoDataRequest(reader, entityDefinition)));
+                        actual.Add(target.CreatePoco<DomainAggregateRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)));
                     }
                 }
 
@@ -486,6 +502,8 @@ namespace Startitecture.Orm.Mapper.Tests
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<ComplexRaisedRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
@@ -496,7 +514,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     stopwatch.Start();
                     reader.Read();
-                    actual = target.CreatePoco<ComplexRaisedRow>(new PocoDataRequest(reader, entityDefinition));
+                    actual = target.CreatePoco<ComplexRaisedRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object));
                     Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #1");
                 }
 
@@ -519,7 +537,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    target.CreatePoco<ComplexRaisedRow>(new PocoDataRequest(reader, entityDefinition));
+                    target.CreatePoco<ComplexRaisedRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object));
                 }
 
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #2");
@@ -529,7 +547,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 using (var reader = expected.MockDataReader(entityDefinition.ReturnableAttributes).Object)
                 {
                     reader.Read();
-                    target.CreatePoco<ComplexRaisedRow>(new PocoDataRequest(reader, entityDefinition));
+                    target.CreatePoco<ComplexRaisedRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object));
                 }
 
                 Trace.TraceInformation($"{stopwatch.Elapsed} Invoke delegate #3");
@@ -614,6 +632,8 @@ namespace Startitecture.Orm.Mapper.Tests
             var stopwatch = new Stopwatch();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<InstanceSection>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
             stopwatch.Reset();
 
             using (var target = new RaisedPocoFactory(definitionProvider))
@@ -624,7 +644,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     stopwatch.Start();
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
                     Trace.TraceInformation($"{stopwatch.Elapsed} Create data request");
                     stopwatch.Reset();
                     actual = target.CreatePoco<InstanceSection>(pocoDataRequest);
@@ -657,7 +677,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     stopwatch.Start();
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
                     target.CreatePoco<InstanceSection>(pocoDataRequest);
                 }
 
@@ -668,7 +688,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     stopwatch.Start();
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
                     target.CreatePoco<InstanceSection>(pocoDataRequest);
                 }
 
@@ -686,6 +706,8 @@ namespace Startitecture.Orm.Mapper.Tests
             var stopwatch = new Stopwatch();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<RaisedOverriddenColumnNameRow>();
+            var databaseContext = new Mock<IDatabaseContext>();
+            databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
 
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
@@ -705,7 +727,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     stopwatch.Start();
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Reset();
                     actual = target.CreatePoco<RaisedOverriddenColumnNameRow>(pocoDataRequest);
@@ -723,7 +745,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     stopwatch.Start();
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Reset();
                     target.CreatePoco<RaisedOverriddenColumnNameRow>(pocoDataRequest);
@@ -736,7 +758,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     stopwatch.Start();
                     reader.Read();
-                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition);
+                    var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                     stopwatch.Reset();
                     target.CreatePoco<RaisedOverriddenColumnNameRow>(pocoDataRequest);

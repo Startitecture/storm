@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IDatabaseContext.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Provides an interface for classes that contain database contexts.
@@ -12,8 +12,6 @@ namespace Startitecture.Orm.Common
     using System;
     using System.Collections.Generic;
     using System.Data;
-
-    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Provides an interface for classes that contain database contexts.
@@ -31,26 +29,14 @@ namespace Startitecture.Orm.Common
         IDbConnection Connection { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether parameters named <code>?myparam</code> are populated from properties of the passed
-        /// in argument values.
-        /// TODO: Validate and test or remove this feature.
-        /// </summary>
-        bool EnableNamedParameters { get; set; }
-
-        /// <summary>
         /// Gets or sets the timeout value for the next (and only next) SQL statement.
         /// </summary>
         int OnetimeCommandTimeout { get; set; }
 
         /// <summary>
-        /// Gets the definition provider for the database context.
-        /// </summary>
-        IEntityDefinitionProvider DefinitionProvider { get; }
-
-        /// <summary>
         /// Gets the statement compiler for the database context.
         /// </summary>
-        IStatementCompiler StatementCompiler { get; }
+        IRepositoryAdapter RepositoryAdapter { get; }
 
         /// <summary>
         /// Open a connection that will be used for all subsequent queries.
@@ -119,5 +105,19 @@ namespace Startitecture.Orm.Common
         /// In cases where this is an issue, consider using Fetch which returns the results as a List rather than an IEnumerable.
         /// </remarks>
         IEnumerable<T> Query<T>(string sql, params object[] args);
+
+        /// <summary>
+        /// Gets a value mapper for the specified types.
+        /// </summary>
+        /// <param name="sourceType">
+        /// The source type.
+        /// </param>
+        /// <param name="destinationType">
+        /// The destination type.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IValueMapper"/> for the specified conversion, or <c>null</c> if no mapper has been registered.
+        /// </returns>
+        IValueMapper GetValueMapper(Type sourceType, Type destinationType);
     }
 }

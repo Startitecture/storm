@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ModifiedByMappingProfile.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The fake modified by mapping profile.
@@ -24,9 +24,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         public ModifiedByMappingProfile()
         {
-            this.CreateMap<ModifiedBy, MultiReferenceRow>()
-                .ForMember(row => row.TransactionProvider, expression => expression.Ignore());
-
+            this.CreateMap<ModifiedBy, MultiReferenceRow>();
             this.CreateMap<MultiReferenceRow, ModifiedBy>();
         }
     }

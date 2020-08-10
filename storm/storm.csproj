@@ -11,7 +11,7 @@
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>Storm Logo.png</PackageIcon>
-    <PackageTags>orm microorm objectrelationalmapper crud query storm</PackageTags>
+    <PackageTags>sql orm microorm objectrelationalmapper crud query storm</PackageTags>
     <NeutralLanguage>en-US</NeutralLanguage>
     <Authors>Startitecture, LLC</Authors>
     <PackageId>Startitecture.Orm</PackageId>

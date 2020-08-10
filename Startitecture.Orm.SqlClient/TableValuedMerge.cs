@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="TableValuedMerge.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ namespace Startitecture.Orm.SqlClient
 
             this.Items.Clear();
             this.Items.AddRange(mergeItems);
-            this.itemDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TEntity>();
+            this.itemDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TEntity>();
             this.directAttributes.AddRange(this.itemDefinition.DirectAttributes);
             this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
 
@@ -242,7 +242,7 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(matchKeys));
             }
 
-            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
             this.selectionMatchAttributes.AddRange(matchKeys.Select(structureDefinition.Find));
             return this;
         }
@@ -255,8 +255,8 @@ namespace Startitecture.Orm.SqlClient
         /// </returns>
         private string CompileCommandText()
         {
-            var qualifier = this.StructuredCommandProvider.NameQualifier;
-            var structureDefinition = this.StructuredCommandProvider.EntityDefinitionProvider.Resolve<TStructure>();
+            var qualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
             var allAttributes = structureDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
             // If there's an auto number primary key, then don't try to insert it. Only use the updateable attributes.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IStructuredCommandProvider.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The StructuredCommandProvider interface.
@@ -11,25 +11,18 @@ namespace Startitecture.Orm.Common
 {
     using System.Data;
 
-    using Startitecture.Orm.Model;
-
     /// <summary>
     /// The StructuredCommandProvider interface.
     /// </summary>
     public interface IStructuredCommandProvider
     {
         /// <summary>
-        /// Gets the entity definition provider.
+        /// Gets the database context for the structured command.
         /// </summary>
-        IEntityDefinitionProvider EntityDefinitionProvider { get; }
+        IDatabaseContext DatabaseContext { get; }
 
         /// <summary>
-        /// Gets the name qualifier.
-        /// </summary>
-        INameQualifier NameQualifier { get; }
-
-        /// <summary>
-        /// Creates an <see cref="System.Data.IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
+        /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>
         /// <param name="structuredCommand">
         /// The structured command.

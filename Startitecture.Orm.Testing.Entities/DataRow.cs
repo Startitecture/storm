@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DataRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The fake raised data row.
@@ -12,15 +12,13 @@ namespace Startitecture.Orm.Testing.Entities
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
-    using Startitecture.Orm.Common;
-    using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
 
     /// <summary>
     /// The fake raised data row.
     /// </summary>
     [Table("FakeData", Schema = "dbo")]
-    public class DataRow : ITransactionContext
+    public class DataRow
     {
         /// <summary>
         /// Gets or sets the fake related row.
@@ -101,21 +99,5 @@ namespace Startitecture.Orm.Testing.Entities
         /// </summary>
         [Column]
         public int? NullableValueColumn { get; set; }
-
-        /// <summary>
-        /// Gets the transaction provider.
-        /// </summary>
-        public IRepositoryProvider TransactionProvider { get; private set; }
-
-        /// <summary>
-        /// The set transaction provider.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider.
-        /// </param>
-        public void SetTransactionProvider(IRepositoryProvider repositoryProvider)
-        {
-            this.TransactionProvider = repositoryProvider;
-        }
     }
 }

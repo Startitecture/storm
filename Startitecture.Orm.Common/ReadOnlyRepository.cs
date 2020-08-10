@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ReadOnlyRepository.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The view repository.
@@ -34,7 +34,7 @@ namespace Startitecture.Orm.Common
     /// The type of entity stored in the repository.
     /// </typeparam>
     public class ReadOnlyRepository<TModel, TEntity> : IReadOnlyRepository<TModel>
-        where TEntity : class, ITransactionContext, new()
+        where TEntity : class, new()
     {
         /// <summary>
         /// The cache key format.
@@ -161,11 +161,6 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            if (candidate is ITransactionContext context)
-            {
-                context.SetTransactionProvider(this.RepositoryProvider);
-            }
-
             TModel entity;
 
             var exampleEntity = this.GetExampleEntity(candidate);
@@ -191,8 +186,6 @@ namespace Startitecture.Orm.Common
                 {
                     return default;
                 }
-
-                dataItem.SetTransactionProvider(this.RepositoryProvider);
 
                 entity = this.ConstructEntity(dataItem);
                 this.UpdateCache(cacheResult.Key, entity);
@@ -509,7 +502,6 @@ namespace Startitecture.Orm.Common
                 }
             }
 
-            exampleEntity.SetTransactionProvider(this.RepositoryProvider);
             return exampleEntity;
         }
 
@@ -597,7 +589,6 @@ namespace Startitecture.Orm.Common
             // TODO: Put results in the container for usage by the construct entity hook.
             foreach (var dataItem in items)
             {
-                dataItem.SetTransactionProvider(this.RepositoryProvider);
                 var entity = this.ConstructEntity(dataItem);
                 results.Add(entity);
             }

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ExtensionMethods.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -79,8 +79,12 @@ namespace Startitecture.Orm.Testing.Moq
             command.Setup(dbCommand => dbCommand.ExecuteReader()).Returns(reader.Object);
 
             var commandProvider = new Mock<IStructuredCommandProvider>();
-            commandProvider.Setup(provider => provider.NameQualifier).Returns(nameQualifier);
-            commandProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            var databaseContext = new Mock<IDatabaseContext>();
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(nameQualifier);
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(definitionProvider);
+            databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+            commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
             commandProvider
                 .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
                 .Returns(command.Object);

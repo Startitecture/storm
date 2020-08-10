@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="StatementCompiler.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+// <copyright file="RepositoryAdapter.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ namespace Startitecture.Orm.Common
     /// <summary>
     /// The statement factory.
     /// </summary>
-    public abstract class StatementCompiler : IStatementCompiler
+    public abstract class RepositoryAdapter : IRepositoryAdapter
     {
         /// <summary>
         /// The select statement.
@@ -190,7 +190,7 @@ SET
         private const int DefaultIndent = 0;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="StatementCompiler"/> class.
+        /// Initializes a new instance of the <see cref="RepositoryAdapter"/> class.
         /// </summary>
         /// <param name="definitionProvider">
         /// The definition Provider.
@@ -201,20 +201,19 @@ SET
         /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
         /// </exception>
-        protected StatementCompiler([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
+        protected RepositoryAdapter([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
         {
             this.DefinitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
             this.NameQualifier = nameQualifier ?? throw new ArgumentNullException(nameof(nameQualifier));
         }
 
-        /// <summary>
-        /// Gets the definition provider.
-        /// </summary>
+        /// <inheritdoc />
         public IEntityDefinitionProvider DefinitionProvider { get; }
 
-        /// <summary>
-        /// Gets the name qualifier.
-        /// </summary>
+        /// <inheritdoc />
+        public abstract IReadOnlyDictionary<Tuple<Type, Type>, IValueMapper> ValueMappers { get; }
+
+        /// <inheritdoc />
         public INameQualifier NameQualifier { get; }
 
         /// <inheritdoc />
@@ -230,20 +229,12 @@ SET
                 throw new ArgumentNullException(nameof(entitySet));
             }
 
-            var entityDefinition = this.DefinitionProvider.Resolve(entitySet.EntityType);
             var qualifiedColumns = new List<string>
                                        {
                                            '1'.ToString()
                                        };
 
-            var selectionStatement = this.CreateSelectionStatement(entitySet, entityDefinition, qualifiedColumns, 0, 0);
-            var selectStatement = entitySet.ParentExpression == null
-                                      ? this.CreateCompleteStatement(entitySet, entityDefinition)
-                                      : this.CreateTableExpression(
-                                          entitySet,
-                                          entityDefinition,
-                                          selectionStatement,
-                                          entitySet.ParentExpression != null);
+            var selectStatement = this.GetSelectionStatement(entitySet, qualifiedColumns);
 
             return string.Format(CultureInfo.InvariantCulture, IfExistsClause, selectStatement);
         }
@@ -264,7 +255,7 @@ SET
             var selectionStatement = this.CreateSelectionStatement(selection, entityDefinition, qualifiedColumns, 0, 0);
             return selection.ParentExpression == null
                        ? this.CreateCompleteStatement(selection, entityDefinition)
-                       : this.CreateTableExpression(selection, entityDefinition, selectionStatement, selection.OrderByExpressions.Any());
+                       : this.CreateTableExpression(selection, entityDefinition, selectionStatement);
         }
 
         /// <inheritdoc />
@@ -289,14 +280,14 @@ SET
                     continue;
                 }
 
-                var qualifiedName = this.NameQualifier.Qualify(attributeDefinition);
+                var physicalName = this.NameQualifier.Escape(attributeDefinition.PhysicalName);
                 setClauses.Add(
                     valueState.Value == null
-                        ? string.Format(CultureInfo.CurrentCulture, SetNullParameterFormat, qualifiedName)
+                        ? string.Format(CultureInfo.CurrentCulture, SetNullParameterFormat, physicalName)
                         : string.Format(
                             CultureInfo.CurrentCulture,
                             SetParameterFormat,
-                            qualifiedName,
+                            physicalName,
                             this.AddPrefix(index.ToString(CultureInfo.InvariantCulture))));
 
                 if (valueState.Value != null)
@@ -363,7 +354,7 @@ SET
 
         /// <inheritdoc />
         public virtual string CreateInsertionStatement<T>()
-            where T : ITransactionContext
+            ////where T : ITransactionContext
         {
             var definition = this.DefinitionProvider.Resolve<T>();
 
@@ -468,6 +459,37 @@ VALUES ({columnValues})";
             }
 
             return parameter;
+        }
+
+        /// <summary>
+        /// The get selection statement.
+        /// </summary>
+        /// <param name="entitySet">
+        /// The entity set.
+        /// </param>
+        /// <param name="qualifiedColumns">
+        /// The qualified columns.
+        /// </param>
+        /// <returns>
+        /// The <see cref="string"/>.
+        /// </returns>
+        protected string GetSelectionStatement([NotNull] IEntitySet entitySet, [NotNull] IEnumerable<string> qualifiedColumns)
+        {
+            if (entitySet == null)
+            {
+                throw new ArgumentNullException(nameof(entitySet));
+            }
+
+            if (qualifiedColumns == null)
+            {
+                throw new ArgumentNullException(nameof(qualifiedColumns));
+            }
+
+            var entityDefinition = this.DefinitionProvider.Resolve(entitySet.EntityType);
+            var selectionStatement = this.CreateSelectionStatement(entitySet, entityDefinition, qualifiedColumns, 0, 0);
+            return entitySet.ParentExpression == null
+                       ? this.CreateCompleteStatement(entitySet, entityDefinition)
+                       : this.CreateTableExpression(entitySet, entityDefinition, selectionStatement);
         }
 
         /// <summary>
@@ -772,7 +794,11 @@ VALUES ({columnValues})";
         /// <returns>
         /// The entity set statement as a <see cref="string"/>.
         /// </returns>
-        protected virtual string CreateEntitySetStatement([NotNull] IEntitySet entitySet, [NotNull] IEntityDefinition entityDefinition, int indexOffset, int indent)
+        protected virtual string CreateEntitySetStatement(
+            [NotNull] IEntitySet entitySet,
+            [NotNull] IEntityDefinition entityDefinition,
+            int indexOffset,
+            int indent)
         {
             if (entitySet == null)
             {
@@ -848,17 +874,13 @@ WHERE {keyPredicate})");
         /// <param name="selectionStatement">
         /// The selection statement to encapsulate with the parent expression.
         /// </param>
-        /// <param name="orderByRecompile">
-        /// A value indicating whether to have the statement use the RECOMPILE option.
-        /// </param>
         /// <returns>
         /// The selection statement as a <see cref="string"/>.
         /// </returns>
         protected virtual string CreateTableExpression(
             [NotNull] IEntitySet entitySet,
             [NotNull] IEntityDefinition definition,
-            [NotNull] string selectionStatement,
-            bool orderByRecompile)
+            [NotNull] string selectionStatement)
         {
             if (entitySet == null)
             {
@@ -888,11 +910,6 @@ WHERE {keyPredicate})");
         {tableExpressionStatement}
     )
 {selectionStatement}";
-
-            if (orderByRecompile)
-            {
-                return fullStatement + " OPTION (RECOMPILE)";
-            }
 
             return fullStatement;
         }

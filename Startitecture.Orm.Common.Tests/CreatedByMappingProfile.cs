@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="CreatedByMappingProfile.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The fake created by mapping profile.
@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Common.Tests
         /// </summary>
         public CreatedByMappingProfile()
         {
-            this.CreateMap<CreatedBy, MultiReferenceRow>().ForMember(row => row.TransactionProvider, expression => expression.Ignore());
+            this.CreateMap<CreatedBy, MultiReferenceRow>();
             this.CreateMap<MultiReferenceRow, CreatedBy>();
         }
     }
