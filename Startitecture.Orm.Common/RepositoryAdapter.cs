@@ -288,7 +288,7 @@ SET
                             CultureInfo.CurrentCulture,
                             SetParameterFormat,
                             physicalName,
-                            this.AddPrefix(index.ToString(CultureInfo.InvariantCulture))));
+                            this.NameQualifier.AddParameterPrefix(index.ToString(CultureInfo.InvariantCulture))));
 
                 if (valueState.Value != null)
                 {
@@ -362,24 +362,13 @@ SET
             var columnNames = string.Join(", ", definition.InsertableAttributes.Select(attribute => this.NameQualifier.Escape(attribute.PhysicalName)));
             var columnValues = string.Join(
                 ", ",
-                Enumerable.Range(0, definition.InsertableAttributes.Count()).Select(i => this.AddPrefix(i.ToString(CultureInfo.InvariantCulture))));
+                Enumerable.Range(0, definition.InsertableAttributes.Count()).Select(i => this.NameQualifier.AddParameterPrefix(i.ToString(CultureInfo.InvariantCulture))));
 
             var commandText = $@"INSERT INTO {escapeTableName}
 ({columnNames})
 VALUES ({columnValues})";
 
             return definition.RowIdentity.HasValue ? this.CaptureInsertedIdentity(commandText, definition) : commandText;
-        }
-
-        /// <inheritdoc />
-        public virtual string AddPrefix([NotNull] string parameterName)
-        {
-            if (string.IsNullOrWhiteSpace(parameterName))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(parameterName));
-            }
-
-            return string.Concat('@', parameterName);
         }
 
         /// <inheritdoc />
@@ -396,7 +385,7 @@ VALUES ({columnValues})";
             }
 
             var parameter = command.CreateParameter();
-            parameter.ParameterName = this.AddPrefix(name);
+            parameter.ParameterName = this.NameQualifier.AddParameterPrefix(name);
 
             if (value == null)
             {
@@ -523,7 +512,7 @@ VALUES ({columnValues})";
         /// </returns>
         protected virtual string GetInclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            var indexTokens = filterValues.Select((o, i) => this.AddPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
+            var indexTokens = filterValues.Select((o, i) => this.NameQualifier.AddParameterPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
 
             var inclusionToken = string.Format(
                 CultureInfo.InvariantCulture,
@@ -551,7 +540,7 @@ VALUES ({columnValues})";
         /// </returns>
         protected virtual string GetExclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
-            var indexTokens = filterValues.Select((o, i) => this.AddPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
+            var indexTokens = filterValues.Select((o, i) => this.NameQualifier.AddParameterPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
 
             var inclusionToken = string.Format(
                 CultureInfo.InvariantCulture,
@@ -623,7 +612,7 @@ VALUES ({columnValues})";
                         EqualityFilter,
                         referenceName,
                         firstFilterValue is string ? LikeOperand : EqualityOperand,
-                        this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture)));
+                        this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture)));
 
                     filterTokens.Add(equalityItem);
                     break;
@@ -633,7 +622,7 @@ VALUES ({columnValues})";
                         EqualityFilter,
                         referenceName,
                         firstFilterValue is string ? NotLikeOperand : InequalityOperand,
-                        this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture)));
+                        this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture)));
 
                     filterTokens.Add(inequalityItem);
                     break;
@@ -643,7 +632,7 @@ VALUES ({columnValues})";
                             CultureInfo.InvariantCulture,
                             LessThanPredicate,
                             referenceName,
-                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+                            this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture))));
 
                     break;
                 case FilterType.LessThanOrEqualTo:
@@ -652,7 +641,7 @@ VALUES ({columnValues})";
                             CultureInfo.InvariantCulture,
                             LessThanOrEqualToPredicate,
                             referenceName,
-                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+                            this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture))));
 
                     break;
                 case FilterType.GreaterThan:
@@ -661,7 +650,7 @@ VALUES ({columnValues})";
                             CultureInfo.InvariantCulture,
                             GreaterThanPredicate,
                             referenceName,
-                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+                            this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture))));
 
                     break;
                 case FilterType.GreaterThanOrEqualTo:
@@ -670,7 +659,7 @@ VALUES ({columnValues})";
                             CultureInfo.InvariantCulture,
                             GreaterThanOrEqualToPredicate,
                             referenceName,
-                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+                            this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture))));
 
                     break;
                 case FilterType.Between:
@@ -679,8 +668,8 @@ VALUES ({columnValues})";
                             CultureInfo.InvariantCulture,
                             BetweenFilter,
                             referenceName,
-                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture)),
-                            this.AddPrefix((index++).ToString(CultureInfo.InvariantCulture))));
+                            this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture)),
+                            this.NameQualifier.AddParameterPrefix((index++).ToString(CultureInfo.InvariantCulture))));
 
                     break;
                 case FilterType.MatchesSet:

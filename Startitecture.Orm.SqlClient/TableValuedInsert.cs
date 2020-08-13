@@ -9,15 +9,20 @@ namespace Startitecture.Orm.SqlClient
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Text;
 
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The structured insert command.
@@ -68,6 +73,7 @@ namespace Startitecture.Orm.SqlClient
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
             this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            this.StructureTypeName = GetTableTypeAttribute().TypeName;
         }
 
         /// <summary>
@@ -84,11 +90,13 @@ namespace Startitecture.Orm.SqlClient
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
             this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            this.StructureTypeName = GetTableTypeAttribute().TypeName;
         }
 
-        /// <summary>
-        /// Gets the command text.
-        /// </summary>
+        /// <inheritdoc />
+        public override string StructureTypeName { get; }
+
+        /// <inheritdoc />
         public override string CommandText => this.commandText.Value;
 
         /// <summary>
@@ -148,7 +156,7 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
-        /// Select the results of the insert, using the specified match keys to link the inserted values with the
+        /// Select the results of the insert, using the specified match keys to link the inserted values with the original values.
         /// </summary>
         /// <param name="matchProperties">
         /// The match properties.
@@ -162,6 +170,33 @@ namespace Startitecture.Orm.SqlClient
             this.selectionAttributes.Clear();
             this.selectionAttributes.AddRange(matchProperties.Select(structureDefinition.Find));
             return this;
+        }
+
+        /// <summary>
+        /// Gets the table type attribute for the current command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="TableTypeAttribute"/> for the current command.
+        /// </returns>
+        /// <exception cref="OperationException">
+        /// <typeparamref name="TStructure"/> is not decorated with a <see cref="TableTypeAttribute"/>
+        /// </exception>
+        private static TableTypeAttribute GetTableTypeAttribute()
+        {
+            var tableTypeAttribute = typeof(TStructure).GetCustomAttributes<TableTypeAttribute>().FirstOrDefault();
+
+            if (tableTypeAttribute != null)
+            {
+                return tableTypeAttribute;
+            }
+
+            var message = string.Format(
+                CultureInfo.CurrentCulture,
+                ErrorMessages.AttributeRequiredForType,
+                typeof(TStructure),
+                nameof(TableTypeAttribute));
+
+            throw new OperationException(typeof(TStructure), message);
         }
 
         /// <summary>

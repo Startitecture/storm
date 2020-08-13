@@ -88,17 +88,6 @@ namespace Startitecture.Orm.Common
         string CreateInsertionStatement<T>();
 
         /// <summary>
-        /// Adds a prefix to a parameter for use in a prepared statement.
-        /// </summary>
-        /// <param name="parameterName">
-        /// The parameter name.
-        /// </param>
-        /// <returns>
-        /// The prefixed parameter name as a <see cref="string"/>.
-        /// </returns>
-        string AddPrefix(string parameterName);
-
-        /// <summary>
         /// Maps a parameter from its runtime type to a compatible database type, if needed.
         /// </summary>
         /// <param name="command">

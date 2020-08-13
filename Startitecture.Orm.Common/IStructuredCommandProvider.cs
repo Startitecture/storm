@@ -9,7 +9,10 @@
 
 namespace Startitecture.Orm.Common
 {
+    using System.Collections.Generic;
     using System.Data;
+
+    using JetBrains.Annotations;
 
     /// <summary>
     /// The StructuredCommandProvider interface.
@@ -24,18 +27,21 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>
+        /// <typeparam name="T">
+        /// The type of items in the structured command.
+        /// </typeparam>
         /// <param name="structuredCommand">
         /// The structured command.
         /// </param>
-        /// <param name="dataTable">
-        /// The data table to include with the command.
+        /// <param name="items">
+        /// The items to pass to the command.
         /// </param>
         /// <param name="transaction">
         /// The transaction to use with the command.
         /// </param>
         /// <returns>
-        /// An <see cref="System.Data.IDbCommand"/> that will execute the structured command.
+        /// An <see cref="IDbCommand"/> that will execute the structured command.
         /// </returns>
-        IDbCommand CreateCommand(IStructuredCommand structuredCommand, DataTable dataTable, IDbTransaction transaction);
+        IDbCommand CreateCommand<T>([NotNull] IStructuredCommand structuredCommand, [NotNull] IEnumerable<T> items, IDbTransaction transaction);
     }
 }

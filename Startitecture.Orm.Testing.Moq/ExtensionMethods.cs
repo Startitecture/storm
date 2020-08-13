@@ -85,8 +85,12 @@ namespace Startitecture.Orm.Testing.Moq
             repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(definitionProvider);
             databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
             commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
+            ////commandProvider
+            ////    .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
+            ////    .Returns(command.Object);
+
             commandProvider
-                .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
+                .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<IEnumerable<T>>(), It.IsAny<IDbTransaction>()))
                 .Returns(command.Object);
 
             return commandProvider;

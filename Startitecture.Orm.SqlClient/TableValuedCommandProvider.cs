@@ -7,6 +7,7 @@
 namespace Startitecture.Orm.SqlClient
 {
     using System;
+    using System.Collections.Generic;
     using System.Data;
 
     using Common;
@@ -25,20 +26,14 @@ namespace Startitecture.Orm.SqlClient
     public class TableValuedCommandProvider : IStructuredCommandProvider
     {
         /// <summary>
-        /// The context provider.
-        /// </summary>
-        private readonly IDatabaseContextProvider contextProvider;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="TableValuedCommandProvider"/> class.
         /// </summary>
-        /// <param name="contextProvider">
+        /// <param name="databaseContext">
         /// The context provider.
         /// </param>
-        public TableValuedCommandProvider([NotNull] IDatabaseContextProvider contextProvider)
+        public TableValuedCommandProvider([NotNull] IDatabaseContext databaseContext)
         {
-            this.contextProvider = contextProvider ?? throw new ArgumentNullException(nameof(contextProvider));
-            this.DatabaseContext = contextProvider.DatabaseContext;
+            this.DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
         }
 
         /// <inheritdoc />
@@ -47,58 +42,70 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
         /// </summary>
+        /// <typeparam name="T">
+        /// The type of items in the structured command.
+        /// </typeparam>
         /// <param name="structuredCommand">
         /// The structured command.
         /// </param>
-        /// <param name="dataTable">
-        /// The data table to include with the command.
+        /// <param name="items">
+        /// The items to pass to the command.
         /// </param>
         /// <param name="transaction">
         /// The transaction to use with the command.
         /// </param>
         /// <returns>
-        /// An <see cref="System.Data.IDbCommand"/> that will execute the structured command.
+        /// An <see cref="IDbCommand"/> that will execute the structured command.
         /// </returns>
-        /// <exception cref="Startitecture.Core.OperationException">
-        /// The underlying <see cref="Startitecture.Orm.Common.IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
+        /// <exception cref="OperationException">
+        /// The underlying <see cref="IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
             "CA2100:Review SQL queries for security vulnerabilities",
             Justification = "structuredCommand.CommandText is built with parameterized input.")]
-        public IDbCommand CreateCommand([NotNull] IStructuredCommand structuredCommand, [NotNull] DataTable dataTable, IDbTransaction transaction)
+        public IDbCommand CreateCommand<T>(IStructuredCommand structuredCommand, IEnumerable<T> items, IDbTransaction transaction)
         {
             if (structuredCommand == null)
             {
                 throw new ArgumentNullException(nameof(structuredCommand));
             }
 
-            if (dataTable == null)
+            if (items == null)
             {
-                throw new ArgumentNullException(nameof(dataTable));
+                throw new ArgumentNullException(nameof(items));
             }
 
-            if (!(this.contextProvider.DatabaseContext.Connection is SqlConnection sqlConnection))
+            if (!(this.DatabaseContext.Connection is SqlConnection sqlConnection))
             {
-                throw new OperationException(this.contextProvider, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
+                throw new OperationException(this.DatabaseContext, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
             }
 
             var sqlCommand = !(transaction is SqlTransaction sqlTransaction)
                                  ? new SqlCommand(structuredCommand.CommandText, sqlConnection)
                                  : new SqlCommand(structuredCommand.CommandText, sqlConnection, sqlTransaction);
 
+            DataTable dataTable = null;
+
             try
             {
-                var tableParameter = sqlCommand.Parameters.AddWithValue($@"{structuredCommand.Parameter}", dataTable);
+                var dataTableLoader = new DataTableLoader<T>(this.DatabaseContext.RepositoryAdapter.DefinitionProvider);
+                dataTable = dataTableLoader.Load(items);
+                var tableParameter = sqlCommand.Parameters.AddWithValue(
+                    $"{this.DatabaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(structuredCommand.Parameter)}",
+                    dataTable);
+
                 tableParameter.SqlDbType = SqlDbType.Structured;
                 tableParameter.TypeName = structuredCommand.StructureTypeName;
             }
             catch
             {
+                dataTable?.Dispose();
                 sqlCommand.Dispose();
                 throw;
             }
 
+            sqlCommand.Disposed += (sender, args) => dataTable.Dispose();
             return sqlCommand;
         }
     }

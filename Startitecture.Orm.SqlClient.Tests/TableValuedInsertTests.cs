@@ -120,7 +120,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 // Set up the structured command provider.
                 var databaseContextProvider = (IDatabaseContextProvider)provider;
-                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider);
+                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider.DatabaseContext);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
 
                 // Delete the existing rows.
@@ -244,7 +244,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 // Set up the structured command provider.
                 var databaseContextProvider = (IDatabaseContextProvider)provider;
-                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider);
+                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider.DatabaseContext);
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
@@ -348,7 +348,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void SelectResults_TableValuedInsertWithIdentityColumn_CommandTextMatchesExpected()
+        public void CommandText_TableValuedInsertWithIdentityColumnSelectResults_CommandTextMatchesExpected()
         {
             var mockProvider = new Mock<IRepositoryProvider>();
 
@@ -371,10 +371,10 @@ INSERT INTO [dbo].[FieldValue]
 ([FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
 OUTPUT INSERTED.[FieldValueId],INSERTED.[FieldId],INSERTED.[LastModifiedByDomainIdentifierId],INSERTED.[LastModifiedTime]
 INTO @inserted ([FieldValueId], [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
-SELECT [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime] FROM @FieldValueTable AS tvp;
+SELECT [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime] FROM @FieldValueRows AS tvp;
 SELECT i.[FieldValueId], i.[FieldId], tvp.[LastModifiedByDomainIdentifierId], tvp.[LastModifiedTime]
 FROM @inserted AS i
-INNER JOIN @FieldValueTable AS tvp
+INNER JOIN @FieldValueRows AS tvp
 ON i.[FieldId] = tvp.[FieldId];
 ";
                 var actual = valuesCommand.CommandText;
@@ -386,7 +386,7 @@ ON i.[FieldId] = tvp.[FieldId];
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void From_TableValuedInsertForRelatedRow_MatchesExpected()
+        public void CommandText_TableValuedInsertForFlattenedType_MatchesExpected()
         {
             var mockProvider = new Mock<IRepositoryProvider>();
 
@@ -406,7 +406,7 @@ ON i.[FieldId] = tvp.[FieldId];
 
                 const string Expected = @"INSERT INTO [dbo].[DateElement]
 ([DateElementId], [Value])
-SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementTable AS tvp;
+SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementRows AS tvp;
 ";
                 var actual = dateElementsCommand.CommandText;
                 Assert.AreEqual(Expected, actual);
@@ -417,7 +417,7 @@ SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementTable AS tvp;
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void InsertInto_TableValueInsertForNonIdentityKey_CommandTextMatchesExpected()
+        public void CommandText_TableValueInsertForNonIdentityKey_CommandTextMatchesExpected()
         {
             var mockProvider = new Mock<IRepositoryProvider>();
 
@@ -440,7 +440,7 @@ SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementTable AS tvp;
 
                 const string Expected = @"INSERT INTO [dbo].[GenericSubmissionValue]
 ([GenericSubmissionValueId], [GenericSubmissionId])
-SELECT [GenericSubmissionValueId], [GenericSubmissionId] FROM @GenericSubmissionValueTable AS tvp;
+SELECT [GenericSubmissionValueId], [GenericSubmissionId] FROM @GenericSubmissionValueRows AS tvp;
 ";
                 var actual = submissionCommand.CommandText;
                 Assert.AreEqual(Expected, actual);

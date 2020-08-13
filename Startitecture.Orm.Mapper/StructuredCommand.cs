@@ -13,14 +13,11 @@ namespace Startitecture.Orm.Mapper
     using System.Collections.Generic;
     using System.Data;
     using System.Globalization;
-    using System.Linq;
-    using System.Reflection;
 
     using JetBrains.Annotations;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Schema;
     using Startitecture.Resources;
 
     /// <summary>
@@ -67,21 +64,9 @@ namespace Startitecture.Orm.Mapper
             this.StructuredCommandProvider = structuredCommandProvider ?? throw new ArgumentNullException(nameof(structuredCommandProvider));
             this.databaseTransaction = databaseTransaction;
 
-            var structureType = typeof(TStructure);
-            var tableTypeAttribute = structureType.GetCustomAttributes<TableTypeAttribute>().FirstOrDefault();
-
-            if (tableTypeAttribute == null)
-            {
-                var requiredAttributeName = nameof(TableTypeAttribute);
-                throw new OperationException(
-                    structureType,
-                    string.Format(CultureInfo.CurrentCulture, ErrorMessages.AttributeRequiredForType, structureType, requiredAttributeName));
-            }
-
-            this.StructureTypeName = tableTypeAttribute.TypeName;
 
             var structureDefinition = structuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
-            this.Parameter = $"{structureDefinition.EntityName}Table";
+            this.Parameter = $"{structureDefinition.EntityName}Rows";
         }
 
         /// <summary>
@@ -92,7 +77,7 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// Gets the structure type name.
         /// </summary>
-        public string StructureTypeName { get; }
+        public abstract string StructureTypeName { get; }
 
         /// <summary>
         /// Gets the command text.
@@ -114,11 +99,9 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         public void Execute()
         {
-            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider);
-
-            using (var dataTable = dataTableLoader.Load(this.Items))
+            using (var sqlCommand = this.StructuredCommandProvider.CreateCommand(this, this.Items, this.databaseTransaction))
             {
-                this.Execute(dataTable);
+                sqlCommand.ExecuteNonQuery();
             }
         }
 
@@ -130,11 +113,9 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         public IEnumerable<TStructure> ExecuteForResults()
         {
-            var dataTableLoader = new DataTableLoader<TStructure>(this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider);
             var returnList = new List<TStructure>();
 
-            using (var dataTable = dataTableLoader.Load(this.Items))
-            using (var reader = this.ExecuteReader(dataTable))
+            using (var reader = this.ExecuteReader())
             {
                 var entityDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
 
@@ -161,41 +142,14 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
-        /// Executes the current command with the specified table.
-        /// </summary>
-        /// <param name="dataTable">
-        /// The data table containing the data to send to the operation.
-        /// </param>
-        private void Execute([NotNull] DataTable dataTable)
-        {
-            if (dataTable == null)
-            {
-                throw new ArgumentNullException(nameof(dataTable));
-            }
-
-            using (var sqlCommand = this.StructuredCommandProvider.CreateCommand(this, dataTable, this.databaseTransaction))
-            {
-                sqlCommand.ExecuteNonQuery();
-            }
-        }
-
-        /// <summary>
         /// Executes a command and returns a data reader.
         /// </summary>
-        /// <param name="dataTable">
-        /// The data table.
-        /// </param>
         /// <returns>
         /// The <see cref="IDataReader"/> associated with the command.
         /// </returns>
-        private IDataReader ExecuteReader([NotNull] DataTable dataTable)
+        private IDataReader ExecuteReader()
         {
-            if (dataTable == null)
-            {
-                throw new ArgumentNullException(nameof(dataTable));
-            }
-
-            using (var command = this.StructuredCommandProvider.CreateCommand(this, dataTable, this.databaseTransaction))
+            using (var command = this.StructuredCommandProvider.CreateCommand(this, this.Items, this.databaseTransaction))
             {
                 return command.ExecuteReader();
             }

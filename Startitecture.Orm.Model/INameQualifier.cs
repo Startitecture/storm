@@ -96,5 +96,16 @@ namespace Startitecture.Orm.Model
         /// The reference name includes the alias of the entity but not the alias of the attribute.
         /// </remarks>
         string GetReferenceName(EntityAttributeDefinition attribute);
+
+        /// <summary>
+        /// Adds a prefix to a parameter for use in a prepared statement.
+        /// </summary>
+        /// <param name="parameterName">
+        /// The parameter name.
+        /// </param>
+        /// <returns>
+        /// The prefixed parameter name as a <see cref="string"/>.
+        /// </returns>
+        string AddParameterPrefix(string parameterName);
     }
 }

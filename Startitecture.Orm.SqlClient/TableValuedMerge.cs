@@ -9,15 +9,20 @@ namespace Startitecture.Orm.SqlClient
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Reflection;
     using System.Text;
 
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
+    using Startitecture.Orm.Schema;
+    using Startitecture.Resources;
 
     /// <summary>
     /// The structured merge command.
@@ -81,6 +86,7 @@ namespace Startitecture.Orm.SqlClient
         public TableValuedMerge([NotNull] IStructuredCommandProvider structuredCommandProvider)
             : base(structuredCommandProvider)
         {
+            this.StructureTypeName = GetTableTypeAttribute().TypeName;
         }
 
         /// <summary>
@@ -95,7 +101,11 @@ namespace Startitecture.Orm.SqlClient
         public TableValuedMerge([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
             : base(structuredCommandProvider, databaseTransaction)
         {
+            this.StructureTypeName = GetTableTypeAttribute().TypeName;
         }
+
+        /// <inheritdoc />
+        public override string StructureTypeName { get; }
 
         /// <inheritdoc />
         public override string CommandText => this.CompileCommandText();
@@ -248,6 +258,33 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
+        /// Gets the table type attribute for the current command.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="TableTypeAttribute"/> for the current command.
+        /// </returns>
+        /// <exception cref="OperationException">
+        /// <typeparamref name="TStructure"/> is not decorated with a <see cref="TableTypeAttribute"/>
+        /// </exception>
+        private static TableTypeAttribute GetTableTypeAttribute()
+        {
+            var tableTypeAttribute = typeof(TStructure).GetCustomAttributes<TableTypeAttribute>().FirstOrDefault();
+
+            if (tableTypeAttribute != null)
+            {
+                return tableTypeAttribute;
+            }
+
+            var message = string.Format(
+                CultureInfo.CurrentCulture,
+                ErrorMessages.AttributeRequiredForType,
+                typeof(TStructure),
+                nameof(TableTypeAttribute));
+
+            throw new OperationException(typeof(TStructure), message);
+        }
+
+        /// <summary>
         /// Compiles the command text.
         /// </summary>
         /// <returns>
@@ -292,8 +329,8 @@ namespace Startitecture.Orm.SqlClient
                 x => $"{qualifier.Escape("Target")}.{qualifier.Escape(x.TargetKey.PhysicalName)} = "
                      + $"{qualifier.Escape("Source")}.{qualifier.Escape(x.SourceKey.PropertyName)}");
 
-            // If all elements are part of the match attributes then this will end up blank. TODO: Skip update if update attributes has no items?
-            var updateAttributes = this.itemDefinition.UpdateableAttributes; ////.Except(keyAttributes.Select(x => x.TargetKey)); 
+            // If all elements are part of the match attributes then this will end up blank.
+            var updateAttributes = this.itemDefinition.UpdateableAttributes; 
 
             var updateClauses = from targetColumn in updateAttributes
                                 join sourceColumn in allAttributes on targetColumn.ResolvedLocation equals sourceColumn.ResolvedLocation
@@ -322,7 +359,7 @@ namespace Startitecture.Orm.SqlClient
                         x =>
                             {
                                 var sourceAttribute = structureDefinition.Find(x);
-                                var tableReferenceName = sourceAttribute.PropertyName; // TODO: Reference by alias?
+                                var tableReferenceName = sourceAttribute.PropertyName;
                                 var itemReferenceName = this.itemDefinition.DirectAttributes
                                     .FirstOrDefault(a => a.PhysicalName == sourceAttribute.PhysicalName)
                                     .PhysicalName;
@@ -342,12 +379,12 @@ namespace Startitecture.Orm.SqlClient
                 // These will be the column names from the table.
                 var outputColumns = this.directAttributes.OrderBy(x => x.Ordinal).Select(x => $"INSERTED.{qualifier.Escape(x.PhysicalName)}");
 
-                // Here we use property name because the assumption is the UDTT uses aliases, not physical names. TODO: Use aliases?
+                // Here we use property name because the assumption is the UDTT uses aliases, not physical names.
                 var insertedColumns =
                     allAttributes.Join(
                         this.directAttributes,
                         tvp => qualifier.Qualify(tvp),
-                        i => qualifier.GetCanonicalName(i), //// i.GetPhysicalName(),
+                        i => qualifier.GetCanonicalName(i), 
                         (structure, entity) => structure).OrderBy(x => x.Ordinal).Select(x => $"{qualifier.Escape(x.PropertyName)}").ToList();
 
                 // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original

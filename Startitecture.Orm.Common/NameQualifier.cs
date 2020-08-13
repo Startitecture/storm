@@ -57,6 +57,17 @@ namespace Startitecture.Orm.Common
             return $"{this.Escape(location.Container)}.{this.Escape(location.Name)}";
         }
 
+        /// <inheritdoc />
+        public virtual string AddParameterPrefix(string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(parameterName));
+            }
+
+            return string.Concat('@', parameterName);
+        }
+
         /// <summary>
         /// Gets the entity qualified name.
         /// </summary>

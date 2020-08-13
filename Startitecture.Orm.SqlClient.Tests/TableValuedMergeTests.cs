@@ -157,7 +157,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             const string Expected = @"DECLARE @inserted FieldValueTableType;
 MERGE [dbo].[FieldValue] AS [Target]
-USING @FieldValueTable AS [Source]
+USING @FieldValueRows AS [Source]
 ON ([Target].[FieldValueId] = [Source].[FieldValueId])
 WHEN MATCHED THEN
 UPDATE SET [FieldId] = [Source].[FieldId], [LastModifiedByDomainIdentifierId] = [Source].[LastModifiedByDomainIdentifierId], [LastModifiedTime] = [Source].[LastModifiedTime]
@@ -168,7 +168,7 @@ OUTPUT INSERTED.[FieldValueId], INSERTED.[FieldId], INSERTED.[LastModifiedByDoma
 INTO @inserted ([FieldValueId], [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime]);
 SELECT i.[FieldValueId], tvp.[FieldId], tvp.[LastModifiedByDomainIdentifierId], tvp.[LastModifiedTime]
 FROM @inserted AS i
-INNER JOIN @FieldValueTable AS tvp
+INNER JOIN @FieldValueRows AS tvp
 ON i.[FieldId] = tvp.[FieldId];
 ";
 
@@ -197,19 +197,19 @@ ON i.[FieldId] = tvp.[FieldId];
 
             const string Expected = @"DECLARE @inserted FieldValueElementTableType;
 MERGE [dbo].[FieldValueElement] AS [Target]
-USING @FieldValueElementTable AS [Source]
+USING @FieldValueElementRows AS [Source]
 ON ([Target].[FieldValueId] = [Source].[FieldValueId] AND [Target].[Order] = [Source].[Order])
 WHEN MATCHED THEN
 UPDATE SET [FieldValueId] = [Source].[FieldValueId], [Order] = [Source].[Order]
 WHEN NOT MATCHED BY TARGET THEN
 INSERT ([FieldValueId], [Order])
 VALUES ([Source].[FieldValueId], [Source].[Order])
-WHEN NOT MATCHED BY SOURCE AND [Target].FieldValueId IN (SELECT [FieldValueId] FROM @FieldValueElementTable) THEN DELETE
+WHEN NOT MATCHED BY SOURCE AND [Target].FieldValueId IN (SELECT [FieldValueId] FROM @FieldValueElementRows) THEN DELETE
 OUTPUT INSERTED.[FieldValueElementId], INSERTED.[FieldValueId], INSERTED.[Order]
 INTO @inserted ([FieldValueElementId], [FieldValueId], [Order]);
 SELECT i.[FieldValueElementId], tvp.[FieldValueId], tvp.[Order], tvp.[DateElement], tvp.[FloatElement], tvp.[IntegerElement], tvp.[MoneyElement], tvp.[TextElement]
 FROM @inserted AS i
-INNER JOIN @FieldValueElementTable AS tvp
+INNER JOIN @FieldValueElementRows AS tvp
 ON i.[FieldValueId] = tvp.[FieldValueId] AND i.[Order] = tvp.[Order];
 ";
 
@@ -243,19 +243,19 @@ ON i.[FieldValueId] = tvp.[FieldValueId] AND i.[Order] = tvp.[Order];
 
             var expected = @"DECLARE @inserted GenericSubmissionValueTableType;
 MERGE [dbo].[GenericSubmissionValue] AS [Target]
-USING @GenericSubmissionValueTable AS [Source]
+USING @GenericSubmissionValueRows AS [Source]
 ON ([Target].[GenericSubmissionValueId] = [Source].[GenericSubmissionValueId])
 WHEN MATCHED THEN
 UPDATE SET [GenericSubmissionId] = [Source].[GenericSubmissionId]
 WHEN NOT MATCHED BY TARGET THEN
 INSERT ([GenericSubmissionValueId], [GenericSubmissionId])
 VALUES ([Source].[GenericSubmissionValueId], [Source].[GenericSubmissionId])
-WHEN NOT MATCHED BY SOURCE AND [Target].GenericSubmissionId IN (SELECT [GenericSubmissionId] FROM @GenericSubmissionValueTable) THEN DELETE
+WHEN NOT MATCHED BY SOURCE AND [Target].GenericSubmissionId IN (SELECT [GenericSubmissionId] FROM @GenericSubmissionValueRows) THEN DELETE
 OUTPUT INSERTED.[GenericSubmissionValueId], INSERTED.[GenericSubmissionId]
 INTO @inserted ([GenericSubmissionValueId], [GenericSubmissionId]);
 SELECT tvp.[GenericSubmissionValueId], tvp.[GenericSubmissionId]
 FROM @inserted AS i
-INNER JOIN @GenericSubmissionValueTable AS tvp
+INNER JOIN @GenericSubmissionValueRows AS tvp
 ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment.NewLine;
 
             Assert.AreEqual(expected, target.CommandText);
@@ -277,7 +277,7 @@ ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment
 
             const string Expected = @"DECLARE @inserted FieldValueElementTableType;
 MERGE [dbo].[DateElement] AS [Target]
-USING @FieldValueElementTable AS [Source]
+USING @FieldValueElementRows AS [Source]
 ON ([Target].[DateElementId] = [Source].[FieldValueElementId])
 WHEN MATCHED THEN
 UPDATE SET [Value] = [Source].[DateElement]
@@ -489,7 +489,8 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                                         };
 
             // Merge in the field values.
-            var commandProvider = new TableValuedCommandProvider((IDatabaseContextProvider)provider);
+            var contextProvider = (IDatabaseContextProvider)provider;
+            var commandProvider = new TableValuedCommandProvider(contextProvider.DatabaseContext);
             var transaction = provider.StartTransaction();
 
             var fieldsCommand = new TableValuedMerge<FieldTableTypeRow>(commandProvider, transaction);
