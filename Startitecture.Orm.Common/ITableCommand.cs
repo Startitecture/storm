@@ -1,25 +1,23 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IStructuredCommand.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+// <copyright file="ITableCommand.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Provides an interface to SQL table command.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common
 {
     /// <summary>
-    /// The structured SQL command interface.
+    /// Provides an interface to SQL table command.
     /// </summary>
-    public interface IStructuredCommand
+    public interface ITableCommand
     {
         /// <summary>
-        /// Gets the table value parameter.
+        /// Gets the parameter for the source data.
         /// </summary>
-        string Parameter { get; }
-
-        /// <summary>
-        /// Gets the structure type name.
-        /// </summary>
-        string StructureTypeName { get; }
+        string ParameterName { get; }
 
         /// <summary>
         /// Gets the command text.

@@ -1,16 +1,21 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="UniqueQuery.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Automatically generates a unique query based on the primary keys of the <typeparamref name="TItem"/>.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Model
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Diagnostics;
     using System.Linq;
 
     using JetBrains.Annotations;
+
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Automatically generates a unique query based on the primary keys of the <typeparamref name="TItem"/>.

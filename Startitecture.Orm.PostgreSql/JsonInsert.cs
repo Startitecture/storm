@@ -25,7 +25,7 @@ namespace Startitecture.Orm.PostgreSql
     /// <typeparam name="T">
     /// The type of item to insert into the repository.
     /// </typeparam>
-    public class JsonInsert<T> : StructuredCommand<T>
+    public class JsonInsert<T> : TableCommand<T>
     {
         /// <summary>
         /// The command text.
@@ -53,41 +53,48 @@ namespace Startitecture.Orm.PostgreSql
         private readonly List<LambdaExpression> fromColumnExpressions = new List<LambdaExpression>();
 
         /// <summary>
-        /// The entity definition.
+        /// The constraint hint expressions.
         /// </summary>
-        private IEntityDefinition itemDefinition;
+        private readonly List<LambdaExpression> constraintHintExpressions = new List<LambdaExpression>();
+
+        /// <summary>
+        /// The update expressions.
+        /// </summary>
+        private readonly List<LambdaExpression> updateColumnExpressions = new List<LambdaExpression>();
+
+        /// <summary>
+        /// The insert conflict action.
+        /// </summary>
+        private InsertConflictAction insertConflictAction = InsertConflictAction.RaiseConstraintViolation;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonInsert{T}"/> class.
         /// </summary>
-        /// <param name="structuredCommandProvider">
+        /// <param name="tableCommandProvider">
         /// The structured command provider.
         /// </param>
-        public JsonInsert([NotNull] IStructuredCommandProvider structuredCommandProvider)
-            : base(structuredCommandProvider)
+        public JsonInsert([NotNull] ITableCommandProvider tableCommandProvider)
+            : base(tableCommandProvider)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonInsert{T}"/> class.
         /// </summary>
-        /// <param name="structuredCommandProvider">
+        /// <param name="tableCommandProvider">
         /// The structured command provider.
         /// </param>
         /// <param name="databaseTransaction">
         /// The database transaction.
         /// </param>
-        public JsonInsert([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
-            : base(structuredCommandProvider, databaseTransaction)
+        public JsonInsert([NotNull] ITableCommandProvider tableCommandProvider, IDbTransaction databaseTransaction)
+            : base(tableCommandProvider, databaseTransaction)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
-
-        /// <inheritdoc />
-        public override string StructureTypeName => typeof(T).Name;
 
         /// <inheritdoc />
         public override string CommandText => this.commandText.Value;
@@ -95,30 +102,14 @@ namespace Startitecture.Orm.PostgreSql
         /// <summary>
         /// Declares the table to insert into.
         /// </summary>
-        /// <param name="insertItems">
-        /// The entities to insert.
-        /// </param>
         /// <param name="targetColumns">
         /// The target columns of the insert table.
         /// </param>
-        /// <typeparam name="TEntity">
-        /// The type of entity to insert the table into.
-        /// </typeparam>
         /// <returns>
         /// The current <see cref="JsonInsert{T}"/>.
         /// </returns>
-        public JsonInsert<T> InsertInto<TEntity>(
-            [NotNull] IEnumerable<T> insertItems,
-            params Expression<Func<TEntity, object>>[] targetColumns)
+        public JsonInsert<T> InsertInto(params Expression<Func<T, object>>[] targetColumns)
         {
-            if (insertItems == null)
-            {
-                throw new ArgumentNullException(nameof(insertItems));
-            }
-
-            this.itemDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TEntity>();
-            this.Items.Clear();
-            this.Items.AddRange(insertItems);
             this.insertColumnExpressions.Clear();
             this.insertColumnExpressions.AddRange(targetColumns);
             return this;
@@ -127,16 +118,19 @@ namespace Startitecture.Orm.PostgreSql
         /// <summary>
         /// Specifies the columns to select into the table.
         /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of items to insert into the table.
+        /// </typeparam>
         /// <param name="fromColumns">
         /// The columns to select into the table. These must be the same number of columns as target columns..
         /// </param>
         /// <returns>
         /// The current <see cref="JsonInsert{T}"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="fromColumns"/> is null.
         /// </exception>
-        public JsonInsert<T> From([NotNull] params Expression<Func<T, object>>[] fromColumns)
+        public JsonInsert<T> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] fromColumns)
         {
             if (fromColumns == null)
             {
@@ -149,6 +143,66 @@ namespace Startitecture.Orm.PostgreSql
         }
 
         /// <summary>
+        /// Specifies that on a constraint violation, the row will not be inserted and no error will be raised.
+        /// </summary>
+        /// <returns>
+        /// The current <see cref="JsonInsert{T}"/>.
+        /// </returns>
+        public JsonInsert<T> OnConflictDoNothing()
+        {
+            this.insertConflictAction = InsertConflictAction.DoNothing;
+            return this;
+        }
+
+        /// <summary>
+        /// Specify the attributes 
+        /// </summary>
+        /// <param name="constraintHintAttributes">
+        /// The constraint hint attributes.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="JsonInsert{T}"/>.
+        /// </returns>
+        public JsonInsert<T> OnConflictDoUpdate([NotNull] params Expression<Func<T, object>>[] constraintHintAttributes)
+        {
+            if (constraintHintAttributes == null)
+            {
+                throw new ArgumentNullException(nameof(constraintHintAttributes));
+            }
+
+            this.insertConflictAction = InsertConflictAction.Update;
+            this.constraintHintExpressions.Clear();
+            this.constraintHintExpressions.AddRange(constraintHintAttributes);
+            return this;
+        }
+
+        /// <summary>
+        /// Defines the source attributes to upsert from. These should be in the same order as non-database generated
+        /// columns in the target table.
+        /// </summary>
+        /// <param name="targetColumns">
+        /// The update source attributes.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="JsonInsert{T}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="targetColumns"/> is null.
+        /// </exception>
+        public JsonInsert<T> Upsert([NotNull] params Expression<Func<T, object>>[] targetColumns)
+        {
+            if (targetColumns == null)
+            {
+                throw new ArgumentNullException(nameof(targetColumns));
+            }
+
+            this.insertConflictAction = InsertConflictAction.Update;
+            this.updateColumnExpressions.Clear();
+            this.updateColumnExpressions.AddRange(targetColumns);
+            return this;
+        }
+
+        /// <summary>
         /// Select the results of the insert, using the specified match keys to link the inserted values with the original values.
         /// </summary>
         /// <param name="matchProperties">
@@ -157,11 +211,10 @@ namespace Startitecture.Orm.PostgreSql
         /// <returns>
         /// The current <see cref="JsonInsert{T}"/>.
         /// </returns>
-        public JsonInsert<T> SelectResults(params Expression<Func<T, object>>[] matchProperties)
+        public JsonInsert<T> Returning(params Expression<Func<T, object>>[] matchProperties)
         {
-            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
             this.selectionAttributes.Clear();
-            this.selectionAttributes.AddRange(matchProperties.Select(structureDefinition.Find));
+            this.selectionAttributes.AddRange(matchProperties.Select(this.EntityDefinition.Find));
             return this;
         }
 
@@ -173,23 +226,22 @@ namespace Startitecture.Orm.PostgreSql
         /// </returns>
         private string CompileCommandText()
         {
-            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
-            var directAttributes = this.itemDefinition.DirectAttributes.ToList();
-            var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.itemDefinition.Find) :
-                                    this.itemDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.itemDefinition.UpdateableAttributes :
+            var directAttributes = this.EntityDefinition.DirectAttributes.ToList();
+            var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.EntityDefinition.Find) :
+                                    this.EntityDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.EntityDefinition.UpdateableAttributes :
                                     directAttributes).ToList();
 
-            var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PhysicalName));
+            var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PhysicalName)).ToList();
 
             // Direct attributes if none are specified because this could be a raised POCO.
             var sourceAttributes = (this.fromColumnExpressions.Any()
-                                        ? this.fromColumnExpressions.Select(structureDefinition.Find)
-                                        : from objectAttribute in structureDefinition.DirectAttributes
+                                        ? this.fromColumnExpressions.Select(this.ItemDefinition.Find)
+                                        : from objectAttribute in this.ItemDefinition.DirectAttributes
                                           join insertAttribute in insertAttributes on objectAttribute.PhysicalName equals insertAttribute.PhysicalName
                                           orderby objectAttribute.Ordinal
                                           select objectAttribute).ToList();
 
-            var sourceColumns = sourceAttributes.Select(x => $"t.{this.nameQualifier.Escape(x.PropertyName)}");
+            var sourceColumns = sourceAttributes.Select(x => $"t.{this.nameQualifier.Escape(x.PropertyName)}").ToList();
             var jsonProperties = sourceAttributes.Select(
                 x => $"{this.nameQualifier.Escape(x.PropertyName)} {PostgresTypeLookup.GetType(x.PropertyInfo.PropertyType)}");
 
@@ -197,11 +249,44 @@ namespace Startitecture.Orm.PostgreSql
 
             var selectResults = this.selectionAttributes.Any();
             commandBuilder.AppendLine(
-                    $"INSERT INTO {this.nameQualifier.Escape(this.itemDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.itemDefinition.EntityName)}")
+                    $"INSERT INTO {this.nameQualifier.Escape(this.EntityDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.EntityDefinition.EntityName)}")
                 .AppendLine($"({string.Join(", ", targetColumns)})");
 
             commandBuilder.Append($@"SELECT {string.Join(", ", sourceColumns)}
-FROM jsonb_to_recordset({this.nameQualifier.AddParameterPrefix(this.Parameter)}::jsonb) AS t ({string.Join(", ", jsonProperties)})");
+FROM jsonb_to_recordset({this.nameQualifier.AddParameterPrefix(this.ParameterName)}::jsonb) AS t ({string.Join(", ", jsonProperties)})");
+
+            if (this.insertConflictAction != InsertConflictAction.RaiseConstraintViolation)
+            {
+                switch (this.insertConflictAction)
+                {
+                    case InsertConflictAction.DoNothing:
+                        commandBuilder.AppendLine();
+                        commandBuilder.Append("ON CONFLICT DO NOTHING");
+                        break;
+                    case InsertConflictAction.Update:
+                        var conflictColumnHints = this.constraintHintExpressions.Select(this.EntityDefinition.Find)
+                            .Select(definition => this.nameQualifier.Escape(definition.PhysicalName))
+                            .ToList();
+
+                        var primaryKeyColumns =
+                            this.EntityDefinition.PrimaryKeyAttributes.Select(definition => this.nameQualifier.Escape(definition.PhysicalName));
+
+                        var excludedColumns = this.updateColumnExpressions.Select(this.EntityDefinition.Find)
+                            .Select(x => $"{this.nameQualifier.Escape(x.PhysicalName)} = EXCLUDED.{this.nameQualifier.Escape(x.PhysicalName)}")
+                            .ToList();
+
+                        ////var setColumnClauses = 
+                            ////this.EntityDefinition.DirectAttributes.Where(definition => definition.IsIdentityColumn)
+                            ////    .Select(id => $"{this.nameQualifier.Escape(id.PhysicalName)} = DEFAULT")
+                            ////    .Union(targetColumns.Select((t, i) => $"{t} = {excludedColumns[i]}")).ToList();
+
+                        commandBuilder.AppendLine()
+                            .AppendLine($"ON CONFLICT ({string.Join(", ", conflictColumnHints.Any() ? conflictColumnHints : primaryKeyColumns)})")
+                            .Append($"DO UPDATE SET {string.Join(", ", excludedColumns)}");
+
+                        break;
+                }
+            }
 
             if (selectResults)
             {

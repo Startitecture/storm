@@ -9,7 +9,6 @@ namespace Startitecture.Orm.SqlClient
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -17,20 +16,18 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
-    using Startitecture.Resources;
 
     /// <summary>
-    /// The structured merge command.
+    /// A MERGE command that uses a table-valued parameter (TVP) to merge multiple rows of data.
     /// </summary>
-    /// <typeparam name="TStructure">
-    /// The type of structure to use as the source of the merge.
+    /// <typeparam name="T">
+    /// The type of table to use as the source of the merge.
     /// </typeparam>
-    public class TableValuedMerge<TStructure> : StructuredCommand<TStructure>
+    public class TableValuedMerge<T> : TableCommand<T>
     {
         /// <summary>
         /// The direct attributes.
@@ -60,12 +57,12 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// The delete constraints.
         /// </summary>
-        private readonly List<Expression<Func<TStructure, object>>> deleteConstraints = new List<Expression<Func<TStructure, object>>>();
+        private readonly List<LambdaExpression> deleteConstraints = new List<LambdaExpression>();
 
         /// <summary>
         /// The explicit relation set.
         /// </summary>
-        private readonly EntityRelationSet<TStructure> explicitRelationSet = new EntityRelationSet<TStructure>();
+        private readonly EntityRelationSet<T> explicitRelationSet = new EntityRelationSet<T>();
 
         /// <summary>
         /// The delete unmatched in source.
@@ -73,83 +70,58 @@ namespace Startitecture.Orm.SqlClient
         private bool deleteUnmatchedInSource;
 
         /// <summary>
-        /// The entity definition.
+        /// Initializes a new instance of the <see cref="TableValuedMerge{T}"/> class.
         /// </summary>
-        private IEntityDefinition itemDefinition;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TableValuedMerge{TStructure}"/> class.
-        /// </summary>
-        /// <param name="structuredCommandProvider">
-        /// The structured command provider.
+        /// <param name="tableCommandProvider">
+        /// The table command provider.
         /// </param>
-        public TableValuedMerge([NotNull] IStructuredCommandProvider structuredCommandProvider)
-            : base(structuredCommandProvider)
+        public TableValuedMerge([NotNull] ITableCommandProvider tableCommandProvider)
+            : base(tableCommandProvider)
         {
-            this.StructureTypeName = GetTableTypeAttribute().TypeName;
+            this.directAttributes.AddRange(this.EntityDefinition.DirectAttributes);
+            this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TableValuedMerge{TStructure}"/> class.
+        /// Initializes a new instance of the <see cref="TableValuedMerge{T}"/> class.
         /// </summary>
-        /// <param name="structuredCommandProvider">
-        /// The structured command provider.
+        /// <param name="tableCommandProvider">
+        /// The table command provider.
         /// </param>
         /// <param name="databaseTransaction">
         /// The database transaction.
         /// </param>
-        public TableValuedMerge([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
-            : base(structuredCommandProvider, databaseTransaction)
+        public TableValuedMerge([NotNull] ITableCommandProvider tableCommandProvider, IDbTransaction databaseTransaction)
+            : base(tableCommandProvider, databaseTransaction)
         {
-            this.StructureTypeName = GetTableTypeAttribute().TypeName;
+            this.directAttributes.AddRange(this.EntityDefinition.DirectAttributes);
+            this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
         }
-
-        /// <inheritdoc />
-        public override string StructureTypeName { get; }
 
         /// <inheritdoc />
         public override string CommandText => this.CompileCommandText();
 
         /// <summary>
-        /// Merges a structured table value into the specified data item.
+        /// Merges a table table value into the specified data item.
         /// </summary>
-        /// <param name="mergeItems">
-        /// The entities to merge.
-        /// </param>
         /// <param name="mergeMatchExpressions">
         /// The merge match expressions to match columns on.
         /// </param>
-        /// <typeparam name="TEntity">
-        /// The type of the entity to merge into.
-        /// </typeparam>
         /// <returns>
         /// The current <see cref="TableValuedMerge{TStructure}"/>.
         /// </returns>
-        public TableValuedMerge<TStructure> MergeInto<TEntity>(
-            [NotNull] IEnumerable<TStructure> mergeItems,
-            [NotNull] params Expression<Func<TEntity, object>>[] mergeMatchExpressions)
+        public TableValuedMerge<T> MergeInto([NotNull] params Expression<Func<T, object>>[] mergeMatchExpressions)
         {
-            if (mergeItems == null)
-            {
-                throw new ArgumentNullException(nameof(mergeItems));
-            }
-
             if (mergeMatchExpressions == null)
             {
                 throw new ArgumentNullException(nameof(mergeMatchExpressions));
             }
 
-            this.Items.Clear();
-            this.Items.AddRange(mergeItems);
-            this.itemDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TEntity>();
-            this.directAttributes.AddRange(this.itemDefinition.DirectAttributes);
-            this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
-
             // Use the expressions provided if any.
             this.mergeMatchAttributes.AddRange(
                 mergeMatchExpressions.Any()
-                    ? mergeMatchExpressions.Select(this.itemDefinition.Find)
-                    : this.itemDefinition.PrimaryKeyAttributes);
+                    ? mergeMatchExpressions.Select(this.EntityDefinition.Find)
+                    : this.EntityDefinition.PrimaryKeyAttributes);
 
             return this;
         }
@@ -157,16 +129,19 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Specifies the columns to select into the table.
         /// </summary>
+        /// <typeparam name="TStructure">
+        /// The type of structure that the source items will be provided in.
+        /// </typeparam>
         /// <param name="fromColumns">
         /// The columns to select into the table. These must be the same number of columns as target columns..
         /// </param>
         /// <returns>
         /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="fromColumns"/> is null.
         /// </exception>
-        public TableValuedMerge<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
+        public TableValuedMerge<T> From<TStructure>([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
         {
             if (fromColumns == null)
             {
@@ -187,18 +162,18 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="targetExpression">
         /// An expression that selects the matching key on the target table.
         /// </param>
-        /// <typeparam name="TDataItem">
-        /// The type of entity representing the target table of the merge.
+        /// <typeparam name="TItem">
+        /// The type of structure that the source items will be provided in.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="TableValuedMerge{TStructure}"/>.
+        /// The current <see cref="TableValuedMerge{T}"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="sourceExpression"/> or <paramref name="targetExpression"/> is null.
         /// </exception>
-        public TableValuedMerge<TStructure> On<TDataItem>(
-            [NotNull] Expression<Func<TStructure, object>> sourceExpression,
-            [NotNull] Expression<Func<TDataItem, object>> targetExpression)
+        public TableValuedMerge<T> On<TItem>(
+            [NotNull] Expression<Func<TItem, object>> sourceExpression,
+            [NotNull] Expression<Func<T, object>> targetExpression)
         {
             if (sourceExpression == null)
             {
@@ -210,20 +185,23 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(targetExpression));
             }
 
-            this.explicitRelationSet.InnerJoin<TDataItem>(sourceExpression, targetExpression);
+            this.explicitRelationSet.InnerJoin(sourceExpression, targetExpression);
             return this;
         }
 
         /// <summary>
         /// Deletes entities that are unmatched in the source. Use with caution.
         /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of the table valued parameter.
+        /// </typeparam>
         /// <param name="constraints">
         /// The delete constraints to filter which rows to delete.
         /// </param>
         /// <returns>
-        /// The current <see cref="TableValuedMerge{TStructure}"/>.
+        /// The current <see cref="TableValuedMerge{T}"/>.
         /// </returns>
-        public TableValuedMerge<TStructure> DeleteUnmatchedInSource([NotNull] params Expression<Func<TStructure, object>>[] constraints)
+        public TableValuedMerge<T> DeleteUnmatchedInSource<TItem>([NotNull] params Expression<Func<TItem, object>>[] constraints)
         {
             if (constraints == null)
             {
@@ -245,43 +223,17 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The current <see cref="TableValuedMerge{TStructure}"/>.
         /// </returns>
-        public TableValuedMerge<TStructure> SelectFromInserted([NotNull] params Expression<Func<TStructure, object>>[] matchKeys)
+        public TableValuedMerge<T> SelectFromInserted([NotNull] params Expression<Func<T, object>>[] matchKeys)
         {
             if (matchKeys == null)
             {
                 throw new ArgumentNullException(nameof(matchKeys));
             }
 
-            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
-            this.selectionMatchAttributes.AddRange(matchKeys.Select(structureDefinition.Find));
+            ////var structureDefinition = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
+            this.selectionMatchAttributes.Clear();
+            this.selectionMatchAttributes.AddRange(matchKeys.Select(this.EntityDefinition.Find));
             return this;
-        }
-
-        /// <summary>
-        /// Gets the table type attribute for the current command.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="TableTypeAttribute"/> for the current command.
-        /// </returns>
-        /// <exception cref="OperationException">
-        /// <typeparamref name="TStructure"/> is not decorated with a <see cref="TableTypeAttribute"/>
-        /// </exception>
-        private static TableTypeAttribute GetTableTypeAttribute()
-        {
-            var tableTypeAttribute = typeof(TStructure).GetCustomAttributes<TableTypeAttribute>().FirstOrDefault();
-
-            if (tableTypeAttribute != null)
-            {
-                return tableTypeAttribute;
-            }
-
-            var message = string.Format(
-                CultureInfo.CurrentCulture,
-                ErrorMessages.AttributeRequiredForType,
-                typeof(TStructure),
-                nameof(TableTypeAttribute));
-
-            throw new OperationException(typeof(TStructure), message);
         }
 
         /// <summary>
@@ -292,15 +244,15 @@ namespace Startitecture.Orm.SqlClient
         /// </returns>
         private string CompileCommandText()
         {
-            var qualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
-            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
-            var allAttributes = structureDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
+            var qualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            ////var structureDefinition = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
+            var allAttributes = this.ItemDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
             // If there's an auto number primary key, then don't try to insert it. Only use the updateable attributes.
             var targetColumns = this.insertAttributes.OrderBy(x => x.Ordinal).Select(x => x.PhysicalName);
 
             var sourceAttributes = this.fromColumnExpressions.Any()
-                                       ? this.fromColumnExpressions.Select(structureDefinition.Find)
+                                       ? this.fromColumnExpressions.Select(this.ItemDefinition.Find)
                                        : (from tvpAttribute in allAttributes
                                           join insertAttribute in this.insertAttributes on tvpAttribute.ResolvedLocation equals insertAttribute
                                               .ResolvedLocation
@@ -313,8 +265,8 @@ namespace Startitecture.Orm.SqlClient
                                     ? (from r in this.explicitRelationSet.Relations
                                        select new
                                                   {
-                                                      TargetKey = this.itemDefinition.Find(r.RelationExpression),
-                                                      SourceKey = structureDefinition.Find(r.SourceExpression)
+                                                      TargetKey = this.EntityDefinition.Find(r.RelationExpression),
+                                                      SourceKey = this.ItemDefinition.Find(r.SourceExpression)
                                                   }).ToList()
                                     : (from key in this.mergeMatchAttributes
                                        join fk in allAttributes on key.ResolvedLocation equals fk.ResolvedLocation
@@ -330,7 +282,7 @@ namespace Startitecture.Orm.SqlClient
                      + $"{qualifier.Escape("Source")}.{qualifier.Escape(x.SourceKey.PropertyName)}");
 
             // If all elements are part of the match attributes then this will end up blank.
-            var updateAttributes = this.itemDefinition.UpdateableAttributes; 
+            var updateAttributes = this.EntityDefinition.UpdateableAttributes; 
 
             var updateClauses = from targetColumn in updateAttributes
                                 join sourceColumn in allAttributes on targetColumn.ResolvedLocation equals sourceColumn.ResolvedLocation
@@ -341,10 +293,11 @@ namespace Startitecture.Orm.SqlClient
                 updateClauses.Distinct()
                     .Select(x => $"{qualifier.Escape(x.TargetColumn)} = {qualifier.Escape("Source")}.{qualifier.Escape(x.SourceColumn)}"));
 
-            var mergeStatementBuilder = new StringBuilder().AppendLine($"DECLARE @inserted {this.StructureTypeName};")
+            var tableTypeName = this.ItemType.GetCustomAttribute<TableTypeAttribute>()?.TypeName ?? this.ItemType?.Name;
+            var mergeStatementBuilder = new StringBuilder().AppendLine($"DECLARE {qualifier.AddParameterPrefix("inserted")} {tableTypeName};")
                 .AppendLine(
-                    $"MERGE {qualifier.Escape(this.itemDefinition.EntityContainer)}.{qualifier.Escape(this.itemDefinition.EntityName)} AS {qualifier.Escape("Target")}")
-                .AppendLine($"USING @{this.Parameter} AS {qualifier.Escape("Source")}")
+                    $"MERGE {qualifier.Escape(this.EntityDefinition.EntityContainer)}.{qualifier.Escape(this.EntityDefinition.EntityName)} AS {qualifier.Escape("Target")}")
+                .AppendLine($"USING {qualifier.AddParameterPrefix(this.ParameterName)} AS {qualifier.Escape("Source")}")
                 .AppendLine($"ON ({string.Join(" AND ", mergeMatchClauses)})")
                 .AppendLine("WHEN MATCHED THEN")
                 .AppendLine($"UPDATE SET {updateClause}")
@@ -358,13 +311,14 @@ namespace Startitecture.Orm.SqlClient
                 var deleteFilterClauses = this.deleteConstraints.Select(
                         x =>
                             {
-                                var sourceAttribute = structureDefinition.Find(x);
+                                var sourceAttribute = this.ItemDefinition.Find(x);
                                 var tableReferenceName = sourceAttribute.PropertyName;
-                                var itemReferenceName = this.itemDefinition.DirectAttributes
+                                var itemReferenceName = this.EntityDefinition.DirectAttributes
                                     .FirstOrDefault(a => a.PhysicalName == sourceAttribute.PhysicalName)
                                     .PhysicalName;
 
-                                return $"AND {qualifier.Escape("Target")}.{itemReferenceName} IN (SELECT {qualifier.Escape(tableReferenceName)} FROM @{this.Parameter})";
+                                return
+                                    $"AND {qualifier.Escape("Target")}.{itemReferenceName} IN (SELECT {qualifier.Escape(tableReferenceName)} FROM {qualifier.AddParameterPrefix(this.ParameterName)})";
                             })
                     .ToList();
 
@@ -412,10 +366,10 @@ namespace Startitecture.Orm.SqlClient
                         x => $"i.{qualifier.Escape(x.SourceKey.PropertyName)} = tvp.{qualifier.Escape(x.SourceKey.PropertyName)}");
 
                 mergeStatementBuilder.AppendLine($"OUTPUT {string.Join(", ", outputColumns)}")
-                    .AppendLine($"INTO @inserted ({string.Join(", ", insertedColumns)});")
+                    .AppendLine($"INTO {qualifier.AddParameterPrefix("inserted")} ({string.Join(", ", insertedColumns)});")
                     .AppendLine($"SELECT {string.Join(", ", selectedColumns)}")
                     .AppendLine("FROM @inserted AS i")
-                    .AppendLine($"INNER JOIN @{this.Parameter} AS tvp")
+                    .AppendLine($"INNER JOIN {qualifier.AddParameterPrefix(this.ParameterName)} AS tvp")
                     .AppendLine($"ON {string.Join(" AND ", selectionJoinMatchColumns)};");
             }
             else

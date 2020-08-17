@@ -45,12 +45,12 @@ namespace Startitecture.Orm.Testing.Moq
         /// The name qualifier.
         /// </param>
         /// <typeparam name="T">
-        /// The type of item in the list to create an <see cref="IStructuredCommandProvider"/> mock for.
+        /// The type of item in the list to create an <see cref="ITableCommandProvider"/> mock for.
         /// </typeparam>
         /// <returns>
         /// The <see cref="Mock"/>.
         /// </returns>
-        public static Mock<IStructuredCommandProvider> MockCommandProvider<T>(
+        public static Mock<ITableCommandProvider> MockCommandProvider<T>(
             [NotNull] this IReadOnlyCollection<T> items,
             [NotNull] IEntityDefinitionProvider definitionProvider,
             [NotNull] INameQualifier nameQualifier)
@@ -78,7 +78,7 @@ namespace Startitecture.Orm.Testing.Moq
             var command = new Mock<IDbCommand>();
             command.Setup(dbCommand => dbCommand.ExecuteReader()).Returns(reader.Object);
 
-            var commandProvider = new Mock<IStructuredCommandProvider>();
+            var commandProvider = new Mock<ITableCommandProvider>();
             var databaseContext = new Mock<IDatabaseContext>();
             var repositoryAdapter = new Mock<IRepositoryAdapter>();
             repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(nameQualifier);
@@ -86,11 +86,11 @@ namespace Startitecture.Orm.Testing.Moq
             databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
             commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
             ////commandProvider
-            ////    .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
+            ////    .Setup(provider => provider.CreateCommand(It.IsAny<ITableCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
             ////    .Returns(command.Object);
 
             commandProvider
-                .Setup(provider => provider.CreateCommand(It.IsAny<IStructuredCommand>(), It.IsAny<IEnumerable<T>>(), It.IsAny<IDbTransaction>()))
+                .Setup(provider => provider.CreateCommand(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<T>>(), It.IsAny<IDbTransaction>()))
                 .Returns(command.Object);
 
             return commandProvider;

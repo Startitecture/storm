@@ -25,8 +25,33 @@ namespace Startitecture.Orm.PostgreSql
         /// <summary>
         /// The mappers.
         /// </summary>
-        private static readonly Dictionary<Tuple<Type, Type>, IValueMapper> Mappers =
-            new Dictionary<Tuple<Type, Type>, IValueMapper> { { new Tuple<Type, Type>(typeof(DateTime), typeof(DateTimeOffset)), new DateTimeMapper() } };
+        private static readonly Dictionary<Tuple<Type, Type>, IValueMapper> Mappers = new Dictionary<Tuple<Type, Type>, IValueMapper>
+                                                                                          {
+                                                                                              {
+                                                                                                  new Tuple<Type, Type>(
+                                                                                                      typeof(DateTime),
+                                                                                                      typeof(DateTimeOffset)),
+                                                                                                  new DateTimeMapper()
+                                                                                              },
+                                                                                              {
+                                                                                                  new Tuple<Type, Type>(
+                                                                                                      typeof(DateTime?),
+                                                                                                      typeof(DateTimeOffset)),
+                                                                                                  new DateTimeMapper()
+                                                                                              },
+                                                                                              {
+                                                                                                  new Tuple<Type, Type>(
+                                                                                                      typeof(DateTime),
+                                                                                                      typeof(DateTimeOffset?)),
+                                                                                                  new DateTimeMapper()
+                                                                                              },
+                                                                                              {
+                                                                                                  new Tuple<Type, Type>(
+                                                                                                      typeof(DateTime?),
+                                                                                                      typeof(DateTimeOffset?)),
+                                                                                                  new DateTimeMapper()
+                                                                                              },
+                                                                                          };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlAdapter"/> class.

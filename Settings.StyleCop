@@ -11,6 +11,7 @@
     <CollectionProperty Name="RecognizedWords">
       <Value>Postgre</Value>
       <Value>Sql</Value>
+      <Value>Upsert</Value>
     </CollectionProperty>
   </GlobalSettings>
 </StyleCopSettings>

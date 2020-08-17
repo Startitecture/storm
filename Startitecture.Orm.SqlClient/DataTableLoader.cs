@@ -1,10 +1,13 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DataTableLoader.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Loads the contents of a list into a DataTable.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Common
+namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
@@ -17,7 +20,7 @@ namespace Startitecture.Orm.Common
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// A base class for data table loaders.
+    /// Loads the contents of a list into a <see cref="System.Data.DataTable"/>.
     /// </summary>
     /// <typeparam name="T">
     /// The type of data to load.

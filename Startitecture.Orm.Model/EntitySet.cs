@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntitySet.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Specifies a set of entities in a repository.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -1040,7 +1043,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueFilter"/> is null.
         /// </exception>
-        private EntitySet<T> AddFilter([NotNull] ValueFilter valueFilter)
+        protected EntitySet<T> AddFilter([NotNull] ValueFilter valueFilter)
         {
             if (valueFilter == null)
             {

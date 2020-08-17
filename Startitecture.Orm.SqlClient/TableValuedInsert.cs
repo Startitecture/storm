@@ -9,7 +9,6 @@ namespace Startitecture.Orm.SqlClient
     using System;
     using System.Collections.Generic;
     using System.Data;
-    using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -17,20 +16,18 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
-    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
-    using Startitecture.Resources;
 
     /// <summary>
     /// The structured insert command.
     /// </summary>
-    /// <typeparam name="TStructure">
+    /// <typeparam name="T">
     /// The type of structure that is the source of the command data.
     /// </typeparam>
-    public class TableValuedInsert<TStructure> : StructuredCommand<TStructure>
+    public class TableValuedInsert<T> : TableCommand<T>
     {
         /// <summary>
         /// The command text.
@@ -58,43 +55,33 @@ namespace Startitecture.Orm.SqlClient
         private readonly List<LambdaExpression> fromColumnExpressions = new List<LambdaExpression>();
 
         /// <summary>
-        /// The entity definition.
+        /// Initializes a new instance of the <see cref="TableValuedInsert{T}"/> class.
         /// </summary>
-        private IEntityDefinition itemDefinition;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TableValuedInsert{TStructure}"/> class.
-        /// </summary>
-        /// <param name="structuredCommandProvider">
+        /// <param name="tableCommandProvider">
         /// The structured command provider.
         /// </param>
-        public TableValuedInsert([NotNull] IStructuredCommandProvider structuredCommandProvider)
-            : base(structuredCommandProvider)
+        public TableValuedInsert([NotNull] ITableCommandProvider tableCommandProvider)
+            : base(tableCommandProvider)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
-            this.StructureTypeName = GetTableTypeAttribute().TypeName;
+            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TableValuedInsert{TStructure}"/> class.
+        /// Initializes a new instance of the <see cref="TableValuedInsert{T}"/> class.
         /// </summary>
-        /// <param name="structuredCommandProvider">
+        /// <param name="tableCommandProvider">
         /// The structured command provider.
         /// </param>
         /// <param name="databaseTransaction">
         /// The database transaction.
         /// </param>
-        public TableValuedInsert([NotNull] IStructuredCommandProvider structuredCommandProvider, IDbTransaction databaseTransaction)
-            : base(structuredCommandProvider, databaseTransaction)
+        public TableValuedInsert([NotNull] ITableCommandProvider tableCommandProvider, IDbTransaction databaseTransaction)
+            : base(tableCommandProvider, databaseTransaction)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
-            this.StructureTypeName = GetTableTypeAttribute().TypeName;
+            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
-
-        /// <inheritdoc />
-        public override string StructureTypeName { get; }
 
         /// <inheritdoc />
         public override string CommandText => this.commandText.Value;
@@ -102,30 +89,19 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Declares the table to insert into.
         /// </summary>
-        /// <param name="insertItems">
-        /// The entities to insert.
-        /// </param>
         /// <param name="targetColumns">
         /// The target columns of the insert table.
         /// </param>
-        /// <typeparam name="TEntity">
-        /// The type of entity to insert the table into.
-        /// </typeparam>
         /// <returns>
         /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        public TableValuedInsert<TStructure> InsertInto<TEntity>(
-            [NotNull] IEnumerable<TStructure> insertItems,
-            params Expression<Func<TEntity, object>>[] targetColumns)
+        public TableValuedInsert<T> InsertInto([NotNull] params Expression<Func<T, object>>[] targetColumns)
         {
-            if (insertItems == null)
+            if (targetColumns == null)
             {
-                throw new ArgumentNullException(nameof(insertItems));
+                throw new ArgumentNullException(nameof(targetColumns));
             }
 
-            this.itemDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TEntity>();
-            this.Items.Clear();
-            this.Items.AddRange(insertItems);
             this.insertColumnExpressions.Clear();
             this.insertColumnExpressions.AddRange(targetColumns);
             return this;
@@ -134,6 +110,9 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Specifies the columns to select into the table.
         /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of items that will be inserted into the table.
+        /// </typeparam>
         /// <param name="fromColumns">
         /// The columns to select into the table. These must be the same number of columns as target columns..
         /// </param>
@@ -143,7 +122,7 @@ namespace Startitecture.Orm.SqlClient
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="fromColumns"/> is null.
         /// </exception>
-        public TableValuedInsert<TStructure> From([NotNull] params Expression<Func<TStructure, object>>[] fromColumns)
+        public TableValuedInsert<T> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] fromColumns)
         {
             if (fromColumns == null)
             {
@@ -164,47 +143,21 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        public TableValuedInsert<TStructure> SelectResults(params Expression<Func<TStructure, object>>[] matchProperties)
+        public TableValuedInsert<T> SelectResults([NotNull] params Expression<Func<T, object>>[] matchProperties)
         {
-            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
-            this.selectionAttributes.Clear();
-            this.selectionAttributes.AddRange(matchProperties.Select(structureDefinition.Find));
-            return this;
-        }
-
-        /// <summary>
-        /// Gets the table type attribute for the current command.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="TableTypeAttribute"/> for the current command.
-        /// </returns>
-        /// <exception cref="OperationException">
-        /// <typeparamref name="TStructure"/> is not decorated with a <see cref="TableTypeAttribute"/>
-        /// </exception>
-        private static TableTypeAttribute GetTableTypeAttribute()
-        {
-            var tableTypeAttribute = typeof(TStructure).GetCustomAttributes<TableTypeAttribute>().FirstOrDefault();
-
-            if (tableTypeAttribute != null)
+            if (matchProperties == null)
             {
-                return tableTypeAttribute;
+                throw new ArgumentNullException(nameof(matchProperties));
             }
 
-            var message = string.Format(
-                CultureInfo.CurrentCulture,
-                ErrorMessages.AttributeRequiredForType,
-                typeof(TStructure),
-                nameof(TableTypeAttribute));
-
-            throw new OperationException(typeof(TStructure), message);
+            this.selectionAttributes.Clear();
+            this.selectionAttributes.AddRange(matchProperties.Select(this.EntityDefinition.Find));
+            return this;
         }
 
         /// <summary>
         /// Creates the output for an output table.
         /// </summary>
-        /// <param name="structureDefinition">
-        /// The structure definition of the table valued parameter.
-        /// </param>
         /// <param name="directAttributes">
         /// The direct attributes.
         /// </param>
@@ -215,12 +168,11 @@ namespace Startitecture.Orm.SqlClient
         /// A value indicating whether to terminate the statement.
         /// </param>
         private void CreateOutput(
-            IEntityDefinition structureDefinition,
             IReadOnlyCollection<EntityAttributeDefinition> directAttributes,
             StringBuilder commandBuilder,
             bool terminateStatement)
         {
-            var outputAttributes = from tvpAttribute in structureDefinition.AllAttributes
+            var outputAttributes = from tvpAttribute in this.ItemDefinition.AllAttributes
                                    join attribute in directAttributes on tvpAttribute.ResolvedLocation equals attribute.ResolvedLocation
                                    orderby tvpAttribute.Ordinal
                                    select tvpAttribute;
@@ -242,17 +194,16 @@ namespace Startitecture.Orm.SqlClient
         /// </returns>
         private string CompileCommandText()
         {
-            var structureDefinition = this.StructuredCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TStructure>();
-            var directAttributes = this.itemDefinition.DirectAttributes.ToList();
-            var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.itemDefinition.Find) :
-                                    this.itemDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.itemDefinition.UpdateableAttributes :
+            var directAttributes = this.EntityDefinition.DirectAttributes.ToList();
+            var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.EntityDefinition.Find) :
+                                    this.EntityDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.EntityDefinition.UpdateableAttributes :
                                     directAttributes).ToList();
 
             var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PhysicalName));
 
             var sourceAttributes = (this.fromColumnExpressions.Any()
-                                        ? this.fromColumnExpressions.Select(structureDefinition.Find)
-                                        : from tvpAttribute in structureDefinition.AllAttributes
+                                        ? this.fromColumnExpressions.Select(this.ItemDefinition.Find)
+                                        : from tvpAttribute in this.ItemDefinition.AllAttributes
                                           join insertAttribute in insertAttributes on tvpAttribute.PhysicalName equals insertAttribute.PhysicalName
                                           orderby tvpAttribute.Ordinal
                                           select tvpAttribute).ToList();
@@ -260,29 +211,29 @@ namespace Startitecture.Orm.SqlClient
             var sourceColumns = sourceAttributes.Select(x => this.nameQualifier.Escape(x.PropertyName));
 
             var commandBuilder = new StringBuilder();
-
             var selectResults = this.selectionAttributes.Any();
+            var tableTypeName = this.ItemType.GetCustomAttribute<TableTypeAttribute>()?.TypeName ?? this.ItemType.Name;
 
             if (selectResults)
             {
-                commandBuilder.AppendLine($"DECLARE @inserted {this.StructureTypeName};");
+                commandBuilder.AppendLine($"DECLARE @inserted {tableTypeName};");
             }
 
             commandBuilder.AppendLine(
-                    $"INSERT INTO {this.nameQualifier.Escape(this.itemDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.itemDefinition.EntityName)}")
+                    $"INSERT INTO {this.nameQualifier.Escape(this.EntityDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.EntityDefinition.EntityName)}")
                 .AppendLine($"({string.Join(", ", targetColumns)})");
 
             if (selectResults)
             {
                 // In an INSERT we do not terminate this statement with a semi-colon. However in a MERGE we would do that.
-                this.CreateOutput(structureDefinition, directAttributes, commandBuilder, false);
+                this.CreateOutput(directAttributes, commandBuilder, false);
             }
 
-            commandBuilder.AppendLine($"SELECT {string.Join(", ", sourceColumns)} FROM @{this.Parameter} AS tvp;");
+            commandBuilder.AppendLine($"SELECT {string.Join(", ", sourceColumns)} FROM @{this.ParameterName} AS tvp;");
 
             if (selectResults)
             {
-                this.SelectOutput(structureDefinition, commandBuilder);
+                this.SelectOutput(commandBuilder);
             }
 
             var compileCommandText = commandBuilder.ToString();
@@ -292,20 +243,17 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Selects the output from an inserted table variable.
         /// </summary>
-        /// <param name="structureDefinition">
-        /// The structure definition of the table valued parameter.
-        /// </param>
         /// <param name="commandBuilder">
         /// The command builder to update.
         /// </param>
-        private void SelectOutput(IEntityDefinition structureDefinition, StringBuilder commandBuilder)
+        private void SelectOutput(StringBuilder commandBuilder)
         {
-            var keyAttributes = (from key in this.itemDefinition.AllAttributes.Where(x => x.IsPrimaryKey)
-                                 join fk in structureDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
+            var keyAttributes = (from key in this.EntityDefinition.AllAttributes.Where(x => x.IsPrimaryKey)
+                                 join fk in this.ItemDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
                                  select new { TargetKey = key, SourceKey = fk }).ToList();
 
             var matchAttributes = (from key in this.selectionAttributes
-                                   join fk in structureDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
+                                   join fk in this.ItemDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
                                    select new { TargetKey = key, SourceKey = fk }).ToList();
 
             var selectionJoinMatchColumns =
@@ -318,7 +266,7 @@ namespace Startitecture.Orm.SqlClient
                 keyAttributes.Select(x => new { Column = $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}", Attribute = x.SourceKey }).ToList();
 
             // Everything for selecting from the TVP uses property name in order to match UDTT columns.
-            var nonKeyAttributes = structureDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute)).Select(
+            var nonKeyAttributes = this.ItemDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute)).Select(
                 x => new
                          {
                              Column = $"tvp.{this.nameQualifier.Escape(x.PropertyName)}",
@@ -329,7 +277,7 @@ namespace Startitecture.Orm.SqlClient
 
             commandBuilder.AppendLine($"SELECT {string.Join(", ", selectedColumns)}")
                 .AppendLine("FROM @inserted AS i")
-                .AppendLine($"INNER JOIN @{this.Parameter} AS tvp")
+                .AppendLine($"INNER JOIN @{this.ParameterName} AS tvp")
                 .AppendLine($"ON {string.Join(" AND ", selectionJoinMatchColumns)};");
         }
     }

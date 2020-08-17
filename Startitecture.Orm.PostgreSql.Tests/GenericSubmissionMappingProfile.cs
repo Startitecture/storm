@@ -51,6 +51,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
             this.CreateMap<FieldValueElementTableTypeRow, FieldValueElement>()
                 .ForMember(element => element.FieldValue, expression => expression.Ignore());
+
+            this.CreateMap<FieldValueElementRow, FieldValueElementTableTypeRow>();
         }
     }
 }

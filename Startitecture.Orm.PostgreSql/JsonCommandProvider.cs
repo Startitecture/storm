@@ -22,7 +22,7 @@ namespace Startitecture.Orm.PostgreSql
     /// <summary>
     /// The json command provider.
     /// </summary>
-    public class JsonCommandProvider : IStructuredCommandProvider
+    public class JsonCommandProvider : ITableCommandProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonCommandProvider"/> class.
@@ -42,12 +42,12 @@ namespace Startitecture.Orm.PostgreSql
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
             "CA2100:Review SQL queries for security vulnerabilities",
-            Justification = "structuredCommand.CommandText is built with parameterized input.")]
-        public IDbCommand CreateCommand<T>(IStructuredCommand structuredCommand, IEnumerable<T> items, IDbTransaction transaction)
+            Justification = "tableCommand.CommandText is built with parameterized input.")]
+        public IDbCommand CreateCommand<T>(ITableCommand tableCommand, IEnumerable<T> items, IDbTransaction transaction)
         {
-            if (structuredCommand == null)
+            if (tableCommand == null)
             {
-                throw new ArgumentNullException(nameof(structuredCommand));
+                throw new ArgumentNullException(nameof(tableCommand));
             }
 
             if (items == null)
@@ -61,12 +61,12 @@ namespace Startitecture.Orm.PostgreSql
             }
 
             var npgsqlCommand = !(transaction is NpgsqlTransaction sqlTransaction)
-                                    ? new NpgsqlCommand(structuredCommand.CommandText, sqlConnection)
-                                    : new NpgsqlCommand(structuredCommand.CommandText, sqlConnection, sqlTransaction);
+                                    ? new NpgsqlCommand(tableCommand.CommandText, sqlConnection)
+                                    : new NpgsqlCommand(tableCommand.CommandText, sqlConnection, sqlTransaction);
 
             try
             {
-                var parameter = new NpgsqlParameter(structuredCommand.Parameter, NpgsqlDbType.Jsonb)
+                var parameter = new NpgsqlParameter(tableCommand.ParameterName, NpgsqlDbType.Jsonb)
                                     {
                                         Value = items
                                     };

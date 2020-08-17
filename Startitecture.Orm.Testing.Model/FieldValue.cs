@@ -213,7 +213,10 @@ namespace Startitecture.Orm.Testing.Model
             }
 
             this.LastModifiedBy = identity;
-            this.LastModifiedTime = DateTimeOffset.Now;
+
+            // Reducing resolution for the purposes of PostgreSQL compatibility.
+            var now = DateTimeOffset.Now;
+            this.LastModifiedTime = new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, now.Millisecond, now.Offset);
             return this;
         }
 

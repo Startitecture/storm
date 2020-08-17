@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="GenericSubmission.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The generic submission.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Model
@@ -25,7 +28,7 @@ namespace Startitecture.Orm.Testing.Model
             {
                 item => item.Subject,
                 item => item.SubmittedBy,
-                item => item.SubmittedTime,
+                item => item.SubmittedTime, 
                 item => item.SubmissionValues
             };
 
@@ -214,7 +217,9 @@ namespace Startitecture.Orm.Testing.Model
         /// </summary>
         public void Submit()
         {
-            this.SubmittedTime = DateTimeOffset.Now;
+            // Reducing resolution for the purposes of PostgreSQL compatibility.
+            var now = DateTimeOffset.Now;
+            this.SubmittedTime = new DateTimeOffset(now.Year, now.Month, now.Day, now.Hour, now.Minute, now.Second, now.Millisecond, now.Offset);
         }
 
         /// <summary>

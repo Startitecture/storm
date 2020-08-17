@@ -41,7 +41,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             this.CreateMap<FieldTableTypeRow, Field>();
 
-            this.CreateMap<FieldValueTableTypeRow, FieldValue>()
+            this.CreateMap<FieldValueRow, FieldValue>()
                 .ForMember(value => value.Field, expression => expression.Ignore())
                 .ForMember(value => value.LastModifiedBy, expression => expression.Ignore());
 
@@ -53,6 +53,8 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             this.CreateMap<FieldValueElementTableTypeRow, FieldValueElement>()
                 .ForMember(element => element.FieldValue, expression => expression.Ignore());
+
+            this.CreateMap<FieldValueElementRow, FieldValueElementTableTypeRow>();
         }
     }
 }

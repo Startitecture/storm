@@ -9,6 +9,7 @@ namespace Startitecture.Orm.SqlClient
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Reflection;
 
     using Common;
 
@@ -18,12 +19,13 @@ namespace Startitecture.Orm.SqlClient
 
     using Microsoft.Data.SqlClient;
 
+    using Startitecture.Orm.Schema;
     using Startitecture.Resources;
 
     /// <summary>
     /// The structured SQL command provider.
     /// </summary>
-    public class TableValuedCommandProvider : IStructuredCommandProvider
+    public class TableValuedCommandProvider : ITableCommandProvider
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="TableValuedCommandProvider"/> class.
@@ -40,12 +42,12 @@ namespace Startitecture.Orm.SqlClient
         public IDatabaseContext DatabaseContext { get; }
 
         /// <summary>
-        /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="structuredCommand"/>.
+        /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="tableCommand"/>.
         /// </summary>
         /// <typeparam name="T">
         /// The type of items in the structured command.
         /// </typeparam>
-        /// <param name="structuredCommand">
+        /// <param name="tableCommand">
         /// The structured command.
         /// </param>
         /// <param name="items">
@@ -63,12 +65,12 @@ namespace Startitecture.Orm.SqlClient
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
             "CA2100:Review SQL queries for security vulnerabilities",
-            Justification = "structuredCommand.CommandText is built with parameterized input.")]
-        public IDbCommand CreateCommand<T>(IStructuredCommand structuredCommand, IEnumerable<T> items, IDbTransaction transaction)
+            Justification = "tableCommand.CommandText is built with parameterized input.")]
+        public IDbCommand CreateCommand<T>(ITableCommand tableCommand, IEnumerable<T> items, IDbTransaction transaction)
         {
-            if (structuredCommand == null)
+            if (tableCommand == null)
             {
-                throw new ArgumentNullException(nameof(structuredCommand));
+                throw new ArgumentNullException(nameof(tableCommand));
             }
 
             if (items == null)
@@ -82,8 +84,8 @@ namespace Startitecture.Orm.SqlClient
             }
 
             var sqlCommand = !(transaction is SqlTransaction sqlTransaction)
-                                 ? new SqlCommand(structuredCommand.CommandText, sqlConnection)
-                                 : new SqlCommand(structuredCommand.CommandText, sqlConnection, sqlTransaction);
+                                 ? new SqlCommand(tableCommand.CommandText, sqlConnection)
+                                 : new SqlCommand(tableCommand.CommandText, sqlConnection, sqlTransaction);
 
             DataTable dataTable = null;
 
@@ -92,11 +94,11 @@ namespace Startitecture.Orm.SqlClient
                 var dataTableLoader = new DataTableLoader<T>(this.DatabaseContext.RepositoryAdapter.DefinitionProvider);
                 dataTable = dataTableLoader.Load(items);
                 var tableParameter = sqlCommand.Parameters.AddWithValue(
-                    $"{this.DatabaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(structuredCommand.Parameter)}",
+                    $"{this.DatabaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(tableCommand.ParameterName)}",
                     dataTable);
 
                 tableParameter.SqlDbType = SqlDbType.Structured;
-                tableParameter.TypeName = structuredCommand.StructureTypeName;
+                tableParameter.TypeName = typeof(T).GetCustomAttribute<TableTypeAttribute>()?.TypeName ?? typeof(T).Name;
             }
             catch
             {
