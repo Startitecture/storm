@@ -463,7 +463,7 @@ namespace Startitecture.Orm.Mapper
         private void AddParam(IDbCommand command, object value)
         {
             // Support passed in parameters
-            var parameterName = command.Parameters.Count.ToString();
+            var parameterName = command.Parameters.Count.ToString(CultureInfo.InvariantCulture);
 
             if (value is IDbDataParameter dataParameter)
             {

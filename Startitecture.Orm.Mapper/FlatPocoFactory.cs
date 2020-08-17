@@ -238,7 +238,7 @@ namespace Startitecture.Orm.Mapper
                     // the same object reference.
                     var attribute = definitions.FirstOrDefault(x => x.ReferenceName == key);
 
-                    if (attribute == EntityAttributeDefinition.Empty)
+                    if (attribute == default)
                     {
                         continue;
                     }

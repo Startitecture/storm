@@ -155,7 +155,7 @@ namespace Startitecture.Orm.PostgreSql
         }
 
         /// <summary>
-        /// Specify the attributes 
+        /// Specify the attributes to update when there is a constraint violation.
         /// </summary>
         /// <param name="constraintHintAttributes">
         /// The constraint hint attributes.

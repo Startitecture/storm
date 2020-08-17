@@ -2,6 +2,9 @@
 // <copyright file="JsonCommandProvider.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The JSON command provider.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.PostgreSql
@@ -20,12 +23,12 @@ namespace Startitecture.Orm.PostgreSql
     using Startitecture.Orm.Common;
 
     /// <summary>
-    /// The json command provider.
+    /// The JSON command provider.
     /// </summary>
     public class JsonCommandProvider : ITableCommandProvider
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonCommandProvider"/> class.
+        /// Initializes a new instance of the <see cref="JsonCommandProvider" /> class.
         /// </summary>
         /// <param name="databaseContext">
         /// The database context.

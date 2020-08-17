@@ -25,11 +25,6 @@ namespace Startitecture.Orm.Model
     public struct EntityAttributeDefinition : IEquatable<EntityAttributeDefinition>, IComparable, IComparable<EntityAttributeDefinition>
     {
         /// <summary>
-        /// Represents an empty entity attribute.
-        /// </summary>
-        public static readonly EntityAttributeDefinition Empty = new EntityAttributeDefinition();
-
-        /// <summary>
         /// The attribute name format.
         /// </summary>
         private const string AttributeNameFormat = "{0}/{1}";

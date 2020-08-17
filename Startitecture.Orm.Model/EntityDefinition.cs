@@ -232,7 +232,7 @@ namespace Startitecture.Orm.Model
         private EntityAttributeDefinition? GetRowIdentity()
         {
             var entityAttributeDefinition = this.directAttributes.Value.FirstOrDefault(x => x.IsDirect && x.IsIdentityColumn);
-            return entityAttributeDefinition == EntityAttributeDefinition.Empty ? default(EntityAttributeDefinition?) : entityAttributeDefinition;
+            return entityAttributeDefinition;
         }
 
         /// <summary>

@@ -73,7 +73,7 @@ namespace Startitecture.Orm.SqlClient
 
             // Capture the primary key type. We'll use this later to change the declared type of the returned ID.
             var primaryKeyAttribute = definition.PrimaryKeyAttributes.FirstOrDefault();
-            var primaryKeyType = primaryKeyAttribute == EntityAttributeDefinition.Empty
+            var primaryKeyType = primaryKeyAttribute == default
                                      ? null
                                      : definition.PrimaryKeyAttributes.First().PropertyInfo.PropertyType;
 
