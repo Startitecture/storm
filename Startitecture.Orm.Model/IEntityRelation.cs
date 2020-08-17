@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IEntityRelation.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Provides an interface for classes that describe a relation between two entities.
@@ -27,9 +27,9 @@ namespace Startitecture.Orm.Model
         LambdaExpression SourceExpression { get; }
 
         /// <summary>
-        /// Gets or sets the source entity alias.
+        /// Gets the source entity alias.
         /// </summary>
-        string SourceEntityAlias { get; set; }
+        string SourceEntityAlias { get; }
 
         /// <summary>
         /// Gets the relation expression.
@@ -37,8 +37,8 @@ namespace Startitecture.Orm.Model
         LambdaExpression RelationExpression { get; }
 
         /// <summary>
-        /// Gets or sets the relation entity alias.
+        /// Gets the relation entity alias.
         /// </summary>
-        string RelationEntityAlias { get; set; }
+        string RelationEntityAlias { get; }
     }
 }

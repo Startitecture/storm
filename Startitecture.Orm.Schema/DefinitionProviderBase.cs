@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DefinitionProviderBase.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The definition provider base class.
@@ -84,9 +84,9 @@ namespace Startitecture.Orm.Schema
 
             var listName = typeof(List<EntityAttributeDefinition>).ToRuntimeName();
             var cacheKey = $"{this.GetType().FullName}:{entityType.FullName}:{listName}";
-            var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, entityType, this.GetRelationAttributes, ItemPolicy);
+            var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, entityType, this.GetAttributeDefinitions, ItemPolicy);
 
-            return result.Item;////.Distinct(Singleton<ReferenceNameComparer>.Instance);
+            return result.Item;
         }
 
         /// <inheritdoc />
@@ -208,7 +208,7 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of attribute references for the <paramref name="entityType"/>.
         /// </returns>
-        protected abstract IEnumerable<AttributeReference> GetAttributes(Type entityType);
+        protected abstract IEnumerable<AttributeReference> GetAttributeReferences(Type entityType);
 
         /// <summary>
         /// Determines whether the property is a key or not.
@@ -231,6 +231,17 @@ namespace Startitecture.Orm.Schema
         /// <c>true</c> if the property is an identity column; otherwise, <c>false</c>.
         /// </returns>
         protected abstract bool IsIdentity(PropertyInfo entityProperty);
+
+        /// <summary>
+        /// Determines whether the property is a computed column or not.
+        /// </summary>
+        /// <param name="entityProperty">
+        /// The property info to evaluate.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the property is a computed column; otherwise, <c>false</c>.
+        /// </returns>
+        protected abstract bool IsComputed(PropertyInfo entityProperty);
 
         /// <summary>
         /// Gets the related entity attribute reference for the specified <paramref name="propertyInfo"/>.
@@ -266,7 +277,7 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items.
         /// </returns>
-        private IEnumerable<EntityAttributeDefinition> GetEntityDefinitions(LinkedList<EntityLocation> entityPath, PropertyInfo entityProperty)
+        private IEnumerable<EntityAttributeDefinition> GetAttributeDefinitions(LinkedList<EntityLocation> entityPath, PropertyInfo entityProperty)
         {
             var entityType = entityProperty.PropertyType;
             var relationReference = new EntityReference
@@ -291,6 +302,7 @@ namespace Startitecture.Orm.Schema
                 var ordinal = this.GetOrdinal(propertyInfo);
                 var isPrimaryKey = this.IsKey(propertyInfo);
                 var isIdentity = this.IsIdentity(propertyInfo);
+                var isComputed = this.IsComputed(propertyInfo);
 
                 var attributeTypes = EntityAttributeTypes.RelatedAttribute;
 
@@ -302,6 +314,11 @@ namespace Startitecture.Orm.Schema
                 if (isIdentity)
                 {
                     attributeTypes |= EntityAttributeTypes.IdentityColumn;
+                }
+
+                if (isComputed)
+                {
+                    attributeTypes |= EntityAttributeTypes.Computed;
                 }
 
                 var entityAttributeDefinition = new EntityAttributeDefinition(
@@ -357,7 +374,7 @@ namespace Startitecture.Orm.Schema
 
                 yield return relationAttribute;
 
-                foreach (var entityAttributeDefinition in this.GetEntityDefinitions(entityPath, propertyInfo))
+                foreach (var entityAttributeDefinition in this.GetAttributeDefinitions(entityPath, propertyInfo))
                 {
                     yield return entityAttributeDefinition;
                 }
@@ -389,7 +406,7 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of <see cref="EntityAttributeDefinition"/> items for the <paramref name="entityType"/>.
         /// </returns>
-        private IEnumerable<EntityAttributeDefinition> GetRelationAttributes(Type entityType)
+        private IEnumerable<EntityAttributeDefinition> GetAttributeDefinitions(Type entityType)
         {
             var entityReference = new EntityReference { EntityType = entityType };
             var entityLocation = this.GetEntityLocation(entityReference);
@@ -397,7 +414,7 @@ namespace Startitecture.Orm.Schema
             var entityPath = new LinkedList<EntityLocation>();
             entityPath.AddLast(entityLocation);
 
-            var attributeReferences = this.GetAttributes(entityType);
+            var attributeReferences = this.GetAttributeReferences(entityType);
 
             foreach (var attributeReference in attributeReferences)
             {
@@ -406,6 +423,7 @@ namespace Startitecture.Orm.Schema
                 var attributeName = physicalName;
                 var isPrimaryKey = this.IsKey(attributeReference.PropertyInfo);
                 var isIdentity = this.IsIdentity(attributeReference.PropertyInfo);
+                var isComputed = this.IsComputed(attributeReference.PropertyInfo);
                 var attributeTypes = EntityAttributeTypes.None;
 
                 if (isPrimaryKey)
@@ -416,6 +434,11 @@ namespace Startitecture.Orm.Schema
                 if (isIdentity)
                 {
                     attributeTypes |= EntityAttributeTypes.IdentityColumn;
+                }
+
+                if (isComputed)
+                {
+                    attributeTypes |= EntityAttributeTypes.Computed;
                 }
 
                 if (attributeReference.IgnoreReference)
@@ -470,7 +493,7 @@ namespace Startitecture.Orm.Schema
 
                     yield return entityAttributeDefinition;
 
-                    foreach (var definition in this.GetEntityDefinitions(entityPath, attributeReference.PropertyInfo))
+                    foreach (var definition in this.GetAttributeDefinitions(entityPath, attributeReference.PropertyInfo))
                     {
                         yield return definition;
                     }

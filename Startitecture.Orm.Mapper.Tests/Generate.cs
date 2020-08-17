@@ -1,17 +1,14 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Generate.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper.Tests
 {
     using System;
-    using System.Collections.Concurrent;
 
-    using Startitecture.Orm.Model;
     using Startitecture.Orm.Testing.Entities;
-    using Startitecture.Orm.Testing.Moq;
 
     /// <summary>
     /// The generate.

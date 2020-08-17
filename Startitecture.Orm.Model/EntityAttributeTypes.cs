@@ -91,5 +91,10 @@ namespace Startitecture.Orm.Model
         /// The attribute is a related attribute explicitly declared on the entity.
         /// </summary>
         ExplicitRelatedAttribute = 128,
+
+        /// <summary>
+        /// The attribute is computed by the database.
+        /// </summary>
+        Computed = 256
     }
 }

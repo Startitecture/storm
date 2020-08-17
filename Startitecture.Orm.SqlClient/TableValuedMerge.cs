@@ -79,7 +79,7 @@ namespace Startitecture.Orm.SqlClient
             : base(tableCommandProvider)
         {
             this.directAttributes.AddRange(this.EntityDefinition.DirectAttributes);
-            this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
+            this.insertAttributes.AddRange(this.EntityDefinition.InsertableAttributes);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Startitecture.Orm.SqlClient
             : base(tableCommandProvider, databaseTransaction)
         {
             this.directAttributes.AddRange(this.EntityDefinition.DirectAttributes);
-            this.insertAttributes.AddRange(this.directAttributes.Where(definition => definition.IsIdentityColumn == false));
+            this.insertAttributes.AddRange(this.EntityDefinition.InsertableAttributes);
         }
 
         /// <inheritdoc />

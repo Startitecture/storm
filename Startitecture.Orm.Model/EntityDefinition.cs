@@ -97,11 +97,11 @@ namespace Startitecture.Orm.Model
 
             // Do not include identity columns.
             this.insertableAttributes = new Lazy<List<EntityAttributeDefinition>>(
-                this.directAttributes.Value.Where(definition => definition.IsIdentityColumn == false).ToList);
+                this.directAttributes.Value.Where(definition => definition.IsIdentityColumn == false && definition.IsComputed == false).ToList);
 
-            // Do not include primary keys. // TODO: Also identify calculated columns.
+            // Do not include primary keys.
             this.updateableAttributes =
-                new Lazy<List<EntityAttributeDefinition>>(this.directAttributes.Value.Except(this.primaryKeyAttributes.Value).ToList);
+                new Lazy<List<EntityAttributeDefinition>>(this.insertableAttributes.Value.Except(this.primaryKeyAttributes.Value).ToList);
 
             this.entityLocation = new Lazy<EntityLocation>(() => definitionProvider.GetEntityLocation(entityReference));
 
@@ -219,7 +219,8 @@ namespace Startitecture.Orm.Model
         /// <inheritdoc />
         public bool IsUpdateable(EntityAttributeDefinition attributeDefinition)
         {
-            return attributeDefinition.IsDirect && attributeDefinition.IsIdentityColumn == false && attributeDefinition.IsPrimaryKey == false;
+            return attributeDefinition.IsDirect && attributeDefinition.IsIdentityColumn == false && attributeDefinition.IsPrimaryKey == false
+                   && attributeDefinition.IsComputed == false;
         }
 
         /// <summary>

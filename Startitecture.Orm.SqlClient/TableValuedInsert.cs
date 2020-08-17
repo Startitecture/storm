@@ -195,9 +195,9 @@ namespace Startitecture.Orm.SqlClient
         private string CompileCommandText()
         {
             var directAttributes = this.EntityDefinition.DirectAttributes.ToList();
-            var insertAttributes = (this.insertColumnExpressions.Any() ? this.insertColumnExpressions.Select(this.EntityDefinition.Find) :
-                                    this.EntityDefinition.DirectAttributes.Any(x => x.IsIdentityColumn) ? this.EntityDefinition.UpdateableAttributes :
-                                    directAttributes).ToList();
+            var insertAttributes = (this.insertColumnExpressions.Any()
+                                        ? this.insertColumnExpressions.Select(this.EntityDefinition.Find)
+                                        : this.EntityDefinition.InsertableAttributes).ToList();
 
             var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PhysicalName));
 

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityAttributeDefinition.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Contains the definition of an entity attribute.
@@ -156,13 +156,13 @@ namespace Startitecture.Orm.Model
             this.IsDirect = this.AttributeTypes.HasFlag(EntityAttributeTypes.DirectAttribute);
             this.IsPrimaryKey = this.AttributeTypes.HasFlag(EntityAttributeTypes.PrimaryKey);
             this.IsIdentityColumn = this.AttributeTypes.HasFlag(EntityAttributeTypes.IdentityColumn);
+            this.IsComputed = this.AttributeTypes.HasFlag(EntityAttributeTypes.Computed);
             this.IsReferencedDirect = this.IsDirect || this.AttributeTypes.HasFlag(EntityAttributeTypes.ExplicitRelatedAttribute);
             this.IsMetadata = this.AttributeTypes.HasFlag(EntityAttributeTypes.Relation)
                               || this.AttributeTypes.HasFlag(EntityAttributeTypes.MappedAttribute);
 
             this.ResolvedLocation = new ResolvedAttributeLocation(this.Entity.Container, this.Entity.Name, this.PhysicalName);
 
-            // TODO: Cache methods/delegates per type/property.
             this.PropertyInfo = propertyInfo;
             var getMethodInfo = propertyInfo.GetGetMethod(true);
             this.GetValueMethod = getMethodInfo;
@@ -265,6 +265,11 @@ namespace Startitecture.Orm.Model
         /// Gets a value indicating whether the attribute is an identity column.
         /// </summary>
         public bool IsIdentityColumn { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the attribute is computed.
+        /// </summary>
+        public bool IsComputed { get; }
 
         /// <summary>
         /// Gets a value indicating whether the attribute is a direct reference (property) on the POCO.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DataAnnotationsDefinitionProvider.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The data annotations definition provider.
@@ -182,13 +182,19 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <inheritdoc />
+        protected override bool IsComputed(PropertyInfo entityProperty)
+        {
+            return entityProperty.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption == DatabaseGeneratedOption.Computed;
+        }
+
+        /// <inheritdoc />
         protected override int GetOrdinal(PropertyInfo entityProperty)
         {
             return entityProperty.GetCustomAttribute<ColumnAttribute>()?.Order ?? int.MaxValue;
         }
 
         /// <inheritdoc />
-        protected override IEnumerable<AttributeReference> GetAttributes([NotNull] Type entityType)
+        protected override IEnumerable<AttributeReference> GetAttributeReferences([NotNull] Type entityType)
         {
             if (entityType == null)
             {

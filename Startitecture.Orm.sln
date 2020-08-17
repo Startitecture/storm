@@ -64,7 +64,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "storm", "storm\storm.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.PostgreSql", "Startitecture.Orm.PostgreSql\Startitecture.Orm.PostgreSql.csproj", "{8C1B8DEF-53C7-4DEC-80A4-CAA89B2F2B2C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.PostgreSql.Tests", "Startitecture.Orm.PostgreSql.Tests\Startitecture.Orm.PostgreSql.Tests.csproj", "{225431BF-846F-4036-8995-27E947EB1D58}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.PostgreSql.Tests", "Startitecture.Orm.PostgreSql.Tests\Startitecture.Orm.PostgreSql.Tests.csproj", "{225431BF-846F-4036-8995-27E947EB1D58}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Schema.Tests", "Startitecture.Orm.Schema.Tests\Startitecture.Orm.Schema.Tests.csproj", "{318F6112-87F3-4624-AA7A-9753ACD50C94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -412,13 +414,31 @@ Global
 		{225431BF-846F-4036-8995-27E947EB1D58}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{225431BF-846F-4036-8995-27E947EB1D58}.Release|x86.ActiveCfg = Release|Any CPU
 		{225431BF-846F-4036-8995-27E947EB1D58}.Release|x86.Build.0 = Release|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Debug|x86.Build.0 = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.DebugLocal|Any CPU.ActiveCfg = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.DebugLocal|Any CPU.Build.0 = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.DebugLocal|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.DebugLocal|Mixed Platforms.Build.0 = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.DebugLocal|x86.ActiveCfg = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.DebugLocal|x86.Build.0 = Debug|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Release|Any CPU.Build.0 = Release|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Release|x86.ActiveCfg = Release|Any CPU
+		{318F6112-87F3-4624-AA7A-9753ACD50C94}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
+		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

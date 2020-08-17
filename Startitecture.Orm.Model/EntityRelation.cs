@@ -1,11 +1,12 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityRelation.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   The base class for defining relations between two entities.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace Startitecture.Orm.Model
 {
     using System;
@@ -39,13 +40,13 @@ namespace Startitecture.Orm.Model
         public LambdaExpression SourceExpression { get; private set; }
 
         /// <inheritdoc />
-        public string SourceEntityAlias { get; set; }
+        public string SourceEntityAlias { get; private set; }
 
         /// <inheritdoc />
         public LambdaExpression RelationExpression { get; private set; }
 
         /// <inheritdoc />
-        public string RelationEntityAlias { get; set; }
+        public string RelationEntityAlias { get; private set; }
 
         #region Equality Methods
 

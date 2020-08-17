@@ -6,7 +6,7 @@
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-alpha5</Version>
+    <Version>1.0.0-alpha6</Version>
     <Authors>Startitecture, LLC</Authors>
     <Company>Startitecture, LLC</Company>
     <Description>Model library for the ST/orm (Startitecture.Orm) package.</Description>
