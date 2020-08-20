@@ -76,10 +76,8 @@ namespace Startitecture.Orm.SqlClient
         /// The table command provider.
         /// </param>
         public TableValuedMerge([NotNull] ITableCommandProvider tableCommandProvider)
-            : base(tableCommandProvider)
+            : this(tableCommandProvider, null)
         {
-            this.directAttributes.AddRange(this.EntityDefinition.DirectAttributes);
-            this.insertAttributes.AddRange(this.EntityDefinition.InsertableAttributes);
         }
 
         /// <summary>
@@ -96,35 +94,11 @@ namespace Startitecture.Orm.SqlClient
         {
             this.directAttributes.AddRange(this.EntityDefinition.DirectAttributes);
             this.insertAttributes.AddRange(this.EntityDefinition.InsertableAttributes);
+            this.mergeMatchAttributes.AddRange(this.EntityDefinition.PrimaryKeyAttributes);
         }
 
         /// <inheritdoc />
         public override string CommandText => this.CompileCommandText();
-
-        /// <summary>
-        /// Merges a table table value into the specified data item.
-        /// </summary>
-        /// <param name="mergeMatchExpressions">
-        /// The merge match expressions to match columns on.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="TableValuedMerge{TStructure}"/>.
-        /// </returns>
-        public TableValuedMerge<T> MergeInto([NotNull] params Expression<Func<T, object>>[] mergeMatchExpressions)
-        {
-            if (mergeMatchExpressions == null)
-            {
-                throw new ArgumentNullException(nameof(mergeMatchExpressions));
-            }
-
-            // Use the expressions provided if any.
-            this.mergeMatchAttributes.AddRange(
-                mergeMatchExpressions.Any()
-                    ? mergeMatchExpressions.Select(this.EntityDefinition.Find)
-                    : this.EntityDefinition.PrimaryKeyAttributes);
-
-            return this;
-        }
 
         /// <summary>
         /// Specifies the columns to select into the table.
@@ -136,7 +110,7 @@ namespace Startitecture.Orm.SqlClient
         /// The columns to select into the table. These must be the same number of columns as target columns..
         /// </param>
         /// <returns>
-        /// The current <see cref="TableValuedInsert{TStructure}"/>.
+        /// The current <see cref="TableValuedInsert{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="fromColumns"/> is null.
@@ -154,7 +128,32 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
-        /// The on.
+        /// Defines the columns from the target table that should be implicitly matched to the source.
+        /// </summary>
+        /// <param name="mergeMatchExpressions">
+        /// The merge match expressions to match columns on. If no expressions are defined, then the primary key attributes are used.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="TableValuedMerge{T}"/>.
+        /// </returns>
+        public TableValuedMerge<T> OnImplicit([NotNull] params Expression<Func<T, object>>[] mergeMatchExpressions)
+        {
+            if (mergeMatchExpressions == null)
+            {
+                throw new ArgumentNullException(nameof(mergeMatchExpressions));
+            }
+
+            // Use the expressions provided if any.
+            this.mergeMatchAttributes.Clear();
+            this.mergeMatchAttributes.AddRange(
+                mergeMatchExpressions.Any() ? mergeMatchExpressions.Select(this.EntityDefinition.Find) : this.EntityDefinition.PrimaryKeyAttributes);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Explicitly defines a pair of columns upon which the source and target will be matched. Call once for each
+        /// column pair.
         /// </summary>
         /// <param name="sourceExpression">
         /// An expression that selects the key on the table value parameter.
@@ -221,7 +220,7 @@ namespace Startitecture.Orm.SqlClient
         /// The keys to match the original table value parameter with the output.
         /// </param>
         /// <returns>
-        /// The current <see cref="TableValuedMerge{TStructure}"/>.
+        /// The current <see cref="TableValuedMerge{T}"/>.
         /// </returns>
         public TableValuedMerge<T> SelectFromInserted([NotNull] params Expression<Func<T, object>>[] matchKeys)
         {
@@ -230,7 +229,6 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(matchKeys));
             }
 
-            ////var structureDefinition = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
             this.selectionMatchAttributes.Clear();
             this.selectionMatchAttributes.AddRange(matchKeys.Select(this.EntityDefinition.Find));
             return this;
@@ -245,7 +243,6 @@ namespace Startitecture.Orm.SqlClient
         private string CompileCommandText()
         {
             var qualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
-            ////var structureDefinition = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
             var allAttributes = this.ItemDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
             // If there's an auto number primary key, then don't try to insert it. Only use the updateable attributes.
@@ -328,6 +325,7 @@ namespace Startitecture.Orm.SqlClient
                         : "WHEN NOT MATCHED BY SOURCE THEN DELETE");
             }
 
+            // TODO: See if we can just get the fully inserted rows since we are not pulling back the TVP
             if (this.selectionMatchAttributes.Any())
             {
                 // These will be the column names from the table.

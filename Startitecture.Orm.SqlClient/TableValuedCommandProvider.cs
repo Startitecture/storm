@@ -60,7 +60,7 @@ namespace Startitecture.Orm.SqlClient
         /// An <see cref="IDbCommand"/> that will execute the structured command.
         /// </returns>
         /// <exception cref="OperationException">
-        /// The underlying <see cref="IDatabaseContextProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
+        /// The underlying <see cref="IRepositoryProvider.DatabaseContext"/> does not contain a <see cref="SqlConnection"/>.
         /// </exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",

@@ -18,7 +18,6 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Resources;
 
     /// <summary>
     /// The SQL Server provider factory.
@@ -31,11 +30,6 @@ namespace Startitecture.Orm.SqlClient
         private const string ProviderInvariantName = "System.Data.SqlClient";
 
         /// <summary>
-        /// The connection string.
-        /// </summary>
-        private readonly string connectionString;
-
-        /// <summary>
         /// The definition provider.
         /// </summary>
         private readonly IEntityDefinitionProvider definitionProvider;
@@ -43,31 +37,19 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Initializes a new instance of the <see cref="SqlClientProviderFactory"/> class.
         /// </summary>
-        /// <param name="connectionString">
-        /// The connection string.
-        /// </param>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null.
         /// </exception>
-        /// <exception cref="System.ArgumentException">
-        /// <paramref name="connectionString"/> is null or whitespace.
-        /// </exception>
-        public SqlClientProviderFactory([NotNull] string connectionString, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public SqlClientProviderFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionString));
-            }
-
-            this.connectionString = connectionString;
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
         }
 
         /// <inheritdoc />
-        public IRepositoryProvider Create()
+        public IRepositoryProvider Create(string connectionString)
         {
 #if !NET472
             if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, ProviderInvariantName, StringComparison.Ordinal)) == false)
@@ -77,7 +59,7 @@ namespace Startitecture.Orm.SqlClient
             }
 #endif
             var statementCompiler = new TransactSqlAdapter(this.definitionProvider);
-            var databaseFactory = new DefaultDatabaseContextFactory(this.connectionString, ProviderInvariantName, statementCompiler);
+            var databaseFactory = new DefaultDatabaseContextFactory(connectionString, ProviderInvariantName, statementCompiler);
             return new DatabaseRepositoryProvider(databaseFactory);
         }
     }

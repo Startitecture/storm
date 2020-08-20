@@ -41,9 +41,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void Create_SqlClientProvider_SysTablesReturnsResultGreaterThanZero()
         {
-            var target = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var target = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var provider = target.Create())
+            using (var provider = target.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var actual = provider.ExecuteScalar<int>("SELECT COUNT(1) FROM sys.tables");
                 Assert.AreNotEqual(0, actual);
@@ -59,9 +59,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             List<DomainAggregateRow> expected;
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var topContainer2 = new TopContainerRow
                 {
@@ -220,7 +220,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                };
             }
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var itemSelection = Select.From<DomainAggregateRow>()
                     .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
@@ -253,11 +253,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             List<DomainAggregateRow> expected;
 
-            var providerFactory = new SqlClientProviderFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var topContainer2 = new TopContainerRow
                                         {
@@ -416,7 +414,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                };
             }
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var itemSelection = Select
                     .From<DomainAggregateRow>(
@@ -459,11 +457,9 @@ namespace Startitecture.Orm.SqlClient.Tests
             List<DomainAggregateRow> expectedPage1;
             List<DomainAggregateRow> expectedPage2;
 
-            var providerFactory = new SqlClientProviderFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var topContainer2 = new TopContainerRow
                 {
@@ -668,7 +664,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                     };
             }
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var countQuery = Select.From<DomainAggregateRow>()
                     .Count(row => row.DomainAggregateId)
@@ -741,11 +737,9 @@ namespace Startitecture.Orm.SqlClient.Tests
             List<DomainAggregateRow> expected;
             List<DomainAggregateRow> expectedDesc;
 
-            var providerFactory = new SqlClientProviderFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var topContainer2 = new TopContainerRow
                 {
@@ -911,7 +905,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                    };
             }
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var itemSelection = Select.From<DomainAggregateRow>()
                     .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
@@ -963,9 +957,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             FieldRow expected;
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 expected = new FieldRow
                 {
@@ -977,7 +971,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             }
 
             // New context again
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsNotNull(actual);
@@ -993,11 +987,11 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void FirstOrDefault_ExistingDomainAggregate_ExpectedPropertiesAreNull()
         {
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             DomainAggregateRow expected;
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var topContainer2 = new TopContainerRow
                 {
@@ -1078,7 +1072,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 target.Insert(expected);
             }
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var itemSelection = Select.From<DomainAggregateRow>()
                     .WhereEqual(row => row.DomainAggregateId, expected.DomainAggregateId)
@@ -1107,9 +1101,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void FirstOrDefault_NonExistentField_ReturnsNull()
         {
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsNull(actual);
@@ -1123,9 +1117,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void DynamicFirstOrDefault_DynamicResults_MatchExpected()
         {
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var timBobIdentity = new DomainIdentityRow
                                          {
@@ -1154,9 +1148,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             FieldRow expected;
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 expected = new FieldRow
                 {
@@ -1168,7 +1162,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             }
 
             // New context again
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
                 Assert.IsTrue(actual);
@@ -1182,9 +1176,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void Contains_NonExistentField_ReturnsFalse()
         {
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, -13));
                 Assert.IsFalse(actual);
@@ -1200,9 +1194,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             FieldRow expected;
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 expected = new FieldRow
                 {
@@ -1216,7 +1210,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             Assert.AreNotEqual(0, expected.FieldId);
 
             // New context again
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 target.Delete(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
 
@@ -1234,9 +1228,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             var description = $"Mah Field Description {nameof(this.Delete_ExistingSetOfFields_ItemsDeleted)}";
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var field1 = new FieldRow
                 {
@@ -1264,7 +1258,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             }
 
             // New context again
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var itemSelection = Select.From<FieldRow>().WhereEqual(row => row.Description, description);
                 var affected = target.Delete(itemSelection);
@@ -1283,9 +1277,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void Insert_NewField_MatchesExpected()
         {
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var transaction = target.StartTransaction();
 
@@ -1311,9 +1305,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             FieldRow item;
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 item = new FieldRow
                 {
@@ -1326,7 +1320,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             // Completely new context to test that caching is not involved.
             FieldRow expected;
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 expected = new FieldRow
                 {
@@ -1339,7 +1333,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             }
 
             // New context again
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
                 Assert.IsNotNull(actual);
@@ -1357,10 +1351,10 @@ namespace Startitecture.Orm.SqlClient.Tests
         {
             DomainIdentityRow item;
 
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             var uniqueIdentifier = Guid.NewGuid().ToString();
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 item = new DomainIdentityRow
                 {
@@ -1376,7 +1370,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Completely new context to test that caching is not involved.
             DomainIdentityRow expected;
 
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 expected = new DomainIdentityRow
                 {
@@ -1391,7 +1385,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             }
 
             // New context again
-            using (var target = providerFactory.Create())
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var actual = target.FirstOrDefault(Select.From<DomainIdentityRow>().WhereEqual(row => row.DomainIdentityId, item.DomainIdentityId));
                 Assert.IsNotNull(actual);
@@ -1408,9 +1402,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCleanup]
         public void DeleteUnitTestItems()
         {
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
-            using (var provider = providerFactory.Create())
+            using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 // Delete the attachment documents based on finding their versions.
                 provider.Delete(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));

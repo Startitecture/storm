@@ -43,6 +43,9 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 .ForMember(value => value.Field, expression => expression.Ignore())
                 .ForMember(value => value.LastModifiedBy, expression => expression.Ignore());
 
+            this.CreateMap<FieldValueRow, FieldValueTableTypeRow>();
+            this.CreateMap<FieldValueTableTypeRow, FieldValue>().ForMember(value => value.Field, expression => expression.Ignore());
+
             this.CreateMap<GenericSubmissionValueRow, FieldValue>()
                 .ForMember(value => value.Field, expression => expression.MapFrom(row => row.FieldValue.Field))
                 .ForMember(value => value.LastModifiedBy, expression => expression.MapFrom(row => row.FieldValue.LastModifiedBy))

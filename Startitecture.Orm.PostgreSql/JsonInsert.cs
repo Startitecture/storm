@@ -163,7 +163,7 @@ namespace Startitecture.Orm.PostgreSql
         /// <returns>
         /// The current <see cref="JsonInsert{T}"/>.
         /// </returns>
-        public JsonInsert<T> OnConflictDoUpdate([NotNull] params Expression<Func<T, object>>[] constraintHintAttributes)
+        public JsonInsert<T> OnConflict([NotNull] params Expression<Func<T, object>>[] constraintHintAttributes)
         {
             if (constraintHintAttributes == null)
             {

@@ -7,7 +7,7 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Model
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
@@ -15,6 +15,8 @@ namespace Startitecture.Orm.Model
     using System.Linq.Expressions;
 
     using JetBrains.Annotations;
+
+    using Startitecture.Orm.Model;
 
     /// <summary>
     /// Provides an interface to concrete entity repositories.
@@ -25,6 +27,11 @@ namespace Startitecture.Orm.Model
         /// Occurs when the provider is disposed.
         /// </summary>
         event EventHandler Disposed;
+
+        /// <summary>
+        /// Gets the database context.
+        /// </summary>
+        IDatabaseContext DatabaseContext { get; }
 
         /// <summary>
         /// Gets the entity definition provider.
@@ -58,7 +65,7 @@ namespace Startitecture.Orm.Model
         /// Starts a transaction in the repository.
         /// </summary>
         /// <returns>
-        /// The <see cref="IDbTransaction"/> started by the provider.
+        /// The <see cref="System.Data.IDbTransaction"/> started by the provider.
         /// </returns>
         IDbTransaction StartTransaction();
 
@@ -69,7 +76,7 @@ namespace Startitecture.Orm.Model
         /// The isolation level for the transaction.
         /// </param>
         /// <returns>
-        /// The <see cref="IDbTransaction"/> started by the provider.
+        /// The <see cref="System.Data.IDbTransaction"/> started by the provider.
         /// </returns>
         IDbTransaction StartTransaction(IsolationLevel isolationLevel);
 
@@ -147,7 +154,7 @@ namespace Startitecture.Orm.Model
         /// The selection specifying the results to return.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of dynamic objects matching the selection.
+        /// An <see cref="System.Collections.Generic.IEnumerable{T}"/> of dynamic objects matching the selection.
         /// </returns>
         IEnumerable<dynamic> DynamicSelect(ISelection selection);
 
@@ -248,7 +255,7 @@ namespace Startitecture.Orm.Model
         /// The parameter values.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of objects returned by the statement.
+        /// An <see cref="System.Collections.Generic.IEnumerable{T}"/> of objects returned by the statement.
         /// </returns>
         IEnumerable<object> ExecuteForResult([NotNull] string executionStatement, [NotNull] params object[] parameterValues);
 
@@ -265,7 +272,7 @@ namespace Startitecture.Orm.Model
         /// The parameter values.
         /// </param>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of entities in the type of <typeparamref name="T"/>.
+        /// An <see cref="System.Collections.Generic.IEnumerable{T}"/> of entities in the type of <typeparamref name="T"/>.
         /// </returns>
         IEnumerable<T> ExecuteForResult<T>([NotNull] string executionStatement, [NotNull] params object[] parameterValues);
     }

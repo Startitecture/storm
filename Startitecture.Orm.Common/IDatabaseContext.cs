@@ -41,13 +41,10 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Open a connection that will be used for all subsequent queries.
         /// </summary>
-        /// <remarks>
-        /// Calls to Open/CloseSharedConnection are reference counted and should be balanced
-        /// </remarks>
         void OpenSharedConnection();
 
         /// <summary>
-        /// Starts a transaction scope, see GetTransaction() for recommended usage
+        /// Begins a transaction for the current database context.
         /// </summary>
         /// <returns>
         /// The <see cref="IDbTransaction"/> that was opened with this call.
@@ -55,16 +52,16 @@ namespace Startitecture.Orm.Common
         IDbTransaction BeginTransaction();
 
         /// <summary>
-        /// Executes a non-query command
+        /// Executes a non-query command.
         /// </summary>
         /// <param name="sql">
-        /// The SQL statement to execute
+        /// The SQL statement to execute.
         /// </param>
         /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL
+        /// Arguments to any embedded parameters in the SQL.
         /// </param>
         /// <returns>
-        /// The number of rows affected
+        /// The number of rows affected.
         /// </returns>
         int Execute(string sql, params object[] args);
 
@@ -72,16 +69,16 @@ namespace Startitecture.Orm.Common
         /// Executes a query and return the first column of the first row in the result set.
         /// </summary>
         /// <typeparam name="T">
-        /// The type that the result value should be cast to
+        /// The type that the result value should be cast to.
         /// </typeparam>
         /// <param name="sql">
-        /// The SQL query to execute
+        /// The SQL query to execute.
         /// </param>
         /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL
+        /// Arguments to any embedded parameters in the SQL.
         /// </param>
         /// <returns>
-        /// The scalar value cast to T
+        /// The scalar value cast to <typeparamref name="T"/>.
         /// </returns>
         T ExecuteScalar<T>(string sql, params object[] args);
 

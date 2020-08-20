@@ -40,10 +40,15 @@ namespace Startitecture.Orm.SqlClient.Tests
             this.CreateMap<FieldRow, Field>();
 
             this.CreateMap<FieldTableTypeRow, Field>();
+            this.CreateMap<FieldRow, FieldTableTypeRow>();
 
             this.CreateMap<FieldValueRow, FieldValue>()
                 .ForMember(value => value.Field, expression => expression.Ignore())
                 .ForMember(value => value.LastModifiedBy, expression => expression.Ignore());
+
+            this.CreateMap<FieldValueRow, FieldValueTableTypeRow>();
+            this.CreateMap<FieldValueTableTypeRow, FieldValue>().ForMember(value => value.Field, expression => expression.Ignore());
+            this.CreateMap<FieldValueTableTypeRow, FieldValueTableTypeRow>();
 
             this.CreateMap<GenericSubmissionValueRow, FieldValue>()
                 .ForMember(value => value.Field, expression => expression.MapFrom(row => row.FieldValue.Field))

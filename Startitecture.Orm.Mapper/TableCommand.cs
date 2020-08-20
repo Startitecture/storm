@@ -125,6 +125,8 @@ namespace Startitecture.Orm.Mapper
             this.ItemType = typeof(TItem);
             this.ParameterName = $"{this.ItemDefinition.EntityName}Rows";
 
+            this.TableCommandProvider.DatabaseContext.OpenSharedConnection();
+
             using (var sqlCommand = this.TableCommandProvider.CreateCommand(this, items, this.databaseTransaction))
             {
                 sqlCommand.ExecuteNonQuery();
@@ -154,6 +156,8 @@ namespace Startitecture.Orm.Mapper
             this.ItemType = typeof(TItem);
             this.ParameterName = $"{this.ItemDefinition.EntityName}Rows";
             var returnList = new List<T>();
+
+            this.TableCommandProvider.DatabaseContext.OpenSharedConnection();
 
             using (var reader = this.ExecuteReader(items))
             {

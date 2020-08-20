@@ -1,22 +1,22 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="JsonInsertTests.cs" company="Startitecture">
+// <copyright file="PostgreSqlRepositoryTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Defines the PostgreSqlRepositoryTests type.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.PostgreSql.Tests
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
 
     using global::AutoMapper;
 
     using Microsoft.Extensions.Configuration;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-    using Moq;
 
     using Startitecture.Core;
     using Startitecture.Orm.AutoMapper;
@@ -28,20 +28,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
     using Startitecture.Orm.Testing.Model;
 
     /// <summary>
-    /// The json insert tests.
+    /// The PostgreSQL repository tests.
     /// </summary>
     [TestClass]
-    public class JsonInsertTests
+    public class PostgreSqlRepositoryTests
     {
         /// <summary>
         /// The entity mapper.
         /// </summary>
         private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
-            new MapperConfiguration(
-                expression =>
-                    {
-                        expression.AddProfile<GenericSubmissionMappingProfile>();
-                    }));
+            new MapperConfiguration(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); }));
 
         /// <summary>
         /// The configuration root.
@@ -49,217 +45,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
         private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
 
         /// <summary>
-        /// The command text test.
-        /// </summary>
-        [TestMethod]
-        public void CommandText_InsertJsonWithReturn_MatchesSelected()
-        {
-            var mockProvider = new Mock<IRepositoryProvider>();
-
-            using (mockProvider.Object)
-            {
-                var structuredCommandProvider = new Mock<ITableCommandProvider>();
-                var databaseContext = new Mock<IDatabaseContext>();
-                var repositoryAdapter = new Mock<IRepositoryAdapter>();
-                repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-                repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new PostgreSqlQualifier());
-                databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-                structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
-                structuredCommandProvider
-                    .Setup(
-                        provider => provider.CreateCommand(
-                            It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<FieldValueRow>>(),
-                            It.IsAny<IDbTransaction>()))
-                    .Returns(new Mock<IDbCommand>().Object);
-
-                var valuesCommand = new JsonInsert<FieldValueRow>(structuredCommandProvider.Object)
-                    .Returning(row => row.FieldId);
-
-                valuesCommand.Execute(new List<FieldValueRow>());
-
-                const string Expected = @"INSERT INTO ""dbo"".""FieldValue""
-(""FieldId"", ""LastModifiedByDomainIdentifierId"", ""LastModifiedTime"")
-SELECT t.""FieldId"", t.""LastModifiedByDomainIdentifierId"", t.""LastModifiedTime""
-FROM jsonb_to_recordset(@FieldValueRows::jsonb) AS t (""FieldId"" integer, ""LastModifiedByDomainIdentifierId"" integer, ""LastModifiedTime"" timestamp with time zone)
-RETURNING ""FieldId"";
-";
-
-                var actual = valuesCommand.CommandText;
-                Assert.AreEqual(Expected, actual);
-            }
-        }
-
-        /// <summary>
-        /// The command text test.
-        /// </summary>
-        [TestMethod]
-        public void CommandText_InsertJsonOnConflictUpdateWithReturn_MatchesSelected()
-        {
-            var mockProvider = new Mock<IRepositoryProvider>();
-
-            using (mockProvider.Object)
-            {
-                var structuredCommandProvider = new Mock<ITableCommandProvider>();
-                var databaseContext = new Mock<IDatabaseContext>();
-                var repositoryAdapter = new Mock<IRepositoryAdapter>();
-                repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-                repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new PostgreSqlQualifier());
-                databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-                structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
-                structuredCommandProvider
-                    .Setup(
-                        provider => provider.CreateCommand(
-                            It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<FieldValueRow>>(),
-                            It.IsAny<IDbTransaction>()))
-                    .Returns(new Mock<IDbCommand>().Object);
-
-                var valuesCommand = new JsonInsert<FieldValueRow>(structuredCommandProvider.Object)
-                    .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
-                    .Returning(row => row.FieldId);
-
-                const string Expected = @"INSERT INTO ""dbo"".""FieldValue""
-(""FieldId"", ""LastModifiedByDomainIdentifierId"", ""LastModifiedTime"")
-SELECT t.""FieldId"", t.""LastModifiedByDomainIdentifierId"", t.""LastModifiedTime""
-FROM jsonb_to_recordset(@FieldValueRows::jsonb) AS t (""FieldId"" integer, ""LastModifiedByDomainIdentifierId"" integer, ""LastModifiedTime"" timestamp with time zone)
-ON CONFLICT (""FieldValueId"")
-DO UPDATE SET ""LastModifiedByDomainIdentifierId"" = EXCLUDED.""LastModifiedByDomainIdentifierId"", ""LastModifiedTime"" = EXCLUDED.""LastModifiedTime""
-RETURNING ""FieldId"";
-";
-
-                valuesCommand.Execute(new List<FieldValueRow>());
-                var actual = valuesCommand.CommandText;
-                Assert.AreEqual(Expected, actual);
-            }
-        }
-
-        /// <summary>
-        /// The execute test.
-        /// </summary>
-        [TestMethod]
-        public void CommandText_TableValueInsertForNonIdentityKey_CommandTextMatchesExpected()
-        {
-            var mockProvider = new Mock<IRepositoryProvider>();
-
-            using (mockProvider.Object)
-            {
-                var structuredCommandProvider = new Mock<ITableCommandProvider>();
-                var databaseContext = new Mock<IDatabaseContext>();
-                var repositoryAdapter = new Mock<IRepositoryAdapter>();
-                repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-                repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new PostgreSqlQualifier());
-                databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-                structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
-                structuredCommandProvider
-                    .Setup(
-                        provider => provider.CreateCommand(
-                            It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<GenericSubmissionValueRow>>(),
-                            It.IsAny<IDbTransaction>()))
-                    .Returns(new Mock<IDbCommand>().Object);
-
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider.Object);
-                submissionCommand.Execute(new List<GenericSubmissionValueRow>());
-
-                const string Expected = @"INSERT INTO ""dbo"".""GenericSubmissionValue""
-(""GenericSubmissionValueId"", ""GenericSubmissionId"")
-SELECT t.""GenericSubmissionValueId"", t.""GenericSubmissionId""
-FROM jsonb_to_recordset(@GenericSubmissionValueRows::jsonb) AS t (""GenericSubmissionValueId"" bigint, ""GenericSubmissionId"" integer);
-";
-                var actual = submissionCommand.CommandText;
-                Assert.AreEqual(Expected, actual);
-            }
-        }
-
-        /// <summary>
-        /// The execute test.
-        /// </summary>
-        [TestMethod]
-        public void CommandText_TableValueInsertForNonIdentityKeyOnConflictDoNothing_CommandTextMatchesExpected()
-        {
-            var mockProvider = new Mock<IRepositoryProvider>();
-
-            using (mockProvider.Object)
-            {
-                var structuredCommandProvider = new Mock<ITableCommandProvider>();
-                var databaseContext = new Mock<IDatabaseContext>();
-                var repositoryAdapter = new Mock<IRepositoryAdapter>();
-                repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-                repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new PostgreSqlQualifier());
-                databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-                structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
-                structuredCommandProvider
-                    .Setup(
-                        provider => provider.CreateCommand(
-                            It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<GenericSubmissionValueRow>>(),
-                            It.IsAny<IDbTransaction>()))
-                    .Returns(new Mock<IDbCommand>().Object);
-
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider.Object)
-                    .OnConflictDoNothing();
-
-                submissionCommand.Execute(new List<GenericSubmissionValueRow>());
-
-                const string Expected = @"INSERT INTO ""dbo"".""GenericSubmissionValue""
-(""GenericSubmissionValueId"", ""GenericSubmissionId"")
-SELECT t.""GenericSubmissionValueId"", t.""GenericSubmissionId""
-FROM jsonb_to_recordset(@GenericSubmissionValueRows::jsonb) AS t (""GenericSubmissionValueId"" bigint, ""GenericSubmissionId"" integer)
-ON CONFLICT DO NOTHING;
-";
-                var actual = submissionCommand.CommandText;
-                Assert.AreEqual(Expected, actual);
-            }
-        }
-
-        /// <summary>
-        /// The execute test.
-        /// </summary>
-        [TestMethod]
-        public void CommandText_TableValuedInsertForFlattenedType_MatchesExpected()
-        {
-            var mockProvider = new Mock<IRepositoryProvider>();
-
-            using (mockProvider.Object)
-            {
-                var structuredCommandProvider = new Mock<ITableCommandProvider>();
-                var databaseContext = new Mock<IDatabaseContext>();
-                var repositoryAdapter = new Mock<IRepositoryAdapter>();
-                repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
-                repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new PostgreSqlQualifier());
-                databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-                structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
-                structuredCommandProvider
-                    .Setup(
-                        provider => provider.CreateCommand(
-                            It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>(),
-                            It.IsAny<IDbTransaction>()))
-                    .Returns(new Mock<IDbCommand>().Object);
-
-                var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider.Object)
-                    .InsertInto(row => row.DateElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
-
-                dateElementsCommand.Execute(new List<FieldValueElementTableTypeRow>());
-
-                const string Expected = @"INSERT INTO ""dbo"".""DateElement""
-(""DateElementId"", ""Value"")
-SELECT t.""FieldValueElementId"", t.""DateElement""
-FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElementId"" bigint, ""DateElement"" timestamp with time zone);
-";
-                var actual = dateElementsCommand.CommandText;
-                Assert.AreEqual(Expected, actual);
-            }
-        }
-
-        /// <summary>
         /// The execute test.
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void Execute_InsertListOfFields_DoesNotThrowException()
+        public void Insert_ListOfFields_DoesNotThrowException()
         {
             var internalId = new Field
                                  {
@@ -313,30 +103,26 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                  bonusTarget,
                                  contactNumbers
                              };
+
             var mapper = this.mapperFactory.Create();
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
 
+                var fieldRows = fields.Select(
+                    field => new FieldRow
+                                 {
+                                     Name = field.Name,
+                                     Description = field.Description
+                                 });
+
                 var transaction = provider.StartTransaction();
-
-                // Set up the structured command provider.
-                var structuredCommandProvider = new JsonCommandProvider(provider.DatabaseContext);
-                var fieldInsertCommand = new JsonInsert<FieldRow>(structuredCommandProvider, transaction);
-
-                fieldInsertCommand.Execute(
-                    fields.Select(
-                        field => new FieldRow
-                                     {
-                                         Name = field.Name,
-                                         Description = field.Description
-                                     }));
-
+                fieldRepository.Insert(fieldRows, transaction, null); // Nothing special here
                 transaction.Commit();
             }
         }
@@ -346,7 +132,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void ExecuteForResults_ListOfFields_DoesNotThrowException()
+        public void InsertForResults_TableValueInsertForFieldsWithReturn_MatchesExpected()
         {
             var internalId = new Field
                                  {
@@ -405,24 +191,20 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
 
+                var fieldRows = fields.Select(
+                    field => new FieldRow
+                                 {
+                                     Name = field.Name,
+                                     Description = field.Description
+                                 });
+
                 var transaction = provider.StartTransaction();
-
-                // Set up the structured command provider.
-                var structuredCommandProvider = new JsonCommandProvider(provider.DatabaseContext);
-                var fieldInsertCommand =
-                    new JsonInsert<FieldRow>(structuredCommandProvider, transaction).Returning(row => row.FieldId, row => row.Description);
-
-                var actual = fieldInsertCommand.ExecuteForResults(fields.Select(
-                        field => new FieldRow
-                                     {
-                                         Name = field.Name,
-                                         Description = field.Description
-                                     }));
+                var actual = fieldRepository.InsertForResults(fieldRows, transaction, null);
 
                 foreach (var fieldRow in actual)
                 {
@@ -438,14 +220,14 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void ExecuteForResults_GenericSubmission_DoesNotThrowException()
+        public void InsertForResults_GenericSubmission_MatchesExpected()
         {
             var mapper = this.mapperFactory.Create();
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
 
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
@@ -506,11 +288,18 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 expected.SetValue(yearlyWage, 75100.35m);
                 expected.SetValue(hireDate, DateTimeOffset.Now);
                 expected.SetValue(bonusTarget, 1.59834578934);
-                expected.SetValue(contactNumbers, new List<string> { "423-222-2252", "615-982-0012", "+1-555-252-5521" });
+                expected.SetValue(
+                    contactNumbers,
+                    new List<string>
+                        {
+                            "423-222-2252",
+                            "615-982-0012",
+                            "+1-555-252-5521"
+                        });
 
                 expected.Submit();
 
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
 
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
@@ -527,7 +316,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                     fieldRepository.Save(field);
                 }
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
 
                 var transaction = provider.StartTransaction();
                 submissionRepository.Save(expected);
@@ -535,8 +324,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
                 Assert.AreNotEqual(0, submissionId);
 
-                // Set up the structured command provider.
-                var structuredCommandProvider = new JsonCommandProvider(provider.DatabaseContext);
+                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, mapper);
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
@@ -547,18 +335,17 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                                 LastModifiedTime = expected.SubmittedTime
                                             };
 
-                var valuesCommand =
-                    new JsonInsert<FieldValueRow>(structuredCommandProvider, transaction)
-                        .Returning(row => row.FieldValueId, row => row.FieldId);
-
-                var insertedValues = valuesCommand.ExecuteForResults(valuesList).ToList();
+                var insertedValues = fieldValueRepository.InsertForResults(valuesList, transaction, null)
+                    .ToDictionary(row => row.FieldId, row => row);
 
                 // Map back to the domain object.
                 foreach (var value in expected.SubmissionValues)
                 {
-                    var input = insertedValues.FirstOrDefault(row => row.FieldId == value.Field.FieldId);
+                    var input = insertedValues[value.Field.FieldId.GetValueOrDefault()];
                     mapper.MapTo(input, value);
                 }
+
+                var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, mapper);
 
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
@@ -569,63 +356,69 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                                    Order = e.Order,
                                                    DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
                                                    FloatElement = e.Element as double? ?? e.Element as float?,
-                                                   IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                   IntegerElement =
+                                                       e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
                                                    MoneyElement = e.Element as decimal?,
                                                    TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                                }).ToList();
 
-                var elementsCommand = new JsonInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, transaction)
-                    .Returning(row => row.FieldValueId, row => row.Order);
-
-                // Reassign with our added identities
-                elementsList = elementsCommand.ExecuteForResults(elementsList).ToList();
+                var insertedElements = fieldValueElementRepository.InsertForResults(
+                        elementsList,
+                        transaction,
+                        insert => insert.Returning(row => row.FieldValueId, row => row.Order))
+                    .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
 
                 foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
                 {
-                    var input = elementsList.First(row => row.FieldValueId == element.FieldValue.FieldValueId && row.Order == element.Order);
+                    var input = insertedElements[new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order)];
                     mapper.MapTo(input, element);
                 }
 
-                var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider, transaction)
-                    .InsertInto(row => row.DateElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
+                var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, mapper);
+                dateElementRepository.Insert(
+                    elementsList.Where(row => row.DateElement.HasValue),
+                    transaction,
+                    insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
+                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
 
-                dateElementsCommand.Execute(elementsList.Where(row => row.DateElement.HasValue));
+                var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, mapper);
+                floatElementRepository.Insert(
+                    elementsList.Where(row => row.FloatElement.HasValue),
+                    transaction,
+                    insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
+                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
 
-                var floatElementsCommand = new JsonInsert<FloatElementRow>(structuredCommandProvider, transaction)
-                    .InsertInto(row => row.FloatElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement);
+                var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, mapper);
+                integerElementRepository.Insert(
+                    elementsList.Where(row => row.IntegerElement.HasValue),
+                    transaction,
+                    insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
+                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
 
-                floatElementsCommand.Execute(elementsList.Where(row => row.FloatElement.HasValue));
+                var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, mapper);
+                moneyElementRepository.Insert(
+                    elementsList.Where(row => row.MoneyElement.HasValue),
+                    transaction,
+                    insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
+                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
 
-                var integerElementsCommand = new JsonInsert<IntegerElementRow>(structuredCommandProvider, transaction)
-                    .InsertInto(row => row.IntegerElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
-
-                integerElementsCommand.Execute(elementsList.Where(row => row.IntegerElement.HasValue));
-
-                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(structuredCommandProvider, transaction)
-                    .InsertInto(row => row.MoneyElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
-
-                moneyElementsCommand.Execute(elementsList.Where(row => row.MoneyElement.HasValue));
-
-                var textElementsCommand = new JsonInsert<TextElementRow>(structuredCommandProvider, transaction)
-                    .InsertInto(row => row.TextElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
-
-                textElementsCommand.Execute(elementsList.Where(row => row.TextElement != null));
+                var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, mapper);
+                textElementRepository.Insert(
+                    elementsList.Where(row => row.TextElement != null),
+                    transaction,
+                    insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
+                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement));
 
                 // Attach the values to the submission
-                var genericValueSubmissions = from v in insertedValues
+                var genericValueSubmissions = from v in insertedValues.Values
                                               select new GenericSubmissionValueRow
                                                          {
                                                              GenericSubmissionId = submissionId,
                                                              GenericSubmissionValueId = v.FieldValueId
                                                          };
 
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider, transaction);
-                submissionCommand.Execute(genericValueSubmissions);
+                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                genericSubmissionValueRepository.Insert(genericValueSubmissions, transaction, null);
                 transaction.Commit();
             }
         }
@@ -635,7 +428,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void ExecuteForResults_MultipleGenericSubmissions_MatchesExpected()
+        public void ExecuteForResults_GenericSubmission_DatabaseMatchesExpected()
         {
             var internalId = new Field
                                  {
@@ -678,7 +471,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                          Name = "MERGE_NonExisting_Contact Numbers",
                                          Description = "A list of contact numbers for the person in order of preference"
                                      };
-                
+
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             GenericSubmission baselineSubmission;
@@ -689,7 +482,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 // Set up the domain identity, not part of our validity testing.
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
                                      ?? identityRepository.Save(
@@ -749,7 +542,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             // Using a new provider clears any provider-level caches
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, mapper);
+                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, mapper);
 
                 // Get rid of all the previous fields.
                 fieldValueRepository.Delete(
@@ -758,10 +551,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
 
                 this.MergeSubmission(expected, provider, mapper);
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
                 actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
-                var genericSubmissionValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
                 var values = genericSubmissionValueRepository.SelectEntities(
                         Select.From<GenericSubmissionValueRow>()
                             .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
@@ -816,7 +609,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         }
 
         /// <summary>
-        /// Merges the specified <paramref name="submission"/> into the repository backed by the <paramref name="provider"/>.
+        /// Merges the specified <paramref name="submission" /> into the repository backed by the <paramref name="provider" />.
         /// </summary>
         /// <param name="submission">
         /// The submission.
@@ -827,10 +620,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         /// <param name="mapper">
         /// The mapper.
         /// </param>
-        private void MergeSubmission(
-            GenericSubmission submission,
-            IRepositoryProvider provider,
-            IEntityMapper mapper)
+        private void MergeSubmission(GenericSubmission submission, IRepositoryProvider provider, IEntityMapper mapper)
         {
             // Merge our existing fields
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
@@ -841,20 +631,20 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                             Description = f.Description
                                         };
 
-            // Merge in the field values.
-            var commandProvider = new JsonCommandProvider(provider.DatabaseContext);
             var transaction = provider.StartTransaction();
 
-            var fieldsCommand = new JsonInsert<FieldRow>(commandProvider, transaction)
-                .OnConflict(row => row.Name)
-                .Upsert(row => row.Description)
-                .Returning(row => row.FieldId, row => row.Name, row => row.Description);
-
-            var mergedFields = fieldsCommand.ExecuteForResults(fieldItems).ToList();
+            var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
+            var mergedFields = fieldRepository.InsertForResults(
+                    fieldItems,
+                    transaction,
+                    insert => insert.OnConflict(row => row.Name)
+                        .Upsert(row => row.Description)
+                        .Returning(row => row.FieldId, row => row.Name, row => row.Description))
+                .ToDictionary(row => row.Name, row => row);
 
             foreach (var field in fields)
             {
-                var input = mergedFields.FirstOrDefault(f => string.Equals(f.Name, field.Name, StringComparison.Ordinal));
+                mergedFields.TryGetValue(field.Name, out var input);
 
                 // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
                 // aren't IDs for baseline fields.
@@ -866,7 +656,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 mapper.MapTo(input, field);
             }
 
-            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+            var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
             submissionRepository.Save(submission);
 
             // Could be mapped as well.
@@ -880,20 +670,25 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
-            var fieldValueCommand = new JsonInsert<FieldValueRow>(commandProvider, transaction);
-            var mergedFieldValues = fieldValueCommand
-                .OnConflict(row => row.FieldValueId)
-                .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
-                .Returning(row => row.FieldValueId, row => row.FieldId, row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
-                .ExecuteForResults(fieldValues)
-                .ToList();
+            var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, mapper);
+            var mergedFieldValues = fieldValueRepository.InsertForResults(
+                    fieldValues,
+                    transaction,
+                    insert => insert.OnConflict(row => row.FieldValueId)
+                        .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
+                        .Returning(
+                            row => row.FieldValueId,
+                            row => row.FieldId,
+                            row => row.LastModifiedByDomainIdentifierId,
+                            row => row.LastModifiedTime))
+                .ToDictionary(row => row.FieldId, row => row);
 
-            Assert.IsTrue(mergedFieldValues.All(row => row.FieldValueId > 0));
+            Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
 
-            // Map back to the domain object.
+            // Map back to the domain object. TODO: Automate?
             foreach (var value in submission.SubmissionValues)
             {
-                var input = mergedFieldValues.First(row => row.FieldId == value.Field.FieldId);
+                var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
                 mapper.MapTo(input, value);
                 Assert.IsTrue(value.FieldValueId.HasValue);
             }
@@ -913,69 +708,73 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                                 TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                             }).ToList();
 
-            var elementMergeCommand = new JsonInsert<FieldValueElementRow>(commandProvider, transaction);
-            var mergedValueElements = elementMergeCommand
-                .OnConflict(row => row.FieldValueElementId)
-                .Upsert(row => row.Order)
-                .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order) 
-                .ExecuteForResults(valueElements)
-                .ToList();
+            var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, mapper);
+            var mergedValueElements = fieldValueElementRepository.InsertForResults(
+                    valueElements,
+                    transaction,
+                    insert => insert.OnConflict(row => row.FieldValueElementId)
+                        .Upsert(row => row.Order)
+                        .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
+                .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
 
             foreach (var element in valueElements)
             {
-                var input = mergedValueElements.First(row => row.FieldValueId == element.FieldValueId && row.Order == element.Order);
-                mapper.MapTo(input, element);
+                var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
+                element.FieldValueElementId = input.FieldValueElementId;
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 
-            var dateElementsCommand = new JsonInsert<DateElementRow>(commandProvider, transaction)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
-                .OnConflict(row => row.DateElementId)
-                .Upsert(row => row.Value);
+            // Note that we use the value elements for insertion because mergeValueElements will only have what is in the FieldValueElement row.
+            var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, mapper);
+            dateElementRepository.Insert(
+                valueElements.Where(row => row.DateElement.HasValue),
+                transaction,
+                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                    .OnConflict(row => row.DateElementId)
+                    .Upsert(row => row.Value));
 
-            dateElementsCommand.Execute(valueElements.Where(row => row.DateElement.HasValue));
+            var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, mapper);
+            floatElementRepository.Insert(
+                valueElements.Where(row => row.FloatElement.HasValue),
+                transaction,
+                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                    .OnConflict(row => row.FloatElementId)
+                    .Upsert(row => row.Value));
 
-            var floatElementsCommand = new JsonInsert<FloatElementRow>(commandProvider, transaction)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
-                .OnConflict(row => row.FloatElementId)
-                .Upsert(row => row.Value);
+            var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, mapper);
+            integerElementRepository.Insert(
+                valueElements.Where(row => row.IntegerElement.HasValue),
+                transaction,
+                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                    .OnConflict(row => row.IntegerElementId)
+                    .Upsert(row => row.Value));
 
-            floatElementsCommand.Execute(valueElements.Where(row => row.FloatElement.HasValue));
+            var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, mapper);
+            moneyElementRepository.Insert(
+                valueElements.Where(row => row.MoneyElement.HasValue),
+                transaction,
+                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                    .OnConflict(row => row.MoneyElementId)
+                    .Upsert(row => row.Value));
 
-            var integerElementsCommand = new JsonInsert<IntegerElementRow>(commandProvider, transaction)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
-                .OnConflict(row => row.IntegerElementId)
-                .Upsert(row => row.Value);
-
-            integerElementsCommand.Execute(valueElements.Where(row => row.IntegerElement.HasValue));
-
-            var moneyElementsCommand = new JsonInsert<MoneyElementRow>(commandProvider, transaction)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
-                .OnConflict(row => row.MoneyElementId)
-                .Upsert(row => row.Value);
-
-            moneyElementsCommand.Execute(valueElements.Where(row => row.MoneyElement.HasValue));
-
-            var textElementsCommand = new JsonInsert<TextElementRow>(commandProvider, transaction)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
-                .OnConflict(row => row.TextElementId)
-                .Upsert(row => row.Value);
-
-            textElementsCommand.Execute(valueElements.Where(row => row.TextElement != null));
+            var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, mapper);
+            textElementRepository.Insert(
+                valueElements.Where(row => row.TextElement != null),
+                transaction,
+                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                    .OnConflict(row => row.TextElementId)
+                    .Upsert(row => row.Value));
 
             // Attach the values to the submission
-            var genericValueSubmissions = from v in mergedFieldValues
+            var genericValueSubmissions = from v in mergedFieldValues.Values
                                           select new GenericSubmissionValueTableTypeRow
                                                      {
                                                          GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                         GenericSubmissionValueId = v.FieldValueId
+                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
                                                      };
 
-            var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, transaction)
-                .Upsert(row => row.GenericSubmissionValueId, row => row.GenericSubmissionId);
-                ////.DeleteUnmatchedInSource(row => row.GenericSubmissionId); Can't with PostgreSQL
-
-            submissionCommand.Execute(genericValueSubmissions);
+            var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+            genericSubmissionValueRepository.Insert(genericValueSubmissions, transaction, null);
             transaction.Commit();
         }
     }

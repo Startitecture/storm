@@ -27,7 +27,7 @@ namespace Startitecture.Orm.Common
     /// <summary>
     /// Provides a concrete implementation for a database repository.
     /// </summary>
-    public sealed class DatabaseRepositoryProvider : IRepositoryProvider, IDatabaseContextProvider
+    public sealed class DatabaseRepositoryProvider : IRepositoryProvider
     {
         /// <summary>
         /// The to string format.

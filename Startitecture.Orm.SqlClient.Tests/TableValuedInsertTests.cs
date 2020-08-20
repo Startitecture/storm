@@ -57,71 +57,70 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void Execute_TableValueInsertForFields_MatchesExpected()
+        public void Execute_TableValueInsertForFields_DoesNotThrowException()
         {
-            var mapper = this.mapperFactory.Create();
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider());
-
-            using (var provider = providerFactory.Create())
-            {
-                var internalId = new Field
-                                     {
-                                         Name = "INS_Internal ID",
-                                         Description = "Unique ID used internally"
-                                     };
-
-                var firstName = new Field
-                                    {
-                                        Name = "INS_First Name",
-                                        Description = "The person's first name"
-                                    };
-
-                var lastName = new Field
-                                   {
-                                       Name = "INS_Last Name",
-                                       Description = "The person's last name"
-                                   };
-
-                var yearlyWage = new Field
-                                     {
-                                         Name = "INS_Yearly Wage",
-                                         Description = "The base wage paid year over year."
-                                     };
-
-                var hireDate = new Field
-                                   {
-                                       Name = "INS_Hire Date",
-                                       Description = "The date and time of hire for the person"
-                                   };
-
-                var bonusTarget = new Field
-                                      {
-                                          Name = "INS_Bonus Target",
-                                          Description = "The target bonus for the person"
-                                      };
-
-                var contactNumbers = new Field
-                                         {
-                                             Name = "INS_Contact Numbers",
-                                             Description = "A list of contact numbers for the person in order of preference"
-                                         };
-
-                var fields = new List<Field>
+            var internalId = new Field
                                  {
-                                     internalId,
-                                     firstName,
-                                     lastName,
-                                     yearlyWage,
-                                     hireDate,
-                                     bonusTarget,
-                                     contactNumbers
+                                     Name = "INS_Internal ID",
+                                     Description = "Unique ID used internally"
                                  };
 
+            var firstName = new Field
+                                {
+                                    Name = "INS_First Name",
+                                    Description = "The person's first name"
+                                };
+
+            var lastName = new Field
+                               {
+                                   Name = "INS_Last Name",
+                                   Description = "The person's last name"
+                               };
+
+            var yearlyWage = new Field
+                                 {
+                                     Name = "INS_Yearly Wage",
+                                     Description = "The base wage paid year over year."
+                                 };
+
+            var hireDate = new Field
+                               {
+                                   Name = "INS_Hire Date",
+                                   Description = "The date and time of hire for the person"
+                               };
+
+            var bonusTarget = new Field
+                                  {
+                                      Name = "INS_Bonus Target",
+                                      Description = "The target bonus for the person"
+                                  };
+
+            var contactNumbers = new Field
+                                     {
+                                         Name = "INS_Contact Numbers",
+                                         Description = "A list of contact numbers for the person in order of preference"
+                                     };
+
+            var fields = new List<Field>
+                             {
+                                 internalId,
+                                 firstName,
+                                 lastName,
+                                 yearlyWage,
+                                 hireDate,
+                                 bonusTarget,
+                                 contactNumbers
+                             };
+
+            var mapper = this.mapperFactory.Create();
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
+
+            using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            {
                 var transaction = provider.StartTransaction();
 
                 // Set up the structured command provider.
-                var databaseContextProvider = (IDatabaseContextProvider)provider;
-                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider.DatabaseContext);
+                var structuredCommandProvider = new TableValuedCommandProvider(provider.DatabaseContext);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
 
                 // Delete the existing rows.
@@ -148,9 +147,9 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void ExecuteWithIdentityUpdate_TableValuedInsertForGenericSubmission_DoesNotThrowException()
         {
             var mapper = this.mapperFactory.Create();
-            var providerFactory = new SqlClientProviderFactory(ConfigurationRoot.GetConnectionString("OrmTestDb"), new DataAnnotationsDefinitionProvider()); 
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider()); 
 
-            using (var provider = providerFactory.Create())
+            using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
 
@@ -244,8 +243,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 Assert.AreNotEqual(0, submissionId);
 
                 // Set up the structured command provider.
-                var databaseContextProvider = (IDatabaseContextProvider)provider;
-                var structuredCommandProvider = new TableValuedCommandProvider(databaseContextProvider.DatabaseContext);
+                var structuredCommandProvider = new TableValuedCommandProvider(provider.DatabaseContext);
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues

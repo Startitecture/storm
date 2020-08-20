@@ -120,7 +120,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var commandProvider = mergeItems.MockCommandProvider(definitionProvider, new TransactSqlQualifier());
             var target = new TableValuedMerge<FieldRow>(commandProvider.Object);
-            var typeRows = target.MergeInto(row => row.Name).SelectFromInserted(row => row.Name).ExecuteForResults(mergeItems);
+            var typeRows = target.OnImplicit(row => row.Name).SelectFromInserted(row => row.Name).ExecuteForResults(mergeItems);
 
             Assert.IsNotNull(typeRows);
             var actual = typeRows.Select(
@@ -181,7 +181,7 @@ INNER JOIN @FieldValueRows AS tvp
 ON i.[FieldId] = tvp.[FieldId];
 ";
 
-            var target = fieldValueCommand.MergeInto(row => row.FieldValueId).SelectFromInserted(row => row.FieldId);
+            var target = fieldValueCommand.OnImplicit(row => row.FieldValueId).SelectFromInserted(row => row.FieldId);
             target.Execute(new List<FieldValueTableTypeRow>());
 
             Assert.AreEqual(Expected, target.CommandText);
@@ -228,7 +228,7 @@ ON i.[FieldValueId] = tvp.[FieldValueId] AND i.[Order] = tvp.[Order];
 ";
 
             var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider.Object)
-                .MergeInto(row => row.FieldValueId, row => row.Order)
+                .OnImplicit(row => row.FieldValueId, row => row.Order)
                 .DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId)
                 .SelectFromInserted(row => row.FieldValueId, row => row.Order);
 
@@ -277,7 +277,7 @@ INNER JOIN @GenericSubmissionValueRows AS tvp
 ON i.[GenericSubmissionValueId] = tvp.[GenericSubmissionValueId];" + Environment.NewLine;
 
             var target = new TableValuedMerge<GenericSubmissionValueRow>(commandProvider.Object);
-            target.MergeInto(row => row.GenericSubmissionValueId)
+            target.OnImplicit(row => row.GenericSubmissionValueId)
                 .SelectFromInserted(row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId);
 
@@ -320,7 +320,6 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
 ;
 ";
             var target = new TableValuedMerge<DateElementRow>(commandProvider.Object)
-                .MergeInto()
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
@@ -378,16 +377,14 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                                          Description = "A list of contact numbers for the person in order of preference"
                                      };
                 
-            var providerFactory = new SqlClientProviderFactory(
-                ConfigurationRoot.GetConnectionString("OrmTestDb"),
-                new DataAnnotationsDefinitionProvider());
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
 
             var mapper = this.mapperFactory.Create();
 
-            using (var provider = providerFactory.Create())
+            using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 // Set up the domain identity, not part of our validity testing.
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
@@ -445,7 +442,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             GenericSubmission actual;
 
             // Using a new provider clears any provider-level caches
-            using (var provider = providerFactory.Create())
+            using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 this.MergeSubmission(expected, provider, mapper);
 
@@ -523,13 +520,12 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                                         };
 
             // Merge in the field values.
-            var contextProvider = (IDatabaseContextProvider)provider;
-            var commandProvider = new TableValuedCommandProvider(contextProvider.DatabaseContext);
+            var commandProvider = new TableValuedCommandProvider(provider.DatabaseContext);
             var transaction = provider.StartTransaction();
 
             var fieldsCommand = new TableValuedMerge<FieldRow>(commandProvider, transaction);
             var mergedFields = fieldsCommand
-                .MergeInto(row => row.Name)
+                .OnImplicit(row => row.Name)
                 .SelectFromInserted(row => row.Name)
                 .ExecuteForResults(fieldItems)
                 .ToList();
@@ -563,7 +559,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
             var fieldValueCommand = new TableValuedMerge<FieldValueRow>(commandProvider, transaction);
-            var mergedFieldValues = fieldValueCommand.MergeInto(row => row.FieldValueId)
+            var mergedFieldValues = fieldValueCommand.OnImplicit(row => row.FieldValueId)
                 .SelectFromInserted(row => row.FieldId)
                 .ExecuteForResults(fieldValues)
                 .ToList();
@@ -594,7 +590,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                                             }).ToList();
 
             var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider, transaction);
-            var mergedValueElements = elementMergeCommand.MergeInto(row => row.FieldValueId, row => row.Order)
+            var mergedValueElements = elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
                 .DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
                 .SelectFromInserted(row => row.FieldValueId, row => row.Order) // Generally this is the same as the MERGE INTO 
                 .ExecuteForResults(valueElements)
@@ -646,7 +642,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                                                      };
 
             var submissionCommand = new TableValuedMerge<GenericSubmissionValueRow>(commandProvider, transaction)
-                .MergeInto(row => row.GenericSubmissionValueId)
+                .OnImplicit(row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId);
 
             submissionCommand.Execute(genericValueSubmissions);

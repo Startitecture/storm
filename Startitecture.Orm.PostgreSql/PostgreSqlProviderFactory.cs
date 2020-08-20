@@ -18,7 +18,6 @@ namespace Startitecture.Orm.PostgreSql
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
-    using Startitecture.Resources;
 
     /// <summary>
     /// The postgre sql provider factory.
@@ -31,11 +30,6 @@ namespace Startitecture.Orm.PostgreSql
         private const string ProviderInvariantName = "Npgsql";
 
         /// <summary>
-        /// The connection string.
-        /// </summary>
-        private readonly string connectionString;
-
-        /// <summary>
         /// The definition provider.
         /// </summary>
         private readonly IEntityDefinitionProvider definitionProvider;
@@ -43,31 +37,19 @@ namespace Startitecture.Orm.PostgreSql
         /// <summary>
         /// Initializes a new instance of the <see cref="PostgreSqlProviderFactory"/> class.
         /// </summary>
-        /// <param name="connectionString">
-        /// The connection string.
-        /// </param>
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// <paramref name="connectionString"/> is null or whitespace.
-        /// </exception>
-        public PostgreSqlProviderFactory([NotNull] string connectionString, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public PostgreSqlProviderFactory([NotNull] IEntityDefinitionProvider definitionProvider)
         {
-            if (string.IsNullOrWhiteSpace(connectionString))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(connectionString));
-            }
-
-            this.connectionString = connectionString;
             this.definitionProvider = definitionProvider ?? throw new ArgumentNullException(nameof(definitionProvider));
         }
 
         /// <inheritdoc />
-        public IRepositoryProvider Create()
+        public IRepositoryProvider Create(string connectionString)
         {
 #if !NET472
             if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, ProviderInvariantName, StringComparison.Ordinal)) == false)
@@ -75,10 +57,9 @@ namespace Startitecture.Orm.PostgreSql
                 Trace.WriteLine($"Registering {ProviderInvariantName} factory");
                 DbProviderFactories.RegisterFactory(ProviderInvariantName, NpgsqlFactory.Instance);
             }
-
 #endif
             var statementCompiler = new PostgreSqlAdapter(this.definitionProvider);
-            var contextFactory = new DefaultDatabaseContextFactory(this.connectionString, ProviderInvariantName, statementCompiler);
+            var contextFactory = new DefaultDatabaseContextFactory(connectionString, ProviderInvariantName, statementCompiler);
             return new DatabaseRepositoryProvider(contextFactory);
         }
     }
