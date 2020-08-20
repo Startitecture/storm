@@ -455,6 +455,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The merge field list does not throw exception.
         /// </summary>
         [TestMethod]
+        [TestCategory("Integration")]
         public void Merge_FieldList_DoesNotThrowException()
         {
             var internalId = new Field
