@@ -335,11 +335,18 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                                 LastModifiedTime = expected.SubmittedTime
                                             };
 
-                var insertedValues = fieldValueRepository.InsertForResults(valuesList, transaction, null)
+                var insertedValues = fieldValueRepository.InsertForResults(
+                        valuesList,
+                        transaction,
+                        insert => insert.Returning(
+                            row => row.FieldValueId,
+                            row => row.FieldId,
+                            row => row.LastModifiedByDomainIdentifierId,
+                            row => row.LastModifiedTime))
                     .ToDictionary(row => row.FieldId, row => row);
 
-                // Map back to the domain object.
-                foreach (var value in expected.SubmissionValues)
+                // Map back to the domain object if needed.
+                foreach (var value in expected.SubmissionValues.Where(value => value.FieldValueId.HasValue == false))
                 {
                     var input = insertedValues[value.Field.FieldId.GetValueOrDefault()];
                     mapper.MapTo(input, value);
@@ -360,51 +367,53 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                                        e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
                                                    MoneyElement = e.Element as decimal?,
                                                    TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                               }).ToList();
+                                               }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
 
                 var insertedElements = fieldValueElementRepository.InsertForResults(
-                        elementsList,
+                        elementsList.Values,
                         transaction,
-                        insert => insert.Returning(row => row.FieldValueId, row => row.Order))
+                        insert => insert.Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
                     .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
 
                 foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
                 {
-                    var input = insertedElements[new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order)];
+                    var key = new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order);
+                    var input = insertedElements[key];
                     mapper.MapTo(input, element);
+                    elementsList[key].FieldValueElementId = input.FieldValueElementId;
                 }
 
                 var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, mapper);
                 dateElementRepository.Insert(
-                    elementsList.Where(row => row.DateElement.HasValue),
+                    elementsList.Values.Where(row => row.DateElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
 
                 var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, mapper);
                 floatElementRepository.Insert(
-                    elementsList.Where(row => row.FloatElement.HasValue),
+                    elementsList.Values.Where(row => row.FloatElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
 
                 var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, mapper);
                 integerElementRepository.Insert(
-                    elementsList.Where(row => row.IntegerElement.HasValue),
+                    elementsList.Values.Where(row => row.IntegerElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
 
                 var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, mapper);
                 moneyElementRepository.Insert(
-                    elementsList.Where(row => row.MoneyElement.HasValue),
+                    elementsList.Values.Where(row => row.MoneyElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
 
                 var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, mapper);
                 textElementRepository.Insert(
-                    elementsList.Where(row => row.TextElement != null),
+                    elementsList.Values.Where(row => row.TextElement != null),
                     transaction,
                     insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement));
