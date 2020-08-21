@@ -122,9 +122,16 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Set up the structured command provider.
                 var structuredCommandProvider = new TableValuedCommandProvider(provider.DatabaseContext);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
+                var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, mapper);
 
                 // Delete the existing rows.
-                fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
+                var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
+                var existingFields = fieldRepository.SelectEntities(fieldSelection);
+
+                fieldValueRepository.Delete(
+                    Select.From<FieldValueRow>().Include(row => row.FieldId, existingFields.Select(field => field.FieldId).ToArray()));
+
+                fieldRepository.Delete(fieldSelection);
                 var fieldInsertCommand = new TableValuedInsert<FieldRow>(structuredCommandProvider, transaction);
 
                 fieldInsertCommand.Execute(
