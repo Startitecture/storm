@@ -6,7 +6,7 @@
     <DeployScriptFileName>Startitecture.Orm.Testing.Schema.sql</DeployScriptFileName>
     <ProfileVersionNumber>1</ProfileVersionNumber>
     <BlockWhenDriftDetected>False</BlockWhenDriftDetected>
-    <RegisterDataTierApplication>True</RegisterDataTierApplication>
+    <RegisterDataTierApplication>False</RegisterDataTierApplication>
     <TargetConnectionString>Data Source=(localdb)\ProjectsV13;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=True</TargetConnectionString>
     <BlockOnPossibleDataLoss>True</BlockOnPossibleDataLoss>
     <DropObjectsNotInSource>True</DropObjectsNotInSource>
