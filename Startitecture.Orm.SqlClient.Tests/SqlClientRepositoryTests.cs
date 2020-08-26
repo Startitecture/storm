@@ -112,7 +112,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var transaction = provider.StartTransaction();
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, entityMapper);
 
-                fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
+                var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
+                var fieldValuesToDelete = provider.DynamicSelect(fieldSelection.Select(row => row.FieldId));
+                provider.Delete(Select.From<FieldValueRow>().Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray()));
+                fieldRepository.Delete(fieldSelection);
                 
                 var fieldRows = from f in fields
                                 select new FieldTableTypeRow
@@ -194,7 +197,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var transaction = provider.StartTransaction();
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, entityMapper);
 
-                fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
+                var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
+                var fieldValuesToDelete = provider.DynamicSelect(fieldSelection.Select(row => row.FieldId));
+                provider.Delete(Select.From<FieldValueRow>().Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray()));
+                fieldRepository.Delete(fieldSelection);
 
                 var fieldRows = from f in expected
                                 select new FieldTableTypeRow
