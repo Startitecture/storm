@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="GenericSubmissionValueTableTypeRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a user-defined table type for the GenericSubmissionValueRow entity.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Entities.TableTypes
@@ -11,7 +14,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The generic submission value table type row.
+    /// Represents a user-defined table type for the <see cref="GenericSubmissionValueRow"/> entity.
     /// </summary>
     [TableType("GenericSubmissionValueTableType")]
     [Table("GenericSubmissionValue", Schema = "dbo")]

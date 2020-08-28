@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ResolvedAttributeLocation.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Defines the location of a resolved attribute.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -12,7 +15,7 @@ namespace Startitecture.Orm.Model
     using Startitecture.Core;
 
     /// <summary>
-    /// The resolved attribute location.
+    /// Defines the location of a resolved attribute.
     /// </summary>
     public struct ResolvedAttributeLocation : IEquatable<ResolvedAttributeLocation>
     {

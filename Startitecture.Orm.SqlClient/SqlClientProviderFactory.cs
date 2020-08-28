@@ -2,6 +2,9 @@
 // <copyright file="SqlClientProviderFactory.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Creates IRepositoryProvider instances for SQL Server connections.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.SqlClient
@@ -20,7 +23,7 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// The SQL Server provider factory.
+    /// Creates <see cref="IRepositoryProvider"/> instances for SQL Server connections.
     /// </summary>
     public class SqlClientProviderFactory : IRepositoryProviderFactory
     {

@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IEntityMapper.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Provides an interface to an entity mapper.
@@ -29,7 +29,7 @@ namespace Startitecture.Orm.Model
         /// The mapped object as a <typeparamref name="TOutput"/>.
         /// </returns>
         /// <exception cref="Startitecture.Core.OperationException">
-        /// The mapping could not be performed because a supported mapping has not been configured.
+        /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
         /// </exception>
         TOutput Map<TOutput>(object input);
 
@@ -71,7 +71,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The mapped object as a <typeparamref name="TDestination"/>.
         /// </returns>
-        /// <exception cref="Startitecture.Core.OperationException">
+        /// <exception cref="Core.OperationException">
         /// The mapping could not be performed because a supported mapping has not been configured.
         /// </exception>
         TDestination MapTo<TSource, TDestination>(TSource input, TDestination output);

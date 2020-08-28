@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="UpdateSet.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents an update set specification for an entity.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -39,29 +42,19 @@ namespace Startitecture.Orm.Model
         /// </summary>
         private EntitySet<T> entitySet = new EntitySet<T>();
 
-        /// <summary>
-        /// Gets the entity attributes to set.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<ValueState> AttributesToSet => this.attributesToSet;
 
-        /// <summary>
-        /// Gets the type of entity to update.
-        /// </summary>
+        /// <inheritdoc />
         public Type EntityType => typeof(T);
 
-        /// <summary>
-        /// Gets the parent expression.
-        /// </summary>
+        /// <inheritdoc />
         public EntityExpression ParentExpression => this.entitySet.ParentExpression;
 
-        /// <summary>
-        /// The relations.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<IEntityRelation> Relations => this.entitySet.Relations;
 
-        /// <summary>
-        /// Gets the property values.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<object> PropertyValues
         {
             get
@@ -91,9 +84,7 @@ namespace Startitecture.Orm.Model
             }
         }
 
-        /// <summary>
-        /// The filters.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<ValueFilter> Filters => this.entitySet.Filters;
 
         /// <summary>

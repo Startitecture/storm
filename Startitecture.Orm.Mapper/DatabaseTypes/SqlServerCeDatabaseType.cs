@@ -9,11 +9,13 @@
 
 namespace Startitecture.Orm.Mapper.DatabaseTypes
 {
+    using System;
     using System.Linq;
 
     /// <summary>
     /// The SQL Server CE database type.
     /// </summary>
+    [Obsolete("DatabaseType and its implementations will be removed in a future release.")]
     internal class SqlServerCeDatabaseType : DatabaseType
     {
         /////// <summary>

@@ -2,6 +2,9 @@
 // <copyright file="JsonInsert.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Creates command text for inserting JSON objects into PostgreSQL tables.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.PostgreSql
@@ -20,7 +23,7 @@ namespace Startitecture.Orm.PostgreSql
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// The json insert.
+    /// Creates command text for inserting JSON objects into PostgreSQL tables.
     /// </summary>
     /// <typeparam name="T">
     /// The type of item to insert into the repository.

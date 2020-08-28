@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="TableTypeAttribute.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Declares that a class represents a user-defined table type.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Schema
@@ -9,7 +12,7 @@ namespace Startitecture.Orm.Schema
     using System;
 
     /// <summary>
-    /// The table type attribute.
+    /// Declares that a class represents a user-defined table type.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class TableTypeAttribute : Attribute
@@ -26,7 +29,7 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <summary>
-        /// Gets the type name.
+        /// Gets the name of the user-defined table type.
         /// </summary>
         public string TypeName { get; private set; }
     }

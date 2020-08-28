@@ -1,0 +1,5 @@
+{{!Copyright (c) Startitecture. All rights reserved. Licensed under the Apache 2.0 license.}}
+
+<a class="navbar-brand" href="{{_rel}}index.html">
+  <img id="logo" class="svg" src="{{_rel}}{{{_appLogoPath}}}{{^_appLogoPath}}logo.png{{/_appLogoPath}}" style="max-width:100%;max-height:100%;" alt="{{_appName}}" >
+</a>

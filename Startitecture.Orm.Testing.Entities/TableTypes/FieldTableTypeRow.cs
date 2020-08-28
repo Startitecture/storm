@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FieldTableTypeRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a user-defined table type for the FieldRow entity.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Entities.TableTypes
@@ -11,7 +14,7 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The field data type row.
+    /// Represents a user-defined table type for the <see cref="FieldRow"/> entity.
     /// </summary>
     [TableType("FieldTableType")]
     [Table("Field", Schema = "dbo")]

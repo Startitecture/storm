@@ -66,6 +66,37 @@ namespace Startitecture.Orm.Mapper.Tests
         }
 
         /// <summary>
+        /// The begin transaction test.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void ExecuteQuery_SqlQuery_ExecutesQueryWithExpectedResults()
+        {
+            var providerName = "System.Data.SqlClient";
+#if !NET472
+            if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, providerName, StringComparison.Ordinal)) == false)
+            {
+                Trace.WriteLine($"Registering {providerName} factory");
+                DbProviderFactories.RegisterFactory(providerName, SqlClientFactory.Instance);
+            }
+#endif
+            var connectionString = ConfigurationRoot.GetConnectionString("MasterDatabase");
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var repositoryAdapter = new TransactSqlAdapter(definitionProvider);
+
+            using (var target = new DatabaseContext(connectionString, providerName, repositoryAdapter))
+            {
+                var tables = target.Query<dynamic>("SELECT * FROM sys.tables WHERE [type] = @0", 'U').ToList();
+                Assert.IsTrue(tables.Any());
+                Assert.IsNotNull(tables.FirstOrDefault()?.name);
+                Assert.IsTrue(tables.FirstOrDefault()?.object_id > 0);
+
+                var tableCount = target.ExecuteScalar<int>("SELECT COUNT(1) FROM sys.tables WHERE [type] = @0", 'U');
+                Assert.AreNotEqual(0, tableCount);
+            }
+        }
+
+        /// <summary>
         /// The database SQL connection changes database.
         /// </summary>
         [TestMethod]

@@ -7,6 +7,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		docs\index.md = docs\index.md
 		nuget.config = nuget.config
 		Startitecture.Orm.vsmdi = Startitecture.Orm.vsmdi
 	EndProjectSection
@@ -66,7 +67,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.PostgreSq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.PostgreSql.Tests", "Startitecture.Orm.PostgreSql.Tests\Startitecture.Orm.PostgreSql.Tests.csproj", "{225431BF-846F-4036-8995-27E947EB1D58}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Startitecture.Orm.Schema.Tests", "Startitecture.Orm.Schema.Tests\Startitecture.Orm.Schema.Tests.csproj", "{318F6112-87F3-4624-AA7A-9753ACD50C94}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Schema.Tests", "Startitecture.Orm.Schema.Tests\Startitecture.Orm.Schema.Tests.csproj", "{318F6112-87F3-4624-AA7A-9753ACD50C94}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -437,8 +438,8 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
+		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

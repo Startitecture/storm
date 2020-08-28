@@ -2,6 +2,9 @@
 // <copyright file="TableValuedInsert.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   A command for inserting multiple rows into a SQL Server table using a table valued parameter (TVP).
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.SqlClient
@@ -22,7 +25,7 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The structured insert command.
+    /// A command for inserting multiple rows into a SQL Server table using a table valued parameter (TVP).
     /// </summary>
     /// <typeparam name="T">
     /// The type of structure that is the source of the command data.

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityAttributeTypes.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Contains the types of an entity attribute.
@@ -33,19 +33,9 @@ namespace Startitecture.Orm.Model
         PrimaryKey = 2,
 
         /// <summary>
-        /// The attribute is a direct primary key.
-        /// </summary>
-        DirectPrimaryKey = DirectAttribute | PrimaryKey,
-
-        /// <summary>
         /// The attribute is a row identity.
         /// </summary>
         IdentityColumn = 4,
-
-        /// <summary>
-        /// The attribute is a direct auto number key.
-        /// </summary>
-        DirectAutoNumberKey = DirectAttribute | PrimaryKey | IdentityColumn,
 
         /// <summary>
         /// The attribute is part of the data item's unique key.
@@ -53,19 +43,9 @@ namespace Startitecture.Orm.Model
         UniqueKey = 8,
 
         /// <summary>
-        /// The attribute is a direct unique key.
-        /// </summary>
-        DirectUniqueKey = DirectAttribute | UniqueKey,
-
-        /// <summary>
         /// The attribute is a direct attribute from a relation of the entity.
         /// </summary>
         RelatedAttribute = 16,
-
-        /// <summary>
-        /// The attribute is a related primary key.
-        /// </summary>
-        RelatedPrimaryKey = RelatedAttribute | PrimaryKey,
 
         /// <summary>
         /// The attribute is a related auto number key.
@@ -73,28 +53,18 @@ namespace Startitecture.Orm.Model
         RelatedAutoNumberKey = RelatedAttribute | PrimaryKey | IdentityColumn,
 
         /// <summary>
-        /// The attribute is a related unique key.
-        /// </summary>
-        RelatedUniqueKey = RelatedAttribute | UniqueKey,
-
-        /// <summary>
-        /// The attribute is being used for mapping but should not be included in the results.
-        /// </summary>
-        MappedAttribute = 32,
-
-        /// <summary>
         /// The attribute is a relation of the entity.
         /// </summary>
-        Relation = 64,
+        Relation = 32,
 
         /// <summary>
         /// The attribute is a related attribute explicitly declared on the entity.
         /// </summary>
-        ExplicitRelatedAttribute = 128,
+        ExplicitRelatedAttribute = 64,
 
         /// <summary>
         /// The attribute is computed by the database.
         /// </summary>
-        Computed = 256
+        Computed = 128
     }
 }

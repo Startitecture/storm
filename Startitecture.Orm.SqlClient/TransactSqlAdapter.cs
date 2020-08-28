@@ -2,6 +2,9 @@
 // <copyright file="TransactSqlAdapter.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Provides an <see cref="IRepositoryAdapter"/> implementation for SQL Server.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.SqlClient
@@ -17,7 +20,7 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Resources;
 
     /// <summary>
-    /// The Transact-SQL statement factory.
+    /// Provides an <see cref="IRepositoryAdapter"/> implementation for SQL Server.
     /// </summary>
     public class TransactSqlAdapter : RepositoryAdapter
     {

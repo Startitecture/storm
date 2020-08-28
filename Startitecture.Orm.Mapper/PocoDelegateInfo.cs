@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="PocoDelegateInfo.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Contains metadata for a POCO delegate.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper
@@ -11,7 +14,7 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     /// <summary>
-    /// CContains metadata for a POCO delegate.
+    /// Contains metadata for a POCO delegate.
     /// </summary>
     public class PocoDelegateInfo
     {

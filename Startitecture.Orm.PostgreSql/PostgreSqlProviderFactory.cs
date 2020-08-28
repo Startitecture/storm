@@ -2,6 +2,9 @@
 // <copyright file="PostgreSqlProviderFactory.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Factory class for creating DatabaseRepositoryProvider instances for PostgreSQL using NPGSQL.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.PostgreSql
@@ -20,7 +23,7 @@ namespace Startitecture.Orm.PostgreSql
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// The postgre sql provider factory.
+    /// Factory class for creating <see cref="DatabaseRepositoryProvider"/> instances for PostgreSQL using NPGSQL.
     /// </summary>
     public class PostgreSqlProviderFactory : IRepositoryProviderFactory
     {

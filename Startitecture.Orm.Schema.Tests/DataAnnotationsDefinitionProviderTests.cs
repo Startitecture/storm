@@ -185,7 +185,7 @@ namespace Startitecture.Orm.Schema.Tests
             var target = new DataAnnotationsDefinitionProvider();
             var expected = new EntityLocation(
                 typeof(SubRow),
-                typeof(SubRow).GetCustomAttribute<TableAttribute>().Schema ?? typeof(SubRow).Namespace,
+                typeof(SubRow).GetCustomAttribute<TableAttribute>()?.Schema ?? typeof(SubRow).Namespace,
                 typeof(SubRow).GetCustomAttribute<TableAttribute>()?.Name ?? nameof(SubRow),
                 false,
                 null);
@@ -210,7 +210,7 @@ namespace Startitecture.Orm.Schema.Tests
             var target = new DataAnnotationsDefinitionProvider();
             var expected = new EntityLocation(
                 typeof(MultiReferenceRow),
-                typeof(MultiReferenceRow).GetCustomAttribute<TableAttribute>().Schema ?? typeof(MultiReferenceRow).Namespace,
+                typeof(MultiReferenceRow).GetCustomAttribute<TableAttribute>()?.Schema ?? typeof(MultiReferenceRow).Namespace,
                 typeof(MultiReferenceRow).GetCustomAttribute<TableAttribute>()?.Name ?? nameof(MultiReferenceRow),
                 false,
                 "CreatedBy");
@@ -274,11 +274,6 @@ namespace Startitecture.Orm.Schema.Tests
                 if (isIdentity)
                 {
                     attributeTypes |= EntityAttributeTypes.IdentityColumn;
-                }
-
-                if (attributeReference.IgnoreReference)
-                {
-                    attributeTypes |= EntityAttributeTypes.MappedAttribute;
                 }
 
                 if (attributeReference.IsRelatedAttribute)
@@ -524,13 +519,13 @@ namespace Startitecture.Orm.Schema.Tests
         private static AttributeReference GetRelatedEntityAttributeReference(MemberInfo propertyInfo)
         {
             var relatedEntity = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
-            var relatedEntityReference = new EntityReference { EntityType = relatedEntity.EntityType, EntityAlias = relatedEntity.EntityAlias };
+            var relatedEntityReference = new EntityReference { EntityType = relatedEntity?.EntityType, EntityAlias = relatedEntity?.EntityAlias };
 
             return new AttributeReference
                        {
                            EntityReference = relatedEntityReference,
                            Name = propertyInfo.Name,
-                           PhysicalName = relatedEntity.PhysicalName ?? propertyInfo.Name
+                           PhysicalName = relatedEntity?.PhysicalName ?? propertyInfo.Name
                        };
         }
 
@@ -586,14 +581,9 @@ namespace Startitecture.Orm.Schema.Tests
                     continue;
                 }
 
-                var isIdentity = propertyInfo.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption
-                                 == DatabaseGeneratedOption.Identity;
-
                 yield return new AttributeReference
                                  {
                                      EntityReference = GetEntityReference(propertyInfo),
-                                     IsIdentity = isIdentity,
-                                     IsPrimaryKey = propertyInfo.GetCustomAttribute<KeyAttribute>() != null,
                                      Name = propertyInfo.Name,
                                      PropertyInfo = propertyInfo,
                                      PhysicalName = GetPhysicalName(propertyInfo),

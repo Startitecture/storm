@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AttributeLocation.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Defines the location of an attribute on an entity.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -16,7 +19,7 @@ namespace Startitecture.Orm.Model
     using Startitecture.Core;
 
     /// <summary>
-    /// The attribute location.
+    /// Defines the location of an attribute on an entity.
     /// </summary>
     public class AttributeLocation : IEquatable<AttributeLocation>
     {

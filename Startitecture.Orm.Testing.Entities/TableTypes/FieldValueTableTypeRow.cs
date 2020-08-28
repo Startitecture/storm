@@ -1,19 +1,21 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FieldValueTableTypeRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a user-defined table type for the FieldValueRow entity.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Entities.TableTypes
 {
     using System;
-    using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The field value data type row.
+    /// Represents a user-defined table type for the <see cref="FieldValueRow"/> entity.
     /// </summary>
     [TableType("FieldValueTableType")]
     [Table("FieldValue", Schema = "dbo")]

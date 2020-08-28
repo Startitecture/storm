@@ -3,7 +3,7 @@
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   The data annotations definition provider.
+//   Generates IEntityDefinition instances using the System.ComponentModel.DataAnnotations namespace.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -24,7 +24,7 @@ namespace Startitecture.Orm.Schema
     using Startitecture.Resources;
 
     /// <summary>
-    /// The data annotations definition provider.
+    /// Generates <see cref="IEntityDefinition"/> instances using the <see cref="System.ComponentModel.DataAnnotations"/> namespace.
     /// </summary>
     public class DataAnnotationsDefinitionProvider : DefinitionProviderBase
     {
@@ -214,14 +214,9 @@ namespace Startitecture.Orm.Schema
                     continue;
                 }
 
-                var isIdentity = propertyInfo.GetCustomAttribute<DatabaseGeneratedAttribute>()?.DatabaseGeneratedOption
-                                 == DatabaseGeneratedOption.Identity;
-
                 yield return new AttributeReference
                                  {
                                      EntityReference = this.GetEntityReference(propertyInfo),
-                                     IsIdentity = isIdentity,
-                                     IsPrimaryKey = propertyInfo.GetCustomAttribute<KeyAttribute>() != null,
                                      Name = propertyInfo.Name,
                                      PropertyInfo = propertyInfo,
                                      PhysicalName = this.GetPhysicalName(propertyInfo),

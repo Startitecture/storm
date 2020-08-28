@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DefaultDatabaseContextFactory.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Creates an IDatabaseContext based on the ADO.NET provider name.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper
@@ -15,7 +18,7 @@ namespace Startitecture.Orm.Mapper
     using Startitecture.Resources;
 
     /// <summary>
-    /// The default database factory.
+    /// Creates an <see cref="IDatabaseContext"/> based on the ADO.NET provider name.
     /// </summary>
     public class DefaultDatabaseContextFactory : IDatabaseContextFactory
     {

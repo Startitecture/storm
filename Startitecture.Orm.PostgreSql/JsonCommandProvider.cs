@@ -3,7 +3,7 @@
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   The JSON command provider.
+//   A command provider for inserting JSON objects into PostgreSQL database tables.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -23,7 +23,7 @@ namespace Startitecture.Orm.PostgreSql
     using Startitecture.Orm.Common;
 
     /// <summary>
-    /// The JSON command provider.
+    /// A command provider for inserting JSON objects into PostgreSQL database tables.
     /// </summary>
     public class JsonCommandProvider : ITableCommandProvider
     {

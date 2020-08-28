@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="INameQualifier.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Provides an interface for qualifying and escaping names for a specific SQL platform.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -9,7 +12,7 @@ namespace Startitecture.Orm.Model
     using JetBrains.Annotations;
 
     /// <summary>
-    /// The NameQualifier interface.
+    /// Provides an interface for qualifying and escaping names for a specific SQL platform.
     /// </summary>
     public interface INameQualifier
     {

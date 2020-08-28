@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="OrderExpression.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a single ORDER BY column clause.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -12,7 +15,7 @@ namespace Startitecture.Orm.Model
     using JetBrains.Annotations;
 
     /// <summary>
-    /// The order expression.
+    /// Represents a single ORDER BY column clause.
     /// </summary>
     public class OrderExpression
     {

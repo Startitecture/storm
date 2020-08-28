@@ -3,7 +3,7 @@
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Defines the PostgreSqlRepository type.
+//   An IEntityRepository implementation for PostgreSQL.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -19,7 +19,7 @@ namespace Startitecture.Orm.PostgreSql
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// The postgre sql repository.
+    /// An <see cref="IEntityRepository{TModel}"/> implementation for PostgreSQL.
     /// </summary>
     /// <typeparam name="TModel">
     /// The type of domain model represented by the repository.

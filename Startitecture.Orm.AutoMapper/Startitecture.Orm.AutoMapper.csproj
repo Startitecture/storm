@@ -5,9 +5,9 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-alpha4</Version>
+    <Version>1.0.0-beta1</Version>
     <Authors>Startitecture, LLC</Authors>
-    <Description>Adds an IEntityMapper implementation based on AutoMapper.</Description>
+    <Description>Adds a ST/ORM IEntityMapper implementation based on AutoMapper.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>Storm Logo.png</PackageIcon>

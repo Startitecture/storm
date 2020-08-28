@@ -199,12 +199,7 @@ namespace Startitecture.Orm.Mapper
 
         #region Connections and Transactions
 
-        /// <summary>
-        /// Open a connection that will be used for all subsequent queries.
-        /// </summary>
-        /// <remarks>
-        /// Calls to Open/CloseSharedConnection are reference counted and should be balanced
-        /// </remarks>
+        /// <inheritdoc />
         public void OpenSharedConnection()
         {
             if (this.Connection == null)
@@ -231,12 +226,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Starts a transaction scope, see GetTransaction() for recommended usage
-        /// </summary>
-        /// <returns>
-        /// A new <see cref="IDbTransaction"/>, or the current transaction if a transaction has already been started.
-        /// </returns>
+        /// <inheritdoc />
         public IDbTransaction BeginTransaction()
         {
             this.transactionDepth++;
@@ -254,18 +244,7 @@ namespace Startitecture.Orm.Mapper
 
         #region Execution
 
-        /// <summary>
-        /// Executes a non-query command
-        /// </summary>
-        /// <param name="sql">
-        /// The SQL statement to execute
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL
-        /// </param>
-        /// <returns>
-        /// The number of rows affected
-        /// </returns>
+        /// <inheritdoc />
         public int Execute([NotNull] string sql, [NotNull] params object[] args)
         {
             if (string.IsNullOrWhiteSpace(sql))
@@ -287,21 +266,7 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
-        /// <summary>
-        /// Executes a query and return the first column of the first row in the result set.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The type that the result value should be cast to
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query to execute
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL
-        /// </param>
-        /// <returns>
-        /// The scalar value cast to T
-        /// </returns>
+        /// <inheritdoc />
         public T ExecuteScalar<T>([NotNull] string sql, [NotNull] params object[] args)
         {
             if (string.IsNullOrWhiteSpace(sql))
@@ -336,25 +301,7 @@ namespace Startitecture.Orm.Mapper
 
         #region Query Operations
 
-        /// <summary>
-        /// Runs an SQL query, returning the results as an IEnumerable collection.
-        /// </summary>
-        /// <typeparam name="T">
-        /// The Type representing a row in the result set.
-        /// </typeparam>
-        /// <param name="sql">
-        /// The SQL query.
-        /// </param>
-        /// <param name="args">
-        /// Arguments to any embedded parameters in the SQL statement.
-        /// </param>
-        /// <returns>
-        /// An enumerable collection of result records.
-        /// </returns>
-        /// <remarks>
-        /// For some DB providers, care should be taken to not start a new Query before finishing with and disposing the previous one.
-        /// In cases where this is an issue, consider using Fetch which returns the results as a List rather than an IEnumerable.
-        /// </remarks>
+        /// <inheritdoc />
         public IEnumerable<T> Query<T>([NotNull] string sql, [NotNull] params object[] args)
         {
             if (sql == null)

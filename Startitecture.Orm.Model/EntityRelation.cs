@@ -3,7 +3,7 @@
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   The base class for defining relations between two entities.
+//   Defines a relation between two entities.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Model
     using Startitecture.Core;
 
     /// <summary>
-    /// The base class for defining relations between two entities.
+    /// Defines a relation between two entities.
     /// </summary>
     public class EntityRelation : IEntityRelation, IEquatable<EntityRelation>
     {

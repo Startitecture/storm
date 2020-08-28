@@ -441,11 +441,6 @@ namespace Startitecture.Orm.Schema
                     attributeTypes |= EntityAttributeTypes.Computed;
                 }
 
-                if (attributeReference.IgnoreReference)
-                {
-                    attributeTypes |= EntityAttributeTypes.MappedAttribute;
-                }
-
                 if (attributeReference.IsRelatedAttribute)
                 {
                     attributeTypes |= EntityAttributeTypes.ExplicitRelatedAttribute;

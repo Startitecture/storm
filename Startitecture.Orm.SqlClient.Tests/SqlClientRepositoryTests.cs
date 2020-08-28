@@ -196,10 +196,13 @@ namespace Startitecture.Orm.SqlClient.Tests
             {
                 var transaction = provider.StartTransaction();
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, entityMapper);
+                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, entityMapper);
 
                 var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
-                var fieldValuesToDelete = provider.DynamicSelect(fieldSelection.Select(row => row.FieldId));
-                provider.Delete(Select.From<FieldValueRow>().Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray()));
+                var fieldValuesToDelete = fieldRepository.DynamicSelect(fieldSelection.Select(row => row.FieldId));
+                fieldValueRepository.Delete(
+                    Select.From<FieldValueRow>().Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray()));
+
                 fieldRepository.Delete(fieldSelection);
 
                 var fieldRows = from f in expected
@@ -522,6 +525,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
+                var transaction = provider.StartTransaction();
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, mapper);
                 fieldRepository.Merge(
                     from f in fields
@@ -530,8 +534,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                                    Name = f.Name,
                                    Description = f.Description
                                },
-                    null,
+                    transaction,
                     merge => merge.On<FieldTableTypeRow>(row => row.Name, row => row.Name));
+
+                transaction.Commit();
             }
         }
         

@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AttributeReference.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a reference to an entity attribute.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -9,7 +12,7 @@ namespace Startitecture.Orm.Model
     using System.Reflection;
 
     /// <summary>
-    /// The attribute reference.
+    /// Represents a reference to an entity attribute.
     /// </summary>
     public class AttributeReference
     {
@@ -34,16 +37,6 @@ namespace Startitecture.Orm.Model
         public PropertyInfo PropertyInfo { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the attribute is a primary key.
-        /// </summary>
-        public bool IsPrimaryKey { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the attribute is an identity attribute.
-        /// </summary>
-        public bool IsIdentity { get; set; }
-
-        /// <summary>
         /// Gets or sets a value indicating whether the attribute is a related attribute.
         /// </summary>
         public bool IsRelatedAttribute { get; set; }
@@ -52,10 +45,5 @@ namespace Startitecture.Orm.Model
         /// Gets or sets a value indicating whether the attribute is a relation.
         /// </summary>
         public bool IsRelation { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to ignore the reference.
-        /// </summary>
-        public bool IgnoreReference { get; set; }
     }
 }

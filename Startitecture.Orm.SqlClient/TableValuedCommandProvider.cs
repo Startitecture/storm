@@ -2,6 +2,9 @@
 // <copyright file="TableValuedCommandProvider.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Creates ITableCommand instances for SQL Server using table-valued parameters (TVPs).
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.SqlClient
@@ -23,7 +26,7 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Resources;
 
     /// <summary>
-    /// The structured SQL command provider.
+    /// Creates <see cref="ITableCommand"/> instances for SQL Server using table-valued parameters (TVPs).
     /// </summary>
     public class TableValuedCommandProvider : ITableCommandProvider
     {

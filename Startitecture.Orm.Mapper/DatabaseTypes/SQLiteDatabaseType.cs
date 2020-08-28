@@ -9,12 +9,14 @@
 
 namespace Startitecture.Orm.Mapper.DatabaseTypes
 {
+    using System;
     using System.Data;
 
     /// <summary>
     /// The SQLite database type.
     /// </summary>
     // ReSharper disable once InconsistentNaming
+    [Obsolete("DatabaseType and its implementations will be removed in a future release.")]
     internal class SQLiteDatabaseType : DatabaseType
     {
         #region Public Methods and Operators

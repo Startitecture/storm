@@ -2,6 +2,9 @@
 // <copyright file="IValueMapper.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Provides an interface for mapping one value to another.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common
@@ -12,13 +15,13 @@ namespace Startitecture.Orm.Common
     public interface IValueMapper
     {
         /// <summary>
-        /// The convert.
+        /// Coverts one value to an equivalent value of a different type.
         /// </summary>
         /// <param name="input">
-        /// The input.
+        /// The input value.
         /// </param>
         /// <returns>
-        /// The <see cref="object"/>.
+        /// The output value as an <see cref="object"/>.
         /// </returns>
         object Convert(object input);
     }

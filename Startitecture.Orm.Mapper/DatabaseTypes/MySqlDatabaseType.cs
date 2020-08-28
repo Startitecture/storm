@@ -14,6 +14,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
     /// <summary>
     /// The MySQL database type.
     /// </summary>
+    [Obsolete("DatabaseType and its implementations will be removed in a future release.")]
     internal class MySqlDatabaseType : DatabaseType
     {
         #region Public Methods and Operators

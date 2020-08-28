@@ -21,8 +21,12 @@ namespace Startitecture.Orm.Common
     using Startitecture.Resources;
 
     /// <summary>
-    /// The statement factory.
+    /// Base class for repository adapters.
     /// </summary>
+    /// <remarks>
+    /// Repository adapters combine entity definition providers and name qualifiers to produce SQL statements specific to a target SQL server
+    /// platform.
+    /// </remarks>
     public abstract class RepositoryAdapter : IRepositoryAdapter
     {
         /// <summary>
@@ -852,7 +856,7 @@ WHERE {keyPredicate})");
         }
 
         /// <summary>
-        /// Creates a page selection statement.
+        /// Creates a table expression statement.
         /// </summary>
         /// <param name="entitySet">
         /// The selection to process.

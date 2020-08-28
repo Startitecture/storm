@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityReference.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Contains a reference to an entity.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -12,7 +15,7 @@ namespace Startitecture.Orm.Model
     using Startitecture.Core;
 
     /// <summary>
-    /// The related entity reference.
+    /// Contains a reference to an entity.
     /// </summary>
     public class EntityReference : IEquatable<EntityReference>
     {

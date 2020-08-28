@@ -19,6 +19,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
     /// <summary>
     /// The Oracle database type.
     /// </summary>
+    [Obsolete("DatabaseType and its implementations will be removed in a future release.")]
     internal class OracleDatabaseType : DatabaseType
     {
         /// <summary>

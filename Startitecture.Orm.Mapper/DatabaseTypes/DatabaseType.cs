@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseType.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Base class for DatabaseType handlers - provides default/common handling for different database engines.
@@ -18,6 +18,7 @@ namespace Startitecture.Orm.Mapper.DatabaseTypes
     /// <summary>
     /// Base class for DatabaseType handlers - provides default/common handling for different database engines.
     /// </summary>
+    [Obsolete("DatabaseType and its implementations will be removed in a future release.")]
     internal abstract class DatabaseType
     {
         #region Public Methods and Operators

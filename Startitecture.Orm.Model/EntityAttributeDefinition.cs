@@ -153,8 +153,7 @@ namespace Startitecture.Orm.Model
             this.IsIdentityColumn = this.AttributeTypes.HasFlag(EntityAttributeTypes.IdentityColumn);
             this.IsComputed = this.AttributeTypes.HasFlag(EntityAttributeTypes.Computed);
             this.IsReferencedDirect = this.IsDirect || this.AttributeTypes.HasFlag(EntityAttributeTypes.ExplicitRelatedAttribute);
-            this.IsMetadata = this.AttributeTypes.HasFlag(EntityAttributeTypes.Relation)
-                              || this.AttributeTypes.HasFlag(EntityAttributeTypes.MappedAttribute);
+            this.IsMetadata = this.AttributeTypes.HasFlag(EntityAttributeTypes.Relation);
 
             this.ResolvedLocation = new ResolvedAttributeLocation(this.Entity.Container, this.Entity.Name, this.PhysicalName);
 

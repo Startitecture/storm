@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityMapperFactory.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   A factory for creating an IEntityMapper instance using AutoMapper.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.AutoMapper
@@ -15,7 +18,7 @@ namespace Startitecture.Orm.AutoMapper
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// The entity mapper factory.
+    /// A factory for creating an <see cref="IEntityMapper"/> instance using <see cref="AutoMapper"/>.
     /// </summary>
     public class EntityMapperFactory : IEntityMapperFactory
     {
@@ -55,12 +58,7 @@ namespace Startitecture.Orm.AutoMapper
             this.serviceConstructor = serviceConstructor ?? throw new ArgumentNullException(nameof(serviceConstructor));
         }
 
-        /// <summary>
-        /// The create.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="IEntityMapper"/>.
-        /// </returns>
+        /// <inheritdoc />
         public IEntityMapper Create()
         {
             return this.serviceConstructor == null

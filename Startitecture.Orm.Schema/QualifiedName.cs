@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="QualifiedName.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a qualified name for a schema entity or attribute.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Schema
@@ -28,7 +31,7 @@ namespace Startitecture.Orm.Schema
             };
 
         /// <summary>
-        /// The to string.
+        /// The to string text.
         /// </summary>
         private readonly string toString;
 
@@ -36,16 +39,16 @@ namespace Startitecture.Orm.Schema
         /// Initializes a new instance of the <see cref="QualifiedName"/> struct.
         /// </summary>
         /// <param name="database">
-        /// The database.
+        /// The database portion of the name.
         /// </param>
         /// <param name="schema">
-        /// The schema.
+        /// The schema portion of the name.
         /// </param>
         /// <param name="entity">
-        /// The entity.
+        /// The entity portion of the name.
         /// </param>
         /// <param name="attribute">
-        /// The attribute.
+        /// The attribute portion of the name.
         /// </param>
         public QualifiedName(string database, string schema, string entity, string attribute)
         {
@@ -80,22 +83,22 @@ namespace Startitecture.Orm.Schema
         }
 
         /// <summary>
-        /// Gets the database.
+        /// Gets the database portion of the name.
         /// </summary>
         public string Database { get; }
 
         /// <summary>
-        /// Gets the schema.
+        /// Gets the schema portion of the name.
         /// </summary>
         public string Schema { get; }
 
         /// <summary>
-        /// Gets the entity.
+        /// Gets the entity portion of the name.
         /// </summary>
         public string Entity { get; }
 
         /// <summary>
-        /// Gets the attribute.
+        /// Gets the attribute portion of the name.
         /// </summary>
         public string Attribute { get; }
 

@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FieldValueElementTableTypeRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a user-defined table type for the FieldValueRow entity.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Entities.TableTypes
@@ -11,11 +14,10 @@ namespace Startitecture.Orm.Testing.Entities.TableTypes
     using System.ComponentModel.DataAnnotations.Schema;
 
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The field value element table type row.
+    /// Represents a user-defined table type for the <see cref="FieldValueRow"/> entity.
     /// </summary>
     [TableType("FieldValueElementTableType")]
     [Table("FieldValueElement", Schema = "dbo")]

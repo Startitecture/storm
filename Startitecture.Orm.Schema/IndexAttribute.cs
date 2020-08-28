@@ -1,7 +1,11 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IndexAttribute.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   This attribute is a public clone of the index attribute included in the EntityFramework package. This allows the reverse POCO generator to
+//   generate index attributes without requiring the EntityFramework package.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Schema
@@ -11,7 +15,8 @@ namespace Startitecture.Orm.Schema
     using Startitecture.Resources;
 
     /// <summary>
-    /// The index attribute.
+    /// This attribute is a public clone of the index attribute included in the EntityFramework package. This allows the reverse POCO generator to
+    /// generate index attributes without requiring the EntityFramework package.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public sealed class IndexAttribute : Attribute
@@ -65,7 +70,7 @@ namespace Startitecture.Orm.Schema
         public bool IsClustered { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the index is clustered configured.
+        /// Gets or sets a value indicating whether <see cref="IsClustered"/> has been set.
         /// </summary>
         public bool IsClusteredConfigured { get; set; }
 
@@ -75,7 +80,7 @@ namespace Startitecture.Orm.Schema
         public bool IsUnique { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the index is uniquely configured.
+        /// Gets or sets a value indicating whether <see cref="IsUnique"/> has been set.
         /// </summary>
         public bool IsUniqueConfigured { get; set; }
 

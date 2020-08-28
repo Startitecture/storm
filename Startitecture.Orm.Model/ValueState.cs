@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ValueState.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Represents a value state for an attribute.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -14,7 +17,7 @@ namespace Startitecture.Orm.Model
     using Startitecture.Core;
 
     /// <summary>
-    /// The value state.
+    /// Represents a value state for an attribute.
     /// </summary>
     public class ValueState : IEquatable<ValueState>
     {
@@ -34,7 +37,7 @@ namespace Startitecture.Orm.Model
         /// The attribute location.
         /// </param>
         /// <param name="value">
-        /// The value.
+        /// The value of the attribute.
         /// </param>
         public ValueState([NotNull] AttributeLocation attributeLocation, object value)
         {
@@ -48,7 +51,7 @@ namespace Startitecture.Orm.Model
         public AttributeLocation AttributeLocation { get; }
 
         /// <summary>
-        /// Gets the value.
+        /// Gets the value of the attribute.
         /// </summary>
         public object Value { get; }
 

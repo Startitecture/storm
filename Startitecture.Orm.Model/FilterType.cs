@@ -1,13 +1,16 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FilterType.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   An enumeration of supported SQL filters.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
 {
     /// <summary>
-    /// The filter type.
+    /// An enumeration of supported SQL filters.
     /// </summary>
     public enum FilterType
     {

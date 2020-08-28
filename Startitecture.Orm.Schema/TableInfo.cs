@@ -1,6 +1,6 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="TableInfo.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Used by IMapper to override table bindings for an object.
@@ -17,6 +17,7 @@ namespace Startitecture.Orm.Schema
     /// <summary>
     /// Used by IMapper to override table bindings for an object.
     /// </summary>
+    [Obsolete("TableInfo is only used by DatabaseType and its inheritors, which are deprecated.")]
     public class TableInfo : IEquatable<TableInfo>
     {
         /// <summary>

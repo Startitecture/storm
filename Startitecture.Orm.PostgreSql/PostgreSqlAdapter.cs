@@ -2,6 +2,9 @@
 // <copyright file="PostgreSqlAdapter.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Provides an IRepositoryAdapter implementation for PostgreSQL.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.PostgreSql
@@ -18,7 +21,7 @@ namespace Startitecture.Orm.PostgreSql
     using Startitecture.Resources;
 
     /// <summary>
-    /// The postgre sql compiler.
+    /// Provides an <see cref="IRepositoryAdapter"/> implementation for PostgreSQL.
     /// </summary>
     public class PostgreSqlAdapter : RepositoryAdapter
     {

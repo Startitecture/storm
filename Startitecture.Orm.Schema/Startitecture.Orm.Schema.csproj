@@ -5,10 +5,10 @@
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.0.0-alpha6</Version>
+    <Version>1.0.0-beta1</Version>
     <Authors>Startitecture, LLC</Authors>
     <Company>Startitecture, LLC</Company>
-    <Description>Schema representation library for the ST/orm (Startitecture.Orm) package.</Description>
+    <Description>Schema representation library for the ST/ORM (Startitecture.Orm) package.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>

@@ -1,9 +1,9 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AutoMapperEntityMapper.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Contains mapping for transfer object types.
+//   Implements IEntityMapper using AutoMapper.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -74,49 +74,15 @@ namespace Startitecture.Orm.AutoMapper
             this.mapperEngine = configurationProvider.CreateMapper(serviceConstructor);
         }
 
-        /// <summary>
-        /// Maps one object type to another object type.
-        /// </summary>
-        /// <param name="input">
-        /// The input object.
-        /// </param>
-        /// <typeparam name="TOutput">
-        /// The type of object to map to.
-        /// </typeparam>
-        /// <returns>
-        /// The mapped object as a <typeparamref name="TOutput"/>.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
-        /// <paramref name="input"/> was null.
-        /// </exception>
-        /// <exception cref="Startitecture.Core.OperationException">
-        /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
-        /// </exception>
+        /// <inheritdoc />
         public TOutput Map<TOutput>(object input)
         {
             return this.Map<TOutput>(input, null);
         }
 
-        /// <summary>
-        /// Maps one object type to another object type.
-        /// </summary>
-        /// <param name="input">
-        /// The input object.
-        /// </param>
-        /// <param name="serviceConstructor">
-        /// The service constructor.
-        /// </param>
-        /// <typeparam name="TOutput">
-        /// The type of object to map to.
-        /// </typeparam>
-        /// <returns>
-        /// The mapped object as a <typeparamref name="TOutput"/>.
-        /// </returns>
+        /// <inheritdoc />
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="input"/> was null.
-        /// </exception>
-        /// <exception cref="Startitecture.Core.OperationException">
-        /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
         /// </exception>
         public TOutput Map<TOutput>(object input, Func<Type, object> serviceConstructor)
         {
@@ -137,29 +103,9 @@ namespace Startitecture.Orm.AutoMapper
             }        
         }
 
-        /// <summary>
-        /// Maps one object type to another object type.
-        /// </summary>
-        /// <param name="input">
-        /// The input object.
-        /// </param>
-        /// <param name="output">
-        /// The output object.
-        /// </param>
-        /// <typeparam name="TInput">
-        /// The type of object to map from.
-        /// </typeparam>
-        /// <typeparam name="TOutput">
-        /// The type of object to map to.
-        /// </typeparam>
-        /// <returns>
-        /// The mapped object as a <typeparamref name="TOutput"/>.
-        /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <inheritdoc />
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="input"/> is null.
-        /// </exception>
-        /// <exception cref="Startitecture.Core.OperationException">
-        /// The mapping could not be performed because a supported mapping has not been configured.
         /// </exception>
         public TOutput MapTo<TInput, TOutput>(TInput input, TOutput output)
         {
