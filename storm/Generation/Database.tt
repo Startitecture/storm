@@ -10,14 +10,14 @@
     // Main settings **********************************************************************************************************************
     // 
     // IMPORTANT: If any options are enabled to create an EF DbContext, then the appropriate EF packages will need to be referenced. The DbContext features will be 
-    // removed over time in preference of creating POCOs to represent database schema and relying on the core ST/orm engine for programmability and execution.
+    // removed over time in preference of creating POCOs to represent database schema and relying on the core ST/ORM engine for programmability and execution.
     //
     // .NET Framework:
     // Settings.ConnectionStringName = "TestDatabase";   // Searches for this connection string in config files listed below in the ConfigFilenameSearchOrder setting
     // ConnectionStringName is the only required setting.
     // 
     // .NET Core: As an alternative to ConnectionStringName above, which must match your app/web.config connection string name, you can override them below
-    // Settings.ConnectionString = @"Data Source=(local);Initial Catalog=Northwind;Integrated Security=True;Application Name=storm Reverse POCO Generator";
+    // Settings.ConnectionString = @"Data Source=(local);Initial Catalog=Northwind;Integrated Security=True;Application Name=STORM Reverse POCO Generator";
     // Settings.ProviderName = "System.Data.SqlClient";
     //
     // Check out the Filtering section to target schemas other than "dbo".
@@ -136,10 +136,10 @@
     //      UnitOfWorkNamespace = "YourProject.Context";
     //      PocoConfigurationNamespace = "YourProject.Maps";
     // You also need to set the following to the namespace where they now live:
-    // Settings.PocoNamespace = "Startitecture.Orm.Testing.Entities";
-    // Settings.ContextNamespace = "Startitecture.Orm.Testing.Entities";
-    // Settings.UnitOfWorkNamespace = "Startitecture.Orm.Testing.Entities";
-    // Settings.PocoConfigurationNamespace = "Startitecture.Orm.Testing.Entities";
+    // Settings.PocoNamespace = "YourProject.Entities";
+    // Settings.ContextNamespace = "YourProject.Context";
+    // Settings.UnitOfWorkNamespace = "YourProject.Context";
+    // Settings.PocoConfigurationNamespace = "YourProject.Maps";
 
 
     // Schema *****************************************************************************************************************************

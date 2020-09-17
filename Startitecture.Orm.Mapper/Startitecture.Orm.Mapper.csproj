@@ -14,6 +14,7 @@
     <PackageTags>sql orm microorm objectrelationalmapper crud query storm</PackageTags>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <NeutralLanguage>English (United States)</NeutralLanguage>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml" Link="Code Analysis\CustomDictionary.xml" />
