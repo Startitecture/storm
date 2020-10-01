@@ -31,47 +31,15 @@ namespace Startitecture.Orm.AutoMapper
         /// <summary>
         /// Initializes a new instance of the <see cref="AutoMapperEntityMapper"/> class.
         /// </summary>
-        /// <param name="configurationProvider">
-        /// The configuration provider.
+        /// <param name="mapper">
+        /// The mapper.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="configurationProvider"/> is null.
+        /// <paramref name="mapper"/> is null.
         /// </exception>
-        public AutoMapperEntityMapper([NotNull] IConfigurationProvider configurationProvider)
+        public AutoMapperEntityMapper([NotNull] IMapper mapper)
         {
-            if (configurationProvider == null)
-            {
-                throw new ArgumentNullException(nameof(configurationProvider));
-            }
-
-            this.mapperEngine = configurationProvider.CreateMapper();
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AutoMapperEntityMapper"/> class.
-        /// </summary>
-        /// <param name="configurationProvider">
-        /// The configuration provider.
-        /// </param>
-        /// <param name="serviceConstructor">
-        /// The service constructor.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="configurationProvider"/> or <paramref name="serviceConstructor"/> is null.
-        /// </exception>
-        public AutoMapperEntityMapper([NotNull] IConfigurationProvider configurationProvider, [NotNull] Func<Type, object> serviceConstructor)
-        {
-            if (configurationProvider == null)
-            {
-                throw new ArgumentNullException(nameof(configurationProvider));
-            }
-
-            if (serviceConstructor == null)
-            {
-                throw new ArgumentNullException(nameof(serviceConstructor));
-            }
-
-            this.mapperEngine = configurationProvider.CreateMapper(serviceConstructor);
+            this.mapperEngine = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         /// <inheritdoc />

@@ -36,12 +36,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
         /// <summary>
         /// The entity mapper.
         /// </summary>
-        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
-            new MapperConfiguration(
-                expression =>
-                    {
-                        expression.AddProfile<GenericSubmissionMappingProfile>();
-                    }));
+        private readonly IEntityMapper mapper = new AutoMapperEntityMapper(
+            new Mapper(
+                new MapperConfiguration(
+                    expression =>
+                        {
+                            expression.AddProfile<GenericSubmissionMappingProfile>();
+                        })));
 
         /// <summary>
         /// The configuration root.
@@ -313,12 +314,12 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                  bonusTarget,
                                  contactNumbers
                              };
-            var mapper = this.mapperFactory.Create();
+
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
@@ -400,12 +401,12 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                  bonusTarget,
                                  contactNumbers
                              };
-            var mapper = this.mapperFactory.Create();
+
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
@@ -440,12 +441,11 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         [TestCategory("Integration")]
         public void ExecuteForResults_GenericSubmission_DoesNotThrowException()
         {
-            var mapper = this.mapperFactory.Create();
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
 
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
@@ -510,7 +510,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
 
                 expected.Submit();
 
-                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.mapper);
 
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
@@ -519,7 +519,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 foreach (var field in existingFields)
                 {
                     var output = fields[field.Name];
-                    mapper.MapTo(field, output);
+                    this.mapper.MapTo(field, output);
                 }
 
                 foreach (var field in fields.Values.Where(field => field.FieldId.HasValue == false))
@@ -527,7 +527,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                     fieldRepository.Save(field);
                 }
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
                 var transaction = provider.StartTransaction();
                 submissionRepository.Save(expected);
@@ -557,7 +557,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 foreach (var value in expected.SubmissionValues)
                 {
                     var input = insertedValues.FirstOrDefault(row => row.FieldId == value.Field.FieldId);
-                    mapper.MapTo(input, value);
+                    this.mapper.MapTo(input, value);
                 }
 
                 // Do the field value elements
@@ -583,7 +583,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
                 {
                     var input = elementsList.First(row => row.FieldValueId == element.FieldValue.FieldValueId && row.Order == element.Order);
-                    mapper.MapTo(input, element);
+                    this.mapper.MapTo(input, element);
                 }
 
                 var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider, transaction)
@@ -684,12 +684,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
 
-            var mapper = this.mapperFactory.Create();
-
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 // Set up the domain identity, not part of our validity testing.
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
                                      ?? identityRepository.Save(
@@ -719,7 +717,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 baselineSubmission.SetValue(yearlyWage, 72150.35m); // gonna get updated so lets check that this value got scrapped
                 baselineSubmission.Submit();
 
-                this.MergeSubmission(baselineSubmission, provider, mapper);
+                this.MergeSubmission(baselineSubmission, provider);
             }
 
             Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
@@ -749,19 +747,19 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             // Using a new provider clears any provider-level caches
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, mapper);
+                var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
                 // Get rid of all the previous fields.
                 fieldValueRepository.Delete(
                     Select.From<FieldValueRow>()
                         .Include(row => row.FieldValueId, baselineSubmission.SubmissionValues.Select(value => value.FieldValueId).ToArray()));
 
-                this.MergeSubmission(expected, provider, mapper);
+                this.MergeSubmission(expected, provider);
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
                 actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
-                var genericSubmissionValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                var genericSubmissionValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 var values = genericSubmissionValueRepository.SelectEntities(
                         Select.From<GenericSubmissionValueRow>()
                             .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
@@ -824,13 +822,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         /// <param name="provider">
         /// The provider.
         /// </param>
-        /// <param name="mapper">
-        /// The mapper.
-        /// </param>
-        private void MergeSubmission(
-            GenericSubmission submission,
-            IRepositoryProvider provider,
-            IEntityMapper mapper)
+        private void MergeSubmission(GenericSubmission submission, IRepositoryProvider provider)
         {
             // Merge our existing fields
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
@@ -845,8 +837,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             var commandProvider = new JsonCommandProvider(provider.DatabaseContext);
             var transaction = provider.StartTransaction();
 
-            var fieldsCommand = new JsonInsert<FieldRow>(commandProvider, transaction)
-                .OnConflict(row => row.Name)
+            var fieldsCommand = new JsonInsert<FieldRow>(commandProvider, transaction).OnConflict(row => row.Name)
                 .Upsert(row => row.Description)
                 .Returning(row => row.FieldId, row => row.Name, row => row.Description);
 
@@ -863,10 +854,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                     continue;
                 }
 
-                mapper.MapTo(input, field);
+                this.mapper.MapTo(input, field);
             }
 
-            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
             submissionRepository.Save(submission);
 
             // Could be mapped as well.
@@ -881,8 +872,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
             var fieldValueCommand = new JsonInsert<FieldValueRow>(commandProvider, transaction);
-            var mergedFieldValues = fieldValueCommand
-                .OnConflict(row => row.FieldValueId)
+            var mergedFieldValues = fieldValueCommand.OnConflict(row => row.FieldValueId)
                 .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
                 .Returning(row => row.FieldValueId, row => row.FieldId, row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
                 .ExecuteForResults(fieldValues)
@@ -894,7 +884,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             foreach (var value in submission.SubmissionValues)
             {
                 var input = mergedFieldValues.First(row => row.FieldId == value.Field.FieldId);
-                mapper.MapTo(input, value);
+                this.mapper.MapTo(input, value);
                 Assert.IsTrue(value.FieldValueId.HasValue);
             }
 
@@ -914,17 +904,16 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                             }).ToList();
 
             var elementMergeCommand = new JsonInsert<FieldValueElementRow>(commandProvider, transaction);
-            var mergedValueElements = elementMergeCommand
-                .OnConflict(row => row.FieldValueElementId)
+            var mergedValueElements = elementMergeCommand.OnConflict(row => row.FieldValueElementId)
                 .Upsert(row => row.Order)
-                .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order) 
+                .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order)
                 .ExecuteForResults(valueElements)
                 .ToList();
 
             foreach (var element in valueElements)
             {
                 var input = mergedValueElements.First(row => row.FieldValueId == element.FieldValueId && row.Order == element.Order);
-                mapper.MapTo(input, element);
+                this.mapper.MapTo(input, element);
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 
@@ -971,9 +960,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                                          GenericSubmissionValueId = v.FieldValueId
                                                      };
 
-            var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, transaction)
-                .Upsert(row => row.GenericSubmissionValueId, row => row.GenericSubmissionId);
-                ////.DeleteUnmatchedInSource(row => row.GenericSubmissionId); Can't with PostgreSQL
+            var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, transaction).Upsert(
+                row => row.GenericSubmissionValueId,
+                row => row.GenericSubmissionId);
+            ////.DeleteUnmatchedInSource(row => row.GenericSubmissionId); Can't with PostgreSQL
 
             submissionCommand.Execute(genericValueSubmissions);
             transaction.Commit();

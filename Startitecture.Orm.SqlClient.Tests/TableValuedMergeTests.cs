@@ -36,14 +36,15 @@ namespace Startitecture.Orm.SqlClient.Tests
     public class TableValuedMergeTests
     {
         /// <summary>
-        /// The entity mapper.
+        /// The entity this.mapper.
         /// </summary>
-        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
-            new MapperConfiguration(
-                expression =>
-                    {
-                        expression.AddProfile<GenericSubmissionMappingProfile>();
-                    }));
+        private readonly IEntityMapper mapper = new AutoMapperEntityMapper(
+            new Mapper(
+                new MapperConfiguration(
+                    expression =>
+                        {
+                            expression.AddProfile<GenericSubmissionMappingProfile>();
+                        })));
 
         /// <summary>
         /// The configuration root.
@@ -382,12 +383,10 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
 
-            var mapper = this.mapperFactory.Create();
-
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 // Set up the domain identity, not part of our validity testing.
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
                                      ?? identityRepository.Save(
@@ -417,7 +416,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                 baselineSubmission.SetValue(yearlyWage, 72150.35m); // gonna get updated so lets check that this value got scrapped
                 baselineSubmission.Submit();
 
-                this.MergeSubmission(baselineSubmission, provider, mapper);
+                this.MergeSubmission(baselineSubmission, provider);
             }
 
             Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
@@ -444,12 +443,12 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Using a new provider clears any provider-level caches
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                this.MergeSubmission(expected, provider, mapper);
+                this.MergeSubmission(expected, provider);
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
                 actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
-                var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 var values = fieldValueRepository.SelectEntities(
                         Select.From<GenericSubmissionValueRow>()
                             .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
@@ -502,13 +501,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
         /// <param name="provider">
         /// The provider.
         /// </param>
-        /// <param name="mapper">
-        /// The mapper.
-        /// </param>
-        private void MergeSubmission(
-            GenericSubmission submission,
-            IRepositoryProvider provider,
-            IEntityMapper mapper)
+        private void MergeSubmission(GenericSubmission submission, IRepositoryProvider provider)
         {
             // Merge our existing fields
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
@@ -524,11 +517,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             var transaction = provider.StartTransaction();
 
             var fieldsCommand = new TableValuedMerge<FieldRow>(commandProvider, transaction);
-            var mergedFields = fieldsCommand
-                .OnImplicit(row => row.Name)
-                .SelectFromInserted(row => row.Name)
-                .ExecuteForResults(fieldItems)
-                .ToList();
+            var mergedFields = fieldsCommand.OnImplicit(row => row.Name).SelectFromInserted(row => row.Name).ExecuteForResults(fieldItems).ToList();
 
             foreach (var field in fields)
             {
@@ -541,10 +530,10 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                     continue;
                 }
 
-                mapper.MapTo(input, field);
+                this.mapper.MapTo(input, field);
             }
 
-            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
             submissionRepository.Save(submission);
 
             // Could be mapped as well.
@@ -570,7 +559,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             foreach (var value in submission.SubmissionValues)
             {
                 var input = mergedFieldValues.First(row => row.FieldId == value.Field.FieldId);
-                mapper.MapTo(input, value);
+                this.mapper.MapTo(input, value);
                 Assert.IsTrue(value.FieldValueId.HasValue);
             }
 
@@ -599,7 +588,7 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             foreach (var element in valueElements)
             {
                 var input = mergedValueElements.First(row => row.FieldValueId == element.FieldValueId && row.Order == element.Order);
-                mapper.MapTo(input, element);
+                this.mapper.MapTo(input, element);
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 

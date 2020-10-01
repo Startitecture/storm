@@ -36,8 +36,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
         /// <summary>
         /// The entity mapper.
         /// </summary>
-        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
-            new MapperConfiguration(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); }));
+        private readonly IEntityMapper mapper = new AutoMapperEntityMapper(
+            new Mapper(new MapperConfiguration(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); })));
 
         /// <summary>
         /// The configuration root.
@@ -104,12 +104,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                  contactNumbers
                              };
 
-            var mapper = this.mapperFactory.Create();
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
@@ -186,12 +185,12 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                  bonusTarget,
                                  contactNumbers
                              };
-            var mapper = this.mapperFactory.Create();
+
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
                 fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
@@ -222,12 +221,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
         [TestCategory("Integration")]
         public void InsertForResults_GenericSubmission_MatchesExpected()
         {
-            var mapper = this.mapperFactory.Create();
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
 
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
@@ -299,7 +297,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 expected.Submit();
 
-                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
 
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
@@ -308,7 +306,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 foreach (var field in existingFields)
                 {
                     var output = fields[field.Name];
-                    mapper.MapTo(field, output);
+                    this.mapper.MapTo(field, output);
                 }
 
                 foreach (var field in fields.Values.Where(field => field.FieldId.HasValue == false))
@@ -316,7 +314,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     fieldRepository.Save(field);
                 }
 
-                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
                 var transaction = provider.StartTransaction();
                 submissionRepository.Save(expected);
@@ -324,7 +322,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
                 Assert.AreNotEqual(0, submissionId);
 
-                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, mapper);
+                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
@@ -349,10 +347,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 foreach (var value in expected.SubmissionValues.Where(value => value.FieldValueId.HasValue == false))
                 {
                     var input = insertedValues[value.Field.FieldId.GetValueOrDefault()];
-                    mapper.MapTo(input, value);
+                    this.mapper.MapTo(input, value);
                 }
 
-                var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, mapper);
+                var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
 
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
@@ -379,39 +377,39 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 {
                     var key = new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order);
                     var input = insertedElements[key];
-                    mapper.MapTo(input, element);
+                    this.mapper.MapTo(input, element);
                     elementsList[key].FieldValueElementId = input.FieldValueElementId;
                 }
 
-                var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, mapper);
+                var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
                 dateElementRepository.Insert(
                     elementsList.Values.Where(row => row.DateElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
 
-                var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, mapper);
+                var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
                 floatElementRepository.Insert(
                     elementsList.Values.Where(row => row.FloatElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
 
-                var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, mapper);
+                var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
                 integerElementRepository.Insert(
                     elementsList.Values.Where(row => row.IntegerElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
 
-                var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, mapper);
+                var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
                 moneyElementRepository.Insert(
                     elementsList.Values.Where(row => row.MoneyElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
 
-                var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, mapper);
+                var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
                 textElementRepository.Insert(
                     elementsList.Values.Where(row => row.TextElement != null),
                     transaction,
@@ -426,7 +424,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                                              GenericSubmissionValueId = v.FieldValueId
                                                          };
 
-                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 genericSubmissionValueRepository.Insert(genericValueSubmissions, transaction, null);
                 transaction.Commit();
             }
@@ -486,12 +484,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
 
-            var mapper = this.mapperFactory.Create();
-
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 // Set up the domain identity, not part of our validity testing.
-                var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
                                      ?? identityRepository.Save(
@@ -521,7 +517,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 baselineSubmission.SetValue(yearlyWage, 72150.35m); // gonna get updated so lets check that this value got scrapped
                 baselineSubmission.Submit();
 
-                this.MergeSubmission(baselineSubmission, provider, mapper);
+                this.MergeSubmission(baselineSubmission, provider);
             }
 
             Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
@@ -551,19 +547,19 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // Using a new provider clears any provider-level caches
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, mapper);
+                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
                 // Get rid of all the previous fields.
                 fieldValueRepository.Delete(
                     Select.From<FieldValueRow>()
                         .Include(row => row.FieldValueId, baselineSubmission.SubmissionValues.Select(value => value.FieldValueId).ToArray()));
 
-                this.MergeSubmission(expected, provider, mapper);
+                this.MergeSubmission(expected, provider);
 
-                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
                 actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
-                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 var values = genericSubmissionValueRepository.SelectEntities(
                         Select.From<GenericSubmissionValueRow>()
                             .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
@@ -626,10 +622,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
         /// <param name="provider">
         /// The provider.
         /// </param>
-        /// <param name="mapper">
-        /// The mapper.
-        /// </param>
-        private void MergeSubmission(GenericSubmission submission, IRepositoryProvider provider, IEntityMapper mapper)
+        private void MergeSubmission(GenericSubmission submission, IRepositoryProvider provider)
         {
             // Merge our existing fields
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
@@ -642,7 +635,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
             var transaction = provider.StartTransaction();
 
-            var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, mapper);
+            var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
             var mergedFields = fieldRepository.InsertForResults(
                     fieldItems,
                     transaction,
@@ -662,10 +655,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     continue;
                 }
 
-                mapper.MapTo(input, field);
+                this.mapper.MapTo(input, field);
             }
 
-            var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+            var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
             submissionRepository.Save(submission);
 
             // Could be mapped as well.
@@ -679,7 +672,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
-            var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, mapper);
+            var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
             var mergedFieldValues = fieldValueRepository.InsertForResults(
                     fieldValues,
                     transaction,
@@ -698,7 +691,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             foreach (var value in submission.SubmissionValues)
             {
                 var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
-                mapper.MapTo(input, value);
+                this.mapper.MapTo(input, value);
                 Assert.IsTrue(value.FieldValueId.HasValue);
             }
 
@@ -717,7 +710,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                                 TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                             }).ToList();
 
-            var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, mapper);
+            var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
             var mergedValueElements = fieldValueElementRepository.InsertForResults(
                     valueElements,
                     transaction,
@@ -734,7 +727,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             }
 
             // Note that we use the value elements for insertion because mergeValueElements will only have what is in the FieldValueElement row.
-            var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, mapper);
+            var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
             dateElementRepository.Insert(
                 valueElements.Where(row => row.DateElement.HasValue),
                 transaction,
@@ -742,7 +735,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     .OnConflict(row => row.DateElementId)
                     .Upsert(row => row.Value));
 
-            var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, mapper);
+            var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
             floatElementRepository.Insert(
                 valueElements.Where(row => row.FloatElement.HasValue),
                 transaction,
@@ -750,7 +743,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     .OnConflict(row => row.FloatElementId)
                     .Upsert(row => row.Value));
 
-            var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, mapper);
+            var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
             integerElementRepository.Insert(
                 valueElements.Where(row => row.IntegerElement.HasValue),
                 transaction,
@@ -758,7 +751,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     .OnConflict(row => row.IntegerElementId)
                     .Upsert(row => row.Value));
 
-            var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, mapper);
+            var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
             moneyElementRepository.Insert(
                 valueElements.Where(row => row.MoneyElement.HasValue),
                 transaction,
@@ -766,7 +759,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     .OnConflict(row => row.MoneyElementId)
                     .Upsert(row => row.Value));
 
-            var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, mapper);
+            var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
             textElementRepository.Insert(
                 valueElements.Where(row => row.TextElement != null),
                 transaction,
@@ -782,7 +775,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                                          GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
                                                      };
 
-            var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+            var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
             genericSubmissionValueRepository.Insert(genericValueSubmissions, transaction, null);
             transaction.Commit();
         }

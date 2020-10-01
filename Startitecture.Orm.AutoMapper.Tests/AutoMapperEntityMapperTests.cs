@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AutoMapperEntityMapperTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The auto mapper entity mapper tests.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.AutoMapper.Tests
@@ -36,7 +39,7 @@ namespace Startitecture.Orm.AutoMapper.Tests
         [TestMethod]
         public void Map_FieldValueListWithSameReferenceParent_ReferenceMaintainedInMapping()
         {
-            var target = new AutoMapperEntityMapper(MappingConfigurationProvider);
+            var target = new AutoMapperEntityMapper(new Mapper(MappingConfigurationProvider));
 
             var fieldRow = new FieldRow { FieldId = 234, Name = "Field1", Description = "The first field" };
             var domainIdentity1Row = new DomainIdentityRow { DomainIdentityId = 134, FirstName = "Tom", LastName = "Bomb", UniqueIdentifier = "tom@google.com" };

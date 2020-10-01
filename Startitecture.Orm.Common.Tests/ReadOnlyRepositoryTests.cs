@@ -38,18 +38,19 @@ namespace Startitecture.Orm.Common.Tests
         /// <summary>
         /// The mapper factory.
         /// </summary>
-        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
-            new MapperConfiguration(
-                expression =>
-                    {
-                        expression.AddProfile<SubSubEntityMappingProfile>();
-                        expression.AddProfile<MultiReferenceEntityMappingProfile>();
-                        expression.AddProfile<CreatedByMappingProfile>();
-                        expression.AddProfile<ModifiedByMappingProfile>();
-                        expression.AddProfile<SubEntityMappingProfile>();
-                        expression.AddProfile<FakeComplexEntityMappingProfile>();
-                        expression.AddProfile<FakeDependentEntityMappingProfile>();
-                    }));
+        private readonly IEntityMapper mapper = new AutoMapperEntityMapper(
+            new Mapper(
+                new MapperConfiguration(
+                    expression =>
+                        {
+                            expression.AddProfile<SubSubEntityMappingProfile>();
+                            expression.AddProfile<MultiReferenceEntityMappingProfile>();
+                            expression.AddProfile<CreatedByMappingProfile>();
+                            expression.AddProfile<ModifiedByMappingProfile>();
+                            expression.AddProfile<SubEntityMappingProfile>();
+                            expression.AddProfile<FakeComplexEntityMappingProfile>();
+                            expression.AddProfile<FakeDependentEntityMappingProfile>();
+                        })));
 
         /// <summary>
         /// The contains test.
@@ -81,8 +82,7 @@ namespace Startitecture.Orm.Common.Tests
                 ModifiedTime = DateTimeOffset.Now.AddHours(1)
             };
 
-            var mapper = this.mapperFactory.Create();
-            var existing = mapper.Map<ComplexRaisedRow>(expected);
+            var existing = this.mapper.Map<ComplexRaisedRow>(expected);
 
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
@@ -93,7 +93,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, mapper);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.Contains(existing);
                 Assert.IsTrue(actual);
             }
@@ -114,7 +114,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create());
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.Contains(22);
                 Assert.IsTrue(actual);
             }
@@ -135,7 +135,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create());
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.Contains(Select.Where<ComplexRaisedRow>().WhereEqual(row => row.FakeSubEntityId, 22));
                 Assert.IsTrue(actual);
             }
@@ -155,7 +155,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create());
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.Contains(Select.Where<ComplexRaisedRow>().WhereEqual(row => row.FakeSubEntityId, 22));
                 Assert.IsFalse(actual);
             }
@@ -179,7 +179,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create(), row => row.UniqueName);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper, row => row.UniqueName);
                 var actual = target.Contains("UniqueName");
                 Assert.IsTrue(actual);
             }
@@ -203,7 +203,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<DependentEntity, DependentRow>(provider, this.mapperFactory.Create(), row => row.DependentIntegerValue);
+                var target = new ReadOnlyRepository<DependentEntity, DependentRow>(provider, this.mapper, row => row.DependentIntegerValue);
                 var actual = target.Contains(24);
                 Assert.IsTrue(actual);
             }
@@ -227,7 +227,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create(), row => row.UniqueName);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper, row => row.UniqueName);
                 dynamic key = new ExpandoObject();
                 key.UniqueName = "UniqueName";
                 key.Foo = 12;
@@ -256,7 +256,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapperFactory.Create(), row => row.UniqueName);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper, row => row.UniqueName);
 
                 var actual = target.Contains(
                     new
@@ -299,19 +299,18 @@ namespace Startitecture.Orm.Common.Tests
                 ModifiedTime = DateTimeOffset.Now.AddHours(1)
             };
 
-            var mapper = this.mapperFactory.Create();
-            var existing = mapper.Map<ComplexRaisedRow>(expected);
+            var existing = this.mapper.Map<ComplexRaisedRow>(expected);
 
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
             repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
-                .Returns(mapper.Map<ComplexRaisedRow>(existing));
+                .Returns(this.mapper.Map<ComplexRaisedRow>(existing));
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, mapper);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.FirstOrDefault(22);
                 Assert.AreEqual(
                     expected.SubSubEntity,
@@ -367,19 +366,18 @@ namespace Startitecture.Orm.Common.Tests
                 ModifiedTime = DateTimeOffset.Now.AddHours(1)
             };
 
-            var mapper = this.mapperFactory.Create();
-            var existing = mapper.Map<ComplexRaisedRow>(expected);
+            var existing = this.mapper.Map<ComplexRaisedRow>(expected);
 
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
             repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
-                .Returns(mapper.Map<ComplexRaisedRow>(existing));
+                .Returns(this.mapper.Map<ComplexRaisedRow>(existing));
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, mapper);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.FirstOrDefault(existing);
                 Assert.AreEqual(
                     expected.SubSubEntity,
@@ -443,19 +441,18 @@ namespace Startitecture.Orm.Common.Tests
 
             expected.SetDependentEntity(994);
 
-            var mapper = this.mapperFactory.Create();
-            var existing = mapper.Map<ComplexRaisedRow>(expected);
+            var existing = this.mapper.Map<ComplexRaisedRow>(expected);
 
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
             repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
-                .Returns(mapper.Map<ComplexRaisedRow>(existing));
+                .Returns(this.mapper.Map<ComplexRaisedRow>(existing));
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, mapper);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.FirstOrDefault(existing);
                 Assert.IsNotNull(expected.DependentEntity);
                 Assert.IsNotNull(expected.FakeDependentEntityId);
@@ -515,7 +512,7 @@ namespace Startitecture.Orm.Common.Tests
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
                 .Returns(expected);
 
-            var entityMapper = this.mapperFactory.Create();
+            var entityMapper = this.mapper;
 
             using (var provider = repositoryProvider.Object)
             {
@@ -548,7 +545,7 @@ namespace Startitecture.Orm.Common.Tests
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as int? == 24)))
                 .Returns(expected);
 
-            var entityMapper = this.mapperFactory.Create();
+            var entityMapper = this.mapper;
 
             using (var provider = repositoryProvider.Object)
             {
@@ -586,7 +583,7 @@ namespace Startitecture.Orm.Common.Tests
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
                 .Returns(expected);
 
-            var entityMapper = this.mapperFactory.Create();
+            var entityMapper = this.mapper;
 
             using (var provider = repositoryProvider.Object)
             {
@@ -629,7 +626,7 @@ namespace Startitecture.Orm.Common.Tests
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
                 .Returns(expected);
 
-            var entityMapper = this.mapperFactory.Create();
+            var entityMapper = this.mapper;
 
             using (var provider = repositoryProvider.Object)
             {
@@ -668,7 +665,7 @@ namespace Startitecture.Orm.Common.Tests
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as int? == 43)))
                 .Returns(result);
 
-            var entityMapper = this.mapperFactory.Create();
+            var entityMapper = this.mapper;
 
             using (var provider = repositoryProvider.Object)
             {
@@ -706,13 +703,12 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            var mapper = this.mapperFactory.Create();
             repositoryProvider.Setup(provider => provider.SelectEntities(It.IsAny<EntitySelection<SubRow>>()))
-                .Returns(mapper.Map<List<SubRow>>(expected));
+                .Returns(this.mapper.Map<List<SubRow>>(expected));
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, mapper);
+                var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, this.mapper);
                 var actual = target.SelectAll().ToList();
 
                 CollectionAssert.AreEqual(expected, actual);
@@ -751,13 +747,12 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            var mapper = this.mapperFactory.Create();
             repositoryProvider.Setup(provider => provider.SelectEntities(It.IsAny<EntitySelection<SubRow>>()))
-                .Returns(mapper.Map<List<SubRow>>(expected));
+                .Returns(this.mapper.Map<List<SubRow>>(expected));
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, mapper);
+                var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, this.mapper);
                 var actual = target.SelectEntities(Select.From<SubRow>().WhereEqual(entity => entity.SubSubEntity.FakeSubSubEntityId, 5848)).ToList();
 
                 CollectionAssert.AreEqual(expected, actual);
@@ -795,13 +790,12 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            var mapper = this.mapperFactory.Create();
             repositoryProvider.Setup(provider => provider.DynamicSelect(It.IsAny<EntitySelection<SubRow>>()))
                 .Returns(expected);
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, mapper);
+                var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, this.mapper);
                 var actual = target.DynamicSelect(Select.From<SubRow>().WhereEqual(entity => entity.SubSubEntity.FakeSubSubEntityId, 5848));
                 Assert.AreSame(expected, actual);
             }

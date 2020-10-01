@@ -36,8 +36,8 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// <summary>
         /// The entity mapper.
         /// </summary>
-        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
-            new MapperConfiguration(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); }));
+        private readonly IEntityMapper mapper = new AutoMapperEntityMapper(
+            new Mapper(new MapperConfiguration(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); })));
 
         /// <summary>
         /// The configuration root.
@@ -105,12 +105,11 @@ namespace Startitecture.Orm.SqlClient.Tests
                              };
             
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
-            var entityMapper = this.mapperFactory.Create();
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var transaction = provider.StartTransaction();
-                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, entityMapper);
+                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
 
                 var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
                 var fieldValuesToDelete = provider.DynamicSelect(fieldSelection.Select(row => row.FieldId));
@@ -190,13 +189,12 @@ namespace Startitecture.Orm.SqlClient.Tests
                              };
             
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
-            var entityMapper = this.mapperFactory.Create();
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var transaction = provider.StartTransaction();
-                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, entityMapper);
-                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, entityMapper);
+                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
+                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
                 var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
                 var fieldValuesToDelete = fieldRepository.DynamicSelect(fieldSelection.Select(row => row.FieldId));
@@ -222,7 +220,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 
                 transaction.Commit();
 
-                var actual = entityMapper.Map<List<Field>>(results);
+                var actual = this.mapper.Map<List<Field>>(results);
                 CollectionAssert.AreEquivalent(expected, actual);
             }
         }
@@ -234,12 +232,11 @@ namespace Startitecture.Orm.SqlClient.Tests
         [TestCategory("Integration")]
         public void Insert_InsertIntoFromFieldTranslation_DoesNotThrowException()
         {
-            var mapper = this.mapperFactory.Create();
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var identityRepository = new SqlClientRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new SqlClientRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
                                      ?? identityRepository.Save(
@@ -316,13 +313,13 @@ namespace Startitecture.Orm.SqlClient.Tests
                     .ToDictionary(field => field.Name, field => field);
                 var inclusionValues = submissionFields.Keys.ToArray();
 
-                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldSelection = new EntitySelection<Field>().Include(field => field.Name, inclusionValues);
                 var existingFields = fieldRepository.SelectEntities(fieldSelection).ToList();
 
                 foreach (var field in existingFields)
                 {
-                    mapper.MapTo(field, submissionFields[field.Name]);
+                    this.mapper.MapTo(field, submissionFields[field.Name]);
                 }
 
                 var missingFields = submissionFields.Values.Except(existingFields).ToList();
@@ -337,10 +334,10 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 foreach (var field in insertedFields)
                 {
-                    mapper.MapTo(field, submissionFields[field.Name]);
+                    this.mapper.MapTo(field, submissionFields[field.Name]);
                 }
 
-                var submissionRepository = new SqlClientRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new SqlClientRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
                 var transaction = provider.StartTransaction();
 
@@ -358,7 +355,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                 LastModifiedTime = expected.SubmittedTime
                                             };
 
-                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, mapper);
+                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
                 // One field value per field.
                 var fieldValues = fieldValueRepository.InsertForResults(valuesList, transaction, insert => insert.SelectResults(row => row.FieldId));
@@ -370,7 +367,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 foreach (var value in fieldValues)
                 {
                     var output = submissionValues[value.FieldId];
-                    mapper.MapTo(value, output);
+                    this.mapper.MapTo(value, output);
                 }
 
                 // Attach the values to the submission
@@ -381,7 +378,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
                                                          };
 
-                var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 submissionValuesRepository.Insert(genericValueSubmissions, transaction, null);
 
                 // Do the field value elements
@@ -404,7 +401,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                    TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                                }).ToList();
 
-                var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, mapper);
+                var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
                 var fieldValueElements = fieldValueElementRepository.InsertForResults(
                         elementsList,
                         transaction,
@@ -416,40 +413,40 @@ namespace Startitecture.Orm.SqlClient.Tests
                 {
                     var input = fieldValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
                     element.FieldValueElementId = input.FieldValueElementId;
-                    mapper.MapTo(input, valueElements[new Tuple<long, int>(element.FieldValueId, element.Order)]);
+                    this.mapper.MapTo(input, valueElements[new Tuple<long, int>(element.FieldValueId, element.Order)]);
                 }
 
                 Assert.IsTrue(valueElements.Values.All(element => element.FieldValueElementId > 0));
 
-                var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, mapper);
+                var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
                 dateElementRepository.Insert(
                     elementsList.Where(row => row.DateElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
 
-                var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, mapper);
+                var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
                 floatElementRepository.Insert(
                     elementsList.Where(row => row.FloatElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
 
-                var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, mapper);
+                var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
                 integerElementRepository.Insert(
                     elementsList.Where(row => row.IntegerElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
 
-                var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, mapper);
+                var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
                 moneyElementRepository.Insert(
                     elementsList.Where(row => row.MoneyElement.HasValue),
                     transaction,
                     insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
                         .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
 
-                var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, mapper);
+                var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
                 textElementRepository.Insert(
                     elementsList.Where(row => row.TextElement != null),
                     transaction,
@@ -520,13 +517,12 @@ namespace Startitecture.Orm.SqlClient.Tests
                                  contactNumbers
                              };
             
-            var mapper = this.mapperFactory.Create();
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var transaction = provider.StartTransaction();
-                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, mapper);
+                var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
                 fieldRepository.Merge(
                     from f in fields
                     select new FieldTableTypeRow
@@ -595,12 +591,10 @@ namespace Startitecture.Orm.SqlClient.Tests
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
 
-            var mapper = this.mapperFactory.Create();
-
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 // Set up the domain identity, not part of our validity testing.
-                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, mapper);
+                var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
                                          Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
                                      ?? identityRepository.Save(
@@ -630,7 +624,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 baselineSubmission.SetValue(yearlyWage, 72150.35m); // gonna get updated so lets check that this value got scrapped
                 baselineSubmission.Submit();
 
-                this.MergeSubmission(baselineSubmission, provider, mapper);
+                this.MergeSubmission(baselineSubmission, provider);
             }
 
             Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
@@ -657,12 +651,12 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Using a new provider clears any provider-level caches
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                this.MergeSubmission(expected, provider, mapper);
+                this.MergeSubmission(expected, provider);
 
-                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
                 actual = submissionRepository.FirstOrDefault(expected.GenericSubmissionId);
 
-                var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+                var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 var values = fieldValueRepository.SelectEntities(
                         Select.From<GenericSubmissionValueRow>()
                             .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
@@ -715,13 +709,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// <param name="provider">
         /// The provider.
         /// </param>
-        /// <param name="mapper">
-        /// The mapper.
-        /// </param>
-        private void MergeSubmission(
-            GenericSubmission submission,
-            IRepositoryProvider provider,
-            IEntityMapper mapper)
+        private void MergeSubmission(GenericSubmission submission, IRepositoryProvider provider)
         {
             // Merge our existing fields
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
@@ -733,7 +721,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                         };
 
             // Merge in the field values.
-            var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, mapper);
+            var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
             var transaction = provider.StartTransaction();
 
             var fieldRows = fieldRepository.MergeForResults(
@@ -753,10 +741,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                     continue;
                 }
 
-                mapper.MapTo(input, field);
+                this.mapper.MapTo(input, field);
             }
 
-            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, mapper);
+            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
             submissionRepository.Save(submission);
 
             // Could be mapped as well.
@@ -770,7 +758,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
-            var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, mapper);
+            var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
             var mergedFieldValues = fieldValueRepository.MergeForResults(
                     fieldValues,
                     transaction,
@@ -783,7 +771,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             foreach (var value in submission.SubmissionValues)
             {
                 var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
-                mapper.MapTo(input, value);
+                this.mapper.MapTo(input, value);
                 Assert.IsTrue(value.FieldValueId.HasValue);
             }
 
@@ -802,7 +790,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                 TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                             }).ToList();
 
-            var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, mapper);
+            var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
             var mergedValueElements = valueElementRepository.MergeForResults(
                     valueElements,
                     transaction,
@@ -817,35 +805,35 @@ namespace Startitecture.Orm.SqlClient.Tests
                 element.FieldValueElementId = input.FieldValueElementId;
             }
 
-            var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, mapper);
+            var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
             dateElementRepository.MergeForResults(
                 valueElements.Where(row => row.DateElement.HasValue),
                 transaction,
                 merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
                     .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId));
 
-            var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, mapper);
+            var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
             floatElementRepository.MergeForResults(
                 valueElements.Where(row => row.FloatElement.HasValue),
                 transaction,
                 merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
                     .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId));
 
-            var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, mapper);
+            var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
             integerElementRepository.MergeForResults(
                 valueElements.Where(row => row.IntegerElement.HasValue),
                 transaction,
                 merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
                     .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId));
 
-            var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, mapper);
+            var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
             moneyElementRepository.MergeForResults(
                 valueElements.Where(row => row.MoneyElement.HasValue),
                 transaction,
                 merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
                     .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId));
 
-            var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, mapper);
+            var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
             textElementRepository.MergeForResults(
                 valueElements.Where(row => row.TextElement != null),
                 transaction,
@@ -860,7 +848,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                          GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
                                                      };
 
-            var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, mapper);
+            var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
             submissionValueRepository.Merge(
                 genericValueSubmissions,
                 transaction,

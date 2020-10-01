@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityRepositoryTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The entity repository tests.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common.Tests
@@ -31,18 +34,19 @@ namespace Startitecture.Orm.Common.Tests
         /// <summary>
         /// The mapper factory.
         /// </summary>
-        private readonly IEntityMapperFactory mapperFactory = new EntityMapperFactory(
-            new MapperConfiguration(
-                expression =>
-                    {
-                        expression.AddProfile<SubSubEntityMappingProfile>();
-                        expression.AddProfile<MultiReferenceEntityMappingProfile>();
-                        expression.AddProfile<CreatedByMappingProfile>();
-                        expression.AddProfile<ModifiedByMappingProfile>();
-                        expression.AddProfile<SubEntityMappingProfile>();
-                        expression.AddProfile<FakeComplexEntityMappingProfile>();
-                        expression.AddProfile<FakeDependentEntityMappingProfile>();
-                    }));
+        private readonly IEntityMapper mapper = new AutoMapperEntityMapper(
+            new Mapper(
+                new MapperConfiguration(
+                    expression =>
+                        {
+                            expression.AddProfile<SubSubEntityMappingProfile>();
+                            expression.AddProfile<MultiReferenceEntityMappingProfile>();
+                            expression.AddProfile<CreatedByMappingProfile>();
+                            expression.AddProfile<ModifiedByMappingProfile>();
+                            expression.AddProfile<SubEntityMappingProfile>();
+                            expression.AddProfile<FakeComplexEntityMappingProfile>();
+                            expression.AddProfile<FakeDependentEntityMappingProfile>();
+                        })));
 
         /// <summary>
         /// The save test.
@@ -71,11 +75,9 @@ namespace Startitecture.Orm.Common.Tests
                 .Callback((ComplexRaisedRow row) => row.ComplexEntityId = 43)
                 .Returns((ComplexRaisedRow row) => row);
 
-            var mapper = this.mapperFactory.Create();
-
             using (var provider = repositoryProvider.Object)
             {
-                var target = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, mapper);
+                var target = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var actual = target.Save(expected);
                 Assert.IsNotNull(actual.SubEntity);
                 Assert.IsNotNull(actual.SubEntity.SubSubEntity);
@@ -124,13 +126,12 @@ namespace Startitecture.Orm.Common.Tests
                                    ModifiedTime = DateTimeOffset.Now.AddHours(1)
                                };
 
-            var mapper = this.mapperFactory.Create();
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
             repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
-                .Returns(mapper.Map<ComplexRaisedRow>(baseline));
+                .Returns(this.mapper.Map<ComplexRaisedRow>(baseline));
 
             repositoryProvider.Setup(
                     provider => provider.Contains(
@@ -147,7 +148,7 @@ namespace Startitecture.Orm.Common.Tests
                                             Description = "UpdatedModifiedBy"
                                         };
 
-                var target = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, mapper);
+                var target = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var expected = target.FirstOrDefault(22);
                 expected.Description = "UpdatedEntity";
                 expected.ModifiedBy = newModifiedBy;
@@ -185,7 +186,6 @@ namespace Startitecture.Orm.Common.Tests
         [TestMethod]
         public void Delete_ItemById_ReturnsSingleRowDeleted()
         {
-            var mapper = this.mapperFactory.Create();
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
@@ -195,7 +195,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var repository = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, mapper);
+                var repository = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 actual = repository.Delete(14);
             }
 
@@ -208,7 +208,6 @@ namespace Startitecture.Orm.Common.Tests
         [TestMethod]
         public void Delete_ItemsBySelection_ReturnsMultipleRowsDeleted()
         {
-            var mapper = this.mapperFactory.Create();
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
@@ -218,7 +217,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, mapper);
+                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
                 actual = repository.Delete(new EntitySelection<SubSubEntity>().WhereEqual(entity => entity.UniqueName, "bar"));
             }
 
