@@ -22,13 +22,15 @@ namespace Startitecture.Orm.Model
         IEnumerable<SelectExpression> SelectExpressions { get; }
 
         /// <summary>
-        /// Gets the order by expressions for the selection.
+        /// Maps an <see cref="ISelection"/> to selection of the specified <typeparamref name="TDestEntity"/> type.
         /// </summary>
-        IEnumerable<OrderExpression> OrderByExpressions { get; }
-
-        /// <summary>
-        /// Gets the page options for the selection.
-        /// </summary>
-        ResultPage Page { get; }
+        /// <typeparam name="TDestEntity">
+        /// The type of entity to represent with the selection.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="ISelection"/> for the specified type.
+        /// </returns>
+        EntitySelection<TDestEntity> MapSelection<TDestEntity>()
+            where TDestEntity : class, new();
     }
 }

@@ -27,6 +27,7 @@ namespace Startitecture.Orm.Common.Tests
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Model;
+    using Startitecture.Orm.Testing.Model.Contracts;
     using Startitecture.Orm.Testing.Model.Entities;
 
     /// <summary>
@@ -50,6 +51,7 @@ namespace Startitecture.Orm.Common.Tests
                             expression.AddProfile<SubEntityMappingProfile>();
                             expression.AddProfile<FakeComplexEntityMappingProfile>();
                             expression.AddProfile<FakeDependentEntityMappingProfile>();
+                            expression.AddProfile<DocumentMappingProfile>();
                         })));
 
         /// <summary>
@@ -136,7 +138,7 @@ namespace Startitecture.Orm.Common.Tests
             using (var provider = repositoryProvider.Object)
             {
                 var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
-                var actual = target.Contains(Select.Where<ComplexRaisedRow>().WhereEqual(row => row.FakeSubEntityId, 22));
+                var actual = target.Contains(Query.From<ComplexRaisedRow>().Where(set => set.AreEqual(row => row.FakeSubEntityId, 22)));
                 Assert.IsTrue(actual);
             }
         }
@@ -156,7 +158,7 @@ namespace Startitecture.Orm.Common.Tests
             using (var provider = repositoryProvider.Object)
             {
                 var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
-                var actual = target.Contains(Select.Where<ComplexRaisedRow>().WhereEqual(row => row.FakeSubEntityId, 22));
+                var actual = target.Contains(Query.From<ComplexRaisedRow>().Where(set => set.AreEqual(row => row.FakeSubEntityId, 22)));
                 Assert.IsFalse(actual);
             }
         }
@@ -250,7 +252,7 @@ namespace Startitecture.Orm.Common.Tests
 
             repositoryProvider.Setup(
                     provider => provider.Contains(
-                        It.Is<EntitySet<ComplexRaisedRow>>(
+                        It.Is<IEntitySet>(
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
                 .Returns(true);
 
@@ -644,6 +646,84 @@ namespace Startitecture.Orm.Common.Tests
         }
 
         /// <summary>
+        /// The contains_ entity with dynamic unique key specified_ returns true.
+        /// </summary>
+        [TestMethod]
+        public void FirstOrDefault_EntitySet_ReturnsEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            var expected = new DocumentRow
+                               {
+                                   DocumentId = 423543,
+                                   DocumentVersionId = 1,
+                                   DocumentVersion = new DocumentVersionRow
+                                                         {
+                                                             DocumentVersionId = 1,
+                                                             Name = "foo1234",
+                                                             VersionNumber = 1
+                                                         },
+                                   Identifier = "1234-1"
+                               };
+
+            repositoryProvider.Setup(
+                    provider => provider.FirstOrDefault(
+                        It.Is<EntitySet<DocumentRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "1234-1")))
+                .Returns(expected);
+
+            var entityMapper = this.mapper;
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper, row => row.Identifier);
+                var actual = target.FirstOrDefault(Query.From<DocumentDto>().Where(set => set.AreEqual(dto => dto.Identifier, "1234-1")));
+                Assert.AreEqual(entityMapper.Map<Document>(expected), actual);
+            }
+        }
+
+        /// <summary>
+        /// The contains_ entity with dynamic unique key specified_ returns true.
+        /// </summary>
+        [TestMethod]
+        public void FirstOrDefault_EntitySetAction_ReturnsEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+
+            var expected = new DocumentRow
+                               {
+                                   DocumentId = 423543,
+                                   DocumentVersionId = 1,
+                                   DocumentVersion = new DocumentVersionRow
+                                                         {
+                                                             DocumentVersionId = 1,
+                                                             Name = "foo1234",
+                                                             VersionNumber = 1
+                                                         },
+                                   Identifier = "1234-1"
+                               };
+
+            repositoryProvider.Setup(
+                    provider => provider.FirstOrDefault(
+                        It.Is<EntitySet<DocumentRow>>(
+                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "1234-1")))
+                .Returns(expected);
+
+            var entityMapper = this.mapper;
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper, row => row.Identifier);
+                var actual = target.FirstOrDefault(select => select.Where(set => set.AreEqual(dto => dto.Identifier, "1234-1")));
+                Assert.AreEqual(entityMapper.Map<Document>(expected), actual);
+            }
+        }
+
+        /// <summary>
         /// The first or default test.
         /// </summary>
         [TestMethod]
@@ -661,7 +741,7 @@ namespace Startitecture.Orm.Common.Tests
 
             repositoryProvider.Setup(
                     provider => provider.DynamicFirstOrDefault(
-                        It.Is<EntitySelection<DocumentRow>>(
+                        It.Is<ISelection>(
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as int? == 43)))
                 .Returns(result);
 
@@ -671,12 +751,13 @@ namespace Startitecture.Orm.Common.Tests
             {
                 var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper, row => row.Identifier);
                 var actual = target.DynamicFirstOrDefault(
-                    Select.From<DocumentRow>(
-                            row => row.DocumentId,
-                            row => row.Identifier, 
-                            row => row.DocumentVersion.Name,
-                            row => row.DocumentVersion.VersionNumber)
-                        .WhereEqual(entity => entity.DocumentId, 43));
+                    Query.SelectEntities<DocumentRow>(
+                        select => select.Select(
+                                row => row.DocumentId,
+                                row => row.Identifier,
+                                row => row.DocumentVersion.Name,
+                                row => row.DocumentVersion.VersionNumber)
+                            .Where(set => set.AreEqual(entity => entity.DocumentId, 43))));
 
                 Assert.AreEqual(43, actual.DocumentId);
                 Assert.AreEqual("client.org.59432-002.pdf", actual.Identifier);
@@ -753,7 +834,9 @@ namespace Startitecture.Orm.Common.Tests
             using (var provider = repositoryProvider.Object)
             {
                 var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, this.mapper);
-                var actual = target.SelectEntities(Select.From<SubRow>().WhereEqual(entity => entity.SubSubEntity.FakeSubSubEntityId, 5848)).ToList();
+                var actual = target.SelectEntities(
+                        Query.Select<SubRow>().Where(set => set.AreEqual(entity => entity.SubSubEntity.FakeSubSubEntityId, 5848)))
+                    .ToList();
 
                 CollectionAssert.AreEqual(expected, actual);
 
@@ -796,7 +879,10 @@ namespace Startitecture.Orm.Common.Tests
             using (var provider = repositoryProvider.Object)
             {
                 var target = new ReadOnlyRepository<SubEntity, SubRow>(provider, this.mapper);
-                var actual = target.DynamicSelect(Select.From<SubRow>().WhereEqual(entity => entity.SubSubEntity.FakeSubSubEntityId, 5848));
+                var actual = target.DynamicSelect(
+                    Query.SelectEntities<SubRow>(
+                        select => select.Where(set => set.AreEqual(entity => entity.SubSubEntity.FakeSubSubEntityId, 5848))));
+
                 Assert.AreSame(expected, actual);
             }
         }

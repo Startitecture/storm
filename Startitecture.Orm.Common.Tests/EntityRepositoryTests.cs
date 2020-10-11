@@ -135,7 +135,7 @@ namespace Startitecture.Orm.Common.Tests
 
             repositoryProvider.Setup(
                     provider => provider.Contains(
-                        It.Is<EntitySet<ComplexRaisedRow>>(selection => (int?)selection.PropertyValues.FirstOrDefault() == 22)))
+                        It.Is<IEntitySet>(selection => (int?)selection.PropertyValues.FirstOrDefault() == 22)))
                 .Returns(true);
 
             repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<ComplexRaisedRow>>()))
@@ -189,7 +189,7 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.Delete(It.IsAny<EntitySelection<ComplexRaisedRow>>())).Returns(1);
+            repositoryProvider.Setup(provider => provider.Delete(It.IsAny<IEntitySet>())).Returns(1);
 
             int actual;
 
@@ -206,19 +206,41 @@ namespace Startitecture.Orm.Common.Tests
         /// The delete test.
         /// </summary>
         [TestMethod]
-        public void Delete_ItemsBySelection_ReturnsMultipleRowsDeleted()
+        public void DeleteSelection_ItemsBySelection_ReturnsMultipleRowsDeleted()
         {
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.Delete(It.IsAny<EntitySelection<SubSubRow>>())).Returns(5);
+            repositoryProvider.Setup(provider => provider.Delete(It.IsAny<IEntitySet>())).Returns(5);
 
             int actual;
 
             using (var provider = repositoryProvider.Object)
             {
                 var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
-                actual = repository.Delete(new EntitySelection<SubSubEntity>().WhereEqual(entity => entity.UniqueName, "bar"));
+                actual = repository.DeleteSelection(new EntitySet<SubSubEntity>().Where(set => set.AreEqual(entity => entity.UniqueName, "bar")));
+            }
+
+            Assert.AreEqual(5, actual);
+        }
+
+        /// <summary>
+        /// The delete test.
+        /// </summary>
+        [TestMethod]
+        public void DeleteEntities_ItemsBySelection_ReturnsMultipleRowsDeleted()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.Delete(It.IsAny<IEntitySet>())).Returns(5);
+
+            int actual;
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
+                actual = repository.DeleteEntities(set => set.Where(filterSet => filterSet.AreEqual(entity => entity.UniqueName, "bar")));
             }
 
             Assert.AreEqual(5, actual);

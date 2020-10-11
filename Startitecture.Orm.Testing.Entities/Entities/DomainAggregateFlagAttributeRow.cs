@@ -20,39 +20,40 @@ namespace Startitecture.Orm.Testing.Entities
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// The FlagAttribute entity POCO.
+    /// The DomainAggregateFlagAttribute entity POCO.
     /// </summary>
-    [Table("FlagAttribute", Schema = "dbo")]
+    [Table("DomainAggregateFlagAttribute", Schema = "dbo")]
     [System.CodeDom.Compiler.GeneratedCode("storm.Reverse.POCO.Generator", "1.0.0")]
-    public partial class FlagAttributeRow : EntityBase
+    public partial class DomainAggregateFlagAttributeRow : EntityBase
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="FlagAttributeRow"/> class.
+        /// Initializes a new instance of the <see cref="DomainAggregateFlagAttributeRow"/> class.
         /// </summary>
-        public FlagAttributeRow()
+        public DomainAggregateFlagAttributeRow()
         {
         }
 
         /// <summary>
+        /// Gets or sets the DomainAggregateId (Primary key)
+        /// </summary>
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column(@"DomainAggregateId", Order = 1, TypeName = "int")]
+        [Index(@"PK_DomainAggregateFlagAttribute", 1, IsUnique = true, IsClustered = true)]
+        [Required]
+        [Key]
+        [Display(Name = "Domain aggregate ID")]
+        public int DomainAggregateId { get; set; }
+
+        /// <summary>
         /// Gets or sets the FlagAttributeId (Primary key)
         /// </summary>
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        [Column(@"FlagAttributeId", Order = 1, TypeName = "int")]
-        [Index(@"PK_FlagAttribute", 1, IsUnique = true, IsClustered = true)]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
+        [Column(@"FlagAttributeId", Order = 2, TypeName = "int")]
+        [Index(@"PK_DomainAggregateFlagAttribute", 2, IsUnique = true, IsClustered = true)]
         [Required]
         [Key]
         [Display(Name = "Flag attribute ID")]
         public int FlagAttributeId { get; set; }
-
-        /// <summary>
-        /// Gets or sets the Name (length: 50)
-        /// </summary>
-        [Column(@"Name", Order = 2, TypeName = "nvarchar")]
-        [Required]
-        [MaxLength(50)]
-        [StringLength(50)]
-        [Display(Name = "Name")]
-        public string Name { get; set; }
     }
 
 }

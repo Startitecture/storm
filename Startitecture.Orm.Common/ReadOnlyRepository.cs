@@ -59,7 +59,7 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// The unique key expressions.
         /// </summary>
-        private readonly List<Expression<Func<TEntity, object>>> uniqueKeyExpressions = new List<Expression<Func<TEntity, object>>>();
+        private readonly List<LambdaExpression> uniqueKeyExpressions = new List<LambdaExpression>();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReadOnlyRepository{TModel,TEntity}"/> class.
@@ -135,9 +135,10 @@ namespace Startitecture.Orm.Common
             }
 
             var exampleEntity = this.GetExampleEntity(candidate);
-            var entitySet = this.uniqueKeyExpressions.Any() ?
-                                this.GetUniqueKeySet(exampleEntity) : 
-                                new EntitySet<TEntity>().MatchKey(exampleEntity, this.RepositoryProvider.EntityDefinitionProvider);
+            var entitySet = this.uniqueKeyExpressions.Any()
+                                ? this.GetUniqueKeySet(exampleEntity)
+                                : new EntitySet<TEntity>().Where(
+                                    set => set.MatchKey(exampleEntity, this.RepositoryProvider.EntityDefinitionProvider));
 
             return this.RepositoryProvider.Contains(entitySet);
         }
@@ -150,7 +151,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.RepositoryProvider.Contains(selection.MapTo<TEntity>());
+            return this.RepositoryProvider.Contains(selection.MapSet<TEntity>());
         }
 
         /// <inheritdoc />
@@ -164,15 +165,10 @@ namespace Startitecture.Orm.Common
             TModel entity;
 
             var exampleEntity = this.GetExampleEntity(candidate);
-            var entitySelection = this.GetUniqueItemSelection(exampleEntity);
+            var entitySet = this.GetUniqueItemSelection(exampleEntity);
+            entitySet.SetDefaultRelations(this.RepositoryProvider.EntityDefinitionProvider);
 
-            // Because we want to hydrate the entire entity, we need to add joins if available.
-            foreach (var relation in this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>().DefaultRelations)
-            {
-                entitySelection.AddRelation(relation);
-            }
-
-            var cacheResult = this.QueryCache(entitySelection);
+            var cacheResult = this.QueryCache(entitySet);
 
             if (cacheResult.Hit)
             {
@@ -180,7 +176,7 @@ namespace Startitecture.Orm.Common
             }
             else
             {
-                var dataItem = this.RepositoryProvider.FirstOrDefault(entitySelection);
+                var dataItem = this.RepositoryProvider.FirstOrDefault(entitySet);
 
                 if (Evaluate.IsNull(dataItem))
                 {
@@ -195,26 +191,40 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public TModel FirstOrDefault<TItem>([NotNull] EntitySelection<TItem> selection)
+        public TModel FirstOrDefault<TItem>([NotNull] EntitySet<TItem> selection)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var entity = this.RepositoryProvider.FirstOrDefault(selection.MapTo<TEntity>());
+            var entity = this.RepositoryProvider.FirstOrDefault(selection.MapSet<TEntity>());
             return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
         }
 
         /// <inheritdoc />
-        public dynamic DynamicFirstOrDefault<TItem>([NotNull] EntitySelection<TItem> selection)
+        public TModel FirstOrDefault([NotNull] Action<EntitySet<TModel>> defineSet)
+        {
+            if (defineSet == null)
+            {
+                throw new ArgumentNullException(nameof(defineSet));
+            }
+
+            var modelSet = new EntitySet<TModel>();
+            defineSet.Invoke(modelSet);
+            var entity = this.RepositoryProvider.FirstOrDefault(modelSet.MapSet<TEntity>());
+            return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
+        }
+
+        /// <inheritdoc />
+        public dynamic DynamicFirstOrDefault([NotNull] ISelection selection)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.RepositoryProvider.DynamicFirstOrDefault(selection.MapTo<TEntity>());
+            return this.RepositoryProvider.DynamicFirstOrDefault(selection.MapSelection<TEntity>());
         }
 
         /// <inheritdoc />
@@ -226,14 +236,14 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public IEnumerable<TModel> SelectEntities<TItem>([NotNull] EntitySelection<TItem> selection)
+        public IEnumerable<TModel> SelectEntities<TItem>([NotNull] EntitySet<TItem> selection)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var mappedSelection = selection.MapTo<TEntity>();
+            var mappedSelection = selection.MapSet<TEntity>();
             var entities = this.RepositoryProvider.SelectEntities(mappedSelection);
             return this.SelectResults(entities);
         }
@@ -246,7 +256,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.RepositoryProvider.DynamicSelect(selection.MapTo<TEntity>());
+            return this.RepositoryProvider.DynamicSelect(selection.MapSelection<TEntity>());
         }
 
         /// <summary>
@@ -260,16 +270,18 @@ namespace Startitecture.Orm.Common
         /// </returns>
         protected virtual EntitySelection<TEntity> GetUniqueItemSelection(TEntity entity)
         {
-            if (this.uniqueKeyExpressions.Count == 0)
-            {
-                return new UniqueQuery<TEntity>(this.RepositoryProvider.EntityDefinitionProvider, entity);
-            }
-
             var entitySelection = new EntitySelection<TEntity>();
 
-            foreach (var keyExpression in this.uniqueKeyExpressions)
+            if (this.uniqueKeyExpressions.Count == 0)
             {
-                entitySelection.WhereEqual(keyExpression, keyExpression.Compile().Invoke(entity));
+                entitySelection.Where(set => set.MatchKey(entity, this.RepositoryProvider.EntityDefinitionProvider));
+            }
+            else
+            {
+                foreach (var keyExpression in this.uniqueKeyExpressions)
+                {
+                    entitySelection.Where(set => set.AreEqual(keyExpression, keyExpression.Compile().DynamicInvoke(entity)));
+                }
             }
 
             return entitySelection;
@@ -516,14 +528,14 @@ namespace Startitecture.Orm.Common
         /// </returns>
         private EntitySet<TEntity> GetUniqueKeySet(TEntity exampleEntity)
         {
-            var set = new EntitySet<TEntity>();
+            var selection = new EntitySet<TEntity>();
 
             foreach (var keyExpression in this.uniqueKeyExpressions)
             {
-                set.WhereEqual(keyExpression, keyExpression.Compile().Invoke(exampleEntity));
+                selection.Where(set => set.AreEqual(keyExpression, keyExpression.Compile().DynamicInvoke(exampleEntity)));
             }
 
-            return set;
+            return selection;
         }
 
         /// <summary>
@@ -535,7 +547,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// <c>true</c> if the entity is found; otherwise, <c>false</c>.
         /// </returns>
-        private CacheResult<TModel> QueryCache(EntitySelection<TEntity> selection)
+        private CacheResult<TModel> QueryCache(EntitySet<TEntity> selection)
         {
             var key = string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TModel).ToRuntimeName(), selection);
             var cacheResult = new CacheResult<TModel>(default, false, key);

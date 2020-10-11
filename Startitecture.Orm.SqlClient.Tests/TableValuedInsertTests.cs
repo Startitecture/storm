@@ -125,13 +125,14 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
                 // Delete the existing rows.
-                var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
+                var fieldSelection = Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%"));
                 var existingFields = fieldRepository.SelectEntities(fieldSelection);
 
-                fieldValueRepository.Delete(
-                    Select.From<FieldValueRow>().Include(row => row.FieldId, existingFields.Select(field => field.FieldId).ToArray()));
+                fieldValueRepository.DeleteSelection(
+                    Query.Select<FieldValueRow>()
+                        .Where(set => set.Include(row => row.FieldId, existingFields.Select(field => field.FieldId).ToArray())));
 
-                fieldRepository.Delete(fieldSelection);
+                fieldRepository.DeleteSelection(fieldSelection);
                 var fieldInsertCommand = new TableValuedInsert<FieldRow>(structuredCommandProvider, transaction);
 
                 fieldInsertCommand.Execute(
@@ -160,7 +161,8 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
 
                 var domainIdentity = identityRepository.FirstOrDefault(
-                                         Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
+                                         Query.Select<DomainIdentity>()
+                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
                                              {
@@ -227,7 +229,8 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // TODO: Return names only from the repo as a dynamic
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
-                var existingFields = fieldRepository.SelectEntities(new EntitySelection<Field>().Include(field => field.Name, inclusionValues));
+                var existingFields = fieldRepository.SelectEntities(
+                    new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues)));
 
                 foreach (var field in existingFields)
                 {

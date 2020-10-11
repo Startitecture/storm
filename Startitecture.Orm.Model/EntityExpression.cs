@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityExpression.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Expresses a named entity selection that is related to another entity set or selection.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -14,66 +17,137 @@ namespace Startitecture.Orm.Model
     using Startitecture.Resources;
 
     /// <summary>
-    /// Represents a table expression.
+    /// Expresses a named entity selection that is related to another entity set or selection.
     /// </summary>
-    public class EntityExpression
+    /// <typeparam name="T">
+    /// The type of entity that the expression is based on.
+    /// </typeparam>
+    public class EntityExpression<T> : IEntityExpression
     {
         /// <summary>
         /// The table relations.
         /// </summary>
-        private readonly List<IEntityRelation> tableRelations = new List<IEntityRelation>();
+        private readonly List<IEntityRelation> relations = new List<IEntityRelation>();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EntityExpression"/> class.
+        /// Gets the expression name.
         /// </summary>
-        /// <param name="tableSelection">
-        /// The table selection.
+        public string Name { get; private set; }
+
+        /// <summary>
+        /// Gets the entity selection in the expression.
+        /// </summary>
+        public ISelection Expression { get; private set; }
+
+        /// <summary>
+        /// Gets the table relations between the expression and the other set or selection.
+        /// </summary>
+        public IEnumerable<IEntityRelation> Relations => this.relations;
+
+        /// <summary>
+        /// Defines the entity set and name of the expression.
+        /// </summary>
+        /// <param name="expression">
+        /// A selection expression that defines the result set to create.
         /// </param>
-        /// <param name="tableName">
-        /// The table name.
+        /// <param name="name">
+        /// The name to use to alias the expression.
         /// </param>
-        /// <param name="relations">
-        /// The relations between the table expression and the dependent entity selection.
-        /// </param>
+        /// <returns>
+        /// The current <see cref="EntityExpression{T}"/>.
+        /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="tableSelection"/> or <paramref name="relations"/> is null.
+        /// <paramref name="expression"/> is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// <paramref name="tableName"/> is null or whitespace.
+        /// <paramref name="name"/> is null or whitespace.
         /// </exception>
-        public EntityExpression(
-            [NotNull] ISelection tableSelection,
-            [NotNull] string tableName,
-            [NotNull] IEnumerable<IEntityRelation> relations)
+        public EntityExpression<T> As([NotNull] ISelection expression, string name)
         {
-            if (relations == null)
+            this.Expression = expression ?? throw new ArgumentNullException(nameof(expression));
+
+            if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentNullException(nameof(relations));
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(name));
             }
 
-            if (string.IsNullOrWhiteSpace(tableName))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(tableName));
-            }
-
-            this.TableSelection = tableSelection ?? throw new ArgumentNullException(nameof(tableSelection));
-            this.TableName = tableName;
-            this.tableRelations.AddRange(relations);
+            this.Name = name;
+            return this;
         }
 
         /// <summary>
-        /// Gets the table name.
+        /// Defines the entity set and name of the expression.
         /// </summary>
-        public string TableName { get; }
+        /// <param name="defineQuery">
+        /// A selection expression that defines the result set to create.
+        /// </param>
+        /// <param name="name">
+        /// The name to use to alias the expression.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="EntityExpression{T}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="defineQuery"/> is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="name"/> is null or whitespace.
+        /// </exception>
+        public EntityExpression<T> As(Action<EntitySelection<T>> defineQuery, string name)
+        {
+            if (defineQuery == null)
+            {
+                throw new ArgumentNullException(nameof(defineQuery));
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(name));
+            }
+
+            var expression = new EntitySelection<T>();
+            defineQuery.Invoke(expression);
+            this.Expression = expression;
+            this.Name = name;
+            return this;
+        }
 
         /// <summary>
-        /// Gets the table selection.
+        /// Creates a selection based on the current entity expression.
         /// </summary>
-        public ISelection TableSelection { get; }
+        /// <param name="matchAttributes">
+        /// The attributes that match between the entity expression and the target selection.
+        /// </param>
+        /// <typeparam name="TSelection">
+        /// The type of entity to be returned by the target selection.
+        /// </typeparam>
+        /// <returns>
+        /// A new <see cref="EntitySelection{T}"/> for entities of type <typeparamref name="TSelection"/>, with the current entity expression as the
+        /// <see cref="EntitySelection{T}.ParentExpression"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="matchAttributes"/> is null.
+        /// </exception>
+        public EntitySelection<TSelection> ForSelection<TSelection>([NotNull] Action<AttributeMatchSet<T, TSelection>> matchAttributes)
+        {
+            if (matchAttributes == null)
+            {
+                throw new ArgumentNullException(nameof(matchAttributes));
+            }
 
-        /// <summary>
-        /// The table relations.
-        /// </summary>
-        public IEnumerable<IEntityRelation> TableRelations => this.tableRelations;
+            var attributeMatchSet = new AttributeMatchSet<T, TSelection>();
+            matchAttributes.Invoke(attributeMatchSet);
+
+            foreach (var attributeMatch in attributeMatchSet.Matches)
+            {
+                var entityRelation = new EntityRelation(EntityRelationType.InnerJoin);
+                entityRelation.Join(attributeMatch.SourceExpression, attributeMatch.RelationExpression);
+                this.relations.Add(entityRelation);
+            }
+
+            var selection = new EntitySelection<TSelection>();
+            selection.WithAs(this);
+            return selection;
+        }
     }
 }

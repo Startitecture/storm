@@ -9,6 +9,8 @@
 
 namespace Startitecture.Orm.Model
 {
+    using System;
+
     /// <summary>
     /// Provides an interface to an entity repository.
     /// </summary>
@@ -43,17 +45,25 @@ namespace Startitecture.Orm.Model
         int Delete<TItem>(TItem example);
 
         /// <summary>
-        /// Deletes all entities matching the selection.
+        /// Delete entities matching the set of <typeparamref name="TModel"/> models in <paramref name="defineSet"/>.
         /// </summary>
-        /// <param name="selection">
-        /// The selection to delete.
+        /// <param name="defineSet">
+        /// Define the set of entities to delete.
         /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item that contains properties that can be mapped to an item selection for the repository entities.
-        /// </typeparam>
         /// <returns>
         /// The number of items affected as an <see cref="int"/>.
         /// </returns>
-        int Delete<TItem>(EntitySelection<TItem> selection);
+        int DeleteEntities(Action<EntitySet<TModel>> defineSet);
+
+        /// <summary>
+        /// Deletes all entities matching the entity set.
+        /// </summary>
+        /// <param name="entitySet">
+        /// The entity set to delete.
+        /// </param>
+        /// <returns>
+        /// The number of items affected as an <see cref="int"/>.
+        /// </returns>
+        int DeleteSelection(IEntitySet entitySet);
     }
 }

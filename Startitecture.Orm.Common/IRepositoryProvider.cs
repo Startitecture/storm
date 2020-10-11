@@ -83,16 +83,13 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Determines whether an entity exists given the specified unique key.
         /// </summary>
-        /// <typeparam name="T">
-        /// The type of entity in the repository.
-        /// </typeparam>
         /// <param name="selection">
         /// A selection for the specified entity or entities to query for existence. 
         /// </param>
         /// <returns>
         /// <c>true</c> if the entity exists; otherwise, <c>false</c>.
         /// </returns>
-        bool Contains<T>(EntitySet<T> selection);
+        bool Contains(IEntitySet selection);
 
         /// <summary>
         /// Gets a scalar result from the specified query.
@@ -114,13 +111,13 @@ namespace Startitecture.Orm.Common
         /// <typeparam name="T">
         /// The type of entity in the repository.
         /// </typeparam>
-        /// <param name="selection">
+        /// <param name="entitySet">
         /// A selection for the specified entity to return. 
         /// </param>
         /// <returns>
         /// The first <typeparamref name="T"/> entity matching the filter, or the default value if no matching entity is found.
         /// </returns>
-        T FirstOrDefault<T>(EntitySelection<T> selection);
+        T FirstOrDefault<T>(EntitySet<T> entitySet);
 
         /// <summary>
         /// Gets the first dynamic result matching the <paramref name="selection"/>, or the default value if the entity cannot be found.
@@ -145,7 +142,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A collection of entities that match the filter.
         /// </returns>
-        IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection);
+        IEnumerable<T> SelectEntities<T>(EntitySet<T> selection);
 
         /// <summary>
         /// Selects a collection of dynamic objects matching the <paramref name="selection"/>.
@@ -204,18 +201,15 @@ namespace Startitecture.Orm.Common
         void UpdateSingle<T>(T entity, params Expression<Func<T, object>>[] setExpressions);
 
         /// <summary>
-        /// Deletes the entities matching the filter.
+        /// Deletes the entities matching the set.
         /// </summary>
-        /// <typeparam name="T">
-        /// The type of entity in the repository.
-        /// </typeparam>
-        /// <param name="selection">
-        /// A selection for the specified entities to delete. 
+        /// <param name="entitySet">
+        /// The entity set to delete. 
         /// </param>
         /// <returns>
         /// The number of deleted entities as an <see cref="int"/>.
         /// </returns>
-        int Delete<T>(EntitySelection<T> selection);
+        int Delete(IEntitySet entitySet);
 
         /// <summary>
         /// Executes the specified operation.

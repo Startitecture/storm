@@ -22,12 +22,12 @@ namespace Startitecture.Orm.Model
     /// <summary>
     /// Contains a filter for a specific item attribute.
     /// </summary>
-    public class ValueFilter : IEquatable<ValueFilter>
+    public class ValueFilter : IEquatable<ValueFilter>, IValueFilter
     {
         /// <summary>
         /// Selects all of the non-null values from the value filter.
         /// </summary>
-        public static readonly Func<ValueFilter, IEnumerable<object>> SelectNonNullValues = x => x.FilterValues.Where(v => v != null); 
+        public static readonly Func<IValueFilter, IEnumerable<object>> SelectNonNullValues = x => x.FilterValues.Where(v => v != null); 
 
         #region Constants
 
@@ -130,19 +130,13 @@ namespace Startitecture.Orm.Model
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets the attribute location.
-        /// </summary>
+        /// <inheritdoc />
         public AttributeLocation AttributeLocation { get; }
 
-        /// <summary>
-        /// Gets the filter type for this value filter.
-        /// </summary>
+        /// <inheritdoc />
         public FilterType FilterType { get; }
 
-        /// <summary>
-        /// Gets the filter values for the current filter.
-        /// </summary>
+        /// <inheritdoc />
         public IEnumerable<object> FilterValues => this.values;
 
         #endregion

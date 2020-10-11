@@ -222,17 +222,18 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var itemSelection = Select.From<DomainAggregateRow>()
-                    .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
-                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
-                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
-                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
-                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
-                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
-                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
-                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
-                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
+                var itemSelection = Query.Select<DomainAggregateRow>()
+                    .From(
+                        set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                            .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                            .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                            .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                            .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                            .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                            .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                            .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                    .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId));
 
                 var actual = target.SelectEntities(itemSelection).OrderBy(x => x.Name).ToList();
                 Assert.AreEqual(
@@ -241,6 +242,289 @@ namespace Startitecture.Orm.SqlClient.Tests
                     string.Join(Environment.NewLine, expected.First().GetDifferences(actual.First())));
 
                 CollectionAssert.AreEqual(expected, actual);
+            }
+        }
+
+        /// <summary>
+        /// The get selection test.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void SelectEntities_ExistingDomainAggregatesWithSubQuery_MatchesExpected()
+        {
+            var flag1 = new FlagAttributeRow
+                            {
+                                Name = $"UNIT_TEST:Flag1-{Generator.Next(int.MaxValue)}"
+                            };
+
+            var flag2 = new FlagAttributeRow
+                            {
+                                Name = $"UNIT_TEST:Flag2-{Generator.Next(int.MaxValue)}"
+                            };
+
+            var flag3 = new FlagAttributeRow
+                            {
+                                Name = $"UNIT_TEST:Flag3-{Generator.Next(int.MaxValue)}"
+                            };
+
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
+
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            {
+                var topContainer2 = new TopContainerRow
+                                        {
+                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                                        };
+
+                target.Insert(topContainer2);
+
+                var subContainerA = new SubContainerRow
+                                        {
+                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                                            TopContainer = topContainer2,
+                                            TopContainerId = topContainer2.TopContainerId
+                                        };
+
+                target.Insert(subContainerA);
+
+                var categoryAttribute20 = new CategoryAttributeRow
+                                              {
+                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                                                  IsActive = true,
+                                                  IsSystem = false
+                                              };
+
+                target.Insert(categoryAttribute20);
+
+                var timBobIdentity = new DomainIdentityRow
+                                         {
+                                             FirstName = "Tim",
+                                             LastName = "Bob",
+                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                                         };
+
+                target.Insert(timBobIdentity);
+
+                var fooBarIdentity = new DomainIdentityRow
+                                         {
+                                             FirstName = "Foo",
+                                             LastName = "Bar",
+                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                                         };
+
+                target.Insert(fooBarIdentity);
+
+                var otherAggregate10 = new OtherAggregateRow
+                                           {
+                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                                               AggregateOptionTypeId = 3
+                                           };
+
+                target.Insert(otherAggregate10);
+
+                var template23 = new TemplateRow
+                                     {
+                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                                     };
+
+                target.Insert(template23);
+
+                var aggregateOption1 = new AggregateOptionRow
+                                           {
+                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                                               AggregateOptionTypeId = 2,
+                                               Value = 439034.0332m
+                                           };
+
+                var aggregateOption2 = new AggregateOptionRow
+                                           {
+                                               Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                                               AggregateOptionTypeId = 4,
+                                               Value = 32453253
+                                           };
+
+                var domainAggregate1 = new DomainAggregateRow
+                                           {
+                                               AggregateOption = aggregateOption1,
+                                               CategoryAttribute = categoryAttribute20,
+                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                                               Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                                               Description = "My First Domain Aggregate",
+                                               CreatedBy = timBobIdentity,
+                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                                               LastModifiedBy = fooBarIdentity,
+                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                                               LastModifiedTime = DateTimeOffset.Now,
+                                               SubContainer = subContainerA,
+                                               SubContainerId = subContainerA.SubContainerId,
+                                               Template = template23,
+                                               TemplateId = template23.TemplateId
+                                           };
+                var domainAggregate2 = new DomainAggregateRow
+                                           {
+                                               AggregateOption = aggregateOption2,
+                                               CategoryAttribute = categoryAttribute20,
+                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                                               Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                                               Description = "My Second Domain Aggregate",
+                                               CreatedBy = timBobIdentity,
+                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                                               LastModifiedBy = fooBarIdentity,
+                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                                               LastModifiedTime = DateTimeOffset.Now,
+                                               OtherAggregate = otherAggregate10,
+                                               SubContainer = subContainerA,
+                                               SubContainerId = subContainerA.SubContainerId,
+                                               Template = template23,
+                                               TemplateId = template23.TemplateId
+                                           };
+                var domainAggregate3 = new DomainAggregateRow
+                                           {
+                                               CategoryAttribute = categoryAttribute20,
+                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                                               Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                                               Description = "My Third Domain Aggregate",
+                                               CreatedBy = timBobIdentity,
+                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                                               LastModifiedBy = timBobIdentity,
+                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                                               LastModifiedTime = DateTimeOffset.Now,
+                                               SubContainer = subContainerA,
+                                               SubContainerId = subContainerA.SubContainerId,
+                                               Template = template23,
+                                               TemplateId = template23.TemplateId
+                                           };
+
+                target.Insert(domainAggregate1);
+                target.Insert(domainAggregate2);
+                target.Insert(domainAggregate3);
+
+                aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
+                target.Insert(aggregateOption1);
+
+                aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
+                target.Insert(aggregateOption2);
+
+                var associationRow = new AssociationRow
+                                         {
+                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
+                                             OtherAggregateId = otherAggregate10.OtherAggregateId
+                                         };
+
+                target.Insert(associationRow);
+
+                target.Insert(flag1);
+                target.Insert(flag2);
+                target.Insert(flag3);
+
+                var flagAssociation1 = new DomainAggregateFlagAttributeRow
+                                           {
+                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
+                                               FlagAttributeId = flag1.FlagAttributeId
+                                           };
+
+                // Test our INNER JOIN will bring back a distinct result
+                var flagAssociation2 = new DomainAggregateFlagAttributeRow
+                                           {
+                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
+                                               FlagAttributeId = flag2.FlagAttributeId
+                                           };
+
+                var flagAssociation3 = new DomainAggregateFlagAttributeRow
+                                           {
+                                               DomainAggregateId = domainAggregate2.DomainAggregateId,
+                                               FlagAttributeId = flag3.FlagAttributeId
+                                           };
+
+                var flagAssociation4 = new DomainAggregateFlagAttributeRow
+                                           {
+                                               DomainAggregateId = domainAggregate3.DomainAggregateId,
+                                               FlagAttributeId = flag2.FlagAttributeId
+                                           };
+
+                var flagAssociation5 = new DomainAggregateFlagAttributeRow
+                                           {
+                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
+                                               FlagAttributeId = flag3.FlagAttributeId
+                                           };
+
+                target.Insert(flagAssociation1);
+                target.Insert(flagAssociation2);
+                target.Insert(flagAssociation3);
+                target.Insert(flagAssociation4);
+                target.Insert(flagAssociation5);
+
+                var expected1 = new List<DomainAggregateRow>
+                                    {
+                                        domainAggregate1,
+                                    };
+
+                // Test that we only get a single domain aggregate 1.
+                var itemSelection1 = Query.Select<DomainAggregateRow>()
+                    .From(
+                        set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                            .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                            .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                            .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                            .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                            .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                            .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                            .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                    .Where(
+                        set => set.AreEqual(row => row.AggregateOption.AggregateOptionId, domainAggregate1.AggregateOption.AggregateOptionId)
+                            .ExistsIn(
+                                row => row.DomainAggregateId,
+                                Query.From<DomainAggregateFlagAttributeRow>(
+                                        sub => sub.InnerJoin<FlagAttributeRow>(row => row.FlagAttributeId, row => row.FlagAttributeId))
+                                    .Where(sub => sub.Include((FlagAttributeRow flagRow) => flagRow.Name, flag1.Name, flag2.Name)),
+                                row => row.DomainAggregateId));
+
+                var actual1 = target.SelectEntities(itemSelection1).OrderBy(x => x.Name).ToList();
+                Assert.AreEqual(expected1.First(), actual1.First(), string.Join(Environment.NewLine, expected1.First().GetDifferences(actual1.First())));
+                CollectionAssert.AreEqual(expected1, actual1);
+
+                // Test that we get all the aggregates.
+                var expected2 = new List<DomainAggregateRow>
+                                {
+                                    domainAggregate1,
+                                    domainAggregate2,
+                                    domainAggregate3
+                                };
+
+                var itemSelection2 = Query.Select<DomainAggregateRow>()
+                    .From(
+                        set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                            .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                            .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                            .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                            .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                            .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                            .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                            .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                    .Where(
+                        set => set.AreEqual(row => row.SubContainerId, domainAggregate1.SubContainerId)
+                            .ExistsIn(
+                                row => row.DomainAggregateId,
+                                Query.From<DomainAggregateFlagAttributeRow>(
+                                        sub => sub.InnerJoin<FlagAttributeRow>(row => row.FlagAttributeId, row => row.FlagAttributeId))
+                                    .Where(
+                                        sub => sub.Include(
+                                            (FlagAttributeRow flagRow) => flagRow.Name,
+                                            flag1.Name,
+                                            flag2.Name,
+                                            flag3.Name,
+                                            "Foo",
+                                            "Bar")),
+                                row => row.DomainAggregateId));
+
+                var actual2 = target.SelectEntities(itemSelection2).OrderBy(x => x.Name).ToList();
+                Assert.AreEqual(expected2.First(), actual2.First(), string.Join(Environment.NewLine, expected1.First().GetDifferences(actual1.First())));
+                CollectionAssert.AreEqual(expected2, actual2);
             }
         }
 
@@ -416,22 +700,24 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var itemSelection = Select
-                    .From<DomainAggregateRow>(
-                        row => row.Name,
-                        row => row.CategoryAttribute.IsSystem,
-                        row => row.CreatedBy.UniqueIdentifier,
-                        row => row.SubContainer.TopContainer.Name)
-                    .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
-                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
-                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
-                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
-                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
-                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
-                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
-                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
-                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
+                var itemSelection = Query.SelectEntities<DomainAggregateRow>(
+                    select => select
+                        .Select(
+                            row => row.Name,
+                            row => row.CategoryAttribute.IsSystem,
+                            row => row.CreatedBy.UniqueIdentifier,
+                            row => row.SubContainer.TopContainer.Name)
+                        .From(
+                            set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                                .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                                .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                                .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                                .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                                .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                                .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                                .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                                .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                        .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId)));
 
                 var actual = target.DynamicSelect(itemSelection).OrderBy(x => x.Name).ToList();
 
@@ -666,43 +952,46 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var countQuery = Select.From<DomainAggregateRow>()
-                    .Count(row => row.DomainAggregateId)
-                    .WhereEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId);
+                var countQuery = Query.SelectEntities<DomainAggregateRow>(
+                    select => select.Count(row => row.DomainAggregateId)
+                        .From(set => set.InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId))
+                        .Where(set => set.AreEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId)));
 
+                // TODO: How will we label our aggregate columns?
                 var count = target.GetScalar<int>(countQuery);
 
                 Assert.AreEqual(5, count);
 
-                var tableExpression = Select.From<DomainAggregateRow>(row => row.DomainAggregateId)
-                    .WhereEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId)
-                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
-                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
-                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
-                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
-                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
-                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
-                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
-                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId)
-                    .Skip(0)
-                    .Take(3)
-                    .OrderBy(row => row.Name);
+                var tableExpression = Query.SelectEntities<DomainAggregateRow>(
+                    select => select.Select(row => row.DomainAggregateId)
+                        .From(
+                            set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                                .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                                .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                                .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                                .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                                .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                                .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                                .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                                .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                        .Where(set => set.AreEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId))
+                        .Sort(set => set.OrderBy(row => row.Name))
+                        .Seek(subset => subset.Skip(0).Take(3)));
 
-                var selection = Select.From<DomainAggregateRow>()
-                    .WhereEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId)
-                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
-                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
-                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
-                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
-                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
-                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
-                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
-                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId)
-                    .OrderBy(row => row.Name)
-                    .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.DomainAggregateId, row => row.DomainAggregateId));
+                var selection = Query.With(tableExpression, "pgCte")
+                    .ForSelection<DomainAggregateRow>(matches => matches.On(row => row.DomainAggregateId, row => row.DomainAggregateId))
+                    .From(
+                        set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                            .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                            .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                            .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                            .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                            .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                            .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                            .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                    .Where(set => set.AreEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId))
+                    .Sort(set => set.OrderBy(row => row.Name));
 
                 var actualPage1 = target.SelectEntities(selection).ToList();
                 Assert.AreEqual(
@@ -713,7 +1002,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 CollectionAssert.AreEqual(expectedPage1, actualPage1);
 
                 // Advance the number of rows
-                selection.ParentExpression.TableSelection.Page.SetPage(2);
+                selection.ParentExpression.Expression.Page.SetPage(2);
 
                 var actualPage2 = target.SelectEntities(selection).ToList();
                 Assert.AreEqual(
@@ -905,36 +1194,38 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var itemSelection = Select.From<DomainAggregateRow>()
-                    .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
-                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
-                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
-                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
-                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
-                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
-                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
-                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
-                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId)
-                    .OrderBy(row => row.Name);
+                var itemSelection = Query.Select<DomainAggregateRow>()
+                    .From(
+                        set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                            .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                            .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                            .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                            .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                            .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                            .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                            .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                    .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId))
+                    .Sort(set => set.OrderBy(row => row.Name));
 
                 var actual = target.SelectEntities(itemSelection).ToList();
                 Assert.AreEqual(expected.First(), actual.First(), string.Join(Environment.NewLine, expected.First().GetDifferences(actual.First())));
 
                 CollectionAssert.AreEqual(expected, actual);
 
-                var itemSelectionDesc = Select.From<DomainAggregateRow>()
-                    .WhereEqual(row => row.SubContainerId, expected.First().SubContainerId)
-                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
-                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
-                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
-                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
-                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
-                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
-                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
-                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId)
-                    .OrderByDescending(row => row.Name);
+                var itemSelectionDesc = Query.Select<DomainAggregateRow>()
+                    .From(
+                        set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                            .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                            .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                            .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                            .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                            .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                            .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                            .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                    .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId))
+                    .Sort(set => set.OrderByDescending(row => row.Name));
 
                 var actualDesc = target.SelectEntities(itemSelectionDesc).ToList();
                 Assert.AreEqual(
@@ -971,7 +1262,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             // New context again
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.FirstOrDefault(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)));
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
@@ -1072,17 +1363,18 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var itemSelection = Select.From<DomainAggregateRow>()
-                    .WhereEqual(row => row.DomainAggregateId, expected.DomainAggregateId)
-                    .LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
-                    .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
-                    .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
-                    .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
-                    .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
-                    .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
-                    .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
-                    .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
-                    .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId);
+                var itemSelection = Query.Select<DomainAggregateRow>()
+                    .From(
+                        set => set.LeftJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .LeftJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId)
+                            .InnerJoin(row => row.CategoryAttributeId, row => row.CategoryAttribute.CategoryAttributeId)
+                            .InnerJoin(row => row.CreatedByDomainIdentityId, row => row.CreatedBy.DomainIdentityId)
+                            .LeftJoin(row => row.DomainAggregateId, row => row.AggregateOption.AggregateOptionId)
+                            .InnerJoin(row => row.LastModifiedByDomainIdentityId, row => row.LastModifiedBy.DomainIdentityId)
+                            .InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId)
+                            .InnerJoin(row => row.SubContainer.TopContainerId, row => row.SubContainer.TopContainer.TopContainerId)
+                            .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
+                    .Where(set => set.AreEqual(row => row.DomainAggregateId, expected.DomainAggregateId));
 
                 var actual = target.FirstOrDefault(itemSelection);
 
@@ -1103,7 +1395,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, -13));
+                var actual = target.FirstOrDefault(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, -13)));
                 Assert.IsNull(actual);
             }
         }
@@ -1128,9 +1420,9 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 target.Insert(timBobIdentity);
 
-                var entitySelection = new EntitySelection<DomainIdentityRow>()
-                    .Select(row => row.UniqueIdentifier)
-                    .WhereEqual(row => row.DomainIdentityId, timBobIdentity.DomainIdentityId);
+                var entitySelection = Query.SelectEntities<DomainIdentityRow>(
+                    select => select.Select(row => row.UniqueIdentifier)
+                        .Where(set => set.AreEqual(row => row.DomainIdentityId, timBobIdentity.DomainIdentityId)));
 
                 var actual = target.DynamicFirstOrDefault(entitySelection);
                 Assert.AreEqual(timBobIdentity.UniqueIdentifier, actual.UniqueIdentifier);
@@ -1162,7 +1454,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             // New context again
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.Contains(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)));
                 Assert.IsTrue(actual);
             }
         }
@@ -1178,7 +1470,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, -13));
+                var actual = target.Contains(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, -13)));
                 Assert.IsFalse(actual);
             }
         }
@@ -1210,9 +1502,9 @@ namespace Startitecture.Orm.SqlClient.Tests
             // New context again
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                target.Delete(Select.From<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                target.Delete(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)));
 
-                var actual = target.Contains(Select.Where<FieldRow>().WhereEqual(row => row.FieldId, expected.FieldId));
+                var actual = target.Contains(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)));
                 Assert.IsFalse(actual);
             }
         }
@@ -1258,7 +1550,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             // New context again
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var itemSelection = Select.From<FieldRow>().WhereEqual(row => row.Description, description);
+                var itemSelection = Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Description, description));
                 var affected = target.Delete(itemSelection);
 
                 Assert.AreEqual(3, affected);
@@ -1333,7 +1625,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             // New context again
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var actual = target.FirstOrDefault(Select.From<FieldRow>().WhereEqual(row => row.FieldId, item.FieldId));
+                var actual = target.FirstOrDefault(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, item.FieldId)));
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(expected, actual);
                 Assert.AreEqual(expected.FieldId, actual.FieldId);
@@ -1385,7 +1677,9 @@ namespace Startitecture.Orm.SqlClient.Tests
             // New context again
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var actual = target.FirstOrDefault(Select.From<DomainIdentityRow>().WhereEqual(row => row.DomainIdentityId, item.DomainIdentityId));
+                var actual = target.FirstOrDefault(
+                    Query.Select<DomainIdentityRow>().Where(set => set.AreEqual(row => row.DomainIdentityId, item.DomainIdentityId)));
+
                 Assert.IsNotNull(actual);
                 Assert.AreNotEqual(expected.MiddleName, actual.MiddleName);
                 Assert.AreEqual(expected.FirstName, actual.FirstName);
@@ -1404,15 +1698,16 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                // Delete the attachment documents based on finding their versions.
-                provider.Delete(Select.From<AggregateOptionRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.Delete(Select.From<OtherAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.Delete(Select.From<DomainAggregateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.Delete(Select.From<SubContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.Delete(Select.From<TopContainerRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.Delete(Select.From<CategoryAttributeRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.Delete(Select.From<TemplateRow>().WhereEqual(row => row.Name, "UNIT_TEST:%"));
-                provider.Delete(Select.From<DomainIdentityRow>().WhereEqual(row => row.UniqueIdentifier, "UNIT_TEST:%"));
+                provider.Delete(Query.From<DomainAggregateFlagAttributeRow>());
+                provider.Delete(Query.From<FlagAttributeRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<AggregateOptionRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<OtherAggregateRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<DomainAggregateRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<SubContainerRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<TopContainerRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<CategoryAttributeRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<TemplateRow>().Where(set => set.AreEqual(row => row.Name, "UNIT_TEST:%")));
+                provider.Delete(Query.Select<DomainIdentityRow>().Where(set => set.AreEqual(row => row.UniqueIdentifier, "UNIT_TEST:%")));
             }
         }
     }

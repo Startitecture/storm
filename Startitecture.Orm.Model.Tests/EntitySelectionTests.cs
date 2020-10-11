@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntitySelectionTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   The entity selection tests.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model.Tests
@@ -18,27 +21,26 @@ namespace Startitecture.Orm.Model.Tests
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
-    /// The item selection tests.
+    /// The entity selection tests.
     /// </summary>
     [TestClass]
     public class EntitySelectionTests
     {
-        /// <summary>
-        /// The with as test.
-        /// </summary>
-        [TestMethod]
-        public void WithAs_TableExpressionForDifferentTable_ParentExpressionIsSet()
-        {
-            var target = new EntitySelection<ComplexRaisedRow>().WithAs(
-                    Select.From<ChildRaisedRow>(row => row.ComplexEntityId),
-                    "childCte",
-                    set => set.InnerJoin(row => row.ComplexEntityId, row => row.ComplexEntity.ComplexEntityId))
-                .Select(row => row.ComplexEntityId, row => row.UniqueName);
+        /////// <summary>
+        /////// The with as test.
+        /////// </summary>
+        ////[TestMethod]
+        ////public void WithAs_TableExpressionForDifferentTable_ParentExpressionIsSet()
+        ////{
+        ////    var target = new EntitySelection<ComplexRaisedRow>().Select(row => row.ComplexEntityId, row => row.UniqueName)
+        ////        .WithAs<ChildRaisedRow>(expression =>
+        ////            expression.As(selection => selection.Select(row => row.ComplexEntityId), "childCte")
+        ////                .For<ComplexRaisedRow>(matches => matches.On(row => row.ComplexEntityId, row => row.ComplexEntityId)));
 
-            Assert.IsNotNull(target.ParentExpression);
-            Assert.AreEqual("childCte", target.ParentExpression.TableName);
-            Assert.IsTrue(target.ParentExpression.TableRelations.Any());
-        }
+        ////    Assert.IsNotNull(target.ParentExpression);
+        ////    Assert.AreEqual("childCte", target.ParentExpression.Name);
+        ////    Assert.IsTrue(target.ParentExpression.Relations.Any());
+        ////}
 
         /// <summary>
         /// The select test.
@@ -93,412 +95,6 @@ namespace Startitecture.Orm.Model.Tests
         }
 
         /// <summary>
-        /// The skip test.
-        /// </summary>
-        [TestMethod]
-        public void Skip_ItemSelectionPageRowOffset_MatchesExpected()
-        {
-            var target = new EntitySelection<ComplexRaisedRow>().Skip(10);
-            Assert.AreEqual(10, target.Page.RowOffset);
-            Assert.AreEqual(10, target.PropertyValues.ElementAtOrDefault(0));
-            Assert.AreEqual(0, target.PropertyValues.ElementAtOrDefault(1));
-        }
-
-        /// <summary>
-        /// The take test.
-        /// </summary>
-        [TestMethod]
-        public void Take_ItemSelectionPageSize_MatchesExpected()
-        {
-            var target = new EntitySelection<ComplexRaisedRow>().Take(10);
-            Assert.AreEqual(10, target.Page.Size);
-            Assert.AreEqual(0, target.PropertyValues.ElementAtOrDefault(0));
-            Assert.AreEqual(10, target.PropertyValues.ElementAtOrDefault(1));
-        }
-
-        /// <summary>
-        /// The order by test.
-        /// </summary>
-        [TestMethod]
-        public void OrderBy_MultipleExpressionsAdded_MatchesExpected()
-        {
-            Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
-            Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
-            Expression<Func<ChildRaisedRow, object>> expr3 = row => row.SomeValue;
-            Expression<Func<ChildRaisedRow, object>> expr4 = row => row.ComplexEntity.Description;
-            Expression<Func<ChildRaisedRow, object>> expr5 = row => row.ComplexEntity.SubEntity.Description;
-            Expression<Func<ChildRaisedRow, object>> expr6 = row => row.ComplexEntity.SubEntity.SubSubEntity.UniqueName;
-
-            var expressions = new List<Expression<Func<ChildRaisedRow, object>>>
-                                  {
-                                      expr1,
-                                      expr2,
-                                      expr3,
-                                      expr4,
-                                      expr5,
-                                      expr6
-                                  };
-
-            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
-            var selection = new EntitySelection<ChildRaisedRow>().Select();
-
-            foreach (var expression in expressions)
-            {
-                selection.OrderBy(expression);
-            }
-
-            var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
-            var expected = expressions.Select(entityDefinition.Find).ToList();
-
-            var actual = selection.OrderByExpressions.Select(expression => expression.PropertyExpression).Select(entityDefinition.Find).ToList();
-            CollectionAssert.AreEqual(expected, actual);
-
-            Assert.IsTrue(selection.OrderByExpressions.All(expression => expression.OrderDescending == false));
-        }
-
-        /// <summary>
-        /// The order by descending test.
-        /// </summary>
-        [TestMethod]
-        public void OrderByDescending_MultipleExpressionsAdded_MatchesExpected()
-        {
-            Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
-            Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
-            Expression<Func<ChildRaisedRow, object>> expr3 = row => row.SomeValue;
-            Expression<Func<ChildRaisedRow, object>> expr4 = row => row.ComplexEntity.Description;
-            Expression<Func<ChildRaisedRow, object>> expr5 = row => row.ComplexEntity.SubEntity.Description;
-            Expression<Func<ChildRaisedRow, object>> expr6 = row => row.ComplexEntity.SubEntity.SubSubEntity.UniqueName;
-
-            var expressions = new List<Expression<Func<ChildRaisedRow, object>>>
-                                  {
-                                      expr1,
-                                      expr2,
-                                      expr3,
-                                      expr4,
-                                      expr5,
-                                      expr6
-                                  };
-
-            var definitionProvider = Singleton<DataAnnotationsDefinitionProvider>.Instance;
-            var selection = new EntitySelection<ChildRaisedRow>().Select();
-
-            foreach (var expression in expressions)
-            {
-                selection.OrderByDescending(expression);
-            }
-
-            var entityDefinition = definitionProvider.Resolve<ChildRaisedRow>();
-            var expected = expressions.Select(entityDefinition.Find).ToList();
-
-            var actual = selection.OrderByExpressions.Select(expression => expression.PropertyExpression).Select(entityDefinition.Find).ToList();
-            CollectionAssert.AreEqual(expected, actual);
-
-            Assert.IsTrue(selection.OrderByExpressions.All(expression => expression.OrderDescending));
-        }
-
-        /// <summary>
-        /// The between test.
-        /// </summary>
-        [TestMethod]
-        public void Between_ItemSelectionWithOrderedValues_ValuesMatchExpected()
-        {
-            var target = new EntitySelection<SelectionTestRow>().Between(row => row.SomeDate, DateTime.Today, DateTime.Today.AddDays(1));
-            Assert.AreEqual(DateTime.Today, target.PropertyValues.First());
-        }
-
-        /// <summary>
-        /// The between test.
-        /// </summary>
-        [TestMethod]
-        public void Between_ItemSelectionWithUnorderedValues_ValuesMatchExpected()
-        {
-            var target = new EntitySelection<SelectionTestRow>().Between(row => row.SomeDate, DateTime.Today.AddDays(1), DateTime.Today);
-            Assert.AreEqual(DateTime.Today, target.PropertyValues.First());
-        }
-
-        /// <summary>
-        /// The between test.
-        /// </summary>
-        [TestMethod]
-        public void Between_ItemSelectionWithUnorderedValues_FilterMatchesExpected()
-        {
-            Expression<Func<SelectionTestRow, DateTime>> selector = row => row.SomeDate;
-            var maxValue = DateTime.Today;
-            var minValue = maxValue.AddDays(-1);
-            var expected = new ValueFilter(new AttributeLocation(selector), FilterType.Between, minValue, maxValue);
-            var target = new EntitySelection<SelectionTestRow>().Between(selector, minValue, maxValue);
-            var actual = target.Filters.First();
-
-            Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
-        }
-
-        /// <summary>
-        /// The greater than test.
-        /// </summary>
-        [TestMethod]
-        public void GreaterThan_DataRowAttribute_MatchesExpected()
-        {
-            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new EntitySelection<DataRow>().GreaterThan(valueExpression, 35);
-            var expected = new ValueFilter(valueExpression, FilterType.GreaterThan, 35);
-            var actual = target.Filters.FirstOrDefault();
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
-        /// The greater than test.
-        /// </summary>
-        [TestMethod]
-        public void GreaterThanOrEqualTo_DataRowAttribute_MatchesExpected()
-        {
-            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new EntitySelection<DataRow>().GreaterThanOrEqualTo(valueExpression, 35);
-            var expected = new ValueFilter(valueExpression, FilterType.GreaterThanOrEqualTo, 35);
-            var actual = target.Filters.FirstOrDefault();
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
-        /// The greater than test.
-        /// </summary>
-        [TestMethod]
-        public void LessThan_DataRowAttribute_MatchesExpected()
-        {
-            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new EntitySelection<DataRow>().LessThan(valueExpression, 35);
-            var expected = new ValueFilter(valueExpression, FilterType.LessThan, 35);
-            var actual = target.Filters.FirstOrDefault();
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
-        /// The greater than test.
-        /// </summary>
-        [TestMethod]
-        public void LessThanOrEqualTo_DataRowAttribute_MatchesExpected()
-        {
-            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
-            var target = new EntitySelection<DataRow>().LessThanOrEqualTo(valueExpression, 35);
-            var expected = new ValueFilter(valueExpression, FilterType.LessThanOrEqualTo, 35);
-            var actual = target.Filters.FirstOrDefault();
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_WithoutRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId).Relations;
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_WithRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_WithSourceAndRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().InnerJoin<FakeRelatedRow, DependencyRow>(
-                    row => row.RelatedId,
-                    "OtherAlias",
-                    row => row.ComplexEntityId,
-                    "RelatedDependency")
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_InferredWithMatchingRelationProperty_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId).Relations;
-
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join_ two external relations with relation alias_ matches expected.
-        /// </summary>
-        [TestMethod]
-        public void InnerJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
-        {
-            var actual = new EntitySelection<DataRow>().InnerJoin<RelatedRow, DependencyRow>(
-                row => row.RelatedRowId,
-                row => row.FakeDependencyEntityId,
-                "My Alias").Relations.First();
-
-            var expected = new EntityRelation(EntityRelationType.InnerJoin);
-            expected.Join<RelatedRow, DependencyRow>(row => row.RelatedRowId, row => row.FakeDependencyEntityId, null, "My Alias");
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
-        /// The left join_ two external relations with relation alias_ matches expected.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
-        {
-            var actual = new EntitySelection<DataRow>().LeftJoin<RelatedRow, DependencyRow>(
-                row => row.RelatedRowId,
-                row => row.FakeDependencyEntityId,
-                "My Alias").Relations.First();
-
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<RelatedRow, DependencyRow>(row => row.RelatedRowId, row => row.FakeDependencyEntityId, null, "My Alias");
-            Assert.AreEqual(expected, actual);
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_WithoutRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId).Relations;
-
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_ExtendedRelationWithoutRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId)
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_WithRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, "OtherAlias")
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId, null, "OtherAlias");
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_WithSourceAndRelationAlias_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().LeftJoin<FakeRelatedRow, DependencyRow>(
-                    row => row.RelatedId,
-                    "OtherAlias",
-                    row => row.ComplexEntityId,
-                    "RelatedDependency")
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId, "OtherAlias", "RelatedDependency");
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_InferredWithMatchingRelationProperty_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().LeftJoin(row => row.FakeDataId, row => row.Related.FakeDataId).Relations;
-
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<DataRow, FakeRelatedRow>(row => row.FakeDataId, row => row.FakeDataId);
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
-        /// The inner join test.
-        /// </summary>
-        [TestMethod]
-        public void LeftJoin_InferredWithMatchingSourceAndRelationProperties_MatchesExpected()
-        {
-            var relations = new EntitySelection<DataRow>().LeftJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .Relations;
-
-            var expected = new EntityRelation(EntityRelationType.LeftJoin);
-            expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.ComplexEntityId);
-
-            Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
-        }
-
-        /// <summary>
         /// The selection statement_ direct data_ matches expected.
         /// </summary>
         [TestMethod]
@@ -521,7 +117,6 @@ namespace Startitecture.Orm.Model.Tests
                 AnotherColumn = "Less"
             };
             var transactionSelection = new EntitySelection<DataRow>()
-                .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
                 .Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
@@ -530,8 +125,10 @@ namespace Startitecture.Orm.Model.Tests
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+                .Where(
+                    set => set.Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20));
 
             var expected = new object[]
                                {
@@ -579,8 +176,8 @@ namespace Startitecture.Orm.Model.Tests
                 FakeDataId = 20,
                 AnotherColumn = "Less"
             };
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -588,9 +185,10 @@ namespace Startitecture.Orm.Model.Tests
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+                .Where(
+                    set => set.Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .Between(baseline, boundary, row => row.FakeDataId, row => row.NormalColumn, row => row.AnotherColumn)
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20));
 
             var expected = new object[]
                                {
@@ -640,10 +238,7 @@ namespace Startitecture.Orm.Model.Tests
             {
                 FakeDataId = 20
             };
-            var transactionSelection = new EntitySelection<DataRow>()
-                .Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Select(
+            var transactionSelection = new EntitySelection<DataRow>().Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.ParentFakeDataId,
@@ -653,7 +248,10 @@ namespace Startitecture.Orm.Model.Tests
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty)
-                .Between(baseline, boundary, row => row.FakeDataId);
+                .Where(
+                    set => set.Matching(match, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             CollectionAssert.AreEqual(
                 new object[]
@@ -733,37 +331,29 @@ namespace Startitecture.Orm.Model.Tests
                 FakeDataId = 70
             };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Where(
+                    set => set.Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
                 .Union(
-                    Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.RelatedAlias.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
-                        .Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                    Query.From<DataRow>()
+                        .Where(
+                            set => set.Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
                         .Union(
-                            Select.From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.RelatedAlias.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
-                                .Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+                            Query.From<DataRow>()
+                                .Where(
+                                    set => set.Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))));
 
             var expected = new object[]
                                {
@@ -854,37 +444,29 @@ namespace Startitecture.Orm.Model.Tests
                 FakeDataId = 70
             };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Where(
+                    set => set.Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
                 .Union(
-                    Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.RelatedAlias.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
-                        .Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                    Query.From<DataRow>()
+                        .Where(
+                            set => set.Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
                         .Union(
-                            Select.From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.RelatedAlias.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
-                                .Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+                            Query.From<DataRow>()
+                                .Where(
+                                    set => set.Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))));
 
             Assert.AreEqual(SelectionLinkType.Union, transactionSelection.LinkedSelection.LinkType);
             Assert.AreEqual(SelectionLinkType.Union, transactionSelection.LinkedSelection.Selection.LinkedSelection.LinkType);
@@ -956,37 +538,29 @@ namespace Startitecture.Orm.Model.Tests
                 FakeDataId = 70
             };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Where(
+                    set => set.Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
                 .Intersect(
-                    Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.RelatedAlias.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
-                        .Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                    Query.From<DataRow>()
+                        .Where(
+                            set => set.Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
                         .Intersect(
-                            Select.From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.RelatedAlias.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
-                                .Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+                            Query.From<DataRow>()
+                                .Where(
+                                    set => set.Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))));
 
             Assert.AreEqual(SelectionLinkType.Intersection, transactionSelection.LinkedSelection.LinkType);
             Assert.AreEqual(SelectionLinkType.Intersection, transactionSelection.LinkedSelection.Selection.LinkedSelection.LinkType);
@@ -1058,37 +632,29 @@ namespace Startitecture.Orm.Model.Tests
                 FakeDataId = 70
             };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .Where(
+                    set => set.Matching(match1, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
                 .Except(
-                    Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.RelatedAlias.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
-                        .Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                    Query.From<DataRow>()
+                        .Where(
+                            set => set.Matching(match2, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
                         .Except(
-                            Select.From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.RelatedAlias.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
-                                .Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+                            Query.From<DataRow>()
+                                .Where(
+                                    set => set.Matching(match3, row => row.ValueColumn, row => row.NullableColumn, row => row.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))));
 
             Assert.AreEqual(SelectionLinkType.Exception, transactionSelection.LinkedSelection.LinkType);
             Assert.AreEqual(SelectionLinkType.Exception, transactionSelection.LinkedSelection.Selection.LinkedSelection.LinkType);
@@ -1098,57 +664,55 @@ namespace Startitecture.Orm.Model.Tests
         /// The map to test.
         /// </summary>
         [TestMethod]
-        public void MapTo_DtoItemSelectionToRowItemSelectionWithParentExpression_AllAttributesMapped()
+        public void MapSet_DtoItemSelectionToRowItemSelectionWithParentExpression_AllAttributesMapped()
         {
-            var expected = new EntitySelection<SelectionTestDto>();
-            expected.WithAs(
-                    Select.From<SelectionTestDto>(dto => dto.SelectionTestId).WhereEqual(dto => dto.ParentId, 3),
-                    "cte",
-                    set => set.InnerJoin(dto => dto.SelectionTestId, dto => dto.SelectionTestId))
+            var expected = Query
+                .With<SelectionTestDto>(
+                    selection => selection.Select(row => row.SelectionTestId).Where(set => set.AreEqual(dto => dto.ParentId, 3)),
+                    "cte")
+                .ForSelection<SelectionTestDto>(matches => matches.On(dto => dto.SelectionTestId, dto => dto.SelectionTestId))
                 .Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
-                .Skip(10)
-                .Take(10)
-                .WhereEqual(dto => dto.Parent.UniqueName, "Test1")
-                .Between(dto => dto.SomeDate, DateTime.Today, DateTime.Today.AddDays(-1))
-                .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId);
+                .From(set => set.InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId))
+                .Where(
+                    set => set.AreEqual(dto => dto.Parent.UniqueName, "Test1")
+                        .Between(dto => dto.SomeDate, DateTime.Today, DateTime.Today.AddDays(-1)))
+                .Seek(subset => subset.Skip(10).Take(10));
 
-            var actual = expected.MapTo<SelectionTestRow>();
-
-            AssertSelectionEquality(expected, actual);
+            var actual = expected.MapSet<SelectionTestRow>();
+            Assert.AreEqual(10, actual.Page.RowOffset);
+            Assert.AreEqual(10, actual.Page.Size);
+            AssertSetEquality(expected, actual);
         }
 
         /// <summary>
         /// The map to test.
         /// </summary>
         [TestMethod]
-        public void MapTo_DtoItemSelectionToRowItemSelection_AllAttributesMapped()
+        public void MapSet_DtoItemSelectionToRowItemSelection_AllAttributesMapped()
         {
             var expected = new EntitySelection<SelectionTestDto>();
-            var selection2 = new EntitySelection<SelectionTestDto>();
-            var selection3 = new EntitySelection<SelectionTestDto>();
+            var selection2 = new EntitySet<SelectionTestDto>();
+            var selection3 = new EntitySet<SelectionTestDto>();
             expected.Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
-                .Skip(10).Take(10)
-                .WhereEqual(dto => dto.Parent.UniqueName, "Test1")
-                .Between(dto => dto.SomeDate, DateTime.Today, DateTime.Today.AddDays(-1))
-                .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId)
+                .From(set => set.InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId))
+                .Where(
+                    set => set.AreEqual(dto => dto.Parent.UniqueName, "Test1")
+                        .Between(dto => dto.SomeDate, DateTime.Today, DateTime.Today.AddDays(-1)))
+                .Seek(subset => subset.Skip(10).Take(10))
                 .Union(
-                    selection2.Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
-                        .Skip(20).Take(10)
-                        .WhereEqual(dto => dto.Parent.UniqueName, "Test2")
-                        .Between(dto => dto.SomeDecimal, 10.2m, 11.4m)
-                        .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId)
+                    selection2.From(set => set.InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId))
+                        .Where(set => set.AreEqual(dto => dto.Parent.UniqueName, "Test2").Between(dto => dto.SomeDecimal, 10.2m, 11.4m))
+                        .Seek(subset => subset.Skip(20).Take(10))
                         .Union(
-                            selection3.Select(dto => dto.UniqueName, dto => dto.SomeDate, dto => dto.SomeDecimal, dto => dto.Parent.UniqueName)
-                                .Skip(20).Take(20)
-                                .WhereEqual(dto => dto.Parent.UniqueName, "Test3")
-                                .Between(dto => dto.StringValue, "AAA", "BBB")
-                                .InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId)));
+                            selection3.From(set => set.InnerJoin(dto => dto.Parent.ParentId, dto => dto.ParentId))
+                                .Where(set => set.AreEqual(dto => dto.Parent.UniqueName, "Test3").Between(dto => dto.StringValue, "AAA", "BBB"))
+                                .Seek(subset => subset.Skip(20).Take(20))));
 
-            var actual = expected.MapTo<SelectionTestRow>();
+            var actual = expected.MapSelection<SelectionTestRow>();
 
-            AssertSelectionEquality(expected, actual);
-            AssertSelectionEquality(expected.LinkedSelection.Selection, actual.LinkedSelection.Selection);
-            AssertSelectionEquality(
+            AssertSetEquality(expected, actual);
+            AssertSetEquality(expected.LinkedSelection.Selection, actual.LinkedSelection.Selection);
+            AssertSetEquality(
                 expected.LinkedSelection.Selection.LinkedSelection.Selection,
                 actual.LinkedSelection.Selection.LinkedSelection.Selection);
         }
@@ -1162,126 +726,33 @@ namespace Startitecture.Orm.Model.Tests
         /// <param name="actual">
         /// The actual.
         /// </param>
-        private static void AssertSelectionEquality(ISelection expected, ISelection actual)
+        private static void AssertSetEquality(IEntitySet expected, IEntitySet actual)
         {
+            if (expected is ISelection expectedSelection && actual is ISelection actualSelection)
+            {
+                var expectedExpressions = expectedSelection.SelectExpressions.Select(expression => expression.AttributeExpression);
+                var actualExpressions = actualSelection.SelectExpressions.Select(expression => expression.AttributeExpression);
+                CollectionAssert.AreEqual(
+                    expectedExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList(),
+                    actualExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList());
+            }
+            else if (expected is ISelection)
+            {
+                Assert.Fail($"Expected type of {nameof(ISelection)}, got {actual.GetType()}");
+            }
+
             Assert.AreEqual(expected.Page, actual.Page);
-            Assert.AreEqual(expected.ParentExpression, actual.ParentExpression);
+
+            if (expected.ParentExpression != null)
+            {
+                Assert.IsNotNull(actual.ParentExpression);
+                Assert.AreEqual(expected.ParentExpression.Name, actual.ParentExpression.Name);
+                CollectionAssert.AreEqual(expected.ParentExpression.Relations.ToList(), actual.ParentExpression.Relations.ToList());
+                AssertSetEquality(expected.ParentExpression.Expression, actual.ParentExpression.Expression);
+            }
+
             CollectionAssert.AreEqual(expected.Filters.ToList(), actual.Filters.ToList());
             CollectionAssert.AreEqual(expected.Relations.ToList(), actual.Relations.ToList());
-            var expectedExpressions = expected.SelectExpressions.Select(expression => expression.AttributeExpression);
-            var actualExpressions = actual.SelectExpressions.Select(expression => expression.AttributeExpression);
-            CollectionAssert.AreEqual(
-                expectedExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList(),
-                actualExpressions.Select(expression => $"{expression.GetProperty().PropertyType}.{expression.GetPropertyName()}").ToList());
-        }
-
-        /// <summary>
-        /// The parent DTO.
-        /// </summary>
-        private class ParentDto
-        {
-            /// <summary>
-            /// Gets or sets the parent id.
-            /// </summary>
-            public int ParentId { get; set; }
-
-            /// <summary>
-            /// Gets or sets the unique name.
-            /// </summary>
-            public string UniqueName { get; set; }
-        }
-
-        /// <summary>
-        /// The selection test DTO.
-        /// </summary>
-        private class SelectionTestDto
-        {
-            /// <summary>
-            /// Gets or sets the selection test id.
-            /// </summary>
-            public int SelectionTestId { get; set; }
-
-            /// <summary>
-            /// Gets or sets the unique name.
-            /// </summary>
-            public string UniqueName { get; set; }
-
-            /// <summary>
-            /// Gets or sets the string value.
-            /// </summary>
-            public string StringValue { get; set; }
-
-            /// <summary>
-            /// Gets or sets the some decimal.
-            /// </summary>
-            public decimal SomeDecimal { get; set; }
-
-            /// <summary>
-            /// Gets or sets the some date.
-            /// </summary>
-            public DateTime SomeDate { get; set; }
-
-            /// <summary>
-            /// Gets or sets the parent.
-            /// </summary>
-            public ParentDto Parent { get; set; }
-
-            /// <summary>
-            /// The parent id.
-            /// </summary>
-            public int? ParentId => this.Parent?.ParentId;
-        }
-
-        /// <summary>
-        /// The parent row.
-        /// </summary>
-        private class ParentRow
-        {
-            /// <summary>
-            /// Gets or sets the parent id.
-            /// </summary>
-            public int ParentId { get; set; }
-
-            /// <summary>
-            /// Gets or sets the unique name.
-            /// </summary>
-            public string UniqueName { get; set; }
-        }
-
-        /// <summary>
-        /// The selection test row.
-        /// </summary>
-        private class SelectionTestRow
-        {
-            /// <summary>
-            /// Gets or sets the selection test id.
-            /// </summary>
-            public int SelectionTestId { get; set; }
-
-            /// <summary>
-            /// Gets or sets the unique name.
-            /// </summary>
-            public string UniqueName { get; set; }
-
-            /// <summary>
-            /// Gets or sets the string value.
-            /// </summary>
-            public string StringValue { get; set; }
-
-            /// <summary>
-            /// Gets or sets the some decimal.
-            /// </summary>
-            public decimal SomeDecimal { get; set; }
-
-            /// <summary>
-            /// Gets or sets the some date.
-            /// </summary>
-            public DateTime SomeDate { get; set; }
-
-            /// <summary>
-            /// Gets or sets the parent.
-            /// </summary>
-            public ParentRow Parent { get; set; }
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TransactSqlCompilerTests.cs" company="Startitecture">
+// <copyright file="TransactSqlAdapterTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
@@ -17,7 +17,7 @@ namespace Startitecture.Orm.SqlClient.Tests
     /// The example selection test.
     /// </summary>
     [TestClass]
-    public class TransactSqlCompilerTests
+    public class TransactSqlAdapterTests
     {
         #region Public Methods and Operators
 
@@ -60,8 +60,8 @@ VALUES (@0, @1, @2)";
         [TestMethod]
         public void CreateSelectionStatement_DirectData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -69,22 +69,25 @@ VALUES (@0, @1, @2)";
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -122,23 +125,26 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateSelectionStatement_DirectDataDefaultColumns_AllColumnsIncluded()
         {
-            var transactionSelection = Select.From<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+            var transactionSelection = Query.Select<DataRow>()
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"SELECT
     [someschema].[Related].[RelatedId] AS [Related.RelatedId],
@@ -194,21 +200,23 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateSelectionStatement_CountDirectData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>().Count(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+            var transactionSelection = Query.Select<DataRow>()
+                .Count(row => row.FakeDataId)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20));
 
             const string Expected = @"SELECT
     COUNT([dbo].[FakeData].[FakeRowId])
@@ -239,28 +247,32 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void CreateSelectionStatement_PagedDirectData_MatchesExpected()
         {
-            var tableExpression = Select.From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .Skip(5)
-                .Take(5);
+            var tableExpression = Query.SelectEntities<DataRow>(
+                select => select.Select(row => row.FakeDataId)
+                    .From(
+                        set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                            .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                            .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                            .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                    .Where(
+                        set => set.AreEqual(row => row.ValueColumn, 2)
+                            .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                            .AreEqual(row => row.NullableValueColumn, null)
+                            .Between(row => row.FakeDataId, 10, 20)
+                            .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                            .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                            .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                    .Sort(
+                        set => set.OrderBy(row => row.Related.RelatedProperty)
+                            .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                            .OrderBy(row => row.NormalColumn))
+                    .Seek(subset => subset.Skip(5).Take(5)));
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query.With(tableExpression, "pgCte") 
+                .ForSelection<DataRow>(matches => matches.On(row => row.FakeDataId, row => row.FakeDataId))
+                .Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -268,23 +280,26 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
+                ////.WithAs(tableExpression, "pgCte", relationSet => relationSet.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -342,33 +357,82 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         }
 
         /// <summary>
+        /// The create selection statement with exists in matches expected.
+        /// </summary>
+        [TestMethod]
+        public void CreateSelectionStatement_WithExistsIn_MatchesExpected()
+        {
+            var query = Query
+                .Select<DomainAggregateRow>(
+                    row => row.Name,
+                    row => row.Description,
+                    row => row.SubContainer.Name,
+                    row => row.SubContainer.TopContainer.Name,
+                    row => row.Template.Name)
+                .From(
+                    set => set.InnerJoin(row => row.SubContainer.SubContainerId, row => row.SubContainerId)
+                        .InnerJoin(row => row.SubContainer.TopContainer.TopContainerId, row => row.SubContainer.TopContainerId))
+                .Where(
+                    set => set.AreEqual(row => row.SubContainerId, 6)
+                        .ExistsIn(
+                            row => row.DomainAggregateId,
+                            Query.From<DomainAggregateFlagAttributeRow>(
+                                    set2 => set2.InnerJoin<FlagAttributeRow>(row => row.FlagAttributeId, row => row.FlagAttributeId))
+                                .Where(set2 => set2.Include((FlagAttributeRow row) => row.Name, "type1", "type2", "type3")),
+                            row => row.DomainAggregateId)
+                        .Include(row => row.SubContainerId, 3, 6, 7));
+
+            const string Expected = @"SELECT
+    [dbo].[DomainAggregate].[Name],
+    [dbo].[DomainAggregate].[Description],
+    [dbo].[SubContainer].[Name] AS [SubContainer.Name],
+    [dbo].[TopContainer].[Name] AS [TopContainer.Name],
+    [dbo].[Template].[Name] AS [Template.Name]
+FROM [dbo].[DomainAggregate]
+INNER JOIN [dbo].[DomainAggregate] ON [dbo].[SubContainer].[SubContainerId] = [dbo].[DomainAggregate].[SubContainerId]
+INNER JOIN [dbo].[SubContainer] ON [dbo].[TopContainer].[TopContainerId] = [dbo].[SubContainer].[TopContainerId]
+WHERE [dbo].[DomainAggregate].[SubContainerId] = @0 AND
+[dbo].[DomainAggregate].[DomainAggregateId] IN
+(SELECT [DomainAggregateFlagAttribute1].[DomainAggregateId]
+FROM [dbo].[DomainAggregateFlagAttribute] AS [DomainAggregateFlagAttribute1]
+INNER JOIN [dbo].[FlagAttribute] AS [FlagAttribute1] ON [DomainAggregateFlagAttribute1].[FlagAttributeId] = [FlagAttribute1].[FlagAttributeId]
+WHERE [FlagAttribute1].[Name] IN (@1, @2, @3)) AND
+[dbo].[DomainAggregate].[SubContainerId] IN (@4, @5, @6)";
+
+            var actual = new TransactSqlAdapter(new DataAnnotationsDefinitionProvider()).CreateSelectionStatement(query);
+            Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
         /// The selection statement direct data matches expected.
         /// </summary>
         [TestMethod]
         public void CreateExistsStatement_DirectData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+            var transactionSelection = Query
+                .From<DataRow>(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"IF EXISTS (
 SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -410,19 +474,20 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -467,20 +532,21 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Between(baseline, boundary, row => row.FakeDataId);
-
+                
             var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -511,8 +577,8 @@ WHERE
         [TestMethod]
         public void CreateDeletionStatement_DirectData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -520,19 +586,21 @@ WHERE
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -562,8 +630,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void CreateSelectionStatement_DirectDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -571,22 +639,25 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -624,21 +695,23 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateSelectionStatement_CountDirectDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>().Count(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20);
+            var transactionSelection = Query.Select<DataRow>()
+                .Count(row => row.FakeDataId)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20));
 
             const string Expected = @"SELECT
     COUNT([dbo].[FakeData].[FakeRowId])
@@ -669,27 +742,32 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void CreateSelectionStatement_PagedDirectDataRaisedRow_MatchesExpected()
         {
-            var tableExpression = Select.From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .Skip(5)
-                .Take(5);
+            var tableExpression = Query.SelectEntities<DataRow>(
+                select => select.Select(row => row.FakeDataId)
+                    .From(
+                        set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                            .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                            .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                            .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                    .Where(
+                        set => set.AreEqual(row => row.ValueColumn, 2)
+                            .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                            .AreEqual(row => row.NullableValueColumn, null)
+                            .Between(row => row.FakeDataId, 10, 20)
+                            .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                            .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                            .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                    .Sort(
+                        set => set.OrderBy(row => row.Related.RelatedProperty)
+                            .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                            .OrderBy(row => row.NormalColumn))
+                    .Seek(subset => subset.Skip(5).Take(5)));
 
-            var transactionSelection = Select.From<DataRow>(
+            var transactionSelection = Query.With(tableExpression, "pgCte")
+                .ForSelection<DataRow>(matches => matches.On(row => row.FakeDataId, row => row.FakeDataId))
+                .Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -697,23 +775,26 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
+                        ////.WithAs(tableExpression, "pgCte", relationSet => relationSet.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -776,28 +857,30 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateExistsStatement_DirectDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+            var transactionSelection = Query
+                .From<DataRow>(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"IF EXISTS (
 SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -839,19 +922,20 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -896,23 +980,21 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .Between(baseline, boundary, row => row.FakeDataId);
 
             var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateSet = new UpdateSet<DataRow>().Set(
-                dataRow,
-                row => row.NormalColumn,
-                row => row.NullableColumn).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -943,8 +1025,8 @@ WHERE
         [TestMethod]
         public void CreateDeletionStatement_DirectDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.NullableColumn,
@@ -952,22 +1034,25 @@ WHERE
                     row => row.ValueColumn,
                     row => row.AnotherColumn,
                     row => row.AnotherValueColumn)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -997,8 +1082,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void CreateSelectionStatement_RelatedData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.Related.RelatedId,
@@ -1008,20 +1093,23 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty,
                     row => row.ParentFakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -1059,19 +1147,21 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateSelectionStatement_CountRelatedData_MatchesExpected()
         {
-            var transactionSelection = Select.From<DataRow>()
+            var transactionSelection = Query.Select<DataRow>()
                 .Count(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20));
 
             const string Expected = @"SELECT
     COUNT([dbo].[FakeData].[FakeRowId])
@@ -1100,25 +1190,30 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void CreateSelectionStatement_PagedRelatedData_MatchesExpected()
         {
-            var tableExpression = Select.From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .Skip(5)
-                .Take(5);
+            var tableExpression = Query.SelectEntities<DataRow>(
+                select => select.Select(row => row.FakeDataId)
+                    .From(
+                        set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                            .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                            .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                            .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                    .Where(
+                        set => set.AreEqual(row => row.ValueColumn, 2)
+                            .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                            .AreEqual(row => row.NullableValueColumn, null)
+                            .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                            .Between(row => row.FakeDataId, 10, 20))
+                    .Sort(
+                        set => set.OrderBy(row => row.Related.RelatedProperty)
+                            .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                            .OrderBy(row => row.NormalColumn))
+                    .Seek(subset => subset.Skip(5).Take(5)));
 
-            var transactionSelection = Select.From<DataRow>(
+            var transactionSelection = Query.With(tableExpression, "pgCte")
+                .ForSelection<DataRow>(matches => matches.On(row => row.FakeDataId, row => row.FakeDataId))
+                .Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.Related.RelatedId,
@@ -1128,21 +1223,24 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty,
                     row => row.ParentFakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
+                        ////.WithAs(tableExpression, "pgCte", set => set.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -1203,26 +1301,28 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateExistsStatement_RelatedData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+            var transactionSelection = Query
+                .From<DataRow>(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"IF EXISTS (
 SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1266,20 +1366,21 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
-                .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -1329,21 +1430,22 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
-                .Between(baseline, boundary, row => row.FakeDataId);
 
             var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match.RelatedAlias.RelatedProperty)
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -1375,8 +1477,8 @@ WHERE
         [TestMethod]
         public void CreateDeletionStatement_RelatedData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.Related.RelatedId,
@@ -1386,17 +1488,19 @@ WHERE
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty,
                     row => row.ParentFakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -1424,8 +1528,8 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void CreateSelectionStatement_RelatedDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.ParentFakeDataId,
@@ -1435,20 +1539,23 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -1486,19 +1593,21 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateSelectionStatement_CountRelatedDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select.From<DataRow>()
+            var transactionSelection = Query.Select<DataRow>()
                 .Count(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20));
 
             const string Expected = @"SELECT
     COUNT([dbo].[FakeData].[FakeRowId])
@@ -1527,27 +1636,30 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         [TestMethod]
         public void CreateSelectionStatement_PagedRelatedDataRaisedRow_MatchesExpected()
         {
-            var tableExpression = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .Skip(5)
-                .Take(5);
+            var tableExpression = Query.SelectEntities<DataRow>(
+                select => select.Select(row => row.FakeDataId)
+                    .From(
+                        set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                            .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                            .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                            .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                            .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                    .Where(
+                        set => set.AreEqual(row => row.ValueColumn, 2)
+                            .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                            .AreEqual(row => row.NullableValueColumn, null)
+                            .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                            .Between(row => row.FakeDataId, 10, 20))
+                    .Sort(
+                        set => set.OrderBy(row => row.Related.RelatedProperty)
+                            .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                            .OrderBy(row => row.NormalColumn))
+                    .Seek(subset => subset.Skip(5).Take(5)));
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query.With(tableExpression, "pgCte")
+                .ForSelection<DataRow>(matches => matches.On(row => row.FakeDataId, row => row.FakeDataId))
+                .Select(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.ParentFakeDataId,
@@ -1557,21 +1669,24 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .WithAs(tableExpression, "pgCte", set => set.InnerJoin(row => row.FakeDataId, row => row.FakeDataId));
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
+                        ////.WithAs(tableExpression, "pgCte", set => set.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -1632,26 +1747,28 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         [TestMethod]
         public void CreateExistsStatement_RelatedDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+            var transactionSelection = Query
+                .From<DataRow>(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"IF EXISTS (
 SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -1692,20 +1809,21 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(baseline, boundary, row => row.FakeDataId);
 
-            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider()).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -1752,21 +1870,22 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-            var selection = Select.Where<DataRow>()
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(baseline, boundary, row => row.FakeDataId);
 
             var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
-            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn).Where(selection);
+            var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(baseline, boundary, row => row.FakeDataId));
 
             const string Expected = @"UPDATE [dbo].[FakeData]
 SET
@@ -1798,8 +1917,8 @@ WHERE
         [TestMethod]
         public void CreateDeletionStatement_RelatedDataRaisedRow_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.ParentFakeDataId,
@@ -1809,17 +1928,19 @@ WHERE
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedId,
                     row => row.OtherAlias.RelatedProperty)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related")
-                .Between(row => row.FakeDataId, 10, 20);
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related")
+                        .Between(row => row.FakeDataId, 10, 20));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -1889,70 +2010,78 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.Related.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match1.RelatedAlias.RelatedProperty)
-                .Between(baseline1, boundary1, row => row.FakeDataId)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match1.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match1.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match1.RelatedAlias.RelatedProperty)
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn))
                 .Union(
-                    Select
-                        .From<DataRow>(
+                    Query.Select<DataRow>(
                             row => row.FakeDataId,
                             row => row.NormalColumn,
                             row => row.Related.RelatedId,
                             row => row.RelatedAlias.RelatedProperty,
                             row => row.OtherAlias.RelatedProperty)
-                        .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
-                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
-                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, match2.RelatedAlias.RelatedProperty)
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
-                        .OrderBy(row => row.Related.RelatedProperty)
-                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                        .OrderBy(row => row.NormalColumn)
+                        .From(
+                            set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                        .Where(
+                            set => set.AreEqual(row => row.ValueColumn, match2.ValueColumn)
+                                .AreEqual(row => row.NullableColumn, match2.NullableColumn)
+                                .AreEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, match2.RelatedAlias.RelatedProperty)
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
+                        .Sort(
+                            set => set.OrderBy(row => row.Related.RelatedProperty)
+                                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                                .OrderBy(row => row.NormalColumn))
                         .Union(
-                            Select.From<DataRow>(
+                            Query.Select<DataRow>(
                                     row => row.FakeDataId,
                                     row => row.NormalColumn,
                                     row => row.Related.RelatedId,
                                     row => row.RelatedAlias.RelatedProperty,
                                     row => row.OtherAlias.RelatedProperty)
-                                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
-                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
-                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match3.RelatedAlias.RelatedProperty)
-                                .Between(baseline3, boundary3, row => row.FakeDataId)
-                                .OrderBy(row => row.Related.RelatedProperty)
-                                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                                .OrderBy(row => row.NormalColumn)));
+                                .From(
+                                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                                .Where(
+                                    set => set.AreEqual(row => row.ValueColumn, match3.ValueColumn)
+                                        .AreEqual(row => row.NullableColumn, match3.NullableColumn)
+                                        .AreEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match3.RelatedAlias.RelatedProperty)
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))
+                                .Sort(
+                                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                                        .OrderBy(row => row.NormalColumn))));
 
             const string Expected = @"(SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -2068,59 +2197,64 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match1.RelatedAlias.RelatedProperty)
-                .Between(baseline1, boundary1, row => row.FakeDataId)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .Union(
-                    Select
-                        .From<DataRow>(row => row.FakeDataId)
-                        .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+            var transactionSelection = Query
+                .From<DataRow>(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                         .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
                         .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
-                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
-                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, match2.RelatedAlias.RelatedProperty)
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
-                        .OrderBy(row => row.Related.RelatedProperty)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match1.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match1.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match1.RelatedAlias.RelatedProperty)
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
                         .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                        .OrderBy(row => row.NormalColumn)
-                        .Union(
-                            Select.From<DataRow>(row => row.FakeDataId)
-                                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .OrderBy(row => row.NormalColumn))
+                .Union(
+                    Query.From<DataRow>(
+                            set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
                                 .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
-                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
-                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match3.RelatedAlias.RelatedProperty)
-                                .Between(baseline3, boundary3, row => row.FakeDataId)
-                                .OrderBy(row => row.Related.RelatedProperty)
+                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                        .Where(
+                            set => set.AreEqual(row => row.ValueColumn, match2.ValueColumn)
+                                .AreEqual(row => row.NullableColumn, match2.NullableColumn)
+                                .AreEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, match2.RelatedAlias.RelatedProperty)
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
+                        .Sort(
+                            set => set.OrderBy(row => row.Related.RelatedProperty)
                                 .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                                .OrderBy(row => row.NormalColumn)));
+                                .OrderBy(row => row.NormalColumn))
+                        .Union(
+                            Query.From<DataRow>(
+                                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                                .Where(
+                                    set => set.AreEqual(row => row.ValueColumn, match3.ValueColumn)
+                                        .AreEqual(row => row.NullableColumn, match3.NullableColumn)
+                                        .AreEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match3.RelatedAlias.RelatedProperty)
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))
+                                .Sort(
+                                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                                        .OrderBy(row => row.NormalColumn))));
 
             const string Expected = @"IF EXISTS (
 (SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2136,7 +2270,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2152,7 +2286,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @5 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2222,49 +2356,40 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.Related.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match1.RelatedAlias.RelatedProperty)
-                .Between(baseline1, boundary1, row => row.FakeDataId)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match1.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match1.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match1.RelatedAlias.RelatedProperty)
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
                 .Union(
-                    Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.Related.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
-                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
-                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
-                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, match2.RelatedAlias.RelatedProperty)
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
+                    Query.From<DataRow>().Where(set => set
+                        .AreEqual(row => row.ValueColumn, match2.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match2.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, match2.RelatedAlias.RelatedProperty)
+                        .Between(baseline2, boundary2, row => row.FakeDataId))
                         .Union(
-                            Select.From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.Related.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
-                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
-                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
-                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, match3.RelatedAlias.RelatedProperty)
-                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+                            Query.From<DataRow>().Where(set => set
+                                .AreEqual(row => row.ValueColumn, match3.ValueColumn)
+                                .AreEqual(row => row.NullableColumn, match3.NullableColumn)
+                                .AreEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, match3.RelatedAlias.RelatedProperty)
+                                .Between(baseline3, boundary3, row => row.FakeDataId))));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]
@@ -2334,71 +2459,78 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                .Between(baseline1, boundary1, row => row.FakeDataId)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match1.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match1.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn))
                 .Union(
-                    Select
-                        .From<DataRow>(
+                    Query.Select<DataRow>(
                             row => row.FakeDataId,
                             row => row.NormalColumn,
                             row => row.RelatedAlias.RelatedId,
                             row => row.RelatedAlias.RelatedProperty,
                             row => row.OtherAlias.RelatedProperty)
-                        .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
-                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
-                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
-                        .OrderBy(row => row.Related.RelatedProperty)
-                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                        .OrderBy(row => row.NormalColumn)
+                        .From(
+                            set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                        .Where(
+                            set => set.AreEqual(row => row.ValueColumn, match2.ValueColumn)
+                                .AreEqual(row => row.NullableColumn, match2.NullableColumn)
+                                .AreEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
+                        .Sort(
+                            set => set.OrderBy(row => row.Related.RelatedProperty)
+                                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                                .OrderBy(row => row.NormalColumn))
                         .Union(
-                            Select
-                                .From<DataRow>(
+                            Query.Select<DataRow>(
                                     row => row.FakeDataId,
                                     row => row.NormalColumn,
                                     row => row.RelatedAlias.RelatedId,
                                     row => row.RelatedAlias.RelatedProperty,
                                     row => row.OtherAlias.RelatedProperty)
-                                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
-                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
-                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                .Between(baseline3, boundary3, row => row.FakeDataId)
-                                .OrderBy(row => row.Related.RelatedProperty)
-                                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                                .OrderBy(row => row.NormalColumn)));
+                                .From(
+                                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                                .Where(
+                                    set => set.AreEqual(row => row.ValueColumn, match3.ValueColumn)
+                                        .AreEqual(row => row.NullableColumn, match3.NullableColumn)
+                                        .AreEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))
+                                .Sort(
+                                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                                        .OrderBy(row => row.NormalColumn))));
 
             const string Expected = @"(SELECT
     [dbo].[FakeData].[FakeRowId],
@@ -2514,60 +2646,64 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                .Between(baseline1, boundary1, row => row.FakeDataId)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn)
-                .Union(
-                    Select
-                        .From<DataRow>(row => row.FakeDataId)
-                        .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+            var transactionSelection = Query
+                .From<DataRow>(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                         .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
                         .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
-                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
-                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
-                        .OrderBy(row => row.Related.RelatedProperty)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match1.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match1.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
                         .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                        .OrderBy(row => row.NormalColumn)
-                        .Union(
-                            Select
-                                .From<DataRow>(row => row.FakeDataId)
-                                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .OrderBy(row => row.NormalColumn))
+                .Union(
+                    Query.From<DataRow>(
+                            set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
                                 .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
-                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
-                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                .Between(baseline3, boundary3, row => row.FakeDataId)
-                                .OrderBy(row => row.Related.RelatedProperty)
+                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                        .Where(
+                            set => set.AreEqual(row => row.ValueColumn, match2.ValueColumn)
+                                .AreEqual(row => row.NullableColumn, match2.NullableColumn)
+                                .AreEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
+                        .Sort(
+                            set => set.OrderBy(row => row.Related.RelatedProperty)
                                 .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                                .OrderBy(row => row.NormalColumn)));
+                                .OrderBy(row => row.NormalColumn))
+                        .Union(
+                            Query.From<DataRow>(
+                                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                                .Where(
+                                    set => set.AreEqual(row => row.ValueColumn, match3.ValueColumn)
+                                        .AreEqual(row => row.NullableColumn, match3.NullableColumn)
+                                        .AreEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))
+                                .Sort(
+                                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                                        .OrderBy(row => row.NormalColumn))));
 
             const string Expected = @"IF EXISTS (
 (SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2583,7 +2719,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2599,7 +2735,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @5 AND
 ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty] DESC, [dbo].[FakeData].[NormalColumn])
 UNION
 (SELECT
-    [dbo].[FakeData].[FakeRowId]
+    1
 FROM [dbo].[FakeData]
 INNER JOIN [someschema].[Related] ON [dbo].[FakeData].[FakeRowId] = [someschema].[Related].[FakeDataId]
 INNER JOIN [dbo].[DependencyEntity] ON [someschema].[Related].[RelatedId] = [dbo].[DependencyEntity].[ComplexEntityId]
@@ -2669,62 +2805,54 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
 
-            var transactionSelection = Select
-                .From<DataRow>(
+            var transactionSelection = Query
+                .Select<DataRow>(
                     row => row.FakeDataId,
                     row => row.NormalColumn,
                     row => row.RelatedAlias.RelatedId,
                     row => row.RelatedAlias.RelatedProperty,
                     row => row.OtherAlias.RelatedProperty)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, match1.ValueColumn)
-                .WhereEqual(row => row.NullableColumn, match1.NullableColumn)
-                .WhereEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
-                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
-                .Between(baseline1, boundary1, row => row.FakeDataId)
-                .Union(
-                    Select
-                        .From<DataRow>(
-                            row => row.FakeDataId,
-                            row => row.NormalColumn,
-                            row => row.RelatedAlias.RelatedId,
-                            row => row.RelatedAlias.RelatedProperty,
-                            row => row.OtherAlias.RelatedProperty)
-                        .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                         .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
                         .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                         .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                        .WhereEqual(row => row.ValueColumn, match2.ValueColumn)
-                        .WhereEqual(row => row.NullableColumn, match2.NullableColumn)
-                        .WhereEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
-                        .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
-                        .Between(baseline2, boundary2, row => row.FakeDataId)
-                        .Union(
-                            Select
-                                .From<DataRow>(
-                                    row => row.FakeDataId,
-                                    row => row.NormalColumn,
-                                    row => row.RelatedAlias.RelatedId,
-                                    row => row.RelatedAlias.RelatedProperty,
-                                    row => row.OtherAlias.RelatedProperty)
-                                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, match1.ValueColumn)
+                        .AreEqual(row => row.NullableColumn, match1.NullableColumn)
+                        .AreEqual(row => row.NullableValueColumn, match1.NullableValueColumn)
+                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related1")
+                        .Between(baseline1, boundary1, row => row.FakeDataId))
+                .Union(
+                    Query.From<DataRow>(
+                            set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
                                 .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
                                 .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
                                 .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                                .WhereEqual(row => row.ValueColumn, match3.ValueColumn)
-                                .WhereEqual(row => row.NullableColumn, match3.NullableColumn)
-                                .WhereEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
-                                .WhereEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
-                                .Between(baseline3, boundary3, row => row.FakeDataId)));
+                                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                        .Where(
+                            set => set.AreEqual(row => row.ValueColumn, match2.ValueColumn)
+                                .AreEqual(row => row.NullableColumn, match2.NullableColumn)
+                                .AreEqual(row => row.NullableValueColumn, match2.NullableValueColumn)
+                                .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related2")
+                                .Between(baseline2, boundary2, row => row.FakeDataId))
+                        .Union(
+                            Query.From<DataRow>(
+                                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                                .Where(
+                                    set => set.AreEqual(row => row.ValueColumn, match3.ValueColumn)
+                                        .AreEqual(row => row.NullableColumn, match3.NullableColumn)
+                                        .AreEqual(row => row.NullableValueColumn, match3.NullableValueColumn)
+                                        .AreEqual(row => row.RelatedAlias.RelatedProperty, "Related3")
+                                        .Between(baseline3, boundary3, row => row.FakeDataId))));
 
             const string Expected = @"DELETE [dbo].[FakeData]
 FROM [dbo].[FakeData]

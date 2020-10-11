@@ -42,6 +42,7 @@ namespace Startitecture.Orm.Testing.Entities
         [Required]
         [Key]
         [Display(Name = "Aggregate submission ID")]
+        [ForeignKey("GenericSubmission")]
         public int AggregateSubmissionId { get; set; }
 
         /// <summary>

@@ -44,16 +44,16 @@ namespace Startitecture.Orm.SqlClient
         public override IReadOnlyDictionary<Tuple<Type, Type>, IValueMapper> ValueMappers => Mappers;
 
         /// <inheritdoc />
-        public override string CreateSelectionStatement(ISelection selection)
+        public override string CreateSelectionStatement(IEntitySet entitySet)
         {
-            if (selection == null)
+            if (entitySet == null)
             {
-                throw new ArgumentNullException(nameof(selection));
+                throw new ArgumentNullException(nameof(entitySet));
             }
 
-            var statement = base.CreateSelectionStatement(selection);
+            var statement = base.CreateSelectionStatement(entitySet);
 
-            if (selection.ParentExpression != null && selection.OrderByExpressions.Any())
+            if (entitySet.ParentExpression != null && entitySet.OrderByExpressions.Any())
             {
                 return statement + " OPTION (RECOMPILE)";
             }

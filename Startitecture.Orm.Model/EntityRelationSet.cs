@@ -1,9 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityRelationSet.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
-//   Defines the EntityRelationSet type.
+//   Contains a set of entity relations.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -18,10 +18,10 @@ namespace Startitecture.Orm.Model
     /// <summary>
     /// Contains a set of entity relations.
     /// </summary>
-    /// <typeparam name="TItem">
+    /// <typeparam name="TEntity">
     /// The type of item that is the focus of the relation set.
     /// </typeparam>
-    public class EntityRelationSet<TItem>
+    public class EntityRelationSet<TEntity>
     {
         /// <summary>
         /// The entity relations.
@@ -45,9 +45,9 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> InnerJoin(
-            [NotNull] Expression<Func<TItem, object>> leftSelector,
-            [NotNull] Expression<Func<TItem, object>> rightSelector)
+        public EntityRelationSet<TEntity> InnerJoin(
+            [NotNull] Expression<Func<TEntity, object>> leftSelector,
+            [NotNull] Expression<Func<TEntity, object>> rightSelector)
         {
             if (leftSelector == null)
             {
@@ -60,7 +60,7 @@ namespace Startitecture.Orm.Model
             }
 
             var relation = new EntityRelation(EntityRelationType.InnerJoin);
-            relation.Join<TItem>(leftSelector, rightSelector);
+            relation.Join<TEntity>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
 
@@ -79,8 +79,8 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> InnerJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntityRelationSet<TEntity> InnerJoin<TRelation>(
+            Expression<Func<TEntity, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
             if (leftSelector == null)
@@ -116,8 +116,8 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> InnerJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntityRelationSet<TEntity> InnerJoin<TRelation>(
+            Expression<Func<TEntity, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string relationAlias)
         {
@@ -155,7 +155,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> InnerJoin<TSource, TRelation>(
+        public EntityRelationSet<TEntity> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
@@ -186,7 +186,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> InnerJoin<TSource, TRelation>(
+        public EntityRelationSet<TEntity> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string relationAlias)
@@ -221,7 +221,7 @@ namespace Startitecture.Orm.Model
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
-        public EntityRelationSet<TItem> InnerJoin<TSource, TRelation>(
+        public EntityRelationSet<TEntity> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             string sourceAlias,
             Expression<Func<TRelation, object>> rightSelector,
@@ -254,9 +254,9 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> LeftJoin(
-            [NotNull] Expression<Func<TItem, object>> leftSelector,
-            [NotNull] Expression<Func<TItem, object>> rightSelector)
+        public EntityRelationSet<TEntity> LeftJoin(
+            [NotNull] Expression<Func<TEntity, object>> leftSelector,
+            [NotNull] Expression<Func<TEntity, object>> rightSelector)
         {
             if (leftSelector == null)
             {
@@ -269,7 +269,7 @@ namespace Startitecture.Orm.Model
             }
 
             var relation = new EntityRelation(EntityRelationType.LeftJoin);
-            relation.Join<TItem>(leftSelector, rightSelector);
+            relation.Join<TEntity>(leftSelector, rightSelector);
             return this.AddRelation(relation);
         }
 
@@ -288,8 +288,8 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> LeftJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntityRelationSet<TEntity> LeftJoin<TRelation>(
+            Expression<Func<TEntity, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
             if (leftSelector == null)
@@ -325,8 +325,8 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> LeftJoin<TRelation>(
-            Expression<Func<TItem, object>> leftSelector,
+        public EntityRelationSet<TEntity> LeftJoin<TRelation>(
+            Expression<Func<TEntity, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string relationAlias)
         {
@@ -364,7 +364,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> LeftJoin<TSource, TRelation>(
+        public EntityRelationSet<TEntity> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector)
         {
@@ -395,7 +395,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        public EntityRelationSet<TItem> LeftJoin<TSource, TRelation>(
+        public EntityRelationSet<TEntity> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             Expression<Func<TRelation, object>> rightSelector,
             string joinAlias)
@@ -430,7 +430,7 @@ namespace Startitecture.Orm.Model
         /// </returns>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
-        public EntityRelationSet<TItem> LeftJoin<TSource, TRelation>(
+        public EntityRelationSet<TEntity> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             string sourceAlias,
             Expression<Func<TRelation, object>> rightSelector,
@@ -460,7 +460,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{T}"/>.
         /// </returns>
-        private EntityRelationSet<TItem> AddRelation([NotNull] IEntityRelation relation)
+        private EntityRelationSet<TEntity> AddRelation([NotNull] IEntityRelation relation)
         {
             if (relation == null)
             {

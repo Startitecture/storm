@@ -388,7 +388,8 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
                 // Set up the domain identity, not part of our validity testing.
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
-                                         Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
+                                         Query.Select<DomainIdentity>()
+                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
                                              {
@@ -399,7 +400,8 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = identityRepository.FirstOrDefault(
-                                      Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, domainIdentifier2))
+                                      Query.Select<DomainIdentity>()
+                                          .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)))
                                   ?? identityRepository.Save(
                                       new DomainIdentity(domainIdentifier2)
                                           {
@@ -450,23 +452,27 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
 
                 var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 var values = fieldValueRepository.SelectEntities(
-                        Select.From<GenericSubmissionValueRow>()
-                            .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
-                            .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
-                            .InnerJoin(row => row.FieldValue.LastModifiedByDomainIdentifierId, row => row.FieldValue.LastModifiedBy.DomainIdentityId)
-                            .WhereEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault()))
+                        Query.Select<GenericSubmissionValueRow>()
+                            .From(
+                                set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
+                                    .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
+                                    .InnerJoin(
+                                        row => row.FieldValue.LastModifiedByDomainIdentifierId,
+                                        row => row.FieldValue.LastModifiedBy.DomainIdentityId))
+                            .Where(set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())))
                     .ToDictionary(value => value.FieldValueId.GetValueOrDefault(), value => value);
 
                 actual.Load(values.Values);
 
                 var valueElementRows = provider.SelectEntities(
-                        Select.From<FieldValueElementTableTypeRow>()
-                            .LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
-                            .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
-                            .LeftJoin<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
-                            .LeftJoin<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
-                            .LeftJoin<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId)
-                            .Include(row => row.FieldValueId, values.Keys.ToArray()))
+                        Query.Select<FieldValueElementTableTypeRow>()
+                            .From(
+                                set => set.LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
+                                    .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
+                                    .LeftJoin<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
+                                    .LeftJoin<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
+                                    .LeftJoin<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId))
+                            .Where(set => set.Include(row => row.FieldValueId, values.Keys.ToArray())))
                     .ToList();
 
                 foreach (var key in values.Keys)

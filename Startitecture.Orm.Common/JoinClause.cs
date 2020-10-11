@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="JoinClause.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Represents a Transact-SQL join.
@@ -78,6 +78,11 @@ namespace Startitecture.Orm.Common
         public int Indent { get; set; }
 
         /// <summary>
+        /// Gets or sets the alias suffix to append to an alias. If set, an alias will be used for every relation.
+        /// </summary>
+        public string AliasSuffix { get; set; }
+
+        /// <summary>
         /// Creates a JOIN clause for the specified <paramref name="relations"/>.
         /// </summary>
         /// <param name="relations">
@@ -140,9 +145,12 @@ namespace Startitecture.Orm.Common
         private string GenerateRelationStatement(IEntityRelation entityRelation)
         {
             var joinType = GetJoinClause(entityRelation.RelationType);
+            var useAliasSuffix = string.IsNullOrWhiteSpace(this.AliasSuffix) == false;
 
             var sourceReference = this.definitionProvider.GetEntityReference(entityRelation.SourceExpression);
-            sourceReference.EntityAlias = entityRelation.SourceEntityAlias ?? sourceReference.EntityAlias;
+            var sourceDefinition = this.definitionProvider.Resolve(sourceReference.EntityType);
+            var sourceAlias = entityRelation.SourceEntityAlias ?? sourceReference.EntityAlias;
+            sourceReference.EntityAlias = useAliasSuffix ? $"{sourceAlias ?? sourceDefinition.EntityName}{this.AliasSuffix}" : sourceAlias;
 
             var sourceLocation = this.definitionProvider.GetEntityLocation(sourceReference);
 
@@ -153,7 +161,9 @@ namespace Startitecture.Orm.Common
             var sourceName = this.nameQualifier.Qualify(sourceAttribute, sourceLocation);
 
             var relationReference = this.definitionProvider.GetEntityReference(entityRelation.RelationExpression);
-            relationReference.EntityAlias = entityRelation.RelationEntityAlias ?? relationReference.EntityAlias;
+            var relationDefinition = this.definitionProvider.Resolve(relationReference.EntityType);
+            var relationAlias = entityRelation.RelationEntityAlias ?? relationReference.EntityAlias;
+            relationReference.EntityAlias = useAliasSuffix ? $"{relationAlias ?? relationDefinition.EntityName}{this.AliasSuffix}" : relationAlias;
 
             var relationLocation = this.definitionProvider.GetEntityLocation(relationReference);
             var relationAttribute =
@@ -161,9 +171,9 @@ namespace Startitecture.Orm.Common
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == entityRelation.RelationExpression.GetPropertyName());
 
             var relationEntity = this.nameQualifier.GetPhysicalName(relationAttribute.Entity); 
-            var relationName = this.nameQualifier.Qualify(relationAttribute, relationLocation); 
+            var relationName = this.nameQualifier.Qualify(relationAttribute, relationLocation);
 
-            if (string.IsNullOrWhiteSpace(relationLocation.Alias))
+            if (string.IsNullOrWhiteSpace(relationLocation.Alias) && useAliasSuffix == false)
             {
                 // Use the entity names for the inner join if no alias has been requested.
                 return string.Format(
@@ -177,7 +187,7 @@ namespace Startitecture.Orm.Common
 
             // Use the entity names names for the inner join and alias the table.
             return string.Format(
-                CultureInfo.InvariantCulture, 
+                CultureInfo.InvariantCulture,
                 AliasedRelationStatementFormat,
                 joinType,
                 relationEntity,

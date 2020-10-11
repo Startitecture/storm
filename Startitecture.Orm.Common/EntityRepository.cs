@@ -61,7 +61,7 @@ namespace Startitecture.Orm.Common
         /// The entity mapper.
         /// </param>
         /// <param name="selectionComparer">
-        /// The selection comparer for ordering data entities from the repository after being selected from the database.
+        /// The set comparer for ordering data entities from the repository after being selected from the database.
         /// </param>
         public EntityRepository(
             IRepositoryProvider repositoryProvider,
@@ -96,15 +96,28 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Delete<TItem>([NotNull] EntitySelection<TItem> selection)
+        public int DeleteEntities([NotNull] Action<EntitySet<TModel>> defineSet)
         {
-            if (selection == null)
+            if (defineSet == null)
             {
-                throw new ArgumentNullException(nameof(selection));
+                throw new ArgumentNullException(nameof(defineSet));
             }
 
-            var itemSelection = selection.MapTo<TEntity>();
-            return this.RepositoryProvider.Delete(itemSelection);
+            var itemSet = new EntitySet<TModel>();
+            defineSet.Invoke(itemSet);
+            return this.DeleteSelection(itemSet);
+        }
+
+        /// <inheritdoc />
+        public int DeleteSelection([NotNull] IEntitySet entitySet)
+        {
+            if (entitySet == null)
+            {
+                throw new ArgumentNullException(nameof(entitySet));
+            }
+
+            var targetSet = entitySet.MapSet<TEntity>();
+            return this.RepositoryProvider.Delete(targetSet);
         }
 
         #region Methods
@@ -218,7 +231,7 @@ namespace Startitecture.Orm.Common
             {
                 var updateSet = new UpdateSet<TEntity>()
                     .Set(entity, this.RepositoryProvider.EntityDefinitionProvider)
-                    .Where(Select.Where<TEntity>().MatchKey(entity, this.RepositoryProvider.EntityDefinitionProvider));
+                    .Where(set => set.MatchKey(entity, this.RepositoryProvider.EntityDefinitionProvider));
 
                 this.RepositoryProvider.Update(updateSet);
             }

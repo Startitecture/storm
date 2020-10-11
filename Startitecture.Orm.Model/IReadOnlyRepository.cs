@@ -18,7 +18,7 @@ namespace Startitecture.Orm.Model
     /// <typeparam name="TModel">
     /// The type of model that the repository reads.
     /// </typeparam>
-    public interface IReadOnlyRepository<out TModel>
+    public interface IReadOnlyRepository<TModel>
     {
         /// <summary>
         /// Determines whether an item exists in the repository.
@@ -88,21 +88,33 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        TModel FirstOrDefault<TItem>(EntitySelection<TItem> selection);
+        TModel FirstOrDefault<TItem>(EntitySet<TItem> selection);
+
+        /// <summary>
+        /// Gets the first matching item of the selection. To ensure repeatable results, use unique column criteria.
+        /// </summary>
+        /// <param name="defineSet">
+        /// Define the set to use to query the repository.
+        /// </param>
+        /// <returns>
+        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a 
+        /// default value of the <typeparamref name="TModel"/> type if no entity could be found using the candidate.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="defineSet"/> is null.
+        /// </exception>
+        TModel FirstOrDefault(Action<EntitySet<TModel>> defineSet);
 
         /// <summary>
         /// Gets the first matching result of the <paramref name="selection"/> as a dynamic object.
         /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item the selection is based on.
-        /// </typeparam>
         /// <param name="selection">
         /// The selection to use to query the repository.
         /// </param>
         /// <returns>
         /// The first result of the <paramref name="selection"/> as a dynamic object, or null if no results were found.
         /// </returns>
-        dynamic DynamicFirstOrDefault<TItem>(EntitySelection<TItem> selection);
+        dynamic DynamicFirstOrDefault(ISelection selection);
 
         /// <summary>
         /// Selects all the domain models of the type <typeparamref name="TModel"/> in the repository.
@@ -127,7 +139,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        IEnumerable<TModel> SelectEntities<TItem>(EntitySelection<TItem> selection);
+        IEnumerable<TModel> SelectEntities<TItem>(EntitySet<TItem> selection);
 
         /// <summary>
         /// Returns a collection of dynamic objects matching the <paramref name="selection"/>.

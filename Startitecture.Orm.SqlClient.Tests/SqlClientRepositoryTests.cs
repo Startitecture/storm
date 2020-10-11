@@ -111,10 +111,15 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var transaction = provider.StartTransaction();
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
 
-                var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
-                var fieldValuesToDelete = provider.DynamicSelect(fieldSelection.Select(row => row.FieldId));
-                provider.Delete(Select.From<FieldValueRow>().Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray()));
-                fieldRepository.Delete(fieldSelection);
+                var fieldSelection = Query.SelectEntities<FieldRow>(
+                    select => select.Select(row => row.FieldId).Where(set => set.AreEqual(row => row.Name, "INS_%")));
+
+                var fieldValuesToDelete = provider.DynamicSelect(fieldSelection);
+                provider.Delete(
+                    Query.Select<FieldValueRow>()
+                        .Where(set => set.Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray())));
+
+                fieldRepository.DeleteSelection(fieldSelection);
                 
                 var fieldRows = from f in fields
                                 select new FieldTableTypeRow
@@ -196,12 +201,15 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
-                var fieldSelection = Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%");
-                var fieldValuesToDelete = fieldRepository.DynamicSelect(fieldSelection.Select(row => row.FieldId));
-                fieldValueRepository.Delete(
-                    Select.From<FieldValueRow>().Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray()));
+                var fieldSelection = Query.SelectEntities<FieldRow>(
+                    select => select.Select(row => row.FieldId).Where(set => set.AreEqual(row => row.Name, "INS_%")));
 
-                fieldRepository.Delete(fieldSelection);
+                var fieldValuesToDelete = fieldRepository.DynamicSelect(fieldSelection);
+                fieldValueRepository.DeleteSelection(
+                    Query.Select<FieldValueRow>()
+                        .Where(set => set.Include(row => row.FieldId, fieldValuesToDelete.Select(o => (int)o.FieldId).ToArray())));
+
+                fieldRepository.DeleteSelection(fieldSelection);
 
                 var fieldRows = from f in expected
                                 select new FieldTableTypeRow
@@ -238,7 +246,7 @@ namespace Startitecture.Orm.SqlClient.Tests
             {
                 var identityRepository = new SqlClientRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
-                                         Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
+                                         Query.Select<DomainIdentity>().Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
                                              {
@@ -314,7 +322,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var inclusionValues = submissionFields.Keys.ToArray();
 
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
-                var fieldSelection = new EntitySelection<Field>().Include(field => field.Name, inclusionValues);
+                var fieldSelection = new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues));
                 var existingFields = fieldRepository.SelectEntities(fieldSelection).ToList();
 
                 foreach (var field in existingFields)
@@ -596,7 +604,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Set up the domain identity, not part of our validity testing.
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
-                                         Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
+                                         Query.Select<DomainIdentity>().Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
                                              {
@@ -607,7 +615,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = identityRepository.FirstOrDefault(
-                                      Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, domainIdentifier2))
+                                      Query.Select<DomainIdentity>().Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)))
                                   ?? identityRepository.Save(
                                       new DomainIdentity(domainIdentifier2)
                                           {
@@ -658,23 +666,27 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 var values = fieldValueRepository.SelectEntities(
-                        Select.From<GenericSubmissionValueRow>()
-                            .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
-                            .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
-                            .InnerJoin(row => row.FieldValue.LastModifiedByDomainIdentifierId, row => row.FieldValue.LastModifiedBy.DomainIdentityId)
-                            .WhereEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault()))
+                        Query.Select<GenericSubmissionValueRow>()
+                            .From(
+                                set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
+                                    .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
+                                    .InnerJoin(
+                                        row => row.FieldValue.LastModifiedByDomainIdentifierId,
+                                        row => row.FieldValue.LastModifiedBy.DomainIdentityId))
+                            .Where(set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())))
                     .ToDictionary(value => value.FieldValueId.GetValueOrDefault(), value => value);
 
                 actual.Load(values.Values);
 
                 var valueElementRows = provider.SelectEntities(
-                        Select.From<FieldValueElementTableTypeRow>()
-                            .LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
-                            .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
-                            .LeftJoin<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
-                            .LeftJoin<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
-                            .LeftJoin<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId)
-                            .Include(row => row.FieldValueId, values.Keys.ToArray()))
+                        Query.Select<FieldValueElementTableTypeRow>()
+                            .From(
+                                set => set.LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
+                                    .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
+                                    .LeftJoin<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
+                                    .LeftJoin<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
+                                    .LeftJoin<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId))
+                            .Where(set => set.Include(row => row.FieldValueId, values.Keys.ToArray())))
                     .ToList();
 
                 foreach (var key in values.Keys)

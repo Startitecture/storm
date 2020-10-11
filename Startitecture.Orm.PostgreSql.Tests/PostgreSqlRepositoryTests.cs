@@ -111,7 +111,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
-                fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
+                fieldRepository.DeleteSelection(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%")));
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
@@ -193,7 +193,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
-                fieldRepository.Delete(Select.From<FieldRow>().WhereEqual(row => row.Name, "INS_%"));
+                fieldRepository.DeleteSelection(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%")));
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
@@ -228,7 +228,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
 
                 var domainIdentity = identityRepository.FirstOrDefault(
-                                         Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
+                                         Query.From<DomainIdentity>()
+                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
                                              {
@@ -301,7 +302,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
-                var existingFields = fieldRepository.SelectEntities(new EntitySelection<Field>().Include(field => field.Name, inclusionValues));
+                var existingFields = fieldRepository.SelectEntities(
+                    new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues)));
 
                 foreach (var field in existingFields)
                 {
@@ -489,7 +491,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Set up the domain identity, not part of our validity testing.
                 var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = identityRepository.FirstOrDefault(
-                                         Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, Environment.UserName))
+                                         Query.From<DomainIdentity>()
+                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
                                              {
@@ -500,7 +503,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = identityRepository.FirstOrDefault(
-                                      Select.From<DomainIdentity>().WhereEqual(identity => identity.UniqueIdentifier, domainIdentifier2))
+                                      Query.From<DomainIdentity>()
+                                          .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)))
                                   ?? identityRepository.Save(
                                       new DomainIdentity(domainIdentifier2)
                                           {
@@ -550,9 +554,12 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
                 // Get rid of all the previous fields.
-                fieldValueRepository.Delete(
-                    Select.From<FieldValueRow>()
-                        .Include(row => row.FieldValueId, baselineSubmission.SubmissionValues.Select(value => value.FieldValueId).ToArray()));
+                fieldValueRepository.DeleteSelection(
+                    Query.Select<FieldValueRow>()
+                        .Where(
+                            set => set.Include(
+                                row => row.FieldValueId,
+                                baselineSubmission.SubmissionValues.Select(value => value.FieldValueId).ToArray())));
 
                 this.MergeSubmission(expected, provider);
 
@@ -561,23 +568,27 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 var values = genericSubmissionValueRepository.SelectEntities(
-                        Select.From<GenericSubmissionValueRow>()
-                            .InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
-                            .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
-                            .InnerJoin(row => row.FieldValue.LastModifiedByDomainIdentifierId, row => row.FieldValue.LastModifiedBy.DomainIdentityId)
-                            .WhereEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault()))
+                        Query.Select<GenericSubmissionValueRow>()
+                            .From(
+                                set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
+                                    .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
+                                    .InnerJoin(
+                                        row => row.FieldValue.LastModifiedByDomainIdentifierId,
+                                        row => row.FieldValue.LastModifiedBy.DomainIdentityId))
+                            .Where(set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())))
                     .ToDictionary(value => value.FieldValueId.GetValueOrDefault(), value => value);
 
                 actual.Load(values.Values);
 
                 var valueElementRows = provider.SelectEntities(
-                        Select.From<FieldValueElementTableTypeRow>()
-                            .LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
-                            .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
-                            .LeftJoin<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
-                            .LeftJoin<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
-                            .LeftJoin<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId)
-                            .Include(row => row.FieldValueId, values.Keys.ToArray()))
+                        Query.Select<FieldValueElementTableTypeRow>()
+                            .From(
+                                set => set.LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
+                                    .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
+                                    .LeftJoin<IntegerElementRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
+                                    .LeftJoin<MoneyElementRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
+                                    .LeftJoin<TextElementRow>(row => row.FieldValueElementId, row => row.TextElementId))
+                            .Where(set => set.Include(row => row.FieldValueId, values.Keys.ToArray())))
                     .ToList();
 
                 foreach (var key in values.Keys)

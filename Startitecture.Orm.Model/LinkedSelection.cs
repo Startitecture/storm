@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="LinkedSelection.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Contains a reference to a linked selection with the link type.
@@ -30,7 +30,7 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        public LinkedSelection([NotNull] ISelection selection, SelectionLinkType linkType)
+        public LinkedSelection([NotNull] IEntitySet selection, SelectionLinkType linkType)
         {
             this.Selection = selection ?? throw new ArgumentNullException(nameof(selection));
             this.LinkType = linkType;
@@ -46,7 +46,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the linked selection.
         /// </summary>
-        public ISelection Selection { get; }
+        public IEntitySet Selection { get; }
 
         #endregion
 

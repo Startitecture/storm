@@ -44,15 +44,15 @@ namespace Startitecture.Orm.Common
         string CreateExistsStatement(IEntitySet entitySet);
 
         /// <summary>
-        /// Creates a query language selection statement for the specified <paramref name="selection"/>.
+        /// Creates a query language selection statement for the specified <paramref name="entitySet"/>.
         /// </summary>
-        /// <param name="selection">
+        /// <param name="entitySet">
         /// The selection to create the statement for.
         /// </param>
         /// <returns>
         /// The query language statement as a <see cref="string"/>.
         /// </returns>
-        string CreateSelectionStatement(ISelection selection);
+        string CreateSelectionStatement(IEntitySet entitySet);
 
         /// <summary>
         /// Creates a statement to update a specific set of entities.

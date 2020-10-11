@@ -38,9 +38,14 @@ namespace Startitecture.Orm.Model
         private readonly List<ValueState> attributesToSet = new List<ValueState>();
 
         /// <summary>
-        /// The entity set.
+        /// The relations.
         /// </summary>
-        private EntitySet<T> entitySet = new EntitySet<T>();
+        private readonly List<IEntityRelation> relations = new List<IEntityRelation>();
+
+        /// <summary>
+        /// The filters.
+        /// </summary>
+        private readonly List<IValueFilter> filters = new List<IValueFilter>();
 
         /// <inheritdoc />
         public IEnumerable<ValueState> AttributesToSet => this.attributesToSet;
@@ -49,10 +54,10 @@ namespace Startitecture.Orm.Model
         public Type EntityType => typeof(T);
 
         /// <inheritdoc />
-        public EntityExpression ParentExpression => this.entitySet.ParentExpression;
+        public IEntityExpression ParentExpression { get; private set; }
 
         /// <inheritdoc />
-        public IEnumerable<IEntityRelation> Relations => this.entitySet.Relations;
+        public IEnumerable<IEntityRelation> Relations => this.relations;
 
         /// <inheritdoc />
         public IEnumerable<object> PropertyValues
@@ -66,7 +71,7 @@ namespace Startitecture.Orm.Model
                 }
 
                 // Then filters.
-                foreach (var value in this.entitySet.Filters.SelectMany(ValueFilter.SelectNonNullValues))
+                foreach (var value in this.filters.SelectMany(ValueFilter.SelectNonNullValues))
                 {
                     yield return value;
                 }
@@ -77,7 +82,7 @@ namespace Startitecture.Orm.Model
                     yield break;
                 }
 
-                foreach (var value in this.entitySet.ParentExpression.TableSelection.PropertyValues)
+                foreach (var value in this.ParentExpression.Expression.PropertyValues)
                 {
                     yield return value;
                 }
@@ -85,7 +90,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <inheritdoc />
-        public IEnumerable<ValueFilter> Filters => this.entitySet.Filters;
+        public IEnumerable<IValueFilter> Filters => this.filters;
 
         /// <summary>
         /// Sets all updateable values for the update set.
@@ -191,6 +196,32 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
+        /// Defines the relations to include in the update statement.
+        /// </summary>
+        /// <param name="setRelations">
+        /// Sets the relations for the update set.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="UpdateSet{T}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="setRelations"/> is empty.
+        /// </exception>
+        public UpdateSet<T> From([NotNull] Action<EntityRelationSet<T>> setRelations)
+        {
+            if (setRelations == null)
+            {
+                throw new ArgumentNullException(nameof(setRelations));
+            }
+
+            var relationSet = new EntityRelationSet<T>();
+            setRelations.Invoke(relationSet);
+            this.relations.Clear();
+            this.relations.AddRange(relationSet.Relations);
+            return this;
+        }
+
+        /// <summary>
         /// Defines the entity set to update.
         /// </summary>
         /// <param name="set">
@@ -199,10 +230,32 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="UpdateSet{T}"/>.
         /// </returns>
-        public UpdateSet<T> Where([NotNull] EntitySet<T> set)
+        public UpdateSet<T> Where([NotNull] Action<ValueFilterSet<T>> set)
         {
-            this.entitySet = set ?? throw new ArgumentNullException(nameof(set));
+            if (set == null)
+            {
+                throw new ArgumentNullException(nameof(set));
+            }
+
+            var target = new ValueFilterSet<T>();
+            set.Invoke(target);
+            this.filters.Clear();
+            this.filters.AddRange(target.ValueFilters);
             return this;
+        }
+
+        /// <summary>
+        /// Sets the current entity set's <see cref="ParentExpression"/> to the specified <paramref name="expression"/>.
+        /// </summary>
+        /// <param name="expression">
+        /// The expression to set as the parent expression.
+        /// </param>
+        /// <typeparam name="TExpression">
+        /// The type of entity selected by the expression.
+        /// </typeparam>
+        public void WithAs<TExpression>(EntityExpression<TExpression> expression)
+        {
+            this.ParentExpression = expression ?? throw new ArgumentNullException(nameof(expression));
         }
     }
 }

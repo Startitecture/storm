@@ -34,7 +34,7 @@
     Settings.MakeClassesInternal = false;
     Settings.MakeClassesPartial = false; // this will still have partial classes but not constructors.
     Settings.MakeDbContextInterfacePartial = false;
-    Settings.UseMappingTables = true; // If true, mapping will be used and no mapping tables will be generated. If false, all tables will be generated.
+    Settings.UseMappingTables = false; // If true, mapping will be used and no mapping tables will be generated. If false, all tables will be generated.
     Settings.IncludeParentEntities = false; // if true, "parent" entities will be included in the POCO.
     Settings.IncludeChildEntities = false; // if true, "child" entity lists will be included in the POCO.
     Settings.UsePascalCase = true;    // This will rename the generated C# tables & properties to use PascalCase. If false table & property names will be left alone.

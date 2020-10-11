@@ -68,5 +68,10 @@ namespace Startitecture.Orm.Model
         /// The filter should match values that are not set.
         /// </summary>
         IsNull = 10,
+
+        /// <summary>
+        /// The filter should match the associated sub query.
+        /// </summary>
+        MatchesSubQuery = 11
     }
 }

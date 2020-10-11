@@ -162,6 +162,22 @@ namespace Startitecture.Orm.Model.Tests
         }
 
         /// <summary>
+        /// The inner join_ two external relations with relation alias_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void InnerJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
+        {
+            var actual = new EntityRelationSet<DataRow>().InnerJoin<RelatedRow, DependencyRow>(
+                row => row.RelatedRowId,
+                row => row.FakeDependencyEntityId,
+                "My Alias").Relations.First();
+
+            var expected = new EntityRelation(EntityRelationType.InnerJoin);
+            expected.Join<RelatedRow, DependencyRow>(row => row.RelatedRowId, row => row.FakeDependencyEntityId, null, "My Alias");
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
         /// The inner join test.
         /// </summary>
         [TestMethod]
@@ -331,6 +347,22 @@ namespace Startitecture.Orm.Model.Tests
             expected.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeDependencyEntityId, null, "Alias");
 
             Assert.IsNotNull(relations.FirstOrDefault(x => expected == (EntityRelation)x));
+        }
+
+        /// <summary>
+        /// The left join_ two external relations with relation alias_ matches expected.
+        /// </summary>
+        [TestMethod]
+        public void LeftJoin_TwoExternalRelationsWithRelationAlias_MatchesExpected()
+        {
+            var actual = new EntityRelationSet<DataRow>().LeftJoin<RelatedRow, DependencyRow>(
+                row => row.RelatedRowId,
+                row => row.FakeDependencyEntityId,
+                "My Alias").Relations.First();
+
+            var expected = new EntityRelation(EntityRelationType.LeftJoin);
+            expected.Join<RelatedRow, DependencyRow>(row => row.RelatedRowId, row => row.FakeDependencyEntityId, null, "My Alias");
+            Assert.AreEqual(expected, actual);
         }
     }
 }

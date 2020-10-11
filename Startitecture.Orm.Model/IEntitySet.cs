@@ -1,7 +1,10 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IEntitySet.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// <summary>
+//   Provides an interface for specifying a set of entities.
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
@@ -22,7 +25,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the parent expression for the set operation.
         /// </summary>
-        EntityExpression ParentExpression { get; }
+        IEntityExpression ParentExpression { get; }
 
         /// <summary>
         /// Gets the relations that are part of the set.
@@ -37,11 +40,33 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Gets the filters for the entity set.
         /// </summary>
-        IEnumerable<ValueFilter> Filters { get; }
+        IEnumerable<IValueFilter> Filters { get; }
 
         /// <summary>
         /// Gets the selection linked to this selection, such as a UNION, INTERSECT, or EXCEPT, if any.
         /// </summary>
         LinkedSelection LinkedSelection { get; }
+
+        /// <summary>
+        /// Gets the page settings for the entity set.
+        /// </summary>
+        ResultPage Page { get; }
+
+        /// <summary>
+        /// Gets the ORDER BY expressions for the entity set.
+        /// </summary>
+        IEnumerable<OrderExpression> OrderByExpressions { get; }
+
+        /// <summary>
+        /// Maps the current selection to the target selection type.
+        /// </summary>
+        /// <typeparam name="TDestEntity">
+        /// The destination entity type.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="EntitySet{T}" /> for the destination type.
+        /// </returns>
+        EntitySet<TDestEntity> MapSet<TDestEntity>()
+            where TDestEntity : class, new();
     }
 }

@@ -192,7 +192,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public bool Contains<T>(EntitySet<T> selection)
+        public bool Contains(IEntitySet selection)
         {
             if (selection == null)
             {
@@ -252,11 +252,11 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public T FirstOrDefault<T>(EntitySelection<T> selection)
+        public T FirstOrDefault<T>(EntitySet<T> entitySet)
         {
-            if (Evaluate.IsNull(selection))
+            if (Evaluate.IsNull(entitySet))
             {
-                throw new ArgumentNullException(nameof(selection));
+                throw new ArgumentNullException(nameof(entitySet));
             }
 
             this.CheckDisposed();
@@ -264,21 +264,21 @@ namespace Startitecture.Orm.Common
 
             if (this.EnableCaching)
             {
-                var cacheKey = CreateCacheKey(selection);
+                var cacheKey = CreateCacheKey(entitySet);
 
                 lock (this.cacheLock)
                 {
                     entity = this.entityCache.GetOrLazyAddExisting(
                         this.cacheLock,
                         cacheKey,
-                        selection,
+                        entitySet,
                         this.FirstOrDefaultEntity<T>,
                         new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) });
                 }
             }
             else
             {
-                entity = this.FirstOrDefaultEntity<T>(selection);
+                entity = this.FirstOrDefaultEntity<T>(entitySet);
             }
 
             return entity;
@@ -298,7 +298,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public IEnumerable<T> SelectEntities<T>(EntitySelection<T> selection)
+        public IEnumerable<T> SelectEntities<T>(EntitySet<T> selection)
         {
             if (selection == null)
             {
@@ -440,10 +440,11 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-            var selection = Select.Where<T>().MatchKey(entity, this.DatabaseContext.RepositoryAdapter.DefinitionProvider);
             var update = setExpressions.Any()
-                             ? new UpdateSet<T>().Set(entity, setExpressions).Where(selection)
-                             : new UpdateSet<T>().Set(entity, this.EntityDefinitionProvider).Where(selection);
+                             ? new UpdateSet<T>().Set(entity, setExpressions)
+                                 .Where(set => set.MatchKey(entity, this.DatabaseContext.RepositoryAdapter.DefinitionProvider))
+                             : new UpdateSet<T>().Set(entity, this.EntityDefinitionProvider)
+                                 .Where(set => set.MatchKey(entity, this.DatabaseContext.RepositoryAdapter.DefinitionProvider));
 
             var updateStatement = this.DatabaseContext.RepositoryAdapter.CreateUpdateStatement(update);
 
@@ -467,31 +468,31 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Delete<T>(EntitySelection<T> selection) 
+        public int Delete(IEntitySet entitySet) 
         {
-            if (selection == null)
+            if (entitySet == null)
             {
-                throw new ArgumentNullException(nameof(selection));
+                throw new ArgumentNullException(nameof(entitySet));
             }
 
             this.CheckDisposed();
-            var statement = this.DatabaseContext.RepositoryAdapter.CreateDeletionStatement(selection);
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateDeletionStatement(entitySet);
 
             try
             {
-                return this.DatabaseContext.Execute(statement, selection.PropertyValues.ToArray());
+                return this.DatabaseContext.Execute(statement, entitySet.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
             {
-                throw new RepositoryException(selection, ex.Message, ex);
+                throw new RepositoryException(entitySet, ex.Message, ex);
             }
             catch (DataException ex)
             {
-                throw new RepositoryException(selection, ex.Message, ex);
+                throw new RepositoryException(entitySet, ex.Message, ex);
             }
             catch (DbException ex)
             {
-                throw new RepositoryException(selection, ex.Message, ex);
+                throw new RepositoryException(entitySet, ex.Message, ex);
             }
         }
 
@@ -604,7 +605,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The first matching <typeparamref name="T"/>, or the default value if no entity is found.
         /// </returns>
-        private T FirstOrDefaultEntity<T>(ISelection selection)
+        private T FirstOrDefaultEntity<T>(IEntitySet selection)
         {
             if (selection == null)
             {

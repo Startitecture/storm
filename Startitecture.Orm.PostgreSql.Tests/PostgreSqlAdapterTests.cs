@@ -41,27 +41,29 @@ RETURNING ""FakeRowId""";
         [TestMethod]
         public void CreateExistsStatement_DirectData_MatchesExpected()
         {
-            var transactionSelection = Select
-                .From<DataRow>(row => row.FakeDataId)
-                .InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
-                .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
-                .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
-                .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
-                .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId)
-                .WhereEqual(row => row.ValueColumn, 2)
-                .WhereEqual(row => row.NullableColumn, "CouldHaveBeenNull")
-                .WhereEqual(row => row.NullableValueColumn, null)
-                .Between(row => row.FakeDataId, 10, 20)
-                .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
-                .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
-                .Include(row => row.AnotherValueColumn, 5, 10, 15, 20)
-                .OrderBy(row => row.Related.RelatedProperty)
-                .OrderByDescending(row => row.OtherAlias.RelatedProperty)
-                .OrderBy(row => row.NormalColumn);
+            var transactionSelection = Query
+                .From<DataRow>(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Sort(
+                    set => set.OrderBy(row => row.Related.RelatedProperty)
+                        .OrderByDescending(row => row.OtherAlias.RelatedProperty)
+                        .OrderBy(row => row.NormalColumn));
 
             const string Expected = @"SELECT EXISTS(SELECT
-    ""dbo"".""FakeData"".""FakeRowId""
+    1
 FROM ""dbo"".""FakeData""
 INNER JOIN ""someschema"".""Related"" ON ""dbo"".""FakeData"".""FakeRowId"" = ""someschema"".""Related"".""FakeDataId""
 INNER JOIN ""dbo"".""DependencyEntity"" ON ""someschema"".""Related"".""RelatedId"" = ""dbo"".""DependencyEntity"".""ComplexEntityId""
