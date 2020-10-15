@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.0-beta2</Version>
+    <Version>1.0.0-beta3</Version>
     <Company>Startitecture, LLC</Company>
     <Product>ST/ORM</Product>
     <Description>An ORM that combines the speed of micro-ORMs with the flexibility of fluent queries and complex POCOs.</Description>
@@ -28,6 +28,11 @@
     <None Remove="Generation\Database.tt" />
     <None Remove="Generation\storm.Reverse.POCO.Core.ttinclude" />
     <None Remove="Generation\storm.Reverse.POCO.ttinclude" />
+    <None Remove="stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>

@@ -11,7 +11,6 @@ namespace Startitecture.Orm.PostgreSql
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Text;
@@ -73,30 +72,24 @@ namespace Startitecture.Orm.PostgreSql
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonInsert{T}"/> class.
         /// </summary>
-        /// <param name="tableCommandProvider">
-        /// The structured command provider.
+        /// <param name="tableCommandFactory">
+        /// The table command provider.
         /// </param>
-        public JsonInsert([NotNull] ITableCommandProvider tableCommandProvider)
-            : base(tableCommandProvider)
+        /// <param name="databaseContext">
+        /// The database context.
+        /// </param>
+        public JsonInsert(
+            [NotNull] IDbTableCommandFactory tableCommandFactory,
+            [NotNull] IDatabaseContext databaseContext)
+            : base(tableCommandFactory, databaseContext)
         {
-            this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
-        }
+            if (databaseContext == null)
+            {
+                throw new ArgumentNullException(nameof(databaseContext));
+            }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonInsert{T}"/> class.
-        /// </summary>
-        /// <param name="tableCommandProvider">
-        /// The structured command provider.
-        /// </param>
-        /// <param name="databaseTransaction">
-        /// The database transaction.
-        /// </param>
-        public JsonInsert([NotNull] ITableCommandProvider tableCommandProvider, IDbTransaction databaseTransaction)
-            : base(tableCommandProvider, databaseTransaction)
-        {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            this.nameQualifier = this.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <inheritdoc />
@@ -254,7 +247,8 @@ namespace Startitecture.Orm.PostgreSql
                     $"INSERT INTO {this.nameQualifier.Escape(this.EntityDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.EntityDefinition.EntityName)}")
                 .AppendLine($"({string.Join(", ", targetColumns)})");
 
-            commandBuilder.Append($@"SELECT {string.Join(", ", sourceColumns)}
+            commandBuilder.Append(
+                $@"SELECT {string.Join(", ", sourceColumns)}
 FROM jsonb_to_recordset({this.nameQualifier.AddParameterPrefix(this.ParameterName)}::jsonb) AS t ({string.Join(", ", jsonProperties)})");
 
             if (this.insertConflictAction != InsertConflictAction.RaiseConstraintViolation)
@@ -277,7 +271,7 @@ FROM jsonb_to_recordset({this.nameQualifier.AddParameterPrefix(this.ParameterNam
                             .Select(x => $"{this.nameQualifier.Escape(x.PhysicalName)} = EXCLUDED.{this.nameQualifier.Escape(x.PhysicalName)}")
                             .ToList();
 
-                        ////var setColumnClauses = 
+                        ////var setColumnClauses =
                             ////this.EntityDefinition.DirectAttributes.From(definition => definition.IsIdentityColumn)
                             ////    .Select(id => $"{this.nameQualifier.Escape(id.PhysicalName)} = DEFAULT")
                             ////    .Union(targetColumns.Select((t, i) => $"{t} = {excludedColumns[i]}")).ToList();

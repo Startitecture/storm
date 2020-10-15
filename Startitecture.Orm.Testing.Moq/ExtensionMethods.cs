@@ -14,9 +14,9 @@ namespace Startitecture.Orm.Testing.Moq
 
     using Castle.DynamicProxy.Internal;
 
-    using JetBrains.Annotations;
-
     using global::Moq;
+
+    using JetBrains.Annotations;
 
     using Startitecture.Core;
     using Startitecture.Orm.Common;
@@ -45,12 +45,12 @@ namespace Startitecture.Orm.Testing.Moq
         /// The name qualifier.
         /// </param>
         /// <typeparam name="T">
-        /// The type of item in the list to create an <see cref="ITableCommandProvider"/> mock for.
+        /// The type of item in the list to create an <see cref="IDbTableCommandFactory"/> mock for.
         /// </typeparam>
         /// <returns>
         /// The <see cref="Mock"/>.
         /// </returns>
-        public static Mock<ITableCommandProvider> MockCommandProvider<T>(
+        public static Mock<IDbTableCommandFactory> MockCommandProvider<T>(
             [NotNull] this IReadOnlyCollection<T> items,
             [NotNull] IEntityDefinitionProvider definitionProvider,
             [NotNull] INameQualifier nameQualifier)
@@ -78,19 +78,19 @@ namespace Startitecture.Orm.Testing.Moq
             var command = new Mock<IDbCommand>();
             command.Setup(dbCommand => dbCommand.ExecuteReader()).Returns(reader.Object);
 
-            var commandProvider = new Mock<ITableCommandProvider>();
+            var commandProvider = new Mock<IDbTableCommandFactory>();
             var databaseContext = new Mock<IDatabaseContext>();
             var repositoryAdapter = new Mock<IRepositoryAdapter>();
             repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(nameQualifier);
             repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(definitionProvider);
             databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-            commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
+            ////commandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
             ////commandProvider
-            ////    .Setup(provider => provider.CreateCommand(It.IsAny<ITableCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
+            ////    .Setup(provider => provider.Create(It.IsAny<ITableCommand>(), It.IsAny<DataTable>(), It.IsAny<IDbTransaction>()))
             ////    .Returns(command.Object);
 
             commandProvider
-                .Setup(provider => provider.CreateCommand(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<T>>(), It.IsAny<IDbTransaction>()))
+                .Setup(provider => provider.Create(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<T>>()))
                 .Returns(command.Object);
 
             return commandProvider;
@@ -125,7 +125,12 @@ namespace Startitecture.Orm.Testing.Moq
                 throw new ArgumentNullException(nameof(attributes));
             }
 
-            return MockDataReaderForList(new List<T> { item }, attributes.ToList());
+            return MockDataReaderForList(
+                new List<T>
+                {
+                    item
+                },
+                attributes.ToList());
         }
 
         /// <summary>
@@ -176,19 +181,23 @@ namespace Startitecture.Orm.Testing.Moq
             var fieldCount = attributes.Count;
             reader.Setup(dataReader => dataReader.FieldCount).Returns(fieldCount);
             reader.Setup(dataReader => dataReader.GetOrdinal(It.IsAny<string>()))
-                .Returns((string s) =>
+                .Returns(
+                    (string s) =>
                     {
                         var attributeIndex = attributeIndexDictionary[s];
                         Trace.WriteLine($"Requested reference name '{s}' located attribute with ordinal {attributeIndex}");
                         return attributeIndex;
                     });
 
-            reader.Setup(dataReader => dataReader.GetName(It.IsAny<int>())).Returns((int i) =>
-                {
-                    var referenceName = attributes.ElementAt(i).ReferenceName;
-                    ////Trace.WriteLine($"Requested name for attribute ordinal {i}: {referenceName}");
-                    return referenceName;
-                });
+            reader.Setup(dataReader => dataReader.GetName(It.IsAny<int>()))
+                .Returns(
+                    (int i) =>
+                    {
+                        var referenceName = attributes.ElementAt(i).ReferenceName;
+                        ////Trace.WriteLine($"Requested name for attribute ordinal {i}: {referenceName}");
+                        return referenceName;
+                    });
+
             reader.Setup(dataReader => dataReader.GetFieldType(It.IsAny<int>()))
                 .Returns((int i) => attributes.ElementAt(i).PropertyInfo.PropertyType);
 

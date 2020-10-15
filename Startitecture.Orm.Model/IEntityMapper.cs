@@ -28,7 +28,7 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The mapped object as a <typeparamref name="TOutput"/>.
         /// </returns>
-        /// <exception cref="Startitecture.Core.OperationException">
+        /// <exception cref="Core.OperationException">
         /// A mapping failed between the input and output type. The inner exception will contain details of the failure.
         /// </exception>
         TOutput Map<TOutput>(object input);

@@ -20,7 +20,7 @@ namespace Startitecture.Orm.SqlClient
     using Startitecture.Orm.Model;
 
     /// <summary>
-    /// Loads the contents of a list into a <see cref="System.Data.DataTable"/>.
+    /// Loads the contents of a list into a <see cref="DataTable"/>.
     /// </summary>
     /// <typeparam name="T">
     /// The type of data to load.
@@ -38,7 +38,7 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="definitionProvider">
         /// The definition provider.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> is null.
         /// </exception>
         public DataTableLoader([NotNull] IEntityDefinitionProvider definitionProvider)
@@ -61,7 +61,7 @@ namespace Startitecture.Orm.SqlClient
         /// The values to load.
         /// </param>
         /// <returns>
-        /// A <see cref="System.Data.DataTable"/> with the loaded values.
+        /// A <see cref="DataTable"/> with the loaded values.
         /// </returns>
         public DataTable Load([NotNull] IEnumerable<T> values)
         {
@@ -96,7 +96,7 @@ namespace Startitecture.Orm.SqlClient
         /// The property info to base the column on.
         /// </param>
         /// <returns>
-        /// A <see cref="System.Data.DataColumn"/> based on the property info.
+        /// A <see cref="DataColumn"/> based on the property info.
         /// </returns>
         private static DataColumn CreateDataColumn(PropertyInfo propertyInfo)
         {

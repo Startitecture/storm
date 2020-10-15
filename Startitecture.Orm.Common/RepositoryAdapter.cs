@@ -570,7 +570,7 @@ VALUES ({columnValues})";
         /// <returns>
         /// The selection link statement as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="linkType"/> is not one of the named enumerations.
         /// </exception>
         private static string CreateLinkStatement(SelectionLinkType linkType)

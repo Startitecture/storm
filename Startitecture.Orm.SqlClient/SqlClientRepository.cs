@@ -11,7 +11,7 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -68,23 +68,6 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="items">
         /// The items to insert.
         /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to insert. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
-        /// </typeparam>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> is null.
-        /// </exception>
-        public void Insert<TItem>([NotNull] IEnumerable<TItem> items)
-        {
-            this.Insert(items, null);
-        }
-
-        /// <summary>
-        /// Inserts a set of items into the repository then maps the results back to the <typeparamref name="TItem"/> type.
-        /// </summary>
-        /// <param name="items">
-        /// The items to insert.
-        /// </param>
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
         /// </param>
@@ -92,40 +75,17 @@ namespace Startitecture.Orm.SqlClient
         /// The type of item to insert. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
         /// </typeparam>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> or <paramref name="insertAction"/> is null.
+        /// <paramref name="items"/> is null.
         /// </exception>
         public void Insert<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedInsert<TEntity>> insertAction)
-        {
-            this.Insert(items, null, insertAction);
-        }
-
-        /// <summary>
-        /// Inserts a set of items into the repository then maps the results back to the <typeparamref name="TItem"/> type.
-        /// </summary>
-        /// <param name="items">
-        /// The items to insert.
-        /// </param>
-        /// <param name="transaction">
-        /// The transaction for the operation, or null to perform the operation without a transaction.
-        /// </param>
-        /// <param name="insertAction">
-        /// The insert action to take, or null to take the default insert action.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to insert. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
-        /// </typeparam>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> is null.
-        /// </exception>
-        public void Insert<TItem>([NotNull] IEnumerable<TItem> items, IDbTransaction transaction, Action<TableValuedInsert<TEntity>> insertAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedCommandProvider(this.RepositoryProvider.DatabaseContext);
-            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, transaction);
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(insertCommand);
             insertCommand.Execute(items);
         }
@@ -142,17 +102,23 @@ namespace Startitecture.Orm.SqlClient
         /// <typeparam name="TItem">
         /// The type of item to insert. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
         /// </typeparam>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
-        /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
         /// </exception>
-        public IEnumerable<TItem> InsertForResults<TItem>(
-            [NotNull] IEnumerable<TItem> items,
-            Action<TableValuedInsert<TEntity>> insertAction)
+        /// <returns>
+        /// The <see cref="Task"/> that is performing the insert.
+        /// </returns>
+        public async Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedInsert<TEntity>> insertAction)
         {
-            return this.InsertForResults(items, null, insertAction);
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            insertAction?.Invoke(insertCommand);
+            await insertCommand.ExecuteAsync(items).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -160,9 +126,6 @@ namespace Startitecture.Orm.SqlClient
         /// </summary>
         /// <param name="items">
         /// The items to insert.
-        /// </param>
-        /// <param name="transaction">
-        /// The transaction for the operation, or null to perform the operation without a transaction.
         /// </param>
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
@@ -178,7 +141,6 @@ namespace Startitecture.Orm.SqlClient
         /// </exception>
         public IEnumerable<TItem> InsertForResults<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            IDbTransaction transaction,
             Action<TableValuedInsert<TEntity>> insertAction)
         {
             if (items == null)
@@ -186,10 +148,44 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedCommandProvider(this.RepositoryProvider.DatabaseContext);
-            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, transaction);
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(insertCommand);
             var entities = insertCommand.ExecuteForResults(items);
+            return this.EntityMapper.Map<List<TItem>>(entities);
+        }
+
+        /// <summary>
+        /// Inserts a set of items into the repository then maps the results back to the <typeparamref name="TItem"/> type.
+        /// </summary>
+        /// <param name="items">
+        /// The items to insert.
+        /// </param>
+        /// <param name="insertAction">
+        /// The insert action to take, or null to take the default insert action.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to insert. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="items"/> is null.
+        /// </exception>
+        public async Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            Action<TableValuedInsert<TEntity>> insertAction)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            insertAction?.Invoke(insertCommand);
+            var entities = await insertCommand.ExecuteForResultsAsync(items).ConfigureAwait(false);
             return this.EntityMapper.Map<List<TItem>>(entities);
         }
 
@@ -198,9 +194,6 @@ namespace Startitecture.Orm.SqlClient
         /// </summary>
         /// <param name="items">
         /// The items to merge.
-        /// </param>
-        /// <param name="transaction">
-        /// The transaction for the operation, or null to perform the operation without a transaction.
         /// </param>
         /// <param name="mergeAction">
         /// The merge action to take, or null to take the default merge action.
@@ -214,17 +207,51 @@ namespace Startitecture.Orm.SqlClient
         /// <remarks>
         /// In SQL Server, MERGE operations are not guaranteed to be atomic.
         /// </remarks>
-        public void Merge<TItem>([NotNull] IEnumerable<TItem> items, IDbTransaction transaction, Action<TableValuedMerge<TEntity>> mergeAction)
+        public void Merge<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedMerge<TEntity>> mergeAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedCommandProvider(this.RepositoryProvider.DatabaseContext);
-            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, transaction);
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
             mergeAction?.Invoke(mergeCommand);
             mergeCommand.Execute(items);
+        }
+
+        /// <summary>
+        /// Merges a set of items into the repository.
+        /// </summary>
+        /// <param name="items">
+        /// The items to merge.
+        /// </param>
+        /// <param name="mergeAction">
+        /// The merge action to take, or null to take the default merge action.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to merge. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
+        /// </typeparam>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="items"/> or <paramref name="mergeAction"/> is null.
+        /// </exception>
+        /// <remarks>
+        /// In SQL Server, MERGE operations are not guaranteed to be atomic.
+        /// </remarks>
+        /// <returns>
+        /// The <see cref="Task"/> that is executing the merge operation.
+        /// </returns>
+        public async Task MergeAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedMerge<TEntity>> mergeAction)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            mergeAction?.Invoke(mergeCommand);
+            await mergeCommand.ExecuteAsync(items).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -232,9 +259,6 @@ namespace Startitecture.Orm.SqlClient
         /// </summary>
         /// <param name="items">
         /// The items to merge.
-        /// </param>
-        /// <param name="transaction">
-        /// The transaction for the operation, or null to perform the operation without a transaction.
         /// </param>
         /// <param name="mergeAction">
         /// The merge action to take, or null to take the default merge action.
@@ -253,7 +277,6 @@ namespace Startitecture.Orm.SqlClient
         /// </remarks>
         public IEnumerable<TItem> MergeForResults<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            IDbTransaction transaction,
             Action<TableValuedMerge<TEntity>> mergeAction)
         {
             if (items == null)
@@ -261,10 +284,47 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedCommandProvider(this.RepositoryProvider.DatabaseContext);
-            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, transaction);
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
             mergeAction?.Invoke(mergeCommand);
             var entities = mergeCommand.ExecuteForResults(items);
+            return this.EntityMapper.Map<List<TItem>>(entities);
+        }
+
+        /// <summary>
+        /// Merges a set of items into the repository then maps the results back to the <typeparamref name="TItem"/> type.
+        /// </summary>
+        /// <param name="items">
+        /// The items to merge.
+        /// </param>
+        /// <param name="mergeAction">
+        /// The merge action to take, or null to take the default merge action.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to merge. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="items"/> or <paramref name="mergeAction"/> is null.
+        /// </exception>
+        /// <remarks>
+        /// In SQL Server, MERGE operations are not guaranteed to be atomic.
+        /// </remarks>
+        public async Task<IEnumerable<TItem>> MergeForResultsAsync<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            Action<TableValuedMerge<TEntity>> mergeAction)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            mergeAction?.Invoke(mergeCommand);
+            var entities = await mergeCommand.ExecuteForResultsAsync(items).ConfigureAwait(false);
             return this.EntityMapper.Map<List<TItem>>(entities);
         }
     }

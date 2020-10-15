@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TableValuedCommandProvider.cs" company="Startitecture">
+// <copyright file="TableValuedParameterCommandFactory.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -13,36 +13,33 @@ namespace Startitecture.Orm.SqlClient
     using System.Collections.Generic;
     using System.Data;
     using System.Reflection;
-
-    using Common;
-
-    using Core;
-
     using JetBrains.Annotations;
-
     using Microsoft.Data.SqlClient;
-
+    using Startitecture.Core;
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
     using Startitecture.Resources;
 
     /// <summary>
     /// Creates <see cref="ITableCommand"/> instances for SQL Server using table-valued parameters (TVPs).
     /// </summary>
-    public class TableValuedCommandProvider : ITableCommandProvider
+    public class TableValuedParameterCommandFactory : IDbTableCommandFactory
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TableValuedCommandProvider"/> class.
+        /// The database context.
+        /// </summary>
+        private readonly IDatabaseContext databaseContext;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TableValuedParameterCommandFactory"/> class.
         /// </summary>
         /// <param name="databaseContext">
         /// The context provider.
         /// </param>
-        public TableValuedCommandProvider([NotNull] IDatabaseContext databaseContext)
+        public TableValuedParameterCommandFactory([NotNull] IDatabaseContext databaseContext)
         {
-            this.DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
+            this.databaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
         }
-
-        /// <inheritdoc />
-        public IDatabaseContext DatabaseContext { get; }
 
         /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="tableCommand"/>.
@@ -56,9 +53,6 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="items">
         /// The items to pass to the command.
         /// </param>
-        /// <param name="transaction">
-        /// The transaction to use with the command.
-        /// </param>
         /// <returns>
         /// An <see cref="IDbCommand"/> that will execute the structured command.
         /// </returns>
@@ -69,7 +63,7 @@ namespace Startitecture.Orm.SqlClient
             "Microsoft.Security",
             "CA2100:Review SQL queries for security vulnerabilities",
             Justification = "tableCommand.CommandText is built with parameterized input.")]
-        public IDbCommand CreateCommand<T>(ITableCommand tableCommand, IEnumerable<T> items, IDbTransaction transaction)
+        public IDbCommand Create<T>(ITableCommand tableCommand, IEnumerable<T> items)
         {
             if (tableCommand == null)
             {
@@ -81,23 +75,21 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(items));
             }
 
-            if (!(this.DatabaseContext.Connection is SqlConnection sqlConnection))
+            if (!(this.databaseContext.Connection is SqlConnection sqlConnection))
             {
-                throw new OperationException(this.DatabaseContext, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
+                throw new OperationException(this.databaseContext, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
             }
 
-            var sqlCommand = !(transaction is SqlTransaction sqlTransaction)
-                                 ? new SqlCommand(tableCommand.CommandText, sqlConnection)
-                                 : new SqlCommand(tableCommand.CommandText, sqlConnection, sqlTransaction);
-
+            var sqlCommand = new SqlCommand(tableCommand.CommandText, sqlConnection);
+            this.databaseContext.AssociateTransaction(sqlCommand);
             DataTable dataTable = null;
 
             try
             {
-                var dataTableLoader = new DataTableLoader<T>(this.DatabaseContext.RepositoryAdapter.DefinitionProvider);
+                var dataTableLoader = new DataTableLoader<T>(this.databaseContext.RepositoryAdapter.DefinitionProvider);
                 dataTable = dataTableLoader.Load(items);
                 var tableParameter = sqlCommand.Parameters.AddWithValue(
-                    $"{this.DatabaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(tableCommand.ParameterName)}",
+                    $"{this.databaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(tableCommand.ParameterName)}",
                     dataTable);
 
                 tableParameter.SqlDbType = SqlDbType.Structured;

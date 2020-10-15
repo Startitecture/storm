@@ -31,7 +31,7 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// A collection of non-indexed properties for the specified type.
         /// </returns>
-        /// <exception cref="System.ArgumentException">
+        /// <exception cref="ArgumentException">
         /// None of the specified property names (case-sensitive) matched properties of the entity type.
         /// </exception>
         public static IEnumerable<PropertyInfo> GetNonIndexedProperties(this Type entityType, params string[] propertyNames)

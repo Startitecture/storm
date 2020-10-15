@@ -5,7 +5,7 @@
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <Version>1.0.0-beta1</Version>
+    <Version>1.0.0-beta2</Version>
     <Authors>Startitecture, LLC</Authors>
     <Company>Startitecture, LLC</Company>
     <Description>Schema representation library for the ST/ORM (Startitecture.Orm) package.</Description>
@@ -17,6 +17,12 @@
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <NeutralLanguage>English (United States)</NeutralLanguage>
   </PropertyGroup>
+  <ItemGroup>
+    <None Remove="stylecop.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <AdditionalFiles Include="stylecop.json" />
+  </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDictionary Include="..\solution code analysis\CustomDictionary.xml">
       <Link>Code Analysis\CustomDictionary.xml</Link>
@@ -42,7 +48,11 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Startitecture.Core" Version="1.0.0-beta4" />
+    <PackageReference Include="Startitecture.Core" Version="1.0.0-beta6" />
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.7.0" />
     <PackageReference Include="System.Runtime.Caching" Version="4.7.0" />
   </ItemGroup>

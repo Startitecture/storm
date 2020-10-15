@@ -14,10 +14,13 @@ namespace Startitecture.Orm.Mapper
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
+    using Startitecture.Orm.Model;
     using Startitecture.Resources;
 
     /// <summary>
@@ -25,17 +28,10 @@ namespace Startitecture.Orm.Mapper
     /// </summary>
     public class DatabaseContext : IDatabaseContext
     {
-        #region Fields
-
         /// <summary>
         /// The connection string.
         /// </summary>
         private readonly string connectionString;
-
-        /// <summary>
-        /// The provider name.
-        /// </summary>
-        private readonly string providerName;
 
         /// <summary>
         /// The is connection user provided.
@@ -43,35 +39,25 @@ namespace Startitecture.Orm.Mapper
         private readonly bool isConnectionUserProvided;
 
         /// <summary>
-        /// The POCO factory. 
+        /// The POCO factory.
         /// </summary>
         private readonly RaisedPocoFactory pocoFactory;
 
         /// <summary>
         /// The factory.
         /// </summary>
-        private DbProviderFactory factory;
+        private readonly DbProviderFactory factory;
 
         /// <summary>
-        /// The transaction.
+        /// The transaction for the current context.
         /// </summary>
         private IDbTransaction transaction;
 
         /// <summary>
-        /// The transaction depth.
-        /// </summary>
-        private int transactionDepth;
-
-        #endregion
-
-        #region Constructors and Destructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseContext"/> class. 
-        /// Construct a database using a supplied IDbConnection
+        /// Initializes a new instance of the <see cref="DatabaseContext"/> class.
         /// </summary>
         /// <param name="connection">
-        /// The IDbConnection to use
+        /// The IDbConnection to use.
         /// </param>
         /// <param name="repositoryAdapter">
         /// The name qualifier for the database.
@@ -90,20 +76,18 @@ namespace Startitecture.Orm.Mapper
             this.RepositoryAdapter = repositoryAdapter ?? throw new ArgumentNullException(nameof(repositoryAdapter));
             this.isConnectionUserProvided = true;
             this.connectionString = connection.ConnectionString;
-            this.CommonConstruct();
-
             this.pocoFactory = new RaisedPocoFactory(this.RepositoryAdapter.DefinitionProvider);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseContext"/> class. 
-        /// Construct a database using a supplied connections string and optionally a provider name
+        /// Initializes a new instance of the <see cref="DatabaseContext"/> class.
+        /// Construct a database using a supplied connections string and optionally a provider name.
         /// </summary>
         /// <param name="connectionString">
-        /// The DB connection string
+        /// The database connection string.
         /// </param>
         /// <param name="providerName">
-        /// The name of the DB provider to use
+        /// The name of the DB provider to use.
         /// </param>
         /// <param name="repositoryAdapter">
         /// The name qualifier for the database.
@@ -134,18 +118,16 @@ namespace Startitecture.Orm.Mapper
 
             this.RepositoryAdapter = repositoryAdapter ?? throw new ArgumentNullException(nameof(repositoryAdapter));
             this.connectionString = connectionString;
-            this.providerName = providerName;
-            this.CommonConstruct();
-
+            this.factory = DbProviderFactories.GetFactory(providerName);
             this.pocoFactory = new RaisedPocoFactory(this.RepositoryAdapter.DefinitionProvider);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseContext"/> class. 
-        /// Construct a Database using a supplied connection string and a DbProviderFactory
+        /// Initializes a new instance of the <see cref="DatabaseContext"/> class.
+        /// Construct a Database using a supplied connection string and a DbProviderFactory.
         /// </summary>
         /// <param name="connectionString">
-        /// The connection string to use
+        /// The database connection string to use.
         /// </param>
         /// <param name="providerFactory">
         /// The DbProviderFactory to use for instantiating IDbConnections.
@@ -172,14 +154,8 @@ namespace Startitecture.Orm.Mapper
             this.factory = providerFactory ?? throw new ArgumentNullException(nameof(providerFactory));
             this.RepositoryAdapter = repositoryAdapter ?? throw new ArgumentNullException(nameof(repositoryAdapter));
             this.connectionString = connectionString;
-            this.CommonConstruct();
-
             this.pocoFactory = new RaisedPocoFactory(this.RepositoryAdapter.DefinitionProvider);
         }
-
-        #endregion
-
-        #region Public Properties
 
         /// <inheritdoc />
         public int CommandTimeout { get; set; }
@@ -192,12 +168,6 @@ namespace Startitecture.Orm.Mapper
 
         /// <inheritdoc />
         public IRepositoryAdapter RepositoryAdapter { get; }
-
-        #endregion
-
-        #region Public Methods and Operators
-
-        #region Connections and Transactions
 
         /// <inheritdoc />
         public void OpenSharedConnection()
@@ -227,22 +197,164 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public IDbTransaction BeginTransaction()
+        public async Task OpenSharedConnectionAsync()
         {
-            this.transactionDepth++;
+            if (this.Connection is DbConnection asyncConnection)
+            {
+                if (this.Connection == null)
+                {
+                    this.Connection = this.factory.CreateConnection();
 
-            if (this.transactionDepth == 1)
+                    if (this.Connection == null)
+                    {
+                        throw new InvalidOperationException(
+                            string.Format(CultureInfo.CurrentCulture, ErrorMessages.ConnectionFactoryReturnedNullConnection, this.factory));
+                    }
+
+                    this.Connection.ConnectionString = this.connectionString;
+                }
+
+                if (this.Connection.State == ConnectionState.Broken)
+                {
+#if NET472
+                    asyncConnection.Close();
+#else
+                    await asyncConnection.CloseAsync().ConfigureAwait(false);
+#endif
+                }
+
+                if (this.Connection.State == ConnectionState.Closed)
+                {
+                    await asyncConnection.OpenAsync().ConfigureAwait(false);
+                }
+            }
+            else
             {
                 this.OpenSharedConnection();
-                this.transaction = this.Connection.BeginTransaction();
             }
-
-            return this.transaction;
         }
 
-        #endregion
+        /// <inheritdoc />
+        public ITransactionContext BeginTransaction()
+        {
+            return this.BeginTransaction(IsolationLevel.ReadCommitted);
+        }
 
-        #region Execution
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync()
+        {
+            return await this.BeginTransactionAsync(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public ITransactionContext BeginTransaction(IsolationLevel isolationLevel)
+        {
+            try
+            {
+                this.OpenSharedConnection();
+                this.transaction = this.Connection.BeginTransaction(isolationLevel);
+
+                // Return the transaction context, then on disposal set our copy to null.
+                var transactionContext = new TransactionContext(this.transaction);
+                transactionContext.Disposed += (sender, args) => this.transaction = null;
+                return transactionContext;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(this, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(this, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel)
+        {
+            try
+            {
+                await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+
+                if (this.Connection is DbConnection asyncConnection)
+                {
+#if NET472
+                    this.transaction = asyncConnection.BeginTransaction(isolationLevel);
+#else
+                    this.transaction = await asyncConnection.BeginTransactionAsync(isolationLevel).ConfigureAwait(false);
+#endif
+                    var transactionContext = new TransactionContext(this.transaction);
+                    transactionContext.Disposed += (sender, args) => this.transaction = null;
+                    return transactionContext;
+                }
+
+                var message = $"The underlying connection is not of the type {nameof(DbConnection)}; use {nameof(this.BeginTransaction)} instead.";
+                throw new OperationException(this, message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(this, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(this, ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// Associates the <paramref name="command"/> with the current context's <see cref="IDbTransaction"/>, if any.
+        /// </summary>
+        /// <param name="command">
+        /// The command to associate.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="command"/> is null.
+        /// </exception>
+        public void AssociateTransaction(IDbCommand command)
+        {
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
+
+            command.Transaction = this.transaction;
+        }
+
+        /// <inheritdoc />
+        public void ChangeDatabase([NotNull] string databaseName)
+        {
+            if (string.IsNullOrWhiteSpace(databaseName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(databaseName));
+            }
+
+            this.OpenSharedConnection();
+            this.Connection.ChangeDatabase(databaseName);
+        }
+
+        /// <inheritdoc />
+        public async Task ChangeDatabaseAsync([NotNull] string databaseName)
+        {
+            if (string.IsNullOrWhiteSpace(databaseName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(databaseName));
+            }
+
+            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+
+            if (this.Connection is DbConnection asyncConnection)
+            {
+#if NET472
+                this.Connection.ChangeDatabase(databaseName);
+#else
+                await asyncConnection.ChangeDatabaseAsync(databaseName).ConfigureAwait(false);
+#endif
+            }
+            else
+            {
+                this.Connection.ChangeDatabase(databaseName);
+            }
+        }
 
         /// <inheritdoc />
         public int Execute([NotNull] string sql, [NotNull] params object[] args)
@@ -259,9 +371,45 @@ namespace Startitecture.Orm.Mapper
 
             this.OpenSharedConnection();
 
-            using (var cmd = this.CreateCommand(this.Connection, sql, args))
+            using (var command = this.CreateCommand(this.Connection, sql, args))
             {
-                var returnValue = cmd.ExecuteNonQuery();
+                var returnValue = command.ExecuteNonQuery();
+                return returnValue;
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<int> ExecuteAsync(string sql, params object[] args)
+        {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(sql));
+            }
+
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+
+            if (this.Connection is DbConnection asyncConnection)
+            {
+#if NET472
+                using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
+#else
+                await using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
+#endif
+                {
+                    var returnValue = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    return returnValue;
+                }
+            }
+
+            using (var command = this.CreateCommand(this.Connection, sql, args))
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                var returnValue = command.ExecuteNonQuery();
                 return returnValue;
             }
         }
@@ -284,22 +432,45 @@ namespace Startitecture.Orm.Mapper
             using (var command = this.CreateCommand(this.Connection, sql, args))
             {
                 var result = command.ExecuteScalar();
-
-                // Handle nullable types
-                var underlyingType = Nullable.GetUnderlyingType(typeof(T));
-
-                if (underlyingType != null && result == null)
-                {
-                    return default;
-                }
-
-                return (T)Convert.ChangeType(result, underlyingType ?? typeof(T), CultureInfo.CurrentCulture);
+                return ConvertNullable<T>(result);
             }
         }
 
-        #endregion
+        /// <inheritdoc />
+        public async Task<T> ExecuteScalarAsync<T>(string sql, params object[] args)
+        {
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(sql));
+            }
 
-        #region Query Operations
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+
+            if (this.Connection is DbConnection asyncConnection)
+            {
+#if NET472
+                using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
+#else
+                await using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
+#endif
+                {
+                    var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                    return ConvertNullable<T>(result);
+                }
+            }
+
+            using (var command = this.CreateCommand(this.Connection, sql, args))
+            {
+                // ReSharper disable once AccessToDisposedClosure
+                var result = command.ExecuteScalar();
+                return ConvertNullable<T>(result);
+            }
+        }
 
         /// <inheritdoc />
         public IEnumerable<T> Query<T>([NotNull] string sql, [NotNull] params object[] args)
@@ -324,23 +495,94 @@ namespace Startitecture.Orm.Mapper
             var entityDefinition = this.RepositoryAdapter.DefinitionProvider.Resolve<T>();
 
             using (var cmd = this.CreateCommand(this.Connection, sql, args))
-            using (var dataReader = cmd.ExecuteReader())
             {
-                while (true)
+                foreach (var poco in this.ReadResults<T>(cmd, entityDefinition))
                 {
-                    if (!dataReader.Read())
+                    yield return poco;
+                }
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<T>> QueryAsync<T>(string sql, params object[] args)
+        {
+            if (sql == null)
+            {
+                throw new ArgumentNullException(nameof(sql));
+            }
+
+            if (string.IsNullOrWhiteSpace(sql))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(sql));
+            }
+
+            if (args == null)
+            {
+                throw new ArgumentNullException(nameof(args));
+            }
+
+            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+            var entityDefinition = this.RepositoryAdapter.DefinitionProvider.Resolve<T>();
+
+            if (this.Connection is DbConnection asyncConnection)
+            {
+#if NET472
+                using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
+#else
+                await using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
+#endif
+                {
+                    var results = new List<T>();
+#if NET472
+                    using (var dataReader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+#else
+                    await using (var dataReader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+#endif
                     {
-                        yield break;
+                        while (true)
+                        {
+                            if (await dataReader.ReadAsync().ConfigureAwait(false) == false)
+                            {
+                                break;
+                            }
+
+                            var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
+                                                  {
+                                                      FirstColumn = 0
+                                                  };
+
+                            var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
+                            results.Add(poco);
+                        }
                     }
 
-                    var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
+                    return results;
+                }
+            }
+
+            using (var command = this.CreateCommand(this.Connection, sql, args))
+            {
+                var results = new List<T>();
+                using (var dataReader = command.ExecuteReader())
+                {
+                    while (true)
+                    {
+                        if (dataReader.Read() == false)
+                        {
+                            break;
+                        }
+
+                        var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
                                               {
                                                   FirstColumn = 0
                                               };
 
-                    var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
-                    yield return poco;
+                        var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
+                        results.Add(poco);
+                    }
                 }
+
+                return results;
             }
         }
 
@@ -362,8 +604,6 @@ namespace Startitecture.Orm.Mapper
                        : null;
         }
 
-        #endregion
-
         /// <inheritdoc />
         public void Dispose()
         {
@@ -371,9 +611,15 @@ namespace Startitecture.Orm.Mapper
             GC.SuppressFinalize(this);
         }
 
-        #endregion
-
-        #region Methods
+        /// <inheritdoc />
+        public async ValueTask DisposeAsync()
+        {
+            await this.DisposeAsyncCore().ConfigureAwait(false);
+            this.Dispose(true);
+#pragma warning disable CA1816 // Dispose methods should call SuppressFinalize
+            GC.SuppressFinalize(this);
+#pragma warning restore CA1816 // Dispose methods should call SuppressFinalize
+        }
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -394,18 +640,151 @@ namespace Startitecture.Orm.Mapper
                 this.Connection.Dispose();
             }
 
-            this.pocoFactory?.Dispose();
             this.transaction?.Dispose();
+            this.transaction = null;
+            this.pocoFactory?.Dispose();
         }
 
         /// <summary>
-        /// Add a parameter to a DB command
+        /// Disposes of objects that implement <see cref="IAsyncDisposable"/>.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="ValueTask"/> for the disposal operation.
+        /// </returns>
+        protected virtual async ValueTask DisposeAsyncCore()
+        {
+#if NET472
+            if (this.transaction is IAsyncDisposable asyncTransaction)
+            {
+                await asyncTransaction.DisposeAsync().ConfigureAwait(false);
+            }
+#else
+            if (this.transaction is DbTransaction asyncTransaction)
+            {
+                await asyncTransaction.DisposeAsync().ConfigureAwait(false);
+            }
+#endif
+
+            this.transaction = null;
+            this.pocoFactory?.Dispose();
+
+            if (this.isConnectionUserProvided)
+            {
+                return;
+            }
+
+#if NET472
+            if (this.Connection is IAsyncDisposable asyncConnection)
+            {
+                await asyncConnection.DisposeAsync().ConfigureAwait(false);
+            }
+#else
+            if (this.Connection is DbConnection asyncConnection)
+            {
+                await asyncConnection.DisposeAsync().ConfigureAwait(false);
+            }
+#endif
+
+            this.Connection = null;
+        }
+
+        /// <summary>
+        /// Converts a nullable into the default value for the base type.
+        /// </summary>
+        /// <param name="value">
+        /// The value to convert.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of the value to convert.
+        /// </typeparam>
+        /// <returns>
+        /// The value as a type of <typeparamref name="T"/>.
+        /// </returns>
+        private static T ConvertNullable<T>(object value)
+        {
+            // Handle nullable types
+            var underlyingType = Nullable.GetUnderlyingType(typeof(T));
+
+            if (underlyingType != null && value == null)
+            {
+                return default;
+            }
+
+            return (T)Convert.ChangeType(value, underlyingType ?? typeof(T), CultureInfo.CurrentCulture);
+        }
+
+        /// <summary>
+        /// Creates a command using the specified connection.
+        /// </summary>
+        /// <param name="connection">
+        /// The connection to use.
+        /// </param>
+        /// <param name="sql">
+        /// The SQL statement.
+        /// </param>
+        /// <param name="parameters">
+        /// The parameters to pass to the statement.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IDbCommand"/> for the specified command text and parameters.
+        /// </returns>
+        private IDbCommand CreateCommand(IDbConnection connection, string sql, params object[] parameters)
+        {
+            // Create the command and add parameters
+            var command = connection.CreateCommand();
+            command.Connection = connection;
+            command.CommandText = sql;
+            command.Transaction = this.transaction;
+
+            foreach (var item in parameters)
+            {
+                this.AddParam(command, item);
+            }
+
+            return command;
+        }
+
+        /// <summary>
+        /// Creates a command using the specified connection.
+        /// </summary>
+        /// <param name="connection">
+        /// The connection to use.
+        /// </param>
+        /// <param name="sql">
+        /// The SQL statement.
+        /// </param>
+        /// <param name="parameters">
+        /// The parameters to pass to the statement.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IDbCommand"/> for the specified command text and parameters.
+        /// </returns>
+        private DbCommand CreateAsyncCommand(DbConnection connection, string sql, params object[] parameters)
+        {
+            // Create the command and add parameters
+            var command = connection.CreateCommand();
+            command.Connection = connection;
+#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
+            command.CommandText = sql;
+#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
+            command.Transaction = this.transaction as DbTransaction;
+
+            foreach (var item in parameters)
+            {
+                this.AddParam(command, item);
+            }
+
+            return command;
+        }
+
+        /// <summary>
+        /// Add a parameter to a DB command.
         /// </summary>
         /// <param name="command">
-        /// A reference to the IDbCommand to which the parameter is to be added
+        /// A reference to the IDbCommand to which the parameter is to be added.
         /// </param>
         /// <param name="value">
-        /// The value to assign to the parameter
+        /// The value to assign to the parameter.
         /// </param>
         private void AddParam(IDbCommand command, object value)
         {
@@ -427,71 +806,40 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
-        /// Creates a command using the specified connection.
+        /// Reads the results of a command.
         /// </summary>
-        /// <param name="connection">
-        /// The connection to use.
+        /// <param name="command">
+        /// The command to execute as a reader.
         /// </param>
-        /// <param name="sql">
-        /// The SQL statement.
+        /// <param name="entityDefinition">
+        /// The entity definition.
         /// </param>
-        /// <param name="parameters">
-        /// The parameters to pass to the statement.
-        /// </param>
+        /// <typeparam name="T">
+        /// The type of results expected.
+        /// </typeparam>
         /// <returns>
-        /// The <see cref="IDbCommand"/>.
+        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="T"/> items.
         /// </returns>
-        private IDbCommand CreateCommand(IDbConnection connection, string sql, params object[] parameters)
+        private IEnumerable<T> ReadResults<T>(IDbCommand command, IEntityDefinition entityDefinition)
         {
-            ////// Perform parameter prefix replacements
-            ////if (this.paramPrefix != "@")
-            ////{
-            ////    sql = ParameterPrefixRegex.Replace(sql, m => this.paramPrefix + m.Value.Substring(1));
-            ////}
-
-////#if NETSTANDARD
-////            sql = sql.Replace("@@", "@", StringComparison.Ordinal); // <- double @@ escapes a single @
-////#else
-////            sql = sql.Replace("@@", "@"); // <- double @@ escapes a single @
-////#endif
-
-            // Create the command and add parameters
-            var command = connection.CreateCommand();
-            command.Connection = connection;
-            command.CommandText = sql;
-            command.Transaction = this.transaction;
-
-            foreach (var item in parameters)
+            using (var dataReader = command.ExecuteReader())
             {
-                this.AddParam(command, item);
+                while (true)
+                {
+                    if (!dataReader.Read())
+                    {
+                        yield break;
+                    }
+
+                    var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
+                                              {
+                                                  FirstColumn = 0
+                                              };
+
+                    var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
+                    yield return poco;
+                }
             }
-
-            return command;
         }
-
-        /// <summary>
-        /// Provides common initialization for the various constructors
-        /// </summary>
-        private void CommonConstruct()
-        {
-            // Reset
-            this.transactionDepth = 0;
-            ////this.EnableNamedParameters = true;
-
-            // If a provider name was supplied, get the IDbProviderFactory for it
-            if (this.providerName != null)
-            {
-                this.factory = DbProviderFactories.GetFactory(this.providerName);
-            }
-
-            // Resolve the DB Type
-            ////var typeName = (this.factory?.GetType() ?? this.Connection.GetType()).Name;
-            ////this.databaseType = DatabaseType.Resolve(typeName, this.providerName);
-
-            // What character is used for delimiting parameters in SQL
-            ////this.paramPrefix = this.databaseType.GetParameterPrefix(this.connectionString);
-        }
-
-        #endregion
     }
 }

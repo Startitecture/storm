@@ -390,7 +390,7 @@ namespace Startitecture.Orm.Schema
         /// The type to create the definition for.
         /// </param>
         /// <returns>
-        /// The <see cref="Startitecture.Orm.Model.EntityDefinition"/> for the specified type.
+        /// The <see cref="EntityDefinition"/> for the specified type.
         /// </returns>
         private EntityDefinition CreateEntityDefinition(Type type)
         {

@@ -37,15 +37,14 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryAdapter = new Mock<IRepositoryAdapter>();
             repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
             mockDatabaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-
-            mockConnection.Setup(connection => connection.ChangeDatabase(It.IsAny<string>()))
+            mockDatabaseContext.Setup(context => context.ChangeDatabase(It.IsAny<string>()))
                 .Callback((string s) => { mockConnection.Setup(connection => connection.Database).Returns(s); });
 
             var databaseFactory = mockDatabaseFactory.Object;
 
             using (var target = new DatabaseRepositoryProvider(databaseFactory))
             {
-                target.DatabaseContext.Connection.ChangeDatabase("newDatabase");
+                target.DatabaseContext.ChangeDatabase("newDatabase");
                 Assert.AreEqual("newDatabase", target.DatabaseContext.Connection.Database);
             }
         }
@@ -65,21 +64,20 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryAdapter = new Mock<IRepositoryAdapter>();
             repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
             mockDatabaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-
-            mockConnection.Setup(connection => connection.BeginTransaction(It.IsAny<IsolationLevel>()))
+            mockDatabaseContext.Setup(context => context.BeginTransaction(It.IsAny<IsolationLevel>()))
                 .Returns(
                     (IsolationLevel i) =>
-                        {
-                            var transaction = new Mock<IDbTransaction>();
-                            transaction.Setup(dbTransaction => dbTransaction.IsolationLevel).Returns(i);
-                            return transaction.Object;
-                        });
+                    {
+                        var transaction = new Mock<ITransactionContext>();
+                        transaction.Setup(dbTransaction => dbTransaction.IsolationLevel).Returns(i);
+                        return transaction.Object;
+                    });
 
             var databaseFactory = mockDatabaseFactory.Object;
 
             using (var target = new DatabaseRepositoryProvider(databaseFactory))
             {
-                var actual = target.StartTransaction(IsolationLevel.Serializable);
+                var actual = target.BeginTransaction(IsolationLevel.Serializable);
                 Assert.AreEqual(IsolationLevel.Serializable, actual.IsolationLevel);
             }
         }

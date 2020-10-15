@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="JsonCommandProvider.cs" company="Startitecture">
+// <copyright file="JsonCommandFactory.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -25,28 +25,27 @@ namespace Startitecture.Orm.PostgreSql
     /// <summary>
     /// A command provider for inserting JSON objects into PostgreSQL database tables.
     /// </summary>
-    public class JsonCommandProvider : ITableCommandProvider
+    public class JsonCommandFactory : IDbTableCommandFactory
     {
+        private readonly IDatabaseContext databaseContext;
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="JsonCommandProvider" /> class.
+        /// Initializes a new instance of the <see cref="JsonCommandFactory" /> class.
         /// </summary>
         /// <param name="databaseContext">
         /// The database context.
         /// </param>
-        public JsonCommandProvider([NotNull] IDatabaseContext databaseContext)
+        public JsonCommandFactory([NotNull] IDatabaseContext databaseContext)
         {
-            this.DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
+            this.databaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
         }
-
-        /// <inheritdoc />
-        public IDatabaseContext DatabaseContext { get; }
 
         /// <inheritdoc />
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Security",
             "CA2100:Review SQL queries for security vulnerabilities",
             Justification = "tableCommand.CommandText is built with parameterized input.")]
-        public IDbCommand CreateCommand<T>(ITableCommand tableCommand, IEnumerable<T> items, IDbTransaction transaction)
+        public IDbCommand Create<T>(ITableCommand tableCommand, IEnumerable<T> items)
         {
             if (tableCommand == null)
             {
@@ -58,21 +57,20 @@ namespace Startitecture.Orm.PostgreSql
                 throw new ArgumentNullException(nameof(items));
             }
 
-            if (!(this.DatabaseContext.Connection is NpgsqlConnection sqlConnection))
+            if (!(this.databaseContext.Connection is NpgsqlConnection sqlConnection))
             {
-                throw new OperationException(this.DatabaseContext, $"This operation requires a connection type of {nameof(NpgsqlConnection)}.");
+                throw new OperationException(this.databaseContext, $"This operation requires a connection type of {nameof(NpgsqlConnection)}.");
             }
 
-            var npgsqlCommand = !(transaction is NpgsqlTransaction sqlTransaction)
-                                    ? new NpgsqlCommand(tableCommand.CommandText, sqlConnection)
-                                    : new NpgsqlCommand(tableCommand.CommandText, sqlConnection, sqlTransaction);
+            var npgsqlCommand = new NpgsqlCommand(tableCommand.CommandText, sqlConnection);
+            this.databaseContext.AssociateTransaction(npgsqlCommand);
 
             try
             {
                 var parameter = new NpgsqlParameter(tableCommand.ParameterName, NpgsqlDbType.Jsonb)
-                                    {
-                                        Value = items
-                                    };
+                                {
+                                    Value = items
+                                };
 
                 npgsqlCommand.Parameters.Add(parameter);
             }

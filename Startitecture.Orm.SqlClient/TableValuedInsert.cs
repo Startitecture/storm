@@ -11,7 +11,6 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -60,30 +59,17 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Initializes a new instance of the <see cref="TableValuedInsert{T}"/> class.
         /// </summary>
-        /// <param name="tableCommandProvider">
-        /// The structured command provider.
+        /// <param name="tableCommandFactory">
+        /// The table command provider.
         /// </param>
-        public TableValuedInsert([NotNull] ITableCommandProvider tableCommandProvider)
-            : base(tableCommandProvider)
+        /// <param name="databaseContext">
+        /// The database context.
+        /// </param>
+        public TableValuedInsert([NotNull] IDbTableCommandFactory tableCommandFactory, [NotNull] IDatabaseContext databaseContext)
+            : base(tableCommandFactory, databaseContext)
         {
             this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TableValuedInsert{T}"/> class.
-        /// </summary>
-        /// <param name="tableCommandProvider">
-        /// The structured command provider.
-        /// </param>
-        /// <param name="databaseTransaction">
-        /// The database transaction.
-        /// </param>
-        public TableValuedInsert([NotNull] ITableCommandProvider tableCommandProvider, IDbTransaction databaseTransaction)
-            : base(tableCommandProvider, databaseTransaction)
-        {
-            this.commandText = new Lazy<string>(this.CompileCommandText);
-            this.nameQualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            this.nameQualifier = this.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <inheritdoc />
@@ -122,7 +108,7 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The current <see cref="TableValuedInsert{TStructure}"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="fromColumns"/> is null.
         /// </exception>
         public TableValuedInsert<T> From<TItem>([NotNull] params Expression<Func<TItem, object>>[] fromColumns)
@@ -253,24 +239,37 @@ namespace Startitecture.Orm.SqlClient
         {
             var keyAttributes = (from key in this.EntityDefinition.AllAttributes.Where(x => x.IsPrimaryKey)
                                  join fk in this.ItemDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
-                                 select new { TargetKey = key, SourceKey = fk }).ToList();
+                                 select new
+                                        {
+                                            TargetKey = key,
+                                            SourceKey = fk
+                                        }).ToList();
 
             var matchAttributes = (from key in this.selectionAttributes
                                    join fk in this.ItemDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
-                                   select new { TargetKey = key, SourceKey = fk }).ToList();
+                                   select new
+                                          {
+                                              TargetKey = key,
+                                              SourceKey = fk
+                                          }).ToList();
 
-            var selectionJoinMatchColumns =
-                (matchAttributes.Any() ? matchAttributes : keyAttributes).Select(
-                    x => $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)} = tvp.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}");
+            var selectionJoinMatchColumns = (matchAttributes.Any() ? matchAttributes : keyAttributes).Select(
+                x => $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)} = tvp.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}");
 
             // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original
             // table valued parameter.
-            var selectedKeyAttributes =
-                keyAttributes.Select(x => new { Column = $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}", Attribute = x.SourceKey }).ToList();
+            var selectedKeyAttributes = keyAttributes.Select(
+                    x => new
+                         {
+                             Column = $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}",
+                             Attribute = x.SourceKey
+                         })
+                .ToList();
 
             // Everything for selecting from the TVP uses property name in order to match UDTT columns.
-            var nonKeyAttributes = this.ItemDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute)).Select(
-                x => new
+            var nonKeyAttributes = this.ItemDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute))
+                .Select(
+                    x => new
                          {
                              Column = $"tvp.{this.nameQualifier.Escape(x.PropertyName)}",
                              Attribute = x

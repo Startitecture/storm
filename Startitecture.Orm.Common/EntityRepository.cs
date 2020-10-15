@@ -12,8 +12,8 @@ namespace Startitecture.Orm.Common
     using System;
     using System.Collections.Generic;
     using System.Globalization;
-    using System.Linq;
     using System.Reflection;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -79,7 +79,20 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(model));
             }
 
-            return this.SaveModel(model);
+            var entity = this.SaveEntity(model);
+            return this.UpdateModelIdentity(model, entity);
+        }
+
+        /// <inheritdoc />
+        public async Task<TModel> SaveAsync(TModel model)
+        {
+            if (Evaluate.IsNull(model))
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
+
+            var entity = await this.SaveEntityAsync(model).ConfigureAwait(false);
+            return this.UpdateModelIdentity(model, entity);
         }
 
         /// <inheritdoc />
@@ -96,6 +109,19 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<int> DeleteAsync<TItem>(TItem example)
+        {
+            if (example == null)
+            {
+                throw new ArgumentNullException(nameof(example));
+            }
+
+            var entity = this.GetExampleEntity(example);
+            var uniqueItemSelection = this.GetUniqueItemSelection(entity);
+            return await this.RepositoryProvider.DeleteAsync(uniqueItemSelection).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public int DeleteEntities([NotNull] Action<EntitySet<TModel>> defineSet)
         {
             if (defineSet == null)
@@ -106,6 +132,19 @@ namespace Startitecture.Orm.Common
             var itemSet = new EntitySet<TModel>();
             defineSet.Invoke(itemSet);
             return this.DeleteSelection(itemSet);
+        }
+
+        /// <inheritdoc />
+        public async Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet)
+        {
+            if (defineSet == null)
+            {
+                throw new ArgumentNullException(nameof(defineSet));
+            }
+
+            var itemSet = new EntitySet<TModel>();
+            defineSet.Invoke(itemSet);
+            return await this.DeleteSelectionAsync(itemSet).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -120,96 +159,129 @@ namespace Startitecture.Orm.Common
             return this.RepositoryProvider.Delete(targetSet);
         }
 
+        /// <inheritdoc />
+        public async Task<int> DeleteSelectionAsync(IEntitySet entitySet)
+        {
+            if (entitySet == null)
+            {
+                throw new ArgumentNullException(nameof(entitySet));
+            }
+
+            var targetSet = entitySet.MapSet<TEntity>();
+            return await this.RepositoryProvider.DeleteAsync(targetSet).ConfigureAwait(false);
+        }
+
         #region Methods
+
+        /// <summary>
+        /// Gets the model's identity (auto number, sequence, etc.) property, if it has one.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="PropertyInfo"/> of the model's identity property.
+        /// </returns>
+        /// <remarks>
+        /// This method is only called when the underlying <typeparamref name="TEntity"/> has an identified identity attribute, such as an identity
+        /// column or sequence column. The default action is to match property names between <typeparamref name="TEntity"/> and
+        /// <typeparamref name="TModel"/>; if this will not work, then implementers should override this method.
+        /// </remarks>
+        protected virtual PropertyInfo GetModelIdentityProperty()
+        {
+            var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>();
+            var propertyName = entityDefinition.RowIdentity?.PropertyName;
+            return string.IsNullOrWhiteSpace(propertyName) ? null : typeof(TModel).GetProperty(propertyName);
+        }
 
         /// <summary>
         /// Saves a domain model in the repository.
         /// </summary>
         /// <param name="model">
-        /// The model to save.
+        /// The model to update the identity for.
+        /// </param>
+        /// <param name="entity">
+        /// The saved entity.
         /// </param>
         /// <returns>
         /// The saved domain model.
         /// </returns>
-        private TModel SaveModel(TModel model)
+        private TModel UpdateModelIdentity(TModel model, TEntity entity)
         {
-            var entity = this.SaveEntity(model);
-
             var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>();
-            var key = entityDefinition.PrimaryKeyAttributes.First().GetValueDelegate.DynamicInvoke(entity);
 
             // Assume identical key name
-            if (entityDefinition.RowIdentity.HasValue)
+            if (entityDefinition.RowIdentity.HasValue == false)
             {
-                var keyProperty = typeof(TModel).GetProperty(entityDefinition.RowIdentity.Value.PropertyName);
-
-                if (keyProperty == null)
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        ErrorMessages.MatchingKeyPropertyNotFound,
-                        model,
-                        typeof(TEntity),
-                        entityDefinition.RowIdentity.Value.PropertyName);
-
-                    throw new OperationException(model, message);
-                }
-
-                try
-                {
-                    keyProperty.SetValue(model, key);
-                }
-                catch (ArgumentException ex)
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TModel),
-                        keyProperty,
-                        key,
-                        ex.Message);
-
-                    throw new OperationException(model, message, ex);
-                }
-                catch (TargetException ex)
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TModel),
-                        keyProperty,
-                        key,
-                        ex.Message);
-
-                    throw new OperationException(model, message, ex);
-                }
-                catch (MethodAccessException ex)
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TModel),
-                        keyProperty,
-                        key,
-                        ex.Message);
-
-                    throw new OperationException(model, message, ex);
-                }
-                catch (TargetInvocationException ex)
-                {
-                    var message = string.Format(
-                        CultureInfo.CurrentCulture,
-                        ErrorMessages.UnableToSetPropertyToValue,
-                        typeof(TModel),
-                        keyProperty,
-                        key,
-                        ex.Message);
-
-                    throw new OperationException(model, message, ex);
-                }
+                return model;
             }
 
-            // Save the dependent elements of the entity.
+            var key = entityDefinition.RowIdentity.Value.GetValueDelegate.DynamicInvoke(entity);
+            var keyProperty = this.GetModelIdentityProperty();
+
+            if (keyProperty == null)
+            {
+                // TODO: Reformat this message to be more specific to not finding a property at all.
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    ErrorMessages.MatchingKeyPropertyNotFound,
+                    model,
+                    typeof(TEntity),
+                    entityDefinition.RowIdentity.Value.PropertyName);
+
+                throw new OperationException(model, message);
+            }
+
+            try
+            {
+                keyProperty.SetValue(model, key);
+            }
+            catch (ArgumentException ex)
+            {
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    ErrorMessages.UnableToSetPropertyToValue,
+                    typeof(TModel),
+                    keyProperty,
+                    key,
+                    ex.Message);
+
+                throw new OperationException(model, message, ex);
+            }
+            catch (TargetException ex)
+            {
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    ErrorMessages.UnableToSetPropertyToValue,
+                    typeof(TModel),
+                    keyProperty,
+                    key,
+                    ex.Message);
+
+                throw new OperationException(model, message, ex);
+            }
+            catch (MethodAccessException ex)
+            {
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    ErrorMessages.UnableToSetPropertyToValue,
+                    typeof(TModel),
+                    keyProperty,
+                    key,
+                    ex.Message);
+
+                throw new OperationException(model, message, ex);
+            }
+            catch (TargetInvocationException ex)
+            {
+                var message = string.Format(
+                    CultureInfo.CurrentCulture,
+                    ErrorMessages.UnableToSetPropertyToValue,
+                    typeof(TModel),
+                    keyProperty,
+                    key,
+                    ex.Message);
+
+                throw new OperationException(model, message, ex);
+            }
+
             return model;
         }
 
@@ -238,6 +310,41 @@ namespace Startitecture.Orm.Common
             else
             {
                 entity = this.RepositoryProvider.Insert(entity);
+            }
+
+            if (entity == null)
+            {
+                throw new OperationException(model, $"The underlying provider returned a null entity when inserting '{model}'.");
+            }
+
+            return entity;
+        }
+
+        /// <summary>
+        /// Saves a domain model to the repository as an entity.
+        /// </summary>
+        /// <param name="model">
+        /// The model to save.
+        /// </param>
+        /// <returns>
+        /// The saved data entity.
+        /// </returns>
+        private async Task<TEntity> SaveEntityAsync(TModel model)
+        {
+            var entity = new TEntity();
+            this.EntityMapper.MapTo(model, entity);
+
+            if (await this.ContainsAsync(entity).ConfigureAwait(false))
+            {
+                var updateSet = new UpdateSet<TEntity>()
+                    .Set(entity, this.RepositoryProvider.EntityDefinitionProvider)
+                    .Where(set => set.MatchKey(entity, this.RepositoryProvider.EntityDefinitionProvider));
+
+                await this.RepositoryProvider.UpdateAsync(updateSet).ConfigureAwait(false);
+            }
+            else
+            {
+                entity = await this.RepositoryProvider.InsertAsync(entity).ConfigureAwait(false);
             }
 
             if (entity == null)

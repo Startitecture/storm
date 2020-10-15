@@ -129,7 +129,7 @@ namespace Startitecture.Orm.Mapper
 //        /// <returns>
 //        /// A <see cref="DbCommand"/> compatible with an Oracle database.
 //        /// </returns>
-//        public override DbCommand CreateCommand()
+//        public override DbCommand Create()
 //        {
 //            var command = (DbCommand)Activator.CreateInstance(commandType);
 //            PropertyInfo oracleCommandBindByName = commandType.GetProperty("BindByName");

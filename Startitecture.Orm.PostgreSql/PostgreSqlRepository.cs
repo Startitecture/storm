@@ -11,7 +11,7 @@ namespace Startitecture.Orm.PostgreSql
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -78,36 +78,13 @@ namespace Startitecture.Orm.PostgreSql
         /// </exception>
         public void Insert<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
         {
-            this.Insert(items, null, insertAction);
-        }
-
-        /// <summary>
-        /// Inserts a list of items into the repository.
-        /// </summary>
-        /// <param name="items">
-        /// The items to insert.
-        /// </param>
-        /// <param name="transaction">
-        /// The transaction for the operation, or null to perform the operation without a transaction.
-        /// </param>
-        /// <param name="insertAction">
-        /// The insert action to take, or null to take the default insert action.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to insert..
-        /// </typeparam>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> is null.
-        /// </exception>
-        public void Insert<TItem>([NotNull] IEnumerable<TItem> items, IDbTransaction transaction, Action<JsonInsert<TEntity>> insertAction)
-        {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var tableCommandProvider = new JsonCommandProvider(this.RepositoryProvider.DatabaseContext);
-            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, transaction);
+            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
             jsonInsert.Execute(items);
         }
@@ -128,11 +105,19 @@ namespace Startitecture.Orm.PostgreSql
         /// <paramref name="items"/> is null.
         /// </exception>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
+        /// The <see cref="Task"/> that is performing the insert.
         /// </returns>
-        public IEnumerable<TItem> InsertForResults<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
+        public async Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
         {
-            return this.InsertForResults(items, null, insertAction);
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
+            insertAction?.Invoke(jsonInsert);
+            await jsonInsert.ExecuteAsync(items).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -140,9 +125,6 @@ namespace Startitecture.Orm.PostgreSql
         /// </summary>
         /// <param name="items">
         /// The items to insert.
-        /// </param>
-        /// <param name="transaction">
-        /// The transaction for the operation, or null to perform the operation without a transaction.
         /// </param>
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
@@ -156,17 +138,53 @@ namespace Startitecture.Orm.PostgreSql
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
         /// </returns>
-        public IEnumerable<TItem> InsertForResults<TItem>([NotNull] IEnumerable<TItem> items, IDbTransaction transaction, Action<JsonInsert<TEntity>> insertAction)
+        public IEnumerable<TItem> InsertForResults<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            Action<JsonInsert<TEntity>> insertAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var tableCommandProvider = new JsonCommandProvider(this.RepositoryProvider.DatabaseContext);
-            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, transaction);
+            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
             var insertedEntities = jsonInsert.ExecuteForResults(items);
+            return this.EntityMapper.Map<List<TItem>>(insertedEntities);
+        }
+
+        /// <summary>
+        /// Inserts a list of items into the repository.
+        /// </summary>
+        /// <param name="items">
+        /// The items to insert.
+        /// </param>
+        /// <param name="insertAction">
+        /// The insert action to take, or null to take the default insert action.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to insert..
+        /// </typeparam>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="items"/> is null.
+        /// </exception>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
+        /// </returns>
+        public async Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            Action<JsonInsert<TEntity>> insertAction)
+        {
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
+            insertAction?.Invoke(jsonInsert);
+            var insertedEntities = await jsonInsert.ExecuteForResultsAsync(items).ConfigureAwait(false);
             return this.EntityMapper.Map<List<TItem>>(insertedEntities);
         }
     }

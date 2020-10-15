@@ -63,7 +63,7 @@ namespace Startitecture.Orm.Common
         /// <param name="nameQualifier">
         /// The SQL name qualifier.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="definitionProvider"/> or <paramref name="nameQualifier"/> is null.
         /// </exception>
         public JoinClause([NotNull] IEntityDefinitionProvider definitionProvider, [NotNull] INameQualifier nameQualifier)
@@ -111,7 +111,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// The JOIN clause as a <see cref="string"/>.
         /// </returns>
-        /// <exception cref="System.ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentOutOfRangeException">
         /// <paramref name="relationType"/> is not one of the named enumerations.
         /// </exception>
         private static string GetJoinClause(EntityRelationType relationType)

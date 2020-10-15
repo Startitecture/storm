@@ -17,16 +17,19 @@ namespace Startitecture.Orm.Common
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.Caching;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
-    using Startitecture.Resources;
 
     /// <summary>
     /// Provides a concrete implementation for a database repository.
     /// </summary>
+    /// <remarks>
+    /// This <see cref="IRepositoryProvider"/> implementation wraps all expected underlying exceptions with <see cref="RepositoryException"/>.
+    /// </remarks>
     public sealed class DatabaseRepositoryProvider : IRepositoryProvider
     {
         /// <summary>
@@ -45,12 +48,7 @@ namespace Startitecture.Orm.Common
         private readonly ObjectCache entityCache;
 
         /// <summary>
-        /// The entity lock.
-        /// </summary>
-        private readonly object cacheLock = new object();
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
+        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class.
         /// </summary>
         /// <param name="databaseContextFactory">
         /// The database context factory.
@@ -62,7 +60,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class. 
+        /// Initializes a new instance of the <see cref="DatabaseRepositoryProvider"/> class.
         /// </summary>
         /// <param name="databaseContextFactory">
         /// The database context factory.
@@ -113,10 +111,7 @@ namespace Startitecture.Orm.Common
         public bool IsDisposed { get; private set; }
 
         /// <inheritdoc />
-        public bool EnableCaching { get; set; }
-
-        /// <inheritdoc />
-        public TimeSpan CacheExpiration { get; set; }
+        public CacheItemPolicy CacheItemPolicy { get; set; }
 
         /// <summary>
         /// Gets the internal identifier for this provider.
@@ -124,41 +119,28 @@ namespace Startitecture.Orm.Common
         private Guid InstanceIdentifier { get; } = Guid.NewGuid();
 
         /// <inheritdoc />
-        public void Dispose()
+        public ITransactionContext BeginTransaction()
         {
-            this.IsDisposed = true;
-
-            this.DatabaseContext?.Dispose();
-
-            this.OnDisposed();
+            return this.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
         /// <inheritdoc />
-        public void ChangeDatabase(string databaseName)
+        public async Task<ITransactionContext> BeginTransactionAsync()
         {
-            if (string.IsNullOrWhiteSpace(databaseName))
-            {
-                throw new ArgumentNullException(nameof(databaseName));
-            }
+            return await this.BeginTransactionAsync(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+        }
 
+        /// <inheritdoc />
+        public ITransactionContext BeginTransaction(IsolationLevel isolationLevel)
+        {
             this.CheckDisposed();
-            this.DatabaseContext.OpenSharedConnection();
-            this.DatabaseContext.Connection.ChangeDatabase(databaseName);
-        }
 
-        /// <inheritdoc />
-        public IDbTransaction StartTransaction()
-        {
             try
             {
-                this.CheckDisposed();
-                return this.DatabaseContext.BeginTransaction();
+                this.DatabaseContext.OpenSharedConnection();
+                return this.DatabaseContext.BeginTransaction(isolationLevel);
             }
             catch (InvalidOperationException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-            catch (DataException ex)
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
@@ -169,19 +151,16 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public IDbTransaction StartTransaction(IsolationLevel isolationLevel)
+        public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel)
         {
             this.CheckDisposed();
 
             try
             {
-                return this.DatabaseContext.Connection.BeginTransaction(isolationLevel);
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                return await this.DatabaseContext.BeginTransactionAsync(isolationLevel).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
-            {
-                throw new RepositoryException(this, ex.Message, ex);
-            }
-            catch (DataException ex)
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
@@ -200,13 +179,43 @@ namespace Startitecture.Orm.Common
             }
 
             this.CheckDisposed();
-
             var sql = this.DatabaseContext.RepositoryAdapter.CreateExistsStatement(selection);
 
             try
             {
                 // Always remember to supply this method with an array of values!
+                this.DatabaseContext.OpenSharedConnection();
                 return this.DatabaseContext.ExecuteScalar<int>(sql, selection.PropertyValues.ToArray()) > 0;
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> ContainsAsync(IEntitySet selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            this.CheckDisposed();
+            var sql = this.DatabaseContext.RepositoryAdapter.CreateExistsStatement(selection);
+
+            try
+            {
+                // Always remember to supply this method with an array of values!
+                return await this.DatabaseContext.ExecuteScalarAsync<int>(sql, selection.PropertyValues.ToArray()).ConfigureAwait(false) > 0;
             }
             catch (InvalidOperationException ex)
             {
@@ -235,7 +244,38 @@ namespace Startitecture.Orm.Common
 
             try
             {
+                this.DatabaseContext.OpenSharedConnection();
                 return this.DatabaseContext.ExecuteScalar<T>(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<T> GetScalarAsync<T>(ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            this.CheckDisposed();
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
+
+            try
+            {
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                return await this.DatabaseContext.ExecuteScalarAsync<T>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -254,7 +294,7 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public T FirstOrDefault<T>(EntitySet<T> entitySet)
         {
-            if (Evaluate.IsNull(entitySet))
+            if (entitySet == null)
             {
                 throw new ArgumentNullException(nameof(entitySet));
             }
@@ -262,23 +302,40 @@ namespace Startitecture.Orm.Common
             this.CheckDisposed();
             T entity;
 
-            if (this.EnableCaching)
+            if (this.CacheItemPolicy != null)
             {
                 var cacheKey = CreateCacheKey(entitySet);
-
-                lock (this.cacheLock)
-                {
-                    entity = this.entityCache.GetOrLazyAddExisting(
-                        this.cacheLock,
-                        cacheKey,
-                        entitySet,
-                        this.FirstOrDefaultEntity<T>,
-                        new CacheItemPolicy { AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(2) });
-                }
+                var lazyGet = new Lazy<T>(() => this.FirstOrDefaultEntity<T>(entitySet));
+                entity = ((Lazy<T>)this.entityCache.AddOrGetExisting(cacheKey, lazyGet, this.CacheItemPolicy)).Value;
             }
             else
             {
                 entity = this.FirstOrDefaultEntity<T>(entitySet);
+            }
+
+            return entity;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> FirstOrDefaultAsync<T>(EntitySet<T> entitySet)
+        {
+            if (entitySet == null)
+            {
+                throw new ArgumentNullException(nameof(entitySet));
+            }
+
+            this.CheckDisposed();
+            T entity;
+
+            if (this.CacheItemPolicy != null)
+            {
+                var cacheKey = CreateCacheKey(entitySet);
+                var lazyGet = new Lazy<Task<T>>(async () => await this.FirstOrDefaultEntityAsync<T>(entitySet).ConfigureAwait(false));
+                entity = ((Lazy<T>)this.entityCache.AddOrGetExisting(cacheKey, lazyGet, this.CacheItemPolicy)).Value;
+            }
+            else
+            {
+                entity = await this.FirstOrDefaultEntityAsync<T>(entitySet).ConfigureAwait(false);
             }
 
             return entity;
@@ -298,6 +355,19 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            this.CheckDisposed();
+            var item = await this.FirstOrDefaultEntityAsync<dynamic>(selection).ConfigureAwait(false);
+            return item;
+        }
+
+        /// <inheritdoc />
         public IEnumerable<T> SelectEntities<T>(EntitySet<T> selection)
         {
             if (selection == null)
@@ -310,7 +380,38 @@ namespace Startitecture.Orm.Common
 
             try
             {
+                this.DatabaseContext.OpenSharedConnection();
                 return this.DatabaseContext.Query<T>(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<T>> SelectEntitiesAsync<T>(EntitySet<T> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            this.CheckDisposed();
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
+
+            try
+            {
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                return await this.DatabaseContext.QueryAsync<T>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -339,7 +440,38 @@ namespace Startitecture.Orm.Common
 
             try
             {
+                this.DatabaseContext.OpenSharedConnection();
                 return this.DatabaseContext.Query<dynamic>(statement, selection.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<dynamic>> DynamicSelectAsync(ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            this.CheckDisposed();
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
+
+            try
+            {
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                return await this.DatabaseContext.QueryAsync<dynamic>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -370,6 +502,8 @@ namespace Startitecture.Orm.Common
 
             try
             {
+                this.DatabaseContext.OpenSharedConnection();
+
                 if (entityDefinition.RowIdentity.HasValue)
                 {
                     var autoNumber = this.DatabaseContext.ExecuteScalar<object>(statement, values);
@@ -379,7 +513,49 @@ namespace Startitecture.Orm.Common
                 {
                     this.DatabaseContext.Execute(statement, values);
                 }
-                ////result = this.DatabaseContext.Insert(entity);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+
+            return entity;
+        }
+
+        /// <inheritdoc />
+        public async Task<T> InsertAsync<T>(T entity)
+        {
+            if (Evaluate.IsNull(entity))
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            this.CheckDisposed();
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateInsertionStatement<T>();
+            var entityDefinition = this.EntityDefinitionProvider.Resolve<T>();
+            var values = entityDefinition.InsertableAttributes.Select(definition => definition.GetValueMethod.Invoke(entity, null)).ToArray();
+
+            try
+            {
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+
+                if (entityDefinition.RowIdentity.HasValue)
+                {
+                    var autoNumber = await this.DatabaseContext.ExecuteScalarAsync<object>(statement, values).ConfigureAwait(false);
+                    entityDefinition.RowIdentity.Value.SetValueDelegate.DynamicInvoke(entity, autoNumber);
+                }
+                else
+                {
+                    await this.DatabaseContext.ExecuteAsync(statement, values).ConfigureAwait(false);
+                }
             }
             catch (InvalidOperationException ex)
             {
@@ -410,7 +586,38 @@ namespace Startitecture.Orm.Common
             try
             {
                 // Always use ToArray()!
+                this.DatabaseContext.OpenSharedConnection();
                 return this.DatabaseContext.Execute(updateStatement, updateSet.PropertyValues.ToArray());
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(updateSet, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(updateSet, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(updateSet, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async Task<int> UpdateAsync<T>(UpdateSet<T> updateSet)
+        {
+            if (updateSet == null)
+            {
+                throw new ArgumentNullException(nameof(updateSet));
+            }
+
+            var updateStatement = this.DatabaseContext.RepositoryAdapter.CreateUpdateStatement(updateSet);
+
+            try
+            {
+                // Always use ToArray()!
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                return await this.DatabaseContext.ExecuteAsync(updateStatement, updateSet.PropertyValues.ToArray()).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -451,6 +658,7 @@ namespace Startitecture.Orm.Common
             try
             {
                 // Always use ToArray()!
+                this.DatabaseContext.OpenSharedConnection();
                 this.DatabaseContext.Execute(updateStatement, update.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
@@ -468,7 +676,49 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Delete(IEntitySet entitySet) 
+        public async Task UpdateSingleAsync<T>(T entity, params Expression<Func<T, object>>[] setExpressions)
+        {
+            if (entity == null)
+            {
+                throw new ArgumentNullException(nameof(entity));
+            }
+
+            if (setExpressions == null)
+            {
+                throw new ArgumentNullException(nameof(setExpressions));
+            }
+
+            this.CheckDisposed();
+            var update = setExpressions.Any()
+                             ? new UpdateSet<T>().Set(entity, setExpressions)
+                                 .Where(set => set.MatchKey(entity, this.DatabaseContext.RepositoryAdapter.DefinitionProvider))
+                             : new UpdateSet<T>().Set(entity, this.EntityDefinitionProvider)
+                                 .Where(set => set.MatchKey(entity, this.DatabaseContext.RepositoryAdapter.DefinitionProvider));
+
+            var updateStatement = this.DatabaseContext.RepositoryAdapter.CreateUpdateStatement(update);
+
+            try
+            {
+                // Always use ToArray()!
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                await this.DatabaseContext.ExecuteAsync(updateStatement, update.PropertyValues.ToArray()).ConfigureAwait(false);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(entity, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public int Delete(IEntitySet entitySet)
         {
             if (entitySet == null)
             {
@@ -480,6 +730,7 @@ namespace Startitecture.Orm.Common
 
             try
             {
+                this.DatabaseContext.OpenSharedConnection();
                 return this.DatabaseContext.Execute(statement, entitySet.PropertyValues.ToArray());
             }
             catch (InvalidOperationException ex)
@@ -497,74 +748,33 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public void Execute(string executionStatement, params object[] parameterValues)
+        public async Task<int> DeleteAsync(IEntitySet entitySet)
         {
-            if (parameterValues == null)
+            if (entitySet == null)
             {
-                throw new ArgumentNullException(nameof(parameterValues));
-            }
-
-            if (string.IsNullOrWhiteSpace(executionStatement))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(executionStatement));
+                throw new ArgumentNullException(nameof(entitySet));
             }
 
             this.CheckDisposed();
-            this.DatabaseContext.Execute(executionStatement, parameterValues);
-        }
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateDeletionStatement(entitySet);
 
-        /// <inheritdoc />
-        public T ExecuteScalar<T>(string executionStatement, params object[] parameterValues)
-        {
-            if (parameterValues == null)
+            try
             {
-                throw new ArgumentNullException(nameof(parameterValues));
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                return await this.DatabaseContext.ExecuteAsync(statement, entitySet.PropertyValues.ToArray()).ConfigureAwait(false);
             }
-
-            if (string.IsNullOrWhiteSpace(executionStatement))
+            catch (InvalidOperationException ex)
             {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(executionStatement));
+                throw new RepositoryException(entitySet, ex.Message, ex);
             }
-
-            this.CheckDisposed();
-            var result = this.DatabaseContext.ExecuteScalar<T>(executionStatement, parameterValues);
-            return result;
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<dynamic> ExecuteForResult(string executionStatement, params object[] parameterValues)
-        {
-            if (parameterValues == null)
+            catch (DataException ex)
             {
-                throw new ArgumentNullException(nameof(parameterValues));
+                throw new RepositoryException(entitySet, ex.Message, ex);
             }
-
-            if (string.IsNullOrWhiteSpace(executionStatement))
+            catch (DbException ex)
             {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(executionStatement));
+                throw new RepositoryException(entitySet, ex.Message, ex);
             }
-
-            this.CheckDisposed();
-            var result = this.DatabaseContext.Query<dynamic>(executionStatement, parameterValues);
-            return result;
-        }
-
-        /// <inheritdoc />
-        public IEnumerable<T> ExecuteForResult<T>(string executionStatement, params object[] parameterValues)
-        {
-            if (parameterValues == null)
-            {
-                throw new ArgumentNullException(nameof(parameterValues));
-            }
-
-            if (string.IsNullOrWhiteSpace(executionStatement))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(executionStatement));
-            }
-
-            this.CheckDisposed();
-            var result = this.DatabaseContext.Query<T>(executionStatement, parameterValues);
-            return result;
         }
 
         /// <summary>
@@ -573,10 +783,24 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A <see cref="string"/> that represents the current <see cref="object"/>.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return string.Format(CultureInfo.CurrentCulture, ToStringFormat, this.DatabaseContext?.Connection?.Database, this.InstanceIdentifier);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            this.IsDisposed = true;
+            this.Dispose(true);
+        }
+
+        /// <inheritdoc />
+        public async ValueTask DisposeAsync()
+        {
+            this.IsDisposed = true;
+            await this.DisposeAsyncCore().ConfigureAwait(false);
+            this.Dispose(true);
         }
 
         /// <summary>
@@ -591,6 +815,37 @@ namespace Startitecture.Orm.Common
         private static string CreateCacheKey(IEntitySet selection)
         {
             return string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, selection.EntityType.ToRuntimeName(), selection);
+        }
+
+        /// <summary>
+        /// Disposes of managed resources in the current object.
+        /// </summary>
+        /// <param name="disposing">
+        /// A value indicating whether the method has been explicitly called.
+        /// </param>
+        private void Dispose(bool disposing)
+        {
+            if (disposing == false)
+            {
+                return;
+            }
+
+            this.DatabaseContext?.Dispose();
+            this.OnDisposed();
+        }
+
+        /// <summary>
+        /// Asynchronously disposes of resources implementing <see cref="IAsyncDisposable"/>.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="ValueTask"/> disposing of the resources.
+        /// </returns>
+        private async ValueTask DisposeAsyncCore()
+        {
+            if (this.DatabaseContext != null)
+            {
+                await this.DatabaseContext.DisposeAsync().ConfigureAwait(false);
+            }
         }
 
         /// <summary>
@@ -616,7 +871,49 @@ namespace Startitecture.Orm.Common
 
             try
             {
+                this.DatabaseContext.OpenSharedConnection();
                 return this.DatabaseContext.Query<T>(statement, selection.PropertyValues.ToArray()).FirstOrDefault();
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DataException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+            catch (DbException ex)
+            {
+                throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets the first or default entity matching the selection.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection that identifies the entity.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of entity to retrieve.
+        /// </typeparam>
+        /// <returns>
+        /// The first matching <typeparamref name="T"/>, or the default value if no entity is found.
+        /// </returns>
+        private async Task<T> FirstOrDefaultEntityAsync<T>(IEntitySet selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
+
+            try
+            {
+                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                var results = await this.DatabaseContext.QueryAsync<T>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
+                return results.FirstOrDefault();
             }
             catch (InvalidOperationException ex)
             {

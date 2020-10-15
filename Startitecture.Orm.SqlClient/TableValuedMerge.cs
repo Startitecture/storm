@@ -8,7 +8,6 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
-    using System.Data;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
@@ -72,25 +71,14 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Initializes a new instance of the <see cref="TableValuedMerge{T}"/> class.
         /// </summary>
-        /// <param name="tableCommandProvider">
+        /// <param name="tableCommandFactory">
         /// The table command provider.
         /// </param>
-        public TableValuedMerge([NotNull] ITableCommandProvider tableCommandProvider)
-            : this(tableCommandProvider, null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TableValuedMerge{T}"/> class.
-        /// </summary>
-        /// <param name="tableCommandProvider">
-        /// The table command provider.
+        /// <param name="databaseContext">
+        /// The database context.
         /// </param>
-        /// <param name="databaseTransaction">
-        /// The database transaction.
-        /// </param>
-        public TableValuedMerge([NotNull] ITableCommandProvider tableCommandProvider, IDbTransaction databaseTransaction)
-            : base(tableCommandProvider, databaseTransaction)
+        public TableValuedMerge([NotNull] IDbTableCommandFactory tableCommandFactory, IDatabaseContext databaseContext)
+            : base(tableCommandFactory, databaseContext)
         {
             this.directAttributes.AddRange(this.EntityDefinition.DirectAttributes);
             this.insertAttributes.AddRange(this.EntityDefinition.InsertableAttributes);
@@ -242,7 +230,7 @@ namespace Startitecture.Orm.SqlClient
         /// </returns>
         private string CompileCommandText()
         {
-            var qualifier = this.TableCommandProvider.DatabaseContext.RepositoryAdapter.NameQualifier;
+            var qualifier = this.DatabaseContext.RepositoryAdapter.NameQualifier;
             var allAttributes = this.ItemDefinition.AllAttributes.Where(definition => definition.IsReferencedDirect).ToList();
 
             // If there's an auto number primary key, then don't try to insert it. Only use the updateable attributes.
@@ -279,11 +267,15 @@ namespace Startitecture.Orm.SqlClient
                      + $"{qualifier.Escape("Source")}.{qualifier.Escape(x.SourceKey.PropertyName)}");
 
             // If all elements are part of the match attributes then this will end up blank.
-            var updateAttributes = this.EntityDefinition.UpdateableAttributes; 
+            var updateAttributes = this.EntityDefinition.UpdateableAttributes;
 
             var updateClauses = from targetColumn in updateAttributes
                                 join sourceColumn in allAttributes on targetColumn.ResolvedLocation equals sourceColumn.ResolvedLocation
-                                select new { TargetColumn = targetColumn.PhysicalName, SourceColumn = sourceColumn.PropertyName };
+                                select new
+                                       {
+                                           TargetColumn = targetColumn.PhysicalName,
+                                           SourceColumn = sourceColumn.PropertyName
+                                       };
 
             var updateClause = string.Join(
                 ", ",
@@ -336,13 +328,19 @@ namespace Startitecture.Orm.SqlClient
                     allAttributes.Join(
                         this.directAttributes,
                         tvp => qualifier.Qualify(tvp),
-                        i => qualifier.GetCanonicalName(i), 
+                        i => qualifier.GetCanonicalName(i),
                         (structure, entity) => structure).OrderBy(x => x.Ordinal).Select(x => $"{qualifier.Escape(x.PropertyName)}").ToList();
 
                 // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original
                 // table valued parameter.
-                var selectedKeyAttributes =
-                    this.directAttributes.Where(x => x.IsIdentityColumn).Select(x => new { Column = $"i.{qualifier.Escape(x.PropertyName)}", Attribute = x }).ToList();
+                var selectedKeyAttributes = this.directAttributes.Where(x => x.IsIdentityColumn)
+                    .Select(
+                        x => new
+                             {
+                                 Column = $"i.{qualifier.Escape(x.PropertyName)}",
+                                 Attribute = x
+                             })
+                    .ToList();
 
                 // Everything for selecting from the TVP uses property name in order to match UDTT columns.
                 var nonKeyAttributes = allAttributes.Where(definition => definition.IsIdentityColumn == false).Select(
@@ -356,7 +354,11 @@ namespace Startitecture.Orm.SqlClient
 
                 var matchAttributes = (from key in this.selectionMatchAttributes
                                        join fk in allAttributes on key.PhysicalName equals fk.PhysicalName
-                                       select new { TargetKey = key, SourceKey = fk }).ToList();
+                                       select new
+                                              {
+                                                  TargetKey = key,
+                                                  SourceKey = fk
+                                              }).ToList();
 
                 // If there are match attributes use those instead of the primary key.
                 var selectionJoinMatchColumns =

@@ -16,7 +16,7 @@ namespace Startitecture.Orm.Common
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using System.Runtime.Caching;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -36,21 +36,6 @@ namespace Startitecture.Orm.Common
     public class ReadOnlyRepository<TModel, TEntity> : IReadOnlyRepository<TModel>
         where TEntity : class, new()
     {
-        /// <summary>
-        /// The cache key format.
-        /// </summary>
-        private const string CacheKeyFormat = "{0}.{1}";
-
-        /// <summary>
-        /// The entity cache.
-        /// </summary>
-        private readonly ObjectCache entityCache = MemoryCache.Default;
-
-        /// <summary>
-        /// The cache item policy.
-        /// </summary>
-        private readonly CacheItemPolicy cacheItemPolicy = new CacheItemPolicy { SlidingExpiration = TimeSpan.FromMinutes(2) };
-
         /// <summary>
         /// The selection comparer.
         /// </summary>
@@ -106,7 +91,7 @@ namespace Startitecture.Orm.Common
             this.EntityMapper = entityMapper ?? throw new ArgumentNullException(nameof(entityMapper));
             this.RepositoryProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
             this.selectionComparer = selectionComparer;
- 
+
             if (uniqueKeyExpressions == null)
             {
                 throw new ArgumentNullException(nameof(uniqueKeyExpressions));
@@ -144,6 +129,23 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<bool> ContainsAsync<TItem>(TItem candidate)
+        {
+            if (Evaluate.IsNull(candidate))
+            {
+                throw new ArgumentNullException(nameof(candidate));
+            }
+
+            var exampleEntity = this.GetExampleEntity(candidate);
+            var entitySet = this.uniqueKeyExpressions.Any()
+                                ? this.GetUniqueKeySet(exampleEntity)
+                                : new EntitySet<TEntity>().Where(
+                                    set => set.MatchKey(exampleEntity, this.RepositoryProvider.EntityDefinitionProvider));
+
+            return await this.RepositoryProvider.ContainsAsync(entitySet).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public bool Contains<TItem>([NotNull] EntitySet<TItem> selection)
         {
             if (selection == null)
@@ -155,6 +157,17 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<bool> ContainsAsync<TItem>(EntitySet<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return await this.RepositoryProvider.ContainsAsync(selection.MapSet<TEntity>()).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public TModel FirstOrDefault<TItem>(TItem candidate)
         {
             if (Evaluate.IsNull(candidate))
@@ -162,31 +175,41 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            TModel entity;
+            var exampleEntity = this.GetExampleEntity(candidate);
+            var entitySet = this.GetUniqueItemSelection(exampleEntity);
+            entitySet.SetDefaultRelations(this.RepositoryProvider.EntityDefinitionProvider);
+
+            var dataItem = this.RepositoryProvider.FirstOrDefault(entitySet);
+
+            if (Evaluate.IsNull(dataItem))
+            {
+                return default;
+            }
+
+            var entity = this.ConstructEntity(dataItem);
+            return entity;
+        }
+
+        /// <inheritdoc />
+        public async Task<TModel> FirstOrDefaultAsync<TItem>(TItem candidate)
+        {
+            if (Evaluate.IsNull(candidate))
+            {
+                throw new ArgumentNullException(nameof(candidate));
+            }
 
             var exampleEntity = this.GetExampleEntity(candidate);
             var entitySet = this.GetUniqueItemSelection(exampleEntity);
             entitySet.SetDefaultRelations(this.RepositoryProvider.EntityDefinitionProvider);
 
-            var cacheResult = this.QueryCache(entitySet);
+            var dataItem = await this.RepositoryProvider.FirstOrDefaultAsync(entitySet).ConfigureAwait(false);
 
-            if (cacheResult.Hit)
+            if (Evaluate.IsNull(dataItem))
             {
-                entity = cacheResult.Item;
-            }
-            else
-            {
-                var dataItem = this.RepositoryProvider.FirstOrDefault(entitySet);
-
-                if (Evaluate.IsNull(dataItem))
-                {
-                    return default;
-                }
-
-                entity = this.ConstructEntity(dataItem);
-                this.UpdateCache(cacheResult.Key, entity);
+                return default;
             }
 
+            var entity = this.ConstructEntity(dataItem);
             return entity;
         }
 
@@ -199,6 +222,18 @@ namespace Startitecture.Orm.Common
             }
 
             var entity = this.RepositoryProvider.FirstOrDefault(selection.MapSet<TEntity>());
+            return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
+        }
+
+        /// <inheritdoc />
+        public async Task<TModel> FirstOrDefaultAsync<TItem>(EntitySet<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            var entity = await this.RepositoryProvider.FirstOrDefaultAsync(selection.MapSet<TEntity>()).ConfigureAwait(false);
             return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
         }
 
@@ -217,6 +252,20 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<TModel> FirstOrDefaultAsync(Action<EntitySet<TModel>> defineSet)
+        {
+            if (defineSet == null)
+            {
+                throw new ArgumentNullException(nameof(defineSet));
+            }
+
+            var modelSet = new EntitySet<TModel>();
+            defineSet.Invoke(modelSet);
+            var entity = await this.RepositoryProvider.FirstOrDefaultAsync(modelSet.MapSet<TEntity>()).ConfigureAwait(false);
+            return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
+        }
+
+        /// <inheritdoc />
         public dynamic DynamicFirstOrDefault([NotNull] ISelection selection)
         {
             if (selection == null)
@@ -228,10 +277,29 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return await this.RepositoryProvider.DynamicFirstOrDefaultAsync(selection.MapSelection<TEntity>()).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public IEnumerable<TModel> SelectAll()
         {
             var exampleSelection = new EntitySelection<TEntity>();
             var entities = this.RepositoryProvider.SelectEntities(exampleSelection);
+            return this.SelectResults(entities);
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<TModel>> SelectAllAsync()
+        {
+            var exampleSelection = new EntitySelection<TEntity>();
+            var entities = await this.RepositoryProvider.SelectEntitiesAsync(exampleSelection).ConfigureAwait(false);
             return this.SelectResults(entities);
         }
 
@@ -249,6 +317,19 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<IEnumerable<TModel>> SelectEntitiesAsync<TItem>(EntitySet<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            var mappedSelection = selection.MapSet<TEntity>();
+            var entities = await this.RepositoryProvider.SelectEntitiesAsync(mappedSelection).ConfigureAwait(false);
+            return this.SelectResults(entities);
+        }
+
+        /// <inheritdoc />
         public IEnumerable<dynamic> DynamicSelect<TItem>([NotNull] EntitySelection<TItem> selection)
         {
             if (selection == null)
@@ -257,6 +338,17 @@ namespace Startitecture.Orm.Common
             }
 
             return this.RepositoryProvider.DynamicSelect(selection.MapSelection<TEntity>());
+        }
+
+        /// <inheritdoc />
+        public async Task<IEnumerable<dynamic>> DynamicSelectAsync<TItem>(EntitySelection<TItem> selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return await this.RepositoryProvider.DynamicSelectAsync(selection.MapSelection<TEntity>()).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -394,8 +486,8 @@ namespace Startitecture.Orm.Common
                         exampleEntity = entity;
                         break;
                     case ExpandoObject expando:
-                        
-                        // Handle dynamics 
+
+                        // Handle dynamics
                         exampleEntity = new TEntity();
 
                         foreach (var attribute in keyDefinitions)
@@ -539,50 +631,6 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Attempts to get a cached entity based on the specified item.
-        /// </summary>
-        /// <param name="selection">
-        /// The item that represents the unique key for the entity.
-        /// </param>
-        /// <returns>
-        /// <c>true</c> if the entity is found; otherwise, <c>false</c>.
-        /// </returns>
-        private CacheResult<TModel> QueryCache(EntitySet<TEntity> selection)
-        {
-            var key = string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, typeof(TModel).ToRuntimeName(), selection);
-            var cacheResult = new CacheResult<TModel>(default, false, key);
-
-            if (this.RepositoryProvider.EnableCaching == false)
-            {
-                return cacheResult;
-            }
-
-            var cachedItem = this.entityCache.Get(key);
-
-            if (cachedItem is TModel item)
-            {
-                ////Trace.TraceInformation("Got item '{0}' from the cache with key '{1}'.", cachedItem, key);
-                cacheResult = new CacheResult<TModel>(item, true, key);
-            }
-
-            return cacheResult;
-        }
-
-        /// <summary>
-        /// Updates the cache with the specified key.
-        /// </summary>
-        /// <param name="key">
-        /// The key.
-        /// </param>
-        /// <param name="entity">
-        /// The entity to save in the cache.
-        /// </param>
-        private void UpdateCache(string key, TModel entity)
-        {
-            this.entityCache.Set(key, entity, this.cacheItemPolicy);
-        }
-
-        /// <summary>
         /// Selects results and adds them to the cache.
         /// </summary>
         /// <param name="entities">
@@ -598,7 +646,6 @@ namespace Startitecture.Orm.Common
             // Order the list of data items if desired.
             var items = this.selectionComparer == null ? entities : entities.OrderBy(x => x, this.selectionComparer);
 
-            // TODO: Put results in the container for usage by the construct entity hook.
             foreach (var dataItem in items)
             {
                 var entity = this.ConstructEntity(dataItem);

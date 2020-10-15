@@ -76,7 +76,7 @@ namespace Startitecture.Orm.Model
         /// <param name="ordinal">
         /// The attribute ordinal on the entity.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="entityPath"/>, <paramref name="propertyInfo"/>, or <paramref name="physicalName"/> is null or empty or whitespace.
         /// </exception>
         public EntityAttributeDefinition(
@@ -110,7 +110,7 @@ namespace Startitecture.Orm.Model
         /// <param name="alias">
         /// The alias.
         /// </param>
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="entityPath"/>, <paramref name="propertyInfo"/>, or <paramref name="physicalName"/> is null or empty or whitespace.
         /// </exception>
         public EntityAttributeDefinition(
@@ -469,7 +469,7 @@ namespace Startitecture.Orm.Model
         /// The get method info.
         /// </param>
         /// <returns>
-        /// A <see cref="System.Delegate"/> that gets the value of the property for any object of the declaring type.
+        /// A <see cref="Delegate"/> that gets the value of the property for any object of the declaring type.
         /// </returns>
         private static Delegate CreateFunctionDelegate(PropertyInfo propertyInfo, MethodInfo getMethodInfo)
         {
@@ -489,7 +489,7 @@ namespace Startitecture.Orm.Model
         /// The set method info.
         /// </param>
         /// <returns>
-        /// A <see cref="System.Delegate"/> that sets the value of the property for any object of the declaring type.
+        /// A <see cref="Delegate"/> that sets the value of the property for any object of the declaring type.
         /// </returns>
         private static Delegate CreateActionDelegate(PropertyInfo propertyInfo, MethodInfo getMethodInfo)
         {

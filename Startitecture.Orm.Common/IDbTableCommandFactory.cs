@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="ITableCommandProvider.cs" company="Startitecture">
+// <copyright file="IDbTableCommandFactory.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
@@ -17,13 +17,8 @@ namespace Startitecture.Orm.Common
     /// <summary>
     /// An interface for a table command provider, which abstracts the underlying database from the command.
     /// </summary>
-    public interface ITableCommandProvider
+    public interface IDbTableCommandFactory
     {
-        /// <summary>
-        /// Gets the database context for the table command.
-        /// </summary>
-        IDatabaseContext DatabaseContext { get; }
-
         /// <summary>
         /// Creates an <see cref="IDbCommand"/> for the specified <paramref name="tableCommand"/>.
         /// </summary>
@@ -36,12 +31,9 @@ namespace Startitecture.Orm.Common
         /// <param name="items">
         /// The items to pass to the command.
         /// </param>
-        /// <param name="transaction">
-        /// The transaction to use with the command.
-        /// </param>
         /// <returns>
         /// An <see cref="IDbCommand"/> that will execute the table command.
         /// </returns>
-        IDbCommand CreateCommand<T>([NotNull] ITableCommand tableCommand, [NotNull] IEnumerable<T> items, IDbTransaction transaction);
+        IDbCommand Create<T>([NotNull] ITableCommand tableCommand, [NotNull] IEnumerable<T> items);
     }
 }

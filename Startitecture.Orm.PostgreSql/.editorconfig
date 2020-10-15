@@ -6,6 +6,10 @@ root = true
 indent_style = space
 
 # Xml files
+
+# SA1413: Use trailing comma in multi-line initializers
+dotnet_diagnostic.SA1413.severity = none
+
 [*.xml]
 indent_size = 2
 

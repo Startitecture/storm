@@ -9,13 +9,15 @@
 
 namespace Startitecture.Orm.Common
 {
+    using System.Threading.Tasks;
+
     /// <summary>
     /// Provides an interface to factories that create repository providers.
     /// </summary>
     public interface IRepositoryProviderFactory
     {
         /// <summary>
-        /// Creates an <see cref="IRepositoryProvider"/>. 
+        /// Creates an <see cref="IRepositoryProvider"/>.
         /// </summary>
         /// <param name="connectionString">
         /// The connection string to the repository.

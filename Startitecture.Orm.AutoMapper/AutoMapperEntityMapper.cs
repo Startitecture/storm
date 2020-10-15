@@ -49,7 +49,7 @@ namespace Startitecture.Orm.AutoMapper
         }
 
         /// <inheritdoc />
-        /// <exception cref="System.ArgumentNullException">
+        /// <exception cref="ArgumentNullException">
         /// <paramref name="input"/> was null.
         /// </exception>
         public TOutput Map<TOutput>(object input, Func<Type, object> serviceConstructor)
