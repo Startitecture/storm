@@ -63,8 +63,6 @@ namespace Startitecture.Orm.Model
         /// </summary>
         public string AttributeName { get; }
 
-        #region Equality and Comparison Methods and Operators
-
         /// <summary>
         /// Determines if two values of the same type are equal.
         /// </summary>
@@ -105,7 +103,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return $"{this.Schema}.{this.EntityName}.{this.AttributeName}";
@@ -117,7 +114,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -132,7 +128,6 @@ namespace Startitecture.Orm.Model
         /// <param name="obj">
         /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -151,7 +146,5 @@ namespace Startitecture.Orm.Model
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
     }
 }

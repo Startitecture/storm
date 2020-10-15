@@ -22,7 +22,7 @@ namespace Startitecture.Orm.Model
     /// <summary>
     /// Contains the definition of an entity attribute.
     /// </summary>
-    public struct EntityAttributeDefinition : IEquatable<EntityAttributeDefinition>, IComparable, IComparable<EntityAttributeDefinition>
+    public readonly struct EntityAttributeDefinition : IEquatable<EntityAttributeDefinition>, IComparable, IComparable<EntityAttributeDefinition>
     {
         /// <summary>
         /// The attribute name format.
@@ -32,18 +32,18 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The delegate cache.
         /// </summary>
-        private static readonly MemoryCache<string, Delegate> DelegateMemoryCache  = new MemoryCache<string, Delegate>();
+        private static readonly MemoryCache<string, Delegate> DelegateMemoryCache = new MemoryCache<string, Delegate>();
 
         /// <summary>
         /// The comparison properties.
         /// </summary>
         private static readonly Func<EntityAttributeDefinition, object>[] ComparisonProperties =
             {
-                item => item.Entity, 
+                item => item.Entity,
                 item => item.ReferenceNode?.Value,
                 item => item.Ordinal,
                 item => item.PropertyName,
-                item => item.PhysicalName, 
+                item => item.PhysicalName,
                 item => item.Alias,
                 item => item.AttributeTypes
             };
@@ -384,7 +384,6 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentException">
         /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
-        /// <filterpriority>2</filterpriority>
         public int CompareTo(object obj)
         {
             return Evaluate.Compare(this, obj);
@@ -410,9 +409,8 @@ namespace Startitecture.Orm.Model
         /// Returns the fully qualified type name of this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="String" /> containing a fully qualified type name.
+        /// A <see cref="string" /> containing a fully qualified type name.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return string.Format(CultureInfo.CurrentCulture, AttributeNameFormat, this.Entity, this.ReferenceName);
@@ -424,7 +422,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A 32-bit signed integer that is the hash code for this instance.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return this.hashCode.Value;
@@ -439,7 +436,6 @@ namespace Startitecture.Orm.Model
         /// <param name="obj">
         /// Another object to compare to.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);

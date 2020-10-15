@@ -28,7 +28,7 @@ namespace Startitecture.Orm.Common
     /// Provides a concrete implementation for a database repository.
     /// </summary>
     /// <remarks>
-    /// This <see cref="IRepositoryProvider"/> implementation wraps all expected underlying exceptions with <see cref="RepositoryException"/>.
+    /// This <see cref="IRepositoryProvider"/> implementation wraps all expected underlying exceptions with <see cref="Startitecture.Orm.Common.RepositoryException"/>.
     /// </remarks>
     public sealed class DatabaseRepositoryProvider : IRepositoryProvider
     {
