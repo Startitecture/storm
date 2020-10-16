@@ -254,150 +254,150 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public void SelectEntities_ExistingDomainAggregatesWithSubQuery_MatchesExpected()
         {
             var flag1 = new FlagAttributeRow
-                            {
-                                Name = $"UNIT_TEST:Flag1-{Generator.Next(int.MaxValue)}"
-                            };
+            {
+                Name = $"UNIT_TEST:Flag1-{Generator.Next(int.MaxValue)}"
+            };
 
             var flag2 = new FlagAttributeRow
-                            {
-                                Name = $"UNIT_TEST:Flag2-{Generator.Next(int.MaxValue)}"
-                            };
+            {
+                Name = $"UNIT_TEST:Flag2-{Generator.Next(int.MaxValue)}"
+            };
 
             var flag3 = new FlagAttributeRow
-                            {
-                                Name = $"UNIT_TEST:Flag3-{Generator.Next(int.MaxValue)}"
-                            };
+            {
+                Name = $"UNIT_TEST:Flag3-{Generator.Next(int.MaxValue)}"
+            };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(topContainer2);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 target.Insert(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 target.Insert(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 target.Insert(otherAggregate10);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 2,
-                                               Value = 439034.0332m
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 2,
+                    Value = 439034.0332m
+                };
 
                 var aggregateOption2 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 4,
-                                               Value = 32453253
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 4,
+                    Value = 32453253
+                };
 
                 var domainAggregate1 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption1,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
-                                               Description = "My First Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now.Date,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption1,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                    Description = "My First Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now.Date,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
                 var domainAggregate2 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption2,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Second Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now.Date,
-                                               OtherAggregate = otherAggregate10,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption2,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                    Description = "My Second Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now.Date,
+                    OtherAggregate = otherAggregate10,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
                 var domainAggregate3 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Third Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now.Date,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now.Date,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Insert(domainAggregate1);
                 target.Insert(domainAggregate2);
@@ -410,10 +410,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 target.Insert(aggregateOption2);
 
                 var associationRow = new AssociationRow
-                                         {
-                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                             OtherAggregateId = otherAggregate10.OtherAggregateId
-                                         };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    OtherAggregateId = otherAggregate10.OtherAggregateId
+                };
 
                 target.Insert(associationRow);
 
@@ -422,35 +422,35 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 target.Insert(flag3);
 
                 var flagAssociation1 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
-                                               FlagAttributeId = flag1.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate1.DomainAggregateId,
+                    FlagAttributeId = flag1.FlagAttributeId
+                };
 
                 // Test our INNER JOIN will bring back a distinct result
                 var flagAssociation2 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
-                                               FlagAttributeId = flag2.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate1.DomainAggregateId,
+                    FlagAttributeId = flag2.FlagAttributeId
+                };
 
                 var flagAssociation3 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                               FlagAttributeId = flag3.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    FlagAttributeId = flag3.FlagAttributeId
+                };
 
                 var flagAssociation4 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate3.DomainAggregateId,
-                                               FlagAttributeId = flag2.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate3.DomainAggregateId,
+                    FlagAttributeId = flag2.FlagAttributeId
+                };
 
                 var flagAssociation5 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
-                                               FlagAttributeId = flag3.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate1.DomainAggregateId,
+                    FlagAttributeId = flag3.FlagAttributeId
+                };
 
                 target.Insert(flagAssociation1);
                 target.Insert(flagAssociation2);
@@ -543,137 +543,137 @@ namespace Startitecture.Orm.PostgreSql.Tests
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(topContainer2);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 target.Insert(subContainerA);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 target.Insert(categoryAttribute20);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(timBobIdentity);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(fooBarIdentity);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 target.Insert(otherAggregate10);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(template23);
 
                 var aggregateOption1 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 2,
-                                               Value = 439034.0332m
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 2,
+                    Value = 439034.0332m
+                };
 
                 var aggregateOption2 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 4,
-                                               Value = 32453253
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 4,
+                    Value = 32453253
+                };
 
                 var domainAggregate1 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption1,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
-                                               Description = "My First Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption1,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                    Description = "My First Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Insert(domainAggregate1);
 
                 var domainAggregate2 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption2,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Second Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               OtherAggregate = otherAggregate10,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption2,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                    Description = "My Second Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    OtherAggregate = otherAggregate10,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Insert(domainAggregate2);
 
                 var domainAggregate3 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Third Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 target.Insert(domainAggregate3);
 
@@ -684,10 +684,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 target.Insert(aggregateOption2);
 
                 var associationRow = new AssociationRow
-                                         {
-                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                             OtherAggregateId = otherAggregate10.OtherAggregateId
-                                         };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    OtherAggregateId = otherAggregate10.OtherAggregateId
+                };
 
                 target.Insert(associationRow);
 
@@ -992,10 +992,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                             .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
                     .Where(set => set.AreEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId))
                     .Sort(set => set.OrderBy(row => row.Name));
-                            ////.WithAs(
-                            ////    tableExpression,
-                            ////    "pgCte",
-                            ////    cteSet => cteSet.InnerJoin(row => row.DomainAggregateId, row => row.DomainAggregateId)));
+                ////.WithAs(
+                ////    tableExpression,
+                ////    "pgCte",
+                ////    cteSet => cteSet.InnerJoin(row => row.DomainAggregateId, row => row.DomainAggregateId)));
 
                 var actualPage1 = target.SelectEntities(selection).ToList();
                 Assert.AreEqual(
@@ -1416,11 +1416,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
             using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 target.Insert(timBobIdentity);
 
@@ -1922,150 +1922,150 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task SelectEntitiesAsync_ExistingDomainAggregatesWithSubQuery_MatchesExpected()
         {
             var flag1 = new FlagAttributeRow
-                            {
-                                Name = $"UNIT_TEST:Flag1-{Generator.Next(int.MaxValue)}"
-                            };
+            {
+                Name = $"UNIT_TEST:Flag1-{Generator.Next(int.MaxValue)}"
+            };
 
             var flag2 = new FlagAttributeRow
-                            {
-                                Name = $"UNIT_TEST:Flag2-{Generator.Next(int.MaxValue)}"
-                            };
+            {
+                Name = $"UNIT_TEST:Flag2-{Generator.Next(int.MaxValue)}"
+            };
 
             var flag3 = new FlagAttributeRow
-                            {
-                                Name = $"UNIT_TEST:Flag3-{Generator.Next(int.MaxValue)}"
-                            };
+            {
+                Name = $"UNIT_TEST:Flag3-{Generator.Next(int.MaxValue)}"
+            };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(topContainer2).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 await target.InsertAsync(subContainerA).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(template23).ConfigureAwait(false);
 
                 var aggregateOption1 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 2,
-                                               Value = 439034.0332m
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 2,
+                    Value = 439034.0332m
+                };
 
                 var aggregateOption2 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 4,
-                                               Value = 32453253
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 4,
+                    Value = 32453253
+                };
 
                 var domainAggregate1 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption1,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
-                                               Description = "My First Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now.Date,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption1,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                    Description = "My First Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now.Date,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
                 var domainAggregate2 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption2,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Second Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now.Date,
-                                               OtherAggregate = otherAggregate10,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption2,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                    Description = "My Second Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now.Date,
+                    OtherAggregate = otherAggregate10,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
                 var domainAggregate3 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Third Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now.Date,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.Date.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now.Date,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 await target.InsertAsync(domainAggregate1).ConfigureAwait(false);
                 await target.InsertAsync(domainAggregate2).ConfigureAwait(false);
@@ -2078,10 +2078,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 await target.InsertAsync(aggregateOption2).ConfigureAwait(false);
 
                 var associationRow = new AssociationRow
-                                         {
-                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                             OtherAggregateId = otherAggregate10.OtherAggregateId
-                                         };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    OtherAggregateId = otherAggregate10.OtherAggregateId
+                };
 
                 await target.InsertAsync(associationRow).ConfigureAwait(false);
 
@@ -2090,35 +2090,35 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 await target.InsertAsync(flag3).ConfigureAwait(false);
 
                 var flagAssociation1 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
-                                               FlagAttributeId = flag1.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate1.DomainAggregateId,
+                    FlagAttributeId = flag1.FlagAttributeId
+                };
 
                 // Test our INNER JOIN will bring back a distinct result
                 var flagAssociation2 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
-                                               FlagAttributeId = flag2.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate1.DomainAggregateId,
+                    FlagAttributeId = flag2.FlagAttributeId
+                };
 
                 var flagAssociation3 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                               FlagAttributeId = flag3.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    FlagAttributeId = flag3.FlagAttributeId
+                };
 
                 var flagAssociation4 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate3.DomainAggregateId,
-                                               FlagAttributeId = flag2.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate3.DomainAggregateId,
+                    FlagAttributeId = flag2.FlagAttributeId
+                };
 
                 var flagAssociation5 = new DomainAggregateFlagAttributeRow
-                                           {
-                                               DomainAggregateId = domainAggregate1.DomainAggregateId,
-                                               FlagAttributeId = flag3.FlagAttributeId
-                                           };
+                {
+                    DomainAggregateId = domainAggregate1.DomainAggregateId,
+                    FlagAttributeId = flag3.FlagAttributeId
+                };
 
                 await target.InsertAsync(flagAssociation1).ConfigureAwait(false);
                 await target.InsertAsync(flagAssociation2).ConfigureAwait(false);
@@ -2214,137 +2214,137 @@ namespace Startitecture.Orm.PostgreSql.Tests
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(topContainer2).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 await target.InsertAsync(subContainerA).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(template23).ConfigureAwait(false);
 
                 var aggregateOption1 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 2,
-                                               Value = 439034.0332m
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption1-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 2,
+                    Value = 439034.0332m
+                };
 
                 var aggregateOption2 = new AggregateOptionRow
-                                           {
-                                               Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 4,
-                                               Value = 32453253
-                                           };
+                {
+                    Name = $"UNIT_TEST:AgOption2-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 4,
+                    Value = 32453253
+                };
 
                 var domainAggregate1 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption1,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
-                                               Description = "My First Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption1,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate1-{Generator.Next(int.MaxValue)}",
+                    Description = "My First Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 await target.InsertAsync(domainAggregate1).ConfigureAwait(false);
 
                 var domainAggregate2 = new DomainAggregateRow
-                                           {
-                                               AggregateOption = aggregateOption2,
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Second Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = fooBarIdentity,
-                                               LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               OtherAggregate = otherAggregate10,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    AggregateOption = aggregateOption2,
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate2-{Generator.Next(int.MaxValue)}",
+                    Description = "My Second Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = fooBarIdentity,
+                    LastModifiedByDomainIdentityId = fooBarIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    OtherAggregate = otherAggregate10,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 await target.InsertAsync(domainAggregate2).ConfigureAwait(false);
 
                 var domainAggregate3 = new DomainAggregateRow
-                                           {
-                                               CategoryAttribute = categoryAttribute20,
-                                               CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                               Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                               Description = "My Third Domain Aggregate",
-                                               CreatedBy = timBobIdentity,
-                                               CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                               LastModifiedBy = timBobIdentity,
-                                               LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                               LastModifiedTime = DateTimeOffset.Now,
-                                               SubContainer = subContainerA,
-                                               SubContainerId = subContainerA.SubContainerId,
-                                               Template = template23,
-                                               TemplateId = template23.TemplateId
-                                           };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 await target.InsertAsync(domainAggregate3).ConfigureAwait(false);
 
@@ -2355,10 +2355,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 await target.InsertAsync(aggregateOption2).ConfigureAwait(false);
 
                 var associationRow = new AssociationRow
-                                         {
-                                             DomainAggregateId = domainAggregate2.DomainAggregateId,
-                                             OtherAggregateId = otherAggregate10.OtherAggregateId
-                                         };
+                {
+                    DomainAggregateId = domainAggregate2.DomainAggregateId,
+                    OtherAggregateId = otherAggregate10.OtherAggregateId
+                };
 
                 await target.InsertAsync(associationRow).ConfigureAwait(false);
 
@@ -2931,10 +2931,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 expected = new FieldRow
-                               {
-                                   Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                   Description = "Mah Field Description"
-                               };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 await target.InsertAsync(expected).ConfigureAwait(false);
             }
@@ -2969,80 +2969,80 @@ namespace Startitecture.Orm.PostgreSql.Tests
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var topContainer2 = new TopContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
-                                        };
+                {
+                    Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(topContainer2).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
-                                        {
-                                            Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
-                                            TopContainer = topContainer2,
-                                            TopContainerId = topContainer2.TopContainerId
-                                        };
+                {
+                    Name = $"UNIT_TEST:SubContainerA-{Generator.Next(int.MaxValue)}",
+                    TopContainer = topContainer2,
+                    TopContainerId = topContainer2.TopContainerId
+                };
 
                 await target.InsertAsync(subContainerA).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
-                                              {
-                                                  Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
-                                                  IsActive = true,
-                                                  IsSystem = false
-                                              };
+                {
+                    Name = $"UNIT_TEST:CatAttr20-{Generator.Next(int.MaxValue)}",
+                    IsActive = true,
+                    IsSystem = false
+                };
 
                 await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Foo",
-                                             LastName = "Bar",
-                                             UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Foo",
+                    LastName = "Bar",
+                    UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
-                                           {
-                                               Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
-                                               AggregateOptionTypeId = 3
-                                           };
+                {
+                    Name = $"UNIT_TEST:OtherAggregate10-{Generator.Next(int.MaxValue)}",
+                    AggregateOptionTypeId = 3
+                };
 
                 await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
-                                     {
-                                         Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
-                                     };
+                {
+                    Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(template23).ConfigureAwait(false);
 
                 expected = new DomainAggregateRow
-                               {
-                                   CategoryAttribute = categoryAttribute20,
-                                   CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
-                                   Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
-                                   Description = "My Third Domain Aggregate",
-                                   CreatedBy = timBobIdentity,
-                                   CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                   CreatedTime = DateTimeOffset.Now.AddMonths(-1),
-                                   LastModifiedBy = timBobIdentity,
-                                   LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
-                                   LastModifiedTime = DateTimeOffset.Now,
-                                   SubContainer = subContainerA,
-                                   SubContainerId = subContainerA.SubContainerId,
-                                   Template = template23,
-                                   TemplateId = template23.TemplateId
-                               };
+                {
+                    CategoryAttribute = categoryAttribute20,
+                    CategoryAttributeId = categoryAttribute20.CategoryAttributeId,
+                    Name = $"UNIT_TEST:Aggregate3-{Generator.Next(int.MaxValue)}",
+                    Description = "My Third Domain Aggregate",
+                    CreatedBy = timBobIdentity,
+                    CreatedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    CreatedTime = DateTimeOffset.Now.AddMonths(-1),
+                    LastModifiedBy = timBobIdentity,
+                    LastModifiedByDomainIdentityId = timBobIdentity.DomainIdentityId,
+                    LastModifiedTime = DateTimeOffset.Now,
+                    SubContainer = subContainerA,
+                    SubContainerId = subContainerA.SubContainerId,
+                    Template = template23,
+                    TemplateId = template23.TemplateId
+                };
 
                 await target.InsertAsync(expected).ConfigureAwait(false);
             }
@@ -3106,11 +3106,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var timBobIdentity = new DomainIdentityRow
-                                         {
-                                             FirstName = "Tim",
-                                             LastName = "Bob",
-                                             UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
-                                         };
+                {
+                    FirstName = "Tim",
+                    LastName = "Bob",
+                    UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
+                };
 
                 await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
 
@@ -3140,10 +3140,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 expected = new FieldRow
-                               {
-                                   Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                   Description = "Mah Field Description"
-                               };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 await target.InsertAsync(expected).ConfigureAwait(false);
             }
@@ -3193,10 +3193,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 expected = new FieldRow
-                               {
-                                   Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
-                                   Description = "Mah Field Description"
-                               };
+                {
+                    Name = $"UNIT_TEST-Field{Generator.Next(int.MaxValue)}",
+                    Description = "Mah Field Description"
+                };
 
                 await target.InsertAsync(expected).ConfigureAwait(false);
             }

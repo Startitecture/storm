@@ -87,7 +87,7 @@ namespace Startitecture.Orm.Model
         string GetPhysicalName(EntityLocation location);
 
         /// <summary>
-        /// Gets the reference name for the <paramref name="attribute"/>. 
+        /// Gets the reference name for the <paramref name="attribute"/>.
         /// </summary>
         /// <param name="attribute">
         /// The attribute to get the reference for.

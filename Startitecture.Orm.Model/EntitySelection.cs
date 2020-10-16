@@ -56,7 +56,7 @@ namespace Startitecture.Orm.Model
         /// Gets the count for the specified attribute.
         /// </summary>
         /// <param name="selector">
-        /// The attribute selector
+        /// The attribute selector.
         /// </param>
         /// <returns>
         /// The current <see cref="EntitySelection{T}"/>.

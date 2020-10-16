@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ResultPage.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -34,20 +34,6 @@ namespace Startitecture.Orm.Model
         /// Gets or sets the size of the result set to return..
         /// </summary>
         public int Size { get; set; }
-
-        /// <summary>
-        /// Sets the page number for the current page result.
-        /// </summary>
-        /// <param name="pageNumber">
-        /// The page number to set.
-        /// </param>
-        public void SetPage(int pageNumber)
-        {
-            // Pages are 1-based, so 1 - 1 = 0 or zero offset for the first page.
-            this.RowOffset = this.Size * (pageNumber - 1);
-        }
-
-        #region Equality and Comparison Methods and Operators
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -89,7 +75,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return $"{this.RowOffset}->{this.Size}";
@@ -101,7 +86,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -116,7 +100,6 @@ namespace Startitecture.Orm.Model
         /// <param name="obj">
         /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -136,6 +119,16 @@ namespace Startitecture.Orm.Model
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
 
-        #endregion
+        /// <summary>
+        /// Sets the page number for the current page result.
+        /// </summary>
+        /// <param name="pageNumber">
+        /// The page number to set.
+        /// </param>
+        public void SetPage(int pageNumber)
+        {
+            // Pages are 1-based, so 1 - 1 = 0 or zero offset for the first page.
+            this.RowOffset = this.Size * (pageNumber - 1);
+        }
     }
 }

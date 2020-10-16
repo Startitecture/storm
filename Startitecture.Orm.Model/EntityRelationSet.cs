@@ -137,7 +137,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Appends a INNER JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a 
+        /// Appends a INNER JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a
         /// JOIN member.
         /// </summary>
         /// <param name="leftSelector">
@@ -165,7 +165,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Appends a INNER JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a 
+        /// Appends a INNER JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a
         /// JOIN member.
         /// </summary>
         /// <param name="leftSelector">
@@ -195,7 +195,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Appends a INNER JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a 
+        /// Appends a INNER JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a
         /// JOIN member.
         /// </summary>
         /// <param name="leftSelector">
@@ -346,7 +346,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Appends a LEFT JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a 
+        /// Appends a LEFT JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a
         /// JOIN member.
         /// </summary>
         /// <param name="leftSelector">
@@ -374,7 +374,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Appends a LEFT JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a 
+        /// Appends a LEFT JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a
         /// JOIN member.
         /// </summary>
         /// <param name="leftSelector">
@@ -404,7 +404,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Appends a LEFT JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a 
+        /// Appends a LEFT JOIN clause to the selection. The table represented by <typeparamref name="TSource"/> must already be a
         /// JOIN member.
         /// </summary>
         /// <param name="leftSelector">

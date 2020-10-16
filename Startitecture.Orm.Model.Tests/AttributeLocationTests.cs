@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AttributeLocationTests.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -30,9 +30,9 @@ namespace Startitecture.Orm.Model.Tests
             var expected = new AttributeLocation(
                 expr.GetProperty(),
                 new EntityReference
-                    {
-                        EntityType = typeof(Document)
-                    });
+                {
+                    EntityType = typeof(Document)
+                });
             var actual = new AttributeLocation(expr);
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
@@ -47,10 +47,10 @@ namespace Startitecture.Orm.Model.Tests
             var expected = new AttributeLocation(
                 expr.GetProperty(),
                 new EntityReference
-                    {
-                        EntityType = typeof(Document),
-                        EntityAlias = "Document"
-                    });
+                {
+                    EntityType = typeof(Document),
+                    EntityAlias = "Document"
+                });
             var actual = new AttributeLocation(expr);
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }

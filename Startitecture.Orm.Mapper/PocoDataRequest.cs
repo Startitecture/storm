@@ -138,8 +138,6 @@ namespace Startitecture.Orm.Mapper
         /// </summary>
         public int FirstColumn { get; set; }
 
-        #region Equality and Comparison Methods and Operators
-
         /// <summary>
         /// Determines if two values of the same type are equal.
         /// </summary>
@@ -180,7 +178,6 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return this.toStringText;
@@ -192,7 +189,6 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return this.hashCode;
@@ -205,9 +201,8 @@ namespace Startitecture.Orm.Mapper
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -226,8 +221,6 @@ namespace Startitecture.Orm.Mapper
         {
             return Evaluate.Equals(this.hashObjects, other?.hashObjects ?? new List<object>());
         }
-
-        #endregion
 
         /// <summary>
         /// Gets hash objects for comparison for this instance.

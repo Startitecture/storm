@@ -1,4 +1,10 @@
-﻿namespace Startitecture.Orm.Model.Tests
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="ParentRow.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Orm.Model.Tests
 {
     /// <summary>
     /// The parent row.

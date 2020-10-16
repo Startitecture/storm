@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="FakeOtherEnumeration.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -14,17 +14,17 @@ namespace Startitecture.Orm.Testing.Model
         /// <summary>
         /// The unknown.
         /// </summary>
-        Unknown = 0, 
+        Unknown = 0,
 
         /// <summary>
         /// The other fake first.
         /// </summary>
-        OtherFakeFirst = 1, 
+        OtherFakeFirst = 1,
 
         /// <summary>
         /// The other fake second.
         /// </summary>
-        OtherFakeSecond = 2, 
+        OtherFakeSecond = 2,
 
         /// <summary>
         /// The other fake third.

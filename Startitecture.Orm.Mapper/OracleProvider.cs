@@ -1,11 +1,11 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="OracleProvider.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   An Oracle data provider for early versions of Oracle drivers.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper
 {
@@ -16,12 +16,12 @@ namespace Startitecture.Orm.Mapper
 
     using Startitecture.Resources;
 
-//    /// <summary>
+// /// <summary>
 //    /// An Oracle data provider for early versions of Oracle drivers.
 //    /// </summary>
 //    public class OracleProvider : DbProviderFactory
 //    {
-//        /* 
+//        /*
 //        Thanks to Adam Schroder (@schotime) for this.
 //
 //        This extra file provides an implementation of DbProviderFactory for early versions of the Oracle
@@ -32,11 +32,11 @@ namespace Startitecture.Orm.Mapper
 //
 //        Currently untested.
 //
-//        Usage:   
+//        Usage:
 //
 //                new PetaPoco.Database("<connstring>", new PetaPoco.OracleProvider())
 //
-//        Or in your app/web config (be sure to change ASSEMBLYNAME to the name of your 
+//        Or in your app/web config (be sure to change ASSEMBLYNAME to the name of your
 //        assembly containing OracleProvider.cs)
 //
 //            <connectionStrings>
@@ -49,7 +49,7 @@ namespace Startitecture.Orm.Mapper
 //
 //            <system.data>
 //                <DbProviderFactories>
-//                    <add name="PetaPoco Oracle Provider" invariant="Oracle" description="PetaPoco Oracle Provider" 
+//                    <add name="PetaPoco Oracle Provider" invariant="Oracle" description="PetaPoco Oracle Provider"
 //                                    type="PetaPoco.OracleProvider, ASSEMBLYNAME" />
 //                </DbProviderFactories>
 //            </system.data>

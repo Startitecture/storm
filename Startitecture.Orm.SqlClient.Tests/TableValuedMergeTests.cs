@@ -54,46 +54,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void SelectFromInserted_ItemsWithIdentityColumn_ReturnedItemsMatchExpected()
         {
             var internalId = new Field(421)
-                             {
-                                 Name = "MERGE_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "MERGE_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field(66)
-                            {
-                                Name = "MERGE_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "MERGE_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field(7887)
-                           {
-                               Name = "MERGE_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "MERGE_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field(82328)
-                             {
-                                 Name = "MERGE_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "MERGE_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "MERGE_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "MERGE_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "MERGE_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "MERGE_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "MERGE_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "MERGE_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                          {
@@ -108,11 +108,11 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             var mergeItems = (from f in fields
                               select new FieldTableTypeRow
-                                     {
-                                         FieldId = f.FieldId,
-                                         Name = f.Name,
-                                         Description = f.Description
-                                     }).ToList();
+                              {
+                                  FieldId = f.FieldId,
+                                  Name = f.Name,
+                                  Description = f.Description
+                              }).ToList();
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var commandProvider = mergeItems.MockCommandProvider(definitionProvider, new TransactSqlQualifier());
@@ -127,15 +127,15 @@ namespace Startitecture.Orm.SqlClient.Tests
             var actual = typeRows.Select(
                     row => row.FieldId > 0
                                ? new Field(row.FieldId)
-                                 {
-                                     Name = row.Name,
-                                     Description = row.Description
-                                 }
+                               {
+                                   Name = row.Name,
+                                   Description = row.Description
+                               }
                                : new Field
-                                 {
-                                     Name = row.Name,
-                                     Description = row.Description
-                                 })
+                               {
+                                   Name = row.Name,
+                                   Description = row.Description
+                               })
                 .ToList();
 
             Assert.IsTrue(actual.All(field => field.FieldId.HasValue));
@@ -330,46 +330,46 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
         public void ExecuteForResults_GenericSubmission_DatabaseMatchesExpected()
         {
             var internalId = new Field
-                             {
-                                 Name = "MERGE_Existing_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "MERGE_Existing_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "MERGE_Existing_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "MERGE_Existing_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "MERGE_NonExisting_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "MERGE_NonExisting_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "MERGE_NonExisting_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -505,46 +505,46 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
         public async Task ExecuteForResultsAsync_GenericSubmission_DatabaseMatchesExpected()
         {
             var internalId = new Field
-                             {
-                                 Name = "MERGE_Existing_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "MERGE_Existing_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "MERGE_Existing_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "MERGE_Existing_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "MERGE_NonExisting_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "MERGE_NonExisting_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "MERGE_NonExisting_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -684,10 +684,10 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
             var fieldItems = from f in fields
                              select new FieldTableTypeRow
-                                    {
-                                        Name = f.Name,
-                                        Description = f.Description
-                                    };
+                             {
+                                 Name = f.Name,
+                                 Description = f.Description
+                             };
 
             // Merge in the field values.
             var commandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
@@ -716,11 +716,11 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
                               select new FieldValueTableTypeRow
-                                     {
-                                         FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                         LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                         LastModifiedTime = v.LastModifiedTime
-                                     };
+                              {
+                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                  LastModifiedTime = v.LastModifiedTime
+                              };
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
@@ -744,16 +744,16 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
                                  select new FieldValueElementTableTypeRow
-                                        {
-                                            FieldValueElementId = e.FieldValueElementId,
-                                            FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                            Order = e.Order,
-                                            DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                            FloatElement = e.Element as double? ?? e.Element as float?,
-                                            IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                            MoneyElement = e.Element as decimal?,
-                                            TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                        }).ToList();
+                                 {
+                                     FieldValueElementId = e.FieldValueElementId,
+                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                     Order = e.Order,
+                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                     FloatElement = e.Element as double? ?? e.Element as float?,
+                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                     MoneyElement = e.Element as decimal?,
+                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                 }).ToList();
 
             var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider, provider.DatabaseContext);
             var mergedValueElements = elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
@@ -802,10 +802,10 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues
                                           select new GenericSubmissionValueTableTypeRow
-                                                 {
-                                                     GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                     GenericSubmissionValueId = v.FieldValueId
-                                                 };
+                                          {
+                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                              GenericSubmissionValueId = v.FieldValueId
+                                          };
 
             var submissionCommand = new TableValuedMerge<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext)
                 .OnImplicit(row => row.GenericSubmissionValueId)
@@ -830,10 +830,10 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
             var fieldItems = from f in fields
                              select new FieldTableTypeRow
-                                    {
-                                        Name = f.Name,
-                                        Description = f.Description
-                                    };
+                             {
+                                 Name = f.Name,
+                                 Description = f.Description
+                             };
 
             // Merge in the field values.
             var commandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
@@ -865,11 +865,11 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
                               select new FieldValueTableTypeRow
-                                     {
-                                         FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                         LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                         LastModifiedTime = v.LastModifiedTime
-                                     };
+                              {
+                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                  LastModifiedTime = v.LastModifiedTime
+                              };
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
@@ -893,16 +893,16 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
                                  select new FieldValueElementTableTypeRow
-                                        {
-                                            FieldValueElementId = e.FieldValueElementId,
-                                            FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                            Order = e.Order,
-                                            DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                            FloatElement = e.Element as double? ?? e.Element as float?,
-                                            IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                            MoneyElement = e.Element as decimal?,
-                                            TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                        }).ToList();
+                                 {
+                                     FieldValueElementId = e.FieldValueElementId,
+                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                     Order = e.Order,
+                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                     FloatElement = e.Element as double? ?? e.Element as float?,
+                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                     MoneyElement = e.Element as decimal?,
+                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                 }).ToList();
 
             var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider, provider.DatabaseContext);
             var mergedValueElements = (await elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
@@ -954,10 +954,10 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues
                                           select new GenericSubmissionValueTableTypeRow
-                                                 {
-                                                     GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                     GenericSubmissionValueId = v.FieldValueId
-                                                 };
+                                          {
+                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                              GenericSubmissionValueId = v.FieldValueId
+                                          };
 
             var submissionCommand = new TableValuedMerge<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext)
                 .OnImplicit(row => row.GenericSubmissionValueId)

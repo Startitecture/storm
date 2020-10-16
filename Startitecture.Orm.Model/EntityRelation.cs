@@ -48,8 +48,6 @@ namespace Startitecture.Orm.Model
         /// <inheritdoc />
         public string RelationEntityAlias { get; private set; }
 
-        #region Equality Methods
-
         /// <summary>
         /// Determines if two values of the same type are equal.
         /// </summary>
@@ -90,19 +88,17 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return $"([{this.SourceExpression}] = [{this.RelationExpression}])";
         }
 
         /// <summary>
-        /// Serves as the default hash function. 
+        /// Serves as the default hash function.
         /// </summary>
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             var sourceProperty = this.SourceExpression?.GetProperty();
@@ -123,7 +119,9 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
+        /// <param name="obj">
+        /// The object to compare with the current object.
+        /// </param>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -138,15 +136,13 @@ namespace Startitecture.Orm.Model
             var otherSourceProperty = other?.SourceExpression?.GetProperty();
             var otherRelationProperty = other?.RelationExpression.GetProperty();
 
-            return sourceProperty?.PropertyType == otherSourceProperty?.PropertyType 
+            return sourceProperty?.PropertyType == otherSourceProperty?.PropertyType
                    && sourceProperty?.Name == otherSourceProperty?.Name
                    && this.SourceEntityAlias == other?.SourceEntityAlias
                    && relationProperty?.PropertyType == otherRelationProperty?.PropertyType
                    && relationProperty?.Name == otherRelationProperty?.Name
                    && this.RelationEntityAlias == other?.RelationEntityAlias;
         }
-
-        #endregion
 
         /// <summary>
         /// Applies the join attributes using the specified items.

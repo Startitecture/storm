@@ -10,6 +10,7 @@
 namespace Startitecture.Orm.Model
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Globalization;
     using System.Linq.Expressions;
@@ -32,7 +33,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The delegate cache.
         /// </summary>
-        private static readonly MemoryCache<string, Delegate> DelegateMemoryCache = new MemoryCache<string, Delegate>();
+        private static readonly ConcurrentDictionary<string, Lazy<Delegate>> DelegateMemoryCache = new ConcurrentDictionary<string, Lazy<Delegate>>();
 
         /// <summary>
         /// The comparison properties.
@@ -160,17 +161,17 @@ namespace Startitecture.Orm.Model
             this.PropertyInfo = propertyInfo;
             var getMethodInfo = propertyInfo.GetGetMethod(true);
             this.GetValueMethod = getMethodInfo;
-            this.GetValueDelegate = DelegateMemoryCache.Get(
+            this.GetValueDelegate = DelegateMemoryCache.GetOrAdd(
                 $"{nameof(getMethodInfo)}.{propertyInfo.DeclaringType}.{propertyInfo.Name}",
-                () => CreateFunctionDelegate(propertyInfo, getMethodInfo));
+                key => new Lazy<Delegate>(() => CreateFunctionDelegate(propertyInfo, getMethodInfo))).Value;
 
             var setMethodInfo = propertyInfo.GetSetMethod(true);
             this.SetValueMethod = setMethodInfo ?? throw new InvalidOperationException(
                     $"The property '{propertyInfo.PropertyType.Name}.{propertyInfo.Name}' requires a set method for this delegate to be built.");
 
-            this.SetValueDelegate = DelegateMemoryCache.Get(
+            this.SetValueDelegate = DelegateMemoryCache.GetOrAdd(
                 $"{nameof(setMethodInfo)}.{propertyInfo.DeclaringType}.{propertyInfo.Name}",
-                () => CreateActionDelegate(propertyInfo, setMethodInfo));
+                key => new Lazy<Delegate>(() => CreateActionDelegate(propertyInfo, setMethodInfo))).Value;
 
             this.hashCode = new Lazy<int>(this.CreateHashCode);
         }

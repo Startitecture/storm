@@ -19,8 +19,6 @@ namespace Startitecture.Orm.SqlClient.Tests
     [TestClass]
     public class TransactSqlAdapterTests
     {
-        #region Public Methods and Operators
-
         /// <summary>
         /// The create insertion statement with identity column matches expected.
         /// </summary>
@@ -270,7 +268,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                             .OrderBy(row => row.NormalColumn))
                     .Seek(subset => subset.Skip(5).Take(5)));
 
-            var transactionSelection = Query.With(tableExpression, "pgCte") 
+            var transactionSelection = Query.With(tableExpression, "pgCte")
                 .ForSelection<DataRow>(matches => matches.On(row => row.FakeDataId, row => row.FakeDataId))
                 .Select(
                     row => row.FakeDataId,
@@ -299,7 +297,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     set => set.OrderBy(row => row.Related.RelatedProperty)
                         .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                         .OrderBy(row => row.NormalColumn));
-                ////.WithAs(tableExpression, "pgCte", relationSet => relationSet.InnerJoin()));
+            ////.WithAs(tableExpression, "pgCte", relationSet => relationSet.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -463,14 +461,14 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         public void CreateUpdateStatement_DirectData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                                AnotherValueColumn = 12,
-                                AnotherColumn = "Some Other Value"
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
@@ -532,7 +530,7 @@ WHERE
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
-                
+
             var dataRow = new DataRow { NormalColumn = "UpdatedNormalColumn", NullableColumn = null };
             var updateSet = new UpdateSet<DataRow>().Set(dataRow, row => row.NormalColumn, row => row.NullableColumn)
                 .From(
@@ -794,7 +792,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     set => set.OrderBy(row => row.Related.RelatedProperty)
                         .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                         .OrderBy(row => row.NormalColumn));
-                        ////.WithAs(tableExpression, "pgCte", relationSet => relationSet.InnerJoin()));
+            ////.WithAs(tableExpression, "pgCte", relationSet => relationSet.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -1240,7 +1238,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     set => set.OrderBy(row => row.Related.RelatedProperty)
                         .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                         .OrderBy(row => row.NormalColumn));
-                        ////.WithAs(tableExpression, "pgCte", set => set.InnerJoin()));
+            ////.WithAs(tableExpression, "pgCte", set => set.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -1351,18 +1349,18 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         public void CreateUpdateStatement_RelatedData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                                AnotherValueColumn = 12,
-                                AnotherColumn = "Some Other Value"
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
@@ -1417,16 +1415,16 @@ WHERE
         public void CreateUpdateStatement_RelatedDataSpecificSetValues_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow { FakeDataId = 10 };
             var boundary = new DataRow { FakeDataId = 20 };
@@ -1686,7 +1684,7 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
                     set => set.OrderBy(row => row.Related.RelatedProperty)
                         .OrderByDescending(row => row.OtherAlias.RelatedProperty)
                         .OrderBy(row => row.NormalColumn));
-                        ////.WithAs(tableExpression, "pgCte", set => set.InnerJoin()));
+            ////.WithAs(tableExpression, "pgCte", set => set.InnerJoin()));
 
             const string Expected = @";WITH [pgCte] AS
     (
@@ -2156,43 +2154,43 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         public void CreateExistsStatement_UnionRelatedData_MatchesExpected()
         {
             var match1 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related1"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull1",
-                                 ValueColumn = 2
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
 
             var baseline1 = new DataRow { FakeDataId = 10 };
             var boundary1 = new DataRow { FakeDataId = 20 };
 
             var match2 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related2"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull2",
-                                 ValueColumn = 3
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
 
             var baseline2 = new DataRow { FakeDataId = 50 };
             var boundary2 = new DataRow { FakeDataId = 40 };
 
             var match3 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related3"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull3",
-                                 ValueColumn = 4
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
 
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
@@ -2315,43 +2313,43 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         public void CreateDeletionStatement_UnionRelatedData_MatchesExpected()
         {
             var match1 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related1"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull1",
-                                 ValueColumn = 2
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
 
             var baseline1 = new DataRow { FakeDataId = 10 };
             var boundary1 = new DataRow { FakeDataId = 20 };
 
             var match2 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related2"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull2",
-                                 ValueColumn = 3
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
 
             var baseline2 = new DataRow { FakeDataId = 50 };
             var boundary2 = new DataRow { FakeDataId = 40 };
 
             var match3 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related3"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull3",
-                                 ValueColumn = 4
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
 
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
@@ -2418,43 +2416,43 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
         public void CreateSelectionStatement_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related1"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull1",
-                                 ValueColumn = 2
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
 
             var baseline1 = new DataRow { FakeDataId = 10 };
             var boundary1 = new DataRow { FakeDataId = 20 };
 
             var match2 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related2"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull2",
-                                 ValueColumn = 3
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
 
             var baseline2 = new DataRow { FakeDataId = 50 };
             var boundary2 = new DataRow { FakeDataId = 40 };
 
             var match3 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related3"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull3",
-                                 ValueColumn = 4
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
 
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
@@ -2605,43 +2603,43 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         public void CreateExistsStatement_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related1"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull1",
-                                 ValueColumn = 2
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
 
             var baseline1 = new DataRow { FakeDataId = 10 };
             var boundary1 = new DataRow { FakeDataId = 20 };
 
             var match2 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related2"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull2",
-                                 ValueColumn = 3
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
 
             var baseline2 = new DataRow { FakeDataId = 50 };
             var boundary2 = new DataRow { FakeDataId = 40 };
 
             var match3 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related3"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull3",
-                                 ValueColumn = 4
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
 
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
@@ -2764,43 +2762,43 @@ ORDER BY [someschema].[Related].[RelatedProperty], [OtherAlias].[RelatedProperty
         public void CreateDeletionStatement_UnionRelatedDataRaisedRow_MatchesExpected()
         {
             var match1 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related1"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull1",
-                                 ValueColumn = 2
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related1"
+                },
+                NullableColumn = "CouldHaveBeenNull1",
+                ValueColumn = 2
+            };
 
             var baseline1 = new DataRow { FakeDataId = 10 };
             var boundary1 = new DataRow { FakeDataId = 20 };
 
             var match2 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related2"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull2",
-                                 ValueColumn = 3
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related2"
+                },
+                NullableColumn = "CouldHaveBeenNull2",
+                ValueColumn = 3
+            };
 
             var baseline2 = new DataRow { FakeDataId = 50 };
             var boundary2 = new DataRow { FakeDataId = 40 };
 
             var match3 = new DataRow
-                             {
-                                 NullableValueColumn = null,
-                                 RelatedAlias = new FakeRelatedRow
-                                                    {
-                                                        RelatedProperty = "Related3"
-                                                    },
-                                 NullableColumn = "CouldHaveBeenNull3",
-                                 ValueColumn = 4
-                             };
+            {
+                NullableValueColumn = null,
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related3"
+                },
+                NullableColumn = "CouldHaveBeenNull3",
+                ValueColumn = 4
+            };
 
             var baseline3 = new DataRow { FakeDataId = 60 };
             var boundary3 = new DataRow { FakeDataId = 70 };
@@ -2873,7 +2871,5 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
-
-        #endregion
     }
 }

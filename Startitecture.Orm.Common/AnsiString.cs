@@ -1,11 +1,11 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="AnsiString.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Wrap strings in an instance of this class to force use of DBType.AnsiString.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common
 {
@@ -15,10 +15,10 @@ namespace Startitecture.Orm.Common
     public class AnsiString
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="AnsiString"/> class. 
+        /// Initializes a new instance of the <see cref="AnsiString"/> class.
         /// </summary>
         /// <param name="value">
-        /// The C# string to be converted to ANSI before being passed to the DB
+        /// The C# string to be converted to ANSI before being passed to the DB.
         /// </param>
         public AnsiString(string value)
         {

@@ -28,9 +28,9 @@ namespace Startitecture.Orm.Model
         /// The entity reference.
         /// </summary>
         private static readonly EntityReference EntityReference = new EntityReference
-                                                                      {
-                                                                          EntityType = typeof(T)
-                                                                      };
+        {
+            EntityType = typeof(T)
+        };
 
         /// <summary>
         /// The attributes to set.

@@ -95,7 +95,7 @@ namespace Startitecture.Orm.Schema
         public int Order { get; }
 
         /// <summary>
-        /// The type ID for this instance.
+        /// Gets the type ID for this instance.
         /// </summary>
         public override object TypeId => this.instanceGuid;
     }

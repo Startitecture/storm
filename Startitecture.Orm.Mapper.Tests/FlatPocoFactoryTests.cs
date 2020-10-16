@@ -36,7 +36,6 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_FlatPocoFactoryForComplexRow_IsNotNull()
         {
-            var target = new FlatPocoFactory();
             var fakeComplexRow = Generate.CreateFakeComplexRow();
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<ComplexFlatRow>();
             var databaseContext = new Mock<IDatabaseContext>();
@@ -48,7 +47,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
-                actual = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest);
+                actual = FlatPocoFactory.CreateDelegate<ComplexFlatRow>(pocoDataRequest);
             }
 
             Assert.IsNotNull(actual);
@@ -60,7 +59,6 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_FlatPocoFactoryForComplexRow_DelegateSetsPocoAsExpected()
         {
-            var target = new FlatPocoFactory();
             var expected = Generate.CreateFakeComplexRow();
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<ComplexFlatRow>();
             var databaseContext = new Mock<IDatabaseContext>();
@@ -74,7 +72,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, databaseContext.Object);
 
                 stopwatch = Stopwatch.StartNew();
-                var pocoDelegate = target.CreateDelegate<ComplexFlatRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, ComplexFlatRow>;
+                var pocoDelegate = FlatPocoFactory.CreateDelegate<ComplexFlatRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, ComplexFlatRow>;
                 Trace.TraceInformation($"{stopwatch.Elapsed} Create delegate");
                 stopwatch.Reset();
 
@@ -94,7 +92,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
+                    FlatPocoFactory.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, ComplexFlatRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -109,7 +107,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
+                    FlatPocoFactory.CreateDelegate<ComplexFlatRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, ComplexFlatRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -127,7 +125,6 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_FlatPocoFactoryForDynamic_DelegateSetsPocoAsExpected()
         {
-            var target = new FlatPocoFactory();
             var expected = Generate.CreateFakeComplexRow();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var entityDefinition = definitionProvider.Resolve<ComplexFlatRow>();
@@ -154,7 +151,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 reader.Read();
                 var pocoDataRequest = new PocoDataRequest(reader, attributes, databaseContext.Object);
 
-                var pocoDelegate = target.CreateDelegate<dynamic>(pocoDataRequest).MappingDelegate as Func<IDataReader, dynamic>;
+                var pocoDelegate = FlatPocoFactory.CreateDelegate<dynamic>(pocoDataRequest).MappingDelegate as Func<IDataReader, dynamic>;
                 Assert.IsNotNull(pocoDelegate);
                 actual = pocoDelegate.Invoke(reader);
             }
@@ -172,16 +169,15 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_FlatPocoFactoryForPhysicalNameOverriddenRow_DelegateSetsPocoAsExpected()
         {
-            var target = new FlatPocoFactory();
             var expected = new OverriddenColumnNameRow
-                               {
-                                   OverriddenColumnNameId = 43,
-                                   Name = "OcnName",
-                                   Description = "OcnDescription",
-                                   EntryTime = DateTimeOffset.Now,
-                                   RelatedRowId = 3433,
-                                   RelatedRowName = "RelatedName"
-                               };
+            {
+                OverriddenColumnNameId = 43,
+                Name = "OcnName",
+                Description = "OcnDescription",
+                EntryTime = DateTimeOffset.Now,
+                RelatedRowId = 3433,
+                RelatedRowName = "RelatedName"
+            };
 
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<OverriddenColumnNameRow>();
             var databaseContext = new Mock<IDatabaseContext>();
@@ -196,7 +192,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
                 stopwatch = Stopwatch.StartNew();
                 var pocoDelegate =
-                    target.CreateDelegate<OverriddenColumnNameRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, OverriddenColumnNameRow>;
+                    FlatPocoFactory.CreateDelegate<OverriddenColumnNameRow>(pocoDataRequest).MappingDelegate as Func<IDataReader, OverriddenColumnNameRow>;
 
                 Trace.TraceInformation($"{stopwatch.Elapsed} Create delegate");
                 stopwatch.Reset();
@@ -218,7 +214,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
+                    FlatPocoFactory.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, OverriddenColumnNameRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -233,7 +229,7 @@ namespace Startitecture.Orm.Mapper.Tests
             {
                 reader.Read();
                 var pocoDelegate =
-                    target.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
+                    FlatPocoFactory.CreateDelegate<OverriddenColumnNameRow>(new PocoDataRequest(reader, entityDefinition, databaseContext.Object)).MappingDelegate as
                         Func<IDataReader, OverriddenColumnNameRow>;
 
                 Assert.IsNotNull(pocoDelegate);
@@ -251,25 +247,24 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_AttributeForDynamicObject_MatchesExpected()
         {
-            var target = new FlatPocoFactory();
             var entityDefinition = new DataAnnotationsDefinitionProvider().Resolve<OverriddenColumnNameRow>();
             var databaseContext = new Mock<IDatabaseContext>();
             databaseContext.Setup(context => context.GetValueMapper(It.IsAny<Type>(), It.IsAny<Type>())).Returns((IValueMapper)null);
             var expected = new OverriddenColumnNameRow
-                               {
-                                   OverriddenColumnNameId = 12,
-                                   Description = "my desc",
-                                   EntryTime = DateTimeOffset.Now,
-                                   Name = "name",
-                                   RelatedRowId = 234,
-                                   RelatedRowName = "relatedName"
-                               };
+            {
+                OverriddenColumnNameId = 12,
+                Description = "my desc",
+                EntryTime = DateTimeOffset.Now,
+                Name = "name",
+                RelatedRowId = 234,
+                RelatedRowName = "relatedName"
+            };
 
             using (var dataReader = expected.MockDataReader(entityDefinition.DirectAttributes).Object)
             {
                 dataReader.Read();
                 var dataRequest = new PocoDataRequest(dataReader, entityDefinition, databaseContext.Object);
-                var func = target.CreateDelegate<dynamic>(dataRequest).MappingDelegate as Func<IDataReader, dynamic>;
+                var func = FlatPocoFactory.CreateDelegate<dynamic>(dataRequest).MappingDelegate as Func<IDataReader, dynamic>;
                 Assert.IsNotNull(func);
 
                 var actual = func(dataReader);

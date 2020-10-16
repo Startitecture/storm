@@ -29,7 +29,7 @@ namespace Startitecture.Orm.Mapper
     /// <summary>
     /// Creates flattened POCOs for POCO data requests.
     /// </summary>
-    public class FlatPocoFactory
+    public static class FlatPocoFactory
     {
         /// <summary>
         /// The converters.
@@ -40,13 +40,15 @@ namespace Startitecture.Orm.Mapper
         /// The Converters field.
         /// </summary>
         private static readonly FieldInfo ConvertersField = typeof(FlatPocoFactory).GetField(
-            "Converters", 
+            "Converters",
             BindingFlags.Static | BindingFlags.GetField | BindingFlags.NonPublic);
 
         /// <summary>
         /// The <see cref="IDataRecord.GetValue"/> method.
         /// </summary>
-        private static readonly MethodInfo GetValueMethod = typeof(IDataRecord).GetMethod("GetValue", new[] { typeof(int) });
+        private static readonly MethodInfo GetValueMethod = typeof(IDataRecord).GetMethod(
+            "GetValue",
+            new[] { typeof(int) });
 
         /// <summary>
         /// The Invoke method for a method delegate.
@@ -62,11 +64,6 @@ namespace Startitecture.Orm.Mapper
         /// The entity Get method for lists.
         /// </summary>
         private static readonly MethodInfo ListItemMethod = typeof(List<Func<object, object>>).GetProperty("Item")?.GetGetMethod();
-
-        /// <summary>
-        /// Gets a <see cref="FlatPocoFactory"/> that populates all returnable attributes of a POCO.
-        /// </summary>
-        public static FlatPocoFactory ReturnableFactory { get; } = new FlatPocoFactory();
 
         /// <summary>
         /// Creates a delegate that returns a POCO from the provided data reader.
@@ -110,7 +107,7 @@ namespace Startitecture.Orm.Mapper
             var method = new DynamicMethod(name, type, new[] { typeof(IDataReader) }, true);
             var generator = method.GetILGenerator();
             var reader = dataRequest.DataReader;
-            
+
             if (type == typeof(object))
             {
                 // var poco=new T()
@@ -159,7 +156,7 @@ namespace Startitecture.Orm.Mapper
 
                     if (converter != null)
                     {
-                        generator.Emit(OpCodes.Pop); // obj, obj, fieldname, 
+                        generator.Emit(OpCodes.Pop); // obj, obj, fieldname,
                     }
 
                     generator.Emit(OpCodes.Ldnull); // obj, obj, fieldname, null
@@ -234,7 +231,7 @@ namespace Startitecture.Orm.Mapper
                     // Get the PocoColumn for this db column, ignore if not known
                     var key = reader.GetName(i);
 
-                    // We may need to set multiple attributes based on a single reader column when there are multiple paths in a POCO to 
+                    // We may need to set multiple attributes based on a single reader column when there are multiple paths in a POCO to
                     // the same object reference.
                     var attribute = definitions.FirstOrDefault(x => x.ReferenceName == key);
 
@@ -373,14 +370,14 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="Delegate"/> that creates a POCO from the reader.
         /// </returns>
-        public PocoDelegateInfo CreateDelegate<T>([NotNull] PocoDataRequest dataRequest)
+        public static PocoDelegateInfo CreateDelegate<T>([NotNull] PocoDataRequest dataRequest)
         {
             if (dataRequest == null)
             {
                 throw new ArgumentNullException(nameof(dataRequest));
             }
 
-            return this.CreateDelegate(dataRequest, typeof(T));
+            return CreateDelegate(dataRequest, typeof(T));
         }
 
         /// <summary>
@@ -395,7 +392,7 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="Delegate"/> that creates a POCO from the reader.
         /// </returns>
-        public PocoDelegateInfo CreateDelegate([NotNull] PocoDataRequest dataRequest, [NotNull] Type type)
+        public static PocoDelegateInfo CreateDelegate([NotNull] PocoDataRequest dataRequest, [NotNull] Type type)
         {
             if (dataRequest == null)
             {

@@ -257,7 +257,7 @@ namespace Startitecture.Orm.Mapper
         private void FillReturnList(IDataReader reader, IEntityDefinition entityDefinition, ICollection<T> returnList)
         {
             var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, this.DatabaseContext);
-            var mappingDelegate = FlatPocoFactory.ReturnableFactory.CreateDelegate<T>(pocoDataRequest).MappingDelegate;
+            var mappingDelegate = FlatPocoFactory.CreateDelegate<T>(pocoDataRequest).MappingDelegate;
 
             if (mappingDelegate is Func<IDataReader, T> pocoDelegate)
             {

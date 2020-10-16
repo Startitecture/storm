@@ -1,11 +1,11 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IEntityDefinition.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Provides an interface for classes that define entities and their attributes.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
 {
@@ -96,7 +96,7 @@ namespace Startitecture.Orm.Model
         /// The property Name.
         /// </param>
         /// <returns>
-        /// The first <see cref="EntityAttributeDefinition"/> that matches the entity alias or name and property name, or 
+        /// The first <see cref="EntityAttributeDefinition"/> that matches the entity alias or name and property name, or
         /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">

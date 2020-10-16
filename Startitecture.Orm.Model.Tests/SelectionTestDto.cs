@@ -1,4 +1,10 @@
-﻿namespace Startitecture.Orm.Model.Tests
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SelectionTestDto.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Orm.Model.Tests
 {
     using System;
 
@@ -38,7 +44,7 @@
         public ParentDto Parent { get; set; }
 
         /// <summary>
-        /// The parent id.
+        /// Gets the parent id.
         /// </summary>
         public int? ParentId => this.Parent?.ParentId;
     }

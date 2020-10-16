@@ -9,7 +9,9 @@
   "settings": {
     "documentationRules": {
       "xmlHeader": true,
-      "companyName": "Startitecture"
+      "companyName": "Startitecture",
+      "copyrightText": "  Copyright (c) {companyName}. All rights reserved.",
+      "headerDecoration": "--------------------------------------------------------------------------------------------------------------------"
     }
   }
 }

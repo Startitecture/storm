@@ -44,8 +44,6 @@ namespace Startitecture.Orm.Model
         /// </summary>
         public Type EntityType { get; set; }
 
-        #region Equality and Comparison Methods and Operators
-
         /// <summary>
         /// Determines if two values of the same type are equal.
         /// </summary>
@@ -86,7 +84,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -98,7 +95,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return $"{(this.ContainerType ?? this.EntityType)?.Name}({this.EntityType?.Name}:[{this.EntityAlias}])";
@@ -111,9 +107,8 @@ namespace Startitecture.Orm.Model
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -132,7 +127,5 @@ namespace Startitecture.Orm.Model
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
     }
 }

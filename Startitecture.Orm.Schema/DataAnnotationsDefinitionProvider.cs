@@ -208,21 +208,21 @@ namespace Startitecture.Orm.Schema
                     continue;
                 }
 
-                // Ignore collections and interfaces. 
+                // Ignore collections and interfaces.
                 if (propertyInfo.PropertyType.IsInterface || propertyInfo.PropertyType.IsSubclassOf(typeof(IEnumerable<>)))
                 {
                     continue;
                 }
 
                 yield return new AttributeReference
-                                 {
-                                     EntityReference = this.GetEntityReference(propertyInfo),
-                                     Name = propertyInfo.Name,
-                                     PropertyInfo = propertyInfo,
-                                     PhysicalName = this.GetPhysicalName(propertyInfo),
-                                     IsRelatedAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>() != null,
-                                     IsRelation = propertyInfo.GetCustomAttribute<RelationAttribute>() != null
-                                 };
+                {
+                    EntityReference = this.GetEntityReference(propertyInfo),
+                    Name = propertyInfo.Name,
+                    PropertyInfo = propertyInfo,
+                    PhysicalName = this.GetPhysicalName(propertyInfo),
+                    IsRelatedAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>() != null,
+                    IsRelation = propertyInfo.GetCustomAttribute<RelationAttribute>() != null
+                };
             }
         }
     }

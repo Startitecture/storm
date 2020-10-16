@@ -105,17 +105,17 @@ namespace Startitecture.Orm.Common.Tests
             using (var target = new DatabaseRepositoryProvider(databaseFactory))
             {
                 var expected = new ComplexRaisedRow
-                              {
-                                  CreatedByFakeMultiReferenceEntityId = 87354,
-                                  ModifiedByFakeMultiReferenceEntityId = 34598,
-                                  FakeEnumerationId = 8,
-                                  FakeOtherEnumerationId = 4,
-                                  UniqueName = "MyUniqueName",
-                                  Description = "Some Stuff!",
-                                  FakeSubEntityId = 4598,
-                                  CreationTime = DateTimeOffset.Now,
-                                  ModifiedTime = DateTimeOffset.Now
-                              };
+                {
+                    CreatedByFakeMultiReferenceEntityId = 87354,
+                    ModifiedByFakeMultiReferenceEntityId = 34598,
+                    FakeEnumerationId = 8,
+                    FakeOtherEnumerationId = 4,
+                    UniqueName = "MyUniqueName",
+                    Description = "Some Stuff!",
+                    FakeSubEntityId = 4598,
+                    CreationTime = DateTimeOffset.Now,
+                    ModifiedTime = DateTimeOffset.Now
+                };
 
                 var actual = target.Insert(expected);
 
@@ -146,11 +146,11 @@ namespace Startitecture.Orm.Common.Tests
             using (var target = new DatabaseRepositoryProvider(databaseFactory))
             {
                 var expected = new DependentRow
-                              {
-                                  FakeDependentEntityId = 234,
-                                  DependentIntegerValue = 4583,
-                                  DependentTimeValue = DateTimeOffset.Now
-                              };
+                {
+                    FakeDependentEntityId = 234,
+                    DependentIntegerValue = 4583,
+                    DependentTimeValue = DateTimeOffset.Now
+                };
 
                 var actual = target.Insert(expected);
                 Assert.AreSame(expected, actual);

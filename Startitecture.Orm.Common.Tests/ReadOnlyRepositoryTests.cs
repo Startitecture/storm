@@ -656,17 +656,17 @@ namespace Startitecture.Orm.Common.Tests
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
             var expected = new DocumentRow
-                               {
-                                   DocumentId = 423543,
-                                   DocumentVersionId = 1,
-                                   DocumentVersion = new DocumentVersionRow
-                                                         {
-                                                             DocumentVersionId = 1,
-                                                             Name = "foo1234",
-                                                             VersionNumber = 1
-                                                         },
-                                   Identifier = "1234-1"
-                               };
+            {
+                DocumentId = 423543,
+                DocumentVersionId = 1,
+                DocumentVersion = new DocumentVersionRow
+                {
+                    DocumentVersionId = 1,
+                    Name = "foo1234",
+                    VersionNumber = 1
+                },
+                Identifier = "1234-1"
+            };
 
             repositoryProvider.Setup(
                     provider => provider.FirstOrDefault(
@@ -695,17 +695,17 @@ namespace Startitecture.Orm.Common.Tests
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
             var expected = new DocumentRow
-                               {
-                                   DocumentId = 423543,
-                                   DocumentVersionId = 1,
-                                   DocumentVersion = new DocumentVersionRow
-                                                         {
-                                                             DocumentVersionId = 1,
-                                                             Name = "foo1234",
-                                                             VersionNumber = 1
-                                                         },
-                                   Identifier = "1234-1"
-                               };
+            {
+                DocumentId = 423543,
+                DocumentVersionId = 1,
+                DocumentVersion = new DocumentVersionRow
+                {
+                    DocumentVersionId = 1,
+                    Name = "foo1234",
+                    VersionNumber = 1
+                },
+                Identifier = "1234-1"
+            };
 
             repositoryProvider.Setup(
                     provider => provider.FirstOrDefault(

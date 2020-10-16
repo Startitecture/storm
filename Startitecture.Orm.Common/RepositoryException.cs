@@ -1,11 +1,11 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="RepositoryException.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Thrown when there is an error accessing a data repository.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common
 {

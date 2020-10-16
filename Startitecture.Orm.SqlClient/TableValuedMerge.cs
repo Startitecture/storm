@@ -249,17 +249,17 @@ namespace Startitecture.Orm.SqlClient
             var keyAttributes = this.explicitRelationSet.Relations.Any()
                                     ? (from r in this.explicitRelationSet.Relations
                                        select new
-                                                  {
-                                                      TargetKey = this.EntityDefinition.Find(r.RelationExpression),
-                                                      SourceKey = this.ItemDefinition.Find(r.SourceExpression)
-                                                  }).ToList()
+                                       {
+                                           TargetKey = this.EntityDefinition.Find(r.RelationExpression),
+                                           SourceKey = this.ItemDefinition.Find(r.SourceExpression)
+                                       }).ToList()
                                     : (from key in this.mergeMatchAttributes
                                        join fk in allAttributes on key.ResolvedLocation equals fk.ResolvedLocation
                                        select new
-                                                  {
-                                                      TargetKey = key,
-                                                      SourceKey = fk
-                                                  }).ToList();
+                                       {
+                                           TargetKey = key,
+                                           SourceKey = fk
+                                       }).ToList();
 
             // Always use the primary key for merge match.
             var mergeMatchClauses = keyAttributes.Select(
@@ -272,10 +272,10 @@ namespace Startitecture.Orm.SqlClient
             var updateClauses = from targetColumn in updateAttributes
                                 join sourceColumn in allAttributes on targetColumn.ResolvedLocation equals sourceColumn.ResolvedLocation
                                 select new
-                                       {
-                                           TargetColumn = targetColumn.PhysicalName,
-                                           SourceColumn = sourceColumn.PropertyName
-                                       };
+                                {
+                                    TargetColumn = targetColumn.PhysicalName,
+                                    SourceColumn = sourceColumn.PropertyName
+                                };
 
             var updateClause = string.Join(
                 ", ",
@@ -336,29 +336,29 @@ namespace Startitecture.Orm.SqlClient
                 var selectedKeyAttributes = this.directAttributes.Where(x => x.IsIdentityColumn)
                     .Select(
                         x => new
-                             {
-                                 Column = $"i.{qualifier.Escape(x.PropertyName)}",
-                                 Attribute = x
-                             })
+                        {
+                            Column = $"i.{qualifier.Escape(x.PropertyName)}",
+                            Attribute = x
+                        })
                     .ToList();
 
                 // Everything for selecting from the TVP uses property name in order to match UDTT columns.
                 var nonKeyAttributes = allAttributes.Where(definition => definition.IsIdentityColumn == false).Select(
                     x => new
-                             {
-                                 Column = $"tvp.{qualifier.Escape(x.PropertyName)}",
-                                 Attribute = x
-                             });
+                    {
+                        Column = $"tvp.{qualifier.Escape(x.PropertyName)}",
+                        Attribute = x
+                    });
 
                 var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.Ordinal).Select(x => x.Column);
 
                 var matchAttributes = (from key in this.selectionMatchAttributes
                                        join fk in allAttributes on key.PhysicalName equals fk.PhysicalName
                                        select new
-                                              {
-                                                  TargetKey = key,
-                                                  SourceKey = fk
-                                              }).ToList();
+                                       {
+                                           TargetKey = key,
+                                           SourceKey = fk
+                                       }).ToList();
 
                 // If there are match attributes use those instead of the primary key.
                 var selectionJoinMatchColumns =

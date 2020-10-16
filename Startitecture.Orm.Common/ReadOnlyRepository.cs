@@ -99,7 +99,7 @@ namespace Startitecture.Orm.Common
 
             this.uniqueKeyExpressions.Clear();
             this.uniqueKeyExpressions.AddRange(uniqueKeyExpressions);
-       }
+        }
 
         /// <summary>
         /// Gets the repository provider.

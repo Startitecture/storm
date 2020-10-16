@@ -53,46 +53,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void Insert_ListOfFields_DoesNotThrowException()
         {
             var internalId = new Field
-                             {
-                                 Name = "INS_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "INS_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "INS_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "INS_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "INS_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "INS_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "INS_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                          {
@@ -124,10 +124,10 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var fieldRows = from f in fields
                                 select new FieldTableTypeRow
-                                       {
-                                           Name = f.Name,
-                                           Description = f.Description
-                                       };
+                                {
+                                    Name = f.Name,
+                                    Description = f.Description
+                                };
 
                 fieldRepository.Insert(fieldRows, null);
                 transaction.Commit();
@@ -142,46 +142,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void InsertForResults_ListOfFields_MatchesExpected()
         {
             var internalId = new Field
-                             {
-                                 Name = "INS_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "INS_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "INS_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "INS_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "INS_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "INS_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "INS_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var expected = new List<Field>
                            {
@@ -214,10 +214,10 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var fieldRows = from f in expected
                                 select new FieldTableTypeRow
-                                       {
-                                           Name = f.Name,
-                                           Description = f.Description
-                                       };
+                                {
+                                    Name = f.Name,
+                                    Description = f.Description
+                                };
 
                 // Select results = by name because the TVP won't have the IDs
                 // TODO: See if we can simplify this process to just pull inserted items without joins
@@ -256,46 +256,46 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var expected = new GenericSubmission("My Submission", domainIdentity);
 
                 var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+                {
+                    Name = "INS_Internal ID",
+                    Description = "Unique ID used internally"
+                };
 
                 var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+                {
+                    Name = "INS_First Name",
+                    Description = "The person's first name"
+                };
 
                 var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+                {
+                    Name = "INS_Last Name",
+                    Description = "The person's last name"
+                };
 
                 var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+                {
+                    Name = "INS_Yearly Wage",
+                    Description = "The base wage paid year over year."
+                };
 
                 var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+                {
+                    Name = "INS_Hire Date",
+                    Description = "The date and time of hire for the person"
+                };
 
                 var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+                {
+                    Name = "INS_Bonus Target",
+                    Description = "The target bonus for the person"
+                };
 
                 var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+                {
+                    Name = "INS_Contact Numbers",
+                    Description = "A list of contact numbers for the person in order of preference"
+                };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -331,10 +331,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var missingFields = submissionFields.Values.Except(existingFields).ToList();
                 var fieldRows = from f in missingFields
                                 select new FieldTableTypeRow
-                                       {
-                                           Name = f.Name,
-                                           Description = f.Description
-                                       };
+                                {
+                                    Name = f.Name,
+                                    Description = f.Description
+                                };
 
                 var insertedFields = fieldRepository.InsertForResults(fieldRows, insert => insert.SelectResults(row => row.Name)).ToList();
 
@@ -355,11 +355,11 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
-                                        {
-                                            FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                            LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                            LastModifiedTime = expected.SubmittedTime
-                                        };
+                                 {
+                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                     LastModifiedTime = expected.SubmittedTime
+                                 };
 
                 var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -379,10 +379,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in submissionValues.Values
                                               select new GenericSubmissionValueTableTypeRow
-                                                     {
-                                                         GenericSubmissionId = submissionId,
-                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                                     };
+                                              {
+                                                  GenericSubmissionId = submissionId,
+                                                  GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                              };
 
                 var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 submissionValuesRepository.Insert(genericValueSubmissions, null);
@@ -395,16 +395,16 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var elementsList = (from e in valueElements.Values
                                     select new FieldValueElementTableTypeRow
-                                           {
-                                               FieldValueElementId = e.FieldValueElementId,
-                                               FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                               Order = e.Order,
-                                               DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                               FloatElement = e.Element as double? ?? e.Element as float?,
-                                               IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                               MoneyElement = e.Element as decimal?,
-                                               TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                           }).ToList();
+                                    {
+                                        FieldValueElementId = e.FieldValueElementId,
+                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                        Order = e.Order,
+                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                        FloatElement = e.Element as double? ?? e.Element as float?,
+                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                        MoneyElement = e.Element as decimal?,
+                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                    }).ToList();
 
                 var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
                 var fieldValueElements = fieldValueElementRepository.InsertForResults(
@@ -464,46 +464,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void Merge_FieldList_DoesNotThrowException()
         {
             var internalId = new Field
-                             {
-                                 Name = "MERGE_Existing_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "MERGE_Existing_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "MERGE_Existing_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "MERGE_Existing_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "MERGE_NonExisting_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "MERGE_NonExisting_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "MERGE_NonExisting_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                          {
@@ -525,10 +525,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 fieldRepository.Merge(
                     from f in fields
                     select new FieldTableTypeRow
-                           {
-                               Name = f.Name,
-                               Description = f.Description
-                           },
+                    {
+                        Name = f.Name,
+                        Description = f.Description
+                    },
                     merge => merge.On<FieldTableTypeRow>(row => row.Name, row => row.Name));
 
                 transaction.Commit();
@@ -543,46 +543,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void ExecuteForResults_GenericSubmission_DatabaseMatchesExpected()
         {
             var internalId = new Field
-                             {
-                                 Name = "MERGE_Existing_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "MERGE_Existing_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "MERGE_Existing_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "MERGE_Existing_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "MERGE_NonExisting_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "MERGE_NonExisting_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "MERGE_NonExisting_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -718,46 +718,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public async Task InsertAsync_ListOfFields_DoesNotThrowException()
         {
             var internalId = new Field
-                             {
-                                 Name = "INS_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "INS_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "INS_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "INS_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "INS_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "INS_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "INS_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                          {
@@ -790,10 +790,10 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var fieldRows = from f in fields
                                 select new FieldTableTypeRow
-                                       {
-                                           Name = f.Name,
-                                           Description = f.Description
-                                       };
+                                {
+                                    Name = f.Name,
+                                    Description = f.Description
+                                };
 
                 await fieldRepository.InsertAsync(fieldRows, null).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
@@ -811,46 +811,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public async Task InsertForResultsAsync_ListOfFields_MatchesExpected()
         {
             var internalId = new Field
-                             {
-                                 Name = "INS_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "INS_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "INS_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "INS_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "INS_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "INS_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "INS_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var expected = new List<Field>
                            {
@@ -884,10 +884,10 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var fieldRows = from f in expected
                                 select new FieldTableTypeRow
-                                       {
-                                           Name = f.Name,
-                                           Description = f.Description
-                                       };
+                                {
+                                    Name = f.Name,
+                                    Description = f.Description
+                                };
 
                 // Select results = by name because the TVP won't have the IDs
                 // TODO: See if we can simplify this process to just pull inserted items without joins
@@ -930,46 +930,46 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var expected = new GenericSubmission("My Submission", domainIdentity);
 
                 var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+                {
+                    Name = "INS_Internal ID",
+                    Description = "Unique ID used internally"
+                };
 
                 var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+                {
+                    Name = "INS_First Name",
+                    Description = "The person's first name"
+                };
 
                 var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+                {
+                    Name = "INS_Last Name",
+                    Description = "The person's last name"
+                };
 
                 var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+                {
+                    Name = "INS_Yearly Wage",
+                    Description = "The base wage paid year over year."
+                };
 
                 var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+                {
+                    Name = "INS_Hire Date",
+                    Description = "The date and time of hire for the person"
+                };
 
                 var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+                {
+                    Name = "INS_Bonus Target",
+                    Description = "The target bonus for the person"
+                };
 
                 var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+                {
+                    Name = "INS_Contact Numbers",
+                    Description = "A list of contact numbers for the person in order of preference"
+                };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -1006,10 +1006,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var missingFields = submissionFields.Values.Except(existingFields).ToList();
                 var fieldRows = from f in missingFields
                                 select new FieldTableTypeRow
-                                       {
-                                           Name = f.Name,
-                                           Description = f.Description
-                                       };
+                                {
+                                    Name = f.Name,
+                                    Description = f.Description
+                                };
 
                 var insertedFields = (await fieldRepository.InsertForResultsAsync(fieldRows, insert => insert.SelectResults(row => row.Name))
                                           .ConfigureAwait(false)).ToList();
@@ -1031,11 +1031,11 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
-                                        {
-                                            FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                            LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                            LastModifiedTime = expected.SubmittedTime
-                                        };
+                                 {
+                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                     LastModifiedTime = expected.SubmittedTime
+                                 };
 
                 var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -1057,10 +1057,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in submissionValues.Values
                                               select new GenericSubmissionValueTableTypeRow
-                                                     {
-                                                         GenericSubmissionId = submissionId,
-                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                                     };
+                                              {
+                                                  GenericSubmissionId = submissionId,
+                                                  GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                              };
 
                 var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 await submissionValuesRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
@@ -1073,16 +1073,16 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var elementsList = (from e in valueElements.Values
                                     select new FieldValueElementTableTypeRow
-                                           {
-                                               FieldValueElementId = e.FieldValueElementId,
-                                               FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                               Order = e.Order,
-                                               DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                               FloatElement = e.Element as double? ?? e.Element as float?,
-                                               IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                               MoneyElement = e.Element as decimal?,
-                                               TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                           }).ToList();
+                                    {
+                                        FieldValueElementId = e.FieldValueElementId,
+                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                        Order = e.Order,
+                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                        FloatElement = e.Element as double? ?? e.Element as float?,
+                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                        MoneyElement = e.Element as decimal?,
+                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                    }).ToList();
 
                 var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
                 var fieldValueElements = (await fieldValueElementRepository.InsertForResultsAsync(
@@ -1152,46 +1152,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public async Task MergeAsync_FieldList_DoesNotThrowException()
         {
             var internalId = new Field
-                             {
-                                 Name = "MERGE_Existing_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "MERGE_Existing_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "MERGE_Existing_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "MERGE_Existing_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "MERGE_NonExisting_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "MERGE_NonExisting_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "MERGE_NonExisting_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                          {
@@ -1213,10 +1213,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 await fieldRepository.MergeAsync(
                         from f in fields
                         select new FieldTableTypeRow
-                               {
-                                   Name = f.Name,
-                                   Description = f.Description
-                               },
+                        {
+                            Name = f.Name,
+                            Description = f.Description
+                        },
                         merge => merge.On<FieldTableTypeRow>(row => row.Name, row => row.Name))
                     .ConfigureAwait(false);
 
@@ -1235,46 +1235,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public async Task ExecuteForResultsAsync_GenericSubmission_DatabaseMatchesExpected()
         {
             var internalId = new Field
-                             {
-                                 Name = "MERGE_Existing_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "MERGE_Existing_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "MERGE_Existing_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "MERGE_Existing_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "MERGE_NonExisting_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "MERGE_NonExisting_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "MERGE_NonExisting_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -1417,10 +1417,10 @@ namespace Startitecture.Orm.SqlClient.Tests
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
             var fieldItems = from f in fields
                              select new FieldTableTypeRow
-                                    {
-                                        Name = f.Name,
-                                        Description = f.Description
-                                    };
+                             {
+                                 Name = f.Name,
+                                 Description = f.Description
+                             };
 
             // Merge in the field values.
             var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
@@ -1451,11 +1451,11 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
                               select new FieldValueTableTypeRow
-                                     {
-                                         FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                         LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                         LastModifiedTime = v.LastModifiedTime
-                                     };
+                              {
+                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                  LastModifiedTime = v.LastModifiedTime
+                              };
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
@@ -1479,16 +1479,16 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
                                  select new FieldValueElementTableTypeRow
-                                        {
-                                            FieldValueElementId = e.FieldValueElementId,
-                                            FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                            Order = e.Order,
-                                            DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                            FloatElement = e.Element as double? ?? e.Element as float?,
-                                            IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                            MoneyElement = e.Element as decimal?,
-                                            TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                        }).ToList();
+                                 {
+                                     FieldValueElementId = e.FieldValueElementId,
+                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                     Order = e.Order,
+                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                     FloatElement = e.Element as double? ?? e.Element as float?,
+                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                     MoneyElement = e.Element as decimal?,
+                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                 }).ToList();
 
             var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
             var mergedValueElements = valueElementRepository.MergeForResults(
@@ -1537,10 +1537,10 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues.Values
                                           select new GenericSubmissionValueTableTypeRow
-                                                 {
-                                                     GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                     GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                                 };
+                                          {
+                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                          };
 
             var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
             submissionValueRepository.Merge(
@@ -1569,10 +1569,10 @@ namespace Startitecture.Orm.SqlClient.Tests
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
             var fieldItems = from f in fields
                              select new FieldTableTypeRow
-                                    {
-                                        Name = f.Name,
-                                        Description = f.Description
-                                    };
+                             {
+                                 Name = f.Name,
+                                 Description = f.Description
+                             };
 
             // Merge in the field values.
             var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
@@ -1603,11 +1603,11 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
                               select new FieldValueTableTypeRow
-                                     {
-                                         FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                         LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                         LastModifiedTime = v.LastModifiedTime
-                                     };
+                              {
+                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                  LastModifiedTime = v.LastModifiedTime
+                              };
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
@@ -1631,16 +1631,16 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
                                  select new FieldValueElementTableTypeRow
-                                        {
-                                            FieldValueElementId = e.FieldValueElementId,
-                                            FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                            Order = e.Order,
-                                            DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                            FloatElement = e.Element as double? ?? e.Element as float?,
-                                            IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                            MoneyElement = e.Element as decimal?,
-                                            TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                        }).ToList();
+                                 {
+                                     FieldValueElementId = e.FieldValueElementId,
+                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                     Order = e.Order,
+                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                     FloatElement = e.Element as double? ?? e.Element as float?,
+                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                     MoneyElement = e.Element as decimal?,
+                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                 }).ToList();
 
             var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
             var mergedValueElements = (await valueElementRepository.MergeForResultsAsync(
@@ -1695,10 +1695,10 @@ namespace Startitecture.Orm.SqlClient.Tests
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues.Values
                                           select new GenericSubmissionValueTableTypeRow
-                                                 {
-                                                     GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                     GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                                 };
+                                          {
+                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                          };
 
             var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
             await submissionValueRepository.MergeAsync(

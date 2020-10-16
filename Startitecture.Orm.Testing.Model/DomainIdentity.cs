@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DomainIdentity.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ namespace Startitecture.Orm.Testing.Model
         }
 
         /// <summary>
-        /// Gets the domain identity id.
+        /// Gets the domain identity ID.
         /// </summary>
         public int? DomainIdentityId { get; private set; }
 
@@ -70,8 +70,6 @@ namespace Startitecture.Orm.Testing.Model
         /// Gets or sets the last name.
         /// </summary>
         public string LastName { get; set; }
-
-        #region Equality and Comparison Methods and Operators
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -113,10 +111,9 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
-            return $"({this.UniqueIdentifier}) {FirstName} {LastName}";
+            return $"({this.UniqueIdentifier}) {this.FirstName} {this.LastName}";
         }
 
         /// <summary>
@@ -125,7 +122,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -138,9 +134,8 @@ namespace Startitecture.Orm.Testing.Model
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -159,7 +154,5 @@ namespace Startitecture.Orm.Testing.Model
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
     }
 }

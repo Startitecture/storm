@@ -263,46 +263,46 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         public void Execute_InsertListOfFields_DoesNotThrowException()
         {
             var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                              {
@@ -333,10 +333,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                     fieldInsertCommand.Execute(
                         fields.Select(
                             field => new FieldRow
-                                     {
-                                         Name = field.Name,
-                                         Description = field.Description
-                                     }));
+                            {
+                                Name = field.Name,
+                                Description = field.Description
+                            }));
 
                     transaction.Commit();
                 }
@@ -351,46 +351,46 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         public void ExecuteForResults_ListOfFields_DoesNotThrowException()
         {
             var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                              {
@@ -424,10 +424,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 var actual = fieldInsertCommand.ExecuteForResults(
                     fields.Select(
                         field => new FieldRow
-                                 {
-                                     Name = field.Name,
-                                     Description = field.Description
-                                 }));
+                        {
+                            Name = field.Name,
+                            Description = field.Description
+                        }));
 
                 foreach (var fieldRow in actual)
                 {
@@ -456,54 +456,54 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
-                                             {
-                                                 FirstName = "King",
-                                                 MiddleName = "T.",
-                                                 LastName = "Animal"
-                                             });
+                                         {
+                                             FirstName = "King",
+                                             MiddleName = "T.",
+                                             LastName = "Animal"
+                                         });
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                                     {
-                                         Name = "Internal ID",
-                                         Description = "Unique ID used internally"
-                                     };
+                {
+                    Name = "Internal ID",
+                    Description = "Unique ID used internally"
+                };
 
                 var firstName = new Field
-                                    {
-                                        Name = "First Name",
-                                        Description = "The person's first name"
-                                    };
+                {
+                    Name = "First Name",
+                    Description = "The person's first name"
+                };
 
                 var lastName = new Field
-                                   {
-                                       Name = "Last Name",
-                                       Description = "The person's last name"
-                                   };
+                {
+                    Name = "Last Name",
+                    Description = "The person's last name"
+                };
 
                 var yearlyWage = new Field
-                                     {
-                                         Name = "Yearly Wage",
-                                         Description = "The base wage paid year over year."
-                                     };
+                {
+                    Name = "Yearly Wage",
+                    Description = "The base wage paid year over year."
+                };
 
                 var hireDate = new Field
-                                   {
-                                       Name = "Hire Date",
-                                       Description = "The date and time of hire for the person"
-                                   };
+                {
+                    Name = "Hire Date",
+                    Description = "The date and time of hire for the person"
+                };
 
                 var bonusTarget = new Field
-                                      {
-                                          Name = "Bonus Target",
-                                          Description = "The target bonus for the person"
-                                      };
+                {
+                    Name = "Bonus Target",
+                    Description = "The target bonus for the person"
+                };
 
                 var contactNumbers = new Field
-                                         {
-                                             Name = "Contact Numbers",
-                                             Description = "A list of contact numbers for the person in order of preference"
-                                         };
+                {
+                    Name = "Contact Numbers",
+                    Description = "A list of contact numbers for the person in order of preference"
+                };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -554,11 +554,11 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueRow
-                                            {
-                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                                LastModifiedTime = expected.SubmittedTime
-                                            };
+                                 {
+                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                     LastModifiedTime = expected.SubmittedTime
+                                 };
 
                 var valuesCommand =
                     new JsonInsert<FieldValueRow>(structuredCommandProvider, provider.DatabaseContext)
@@ -576,16 +576,16 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                               {
-                                                   FieldValueElementId = e.FieldValueElementId,
-                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                   Order = e.Order,
-                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                   FloatElement = e.Element as double? ?? e.Element as float?,
-                                                   IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                   MoneyElement = e.Element as decimal?,
-                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                               }).ToList();
+                                    {
+                                        FieldValueElementId = e.FieldValueElementId,
+                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                        Order = e.Order,
+                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                        FloatElement = e.Element as double? ?? e.Element as float?,
+                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                        MoneyElement = e.Element as decimal?,
+                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                    }).ToList();
 
                 var elementsCommand = new JsonInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, provider.DatabaseContext)
                     .Returning(row => row.FieldValueId, row => row.Order);
@@ -632,10 +632,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues
                                               select new GenericSubmissionValueRow
-                                                         {
-                                                             GenericSubmissionId = submissionId,
-                                                             GenericSubmissionValueId = v.FieldValueId
-                                                         };
+                                              {
+                                                  GenericSubmissionId = submissionId,
+                                                  GenericSubmissionValueId = v.FieldValueId
+                                              };
 
                 var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider, provider.DatabaseContext);
                 submissionCommand.Execute(genericValueSubmissions);
@@ -651,46 +651,46 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
         public void ExecuteForResults_MultipleGenericSubmissions_MatchesExpected()
         {
             var internalId = new Field
-                                 {
-                                     Name = "MERGE_Existing_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "MERGE_Existing_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "MERGE_Existing_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "MERGE_Existing_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "MERGE_NonExisting_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "MERGE_NonExisting_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "MERGE_NonExisting_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -706,11 +706,11 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
-                                             {
-                                                 FirstName = "King",
-                                                 MiddleName = "T.",
-                                                 LastName = "Animal"
-                                             });
+                                         {
+                                             FirstName = "King",
+                                             MiddleName = "T.",
+                                             LastName = "Animal"
+                                         });
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = identityRepository.FirstOrDefault(
@@ -718,11 +718,11 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                           .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)))
                                   ?? identityRepository.Save(
                                       new DomainIdentity(domainIdentifier2)
-                                          {
-                                              FirstName = "Foo",
-                                              MiddleName = "J.",
-                                              LastName = "Bar"
-                                          });
+                                      {
+                                          FirstName = "Foo",
+                                          MiddleName = "J.",
+                                          LastName = "Bar"
+                                      });
 
                 // We will add to this submission later.
                 baselineSubmission = new GenericSubmission("My MERGE Submission", domainIdentity);
@@ -850,10 +850,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
             var fieldItems = from f in fields
                              select new FieldRow
-                                        {
-                                            Name = f.Name,
-                                            Description = f.Description
-                                        };
+                             {
+                                 Name = f.Name,
+                                 Description = f.Description
+                             };
 
             // Merge in the field values.
             var commandProvider = new JsonCommandFactory(provider.DatabaseContext);
@@ -885,11 +885,11 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
                               select new FieldValueTableTypeRow
-                                         {
-                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                             LastModifiedTime = v.LastModifiedTime
-                                         };
+                              {
+                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                  LastModifiedTime = v.LastModifiedTime
+                              };
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
@@ -914,16 +914,16 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
                                  select new FieldValueElementTableTypeRow
-                                            {
-                                                FieldValueElementId = e.FieldValueElementId,
-                                                FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                Order = e.Order,
-                                                DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                FloatElement = e.Element as double? ?? e.Element as float?,
-                                                IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                MoneyElement = e.Element as decimal?,
-                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                            }).ToList();
+                                 {
+                                     FieldValueElementId = e.FieldValueElementId,
+                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                     Order = e.Order,
+                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                     FloatElement = e.Element as double? ?? e.Element as float?,
+                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                     MoneyElement = e.Element as decimal?,
+                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                 }).ToList();
 
             var elementMergeCommand = new JsonInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext);
             var mergedValueElements = elementMergeCommand.OnConflict(row => row.FieldValueElementId)
@@ -977,10 +977,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues
                                           select new GenericSubmissionValueTableTypeRow
-                                                     {
-                                                         GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                         GenericSubmissionValueId = v.FieldValueId
-                                                     };
+                                          {
+                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                              GenericSubmissionValueId = v.FieldValueId
+                                          };
 
             var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext).Upsert(
                 row => row.GenericSubmissionValueId,

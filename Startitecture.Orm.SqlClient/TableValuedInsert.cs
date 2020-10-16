@@ -240,18 +240,18 @@ namespace Startitecture.Orm.SqlClient
             var keyAttributes = (from key in this.EntityDefinition.AllAttributes.Where(x => x.IsPrimaryKey)
                                  join fk in this.ItemDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
                                  select new
-                                        {
-                                            TargetKey = key,
-                                            SourceKey = fk
-                                        }).ToList();
+                                 {
+                                     TargetKey = key,
+                                     SourceKey = fk
+                                 }).ToList();
 
             var matchAttributes = (from key in this.selectionAttributes
                                    join fk in this.ItemDefinition.AllAttributes on key.PhysicalName equals fk.PhysicalName
                                    select new
-                                          {
-                                              TargetKey = key,
-                                              SourceKey = fk
-                                          }).ToList();
+                                   {
+                                       TargetKey = key,
+                                       SourceKey = fk
+                                   }).ToList();
 
             var selectionJoinMatchColumns = (matchAttributes.Any() ? matchAttributes : keyAttributes).Select(
                 x => $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)} = tvp.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}");
@@ -260,20 +260,20 @@ namespace Startitecture.Orm.SqlClient
             // table valued parameter.
             var selectedKeyAttributes = keyAttributes.Select(
                     x => new
-                         {
-                             Column = $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}",
-                             Attribute = x.SourceKey
-                         })
+                    {
+                        Column = $"i.{this.nameQualifier.Escape(x.SourceKey.PropertyName)}",
+                        Attribute = x.SourceKey
+                    })
                 .ToList();
 
             // Everything for selecting from the TVP uses property name in order to match UDTT columns.
             var nonKeyAttributes = this.ItemDefinition.AllAttributes.Except(selectedKeyAttributes.Select(x => x.Attribute))
                 .Select(
                     x => new
-                         {
-                             Column = $"tvp.{this.nameQualifier.Escape(x.PropertyName)}",
-                             Attribute = x
-                         });
+                    {
+                        Column = $"tvp.{this.nameQualifier.Escape(x.PropertyName)}",
+                        Attribute = x
+                    });
 
             var selectedColumns = selectedKeyAttributes.Union(nonKeyAttributes).OrderBy(x => x.Attribute.Ordinal).Select(x => x.Column);
 

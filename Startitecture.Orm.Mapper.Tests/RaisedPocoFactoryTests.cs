@@ -288,38 +288,38 @@ namespace Startitecture.Orm.Mapper.Tests
                     new AggregateOptionRow { AggregateOptionId = 3, AggregateOptionTypeId = 4, Name = "Slim Shady", Value = 324.10m };
 
                 var topContainerRow = new TopContainerRow
-                                          {
-                                              Name = "All TV Evar",
-                                              TopContainerId = 2
-                                          };
+                {
+                    Name = "All TV Evar",
+                    TopContainerId = 2
+                };
 
                 var tomNJerry = new DomainIdentityRow
-                                    {
-                                        DomainIdentityId = 23,
-                                        FirstName = "Tom",
-                                        MiddleName = "N.",
-                                        LastName = "Jerry",
-                                        UniqueIdentifier = "tomnjerry@what.com"
-                                    };
+                {
+                    DomainIdentityId = 23,
+                    FirstName = "Tom",
+                    MiddleName = "N.",
+                    LastName = "Jerry",
+                    UniqueIdentifier = "tomnjerry@what.com"
+                };
 
                 var mahCatzCategory = new CategoryAttributeRow { CategoryAttributeId = 3, Name = "Mah Catz", IsActive = true, IsSystem = true };
                 var fooBarCategory = new CategoryAttributeRow { CategoryAttributeId = 4, Name = "foobar", IsActive = true, IsSystem = false };
 
                 var porkyPig = new DomainIdentityRow
-                                   {
-                                       DomainIdentityId = 55,
-                                       FirstName = "Porky",
-                                       MiddleName = "That's All Folks",
-                                       LastName = "Pig",
-                                       UniqueIdentifier = "pp@whatwhat.com"
-                                   };
+                {
+                    DomainIdentityId = 55,
+                    FirstName = "Porky",
+                    MiddleName = "That's All Folks",
+                    LastName = "Pig",
+                    UniqueIdentifier = "pp@whatwhat.com"
+                };
                 var warnerBros = new SubContainerRow
-                                     {
-                                         Name = "Warner Bros",
-                                         SubContainerId = 234,
-                                         TopContainerId = 2,
-                                         TopContainer = topContainerRow
-                                     };
+                {
+                    Name = "Warner Bros",
+                    SubContainerId = 234,
+                    TopContainerId = 2,
+                    TopContainer = topContainerRow
+                };
                 var template1 = new TemplateRow { Name = "Template1", TemplateId = 44 };
                 var template2 = new TemplateRow { Name = "Template34", TemplateId = 45 };
                 var expected = new List<DomainAggregateRow>
@@ -561,73 +561,73 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestMethod]
         public void CreateDelegate_RaisedPocoFactoryForRaisedDuplicateAttributeRow_DelegateSetsPocoAsExpected()
         {
-            // It is vitally important that we use separate (duplicate) POCOs when creating this test object so that any failure to 
+            // It is vitally important that we use separate (duplicate) POCOs when creating this test object so that any failure to
             // update one of the instance properties is caught.
             var expected = new InstanceSection
-                               {
-                                   InstanceSectionId = 234,
-                                   EndDate = DateTimeOffset.MaxValue,
-                                   InstanceId = 45873,
-                                   Instance =
+            {
+                InstanceSectionId = 234,
+                EndDate = DateTimeOffset.MaxValue,
+                InstanceId = 45873,
+                Instance =
                                        new Instance
-                                           {
-                                               InstanceId = 45873,
-                                               Name = "MyInstance",
-                                               OwnerId = 4875,
-                                               TemplateVersionId = 43,
-                                               TemplateVersion =
+                                       {
+                                           InstanceId = 45873,
+                                           Name = "MyInstance",
+                                           OwnerId = 4875,
+                                           TemplateVersionId = 43,
+                                           TemplateVersion =
                                                    new TemplateVersion
-                                                       {
-                                                           TemplateVersionId = 43,
-                                                           TemplateId = 87,
-                                                           Revision = 3,
-                                                           FakeSubSubEntityId = 56,
-                                                           FakeSubSubUniqueName = "FakeSubSubUniqueName",
-                                                           OtherEntityUniqueName = "OtherEntityUniqueName",
-                                                           Description = "TemplateVersion",
-                                                           Template =
+                                                   {
+                                                       TemplateVersionId = 43,
+                                                       TemplateId = 87,
+                                                       Revision = 3,
+                                                       FakeSubSubEntityId = 56,
+                                                       FakeSubSubUniqueName = "FakeSubSubUniqueName",
+                                                       OtherEntityUniqueName = "OtherEntityUniqueName",
+                                                       Description = "TemplateVersion",
+                                                       Template =
                                                                new Template
-                                                                   {
-                                                                       TemplateId = 87,
-                                                                       Name = "Template"
-                                                                   }
-                                                       }
-                                           },
-                                   FakeDependentId = 345,
-                                   FakeDependentEntityDependentTimeValue = DateTimeOffset.MinValue.AddYears(2000),
-                                   SomeEntityUniqueName = "SomeEntityUniqueName",
-                                   InstanceExtension = new InstanceExtension { InstanceExtensionId = 234, Enabled = true },
-                                   OwnerId = 7458,
-                                   StartDate = DateTimeOffset.Now,
-                                   TemplateSectionId = 48753,
-                                   TemplateSection =
+                                                               {
+                                                                   TemplateId = 87,
+                                                                   Name = "Template"
+                                                               }
+                                                   }
+                                       },
+                FakeDependentId = 345,
+                FakeDependentEntityDependentTimeValue = DateTimeOffset.MinValue.AddYears(2000),
+                SomeEntityUniqueName = "SomeEntityUniqueName",
+                InstanceExtension = new InstanceExtension { InstanceExtensionId = 234, Enabled = true },
+                OwnerId = 7458,
+                StartDate = DateTimeOffset.Now,
+                TemplateSectionId = 48753,
+                TemplateSection =
                                        new TemplateSection
-                                           {
-                                               TemplateSectionId = 48753,
-                                               Header = "My Section Header",
-                                               Order = 2,
-                                               TemplateVersionId = 43,
-                                               TemplateVersion =
+                                       {
+                                           TemplateSectionId = 48753,
+                                           Header = "My Section Header",
+                                           Order = 2,
+                                           TemplateVersionId = 43,
+                                           TemplateVersion =
                                                    new TemplateVersion
-                                                       {
-                                                           TemplateVersionId = 43,
-                                                           TemplateId = 87,
-                                                           Revision = 3,
-                                                           FakeSubSubEntityId = 56,
-                                                           FakeSubSubUniqueName =
+                                                   {
+                                                       TemplateVersionId = 43,
+                                                       TemplateId = 87,
+                                                       Revision = 3,
+                                                       FakeSubSubEntityId = 56,
+                                                       FakeSubSubUniqueName =
                                                                "FakeSubSubUniqueName",
-                                                           OtherEntityUniqueName =
+                                                       OtherEntityUniqueName =
                                                                "OtherEntityUniqueName",
-                                                           Description = "TemplateVersion",
-                                                           Template =
+                                                       Description = "TemplateVersion",
+                                                       Template =
                                                                new Template
-                                                                   {
-                                                                       Name = "Template",
-                                                                       TemplateId = 87
-                                                                   }
-                                                       }
-                                           }
-                               };
+                                                               {
+                                                                   Name = "Template",
+                                                                   TemplateId = 87
+                                                               }
+                                                   }
+                                       }
+            };
 
             var stopwatch = new Stopwatch();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
@@ -712,14 +712,14 @@ namespace Startitecture.Orm.Mapper.Tests
             using (var target = new RaisedPocoFactory(definitionProvider))
             {
                 var expected = new RaisedOverriddenColumnNameRow
-                                   {
-                                       OverriddenColumnNameId = 345,
-                                       Name = "RaisedName",
-                                       Description = "RaisedDescription",
-                                       EntryTime = DateTimeOffset.Now,
-                                       RelatedRowId = 344,
-                                       RelatedRow = new RelatedRow { RelatedRowId = 344, Name = "RelatedName" }
-                                   };
+                {
+                    OverriddenColumnNameId = 345,
+                    Name = "RaisedName",
+                    Description = "RaisedDescription",
+                    EntryTime = DateTimeOffset.Now,
+                    RelatedRowId = 344,
+                    RelatedRow = new RelatedRow { RelatedRowId = 344, Name = "RelatedName" }
+                };
 
                 RaisedOverriddenColumnNameRow actual;
 

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DocumentVersion.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   A specific version of a document.
@@ -66,7 +66,7 @@ namespace Startitecture.Orm.Testing.Model
         }
 
         /// <summary>
-        /// Gets the document version id.
+        /// Gets the document version ID.
         /// </summary>
         public long? DocumentVersionId { get; private set; }
 
@@ -76,15 +76,9 @@ namespace Startitecture.Orm.Testing.Model
         public Document Document { get; private set; }
 
         /// <summary>
-        /// Gets the document id.
+        /// Gets the document ID.
         /// </summary>
-        public int? DocumentId
-        {
-            get
-            {
-                return this.Document?.DocumentId;
-            }
-        }
+        public int? DocumentId => this.Document?.DocumentId;
 
         /// <summary>
         /// Gets the version.
@@ -95,8 +89,6 @@ namespace Startitecture.Orm.Testing.Model
         /// Gets or sets the version name.
         /// </summary>
         public string Name { get; set; }
-
-        #region Equality Methods and Operators
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -154,7 +146,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return $"{this.Name} ({this.Document?.Identifier} version {this.VersionNumber})";
@@ -166,7 +157,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -183,12 +173,11 @@ namespace Startitecture.Orm.Testing.Model
         /// <paramref name="obj"/> in the sort order.
         /// </returns>
         /// <param name="obj">
-        /// An object to compare with this instance. 
+        /// An object to compare with this instance.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="obj"/> is not the same type as this instance. 
+        /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
-        /// <filterpriority>2</filterpriority>
         public int CompareTo(object obj)
         {
             return Evaluate.Compare(this, obj);
@@ -203,7 +192,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <param name="obj">
         /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -222,8 +210,6 @@ namespace Startitecture.Orm.Testing.Model
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
 
         /// <summary>
         /// Associates the current document version with the specified document.

@@ -59,10 +59,10 @@ namespace Startitecture.Orm.Common.Tests
             var createdBy = new CreatedBy("CreateUniqueName", 1122);
             var modifiedBy = new ModifiedBy("ModifiedBy", 454);
             var expected = new ComplexEntity("UniqueName", subEntity, FakeEnumeration.FirstFake, createdBy)
-                               {
-                                   ModifiedBy = modifiedBy,
-                                   ModifiedTime = DateTimeOffset.Now.AddHours(1)
-                               };
+            {
+                ModifiedBy = modifiedBy,
+                ModifiedTime = DateTimeOffset.Now.AddHours(1)
+            };
 
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
@@ -103,28 +103,28 @@ namespace Startitecture.Orm.Common.Tests
         public void Save_UpdatedFakeComplexEntity_MatchesExpected()
         {
             var subSubEntity = new SubSubEntity("SubSubUniqueName", 45)
-                                   {
-                                       Description = "OriginalSubSub"
-                                   };
+            {
+                Description = "OriginalSubSub"
+            };
             var subEntity = new SubEntity("SubUniqueName", 234, subSubEntity, 16)
-                                {
-                                    Description = "OriginalSub"
-                                };
+            {
+                Description = "OriginalSub"
+            };
             var createdBy = new CreatedBy("CreateUniqueName", 432)
-                                {
-                                    Description = "OriginalCreatedBy"
-                                };
+            {
+                Description = "OriginalCreatedBy"
+            };
             var modifiedBy = new ModifiedBy("ModifiedBy", 433)
-                                 {
-                                     Description = "OriginalModifiedBy"
-                                 };
+            {
+                Description = "OriginalModifiedBy"
+            };
             var creationTime = DateTimeOffset.Now.AddDays(-1);
             var baseline = new ComplexEntity("UniqueName", subEntity, FakeEnumeration.FirstFake, createdBy, creationTime, 22)
-                               {
-                                   Description = "OriginalComplexEntity",
-                                   ModifiedBy = modifiedBy,
-                                   ModifiedTime = DateTimeOffset.Now.AddHours(1)
-                               };
+            {
+                Description = "OriginalComplexEntity",
+                ModifiedBy = modifiedBy,
+                ModifiedTime = DateTimeOffset.Now.AddHours(1)
+            };
 
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
@@ -144,9 +144,9 @@ namespace Startitecture.Orm.Common.Tests
             using (var provider = repositoryProvider.Object)
             {
                 var newModifiedBy = new ModifiedBy("ModifiedBy", 433)
-                                        {
-                                            Description = "UpdatedModifiedBy"
-                                        };
+                {
+                    Description = "UpdatedModifiedBy"
+                };
 
                 var target = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 var expected = target.FirstOrDefault(22);

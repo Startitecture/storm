@@ -1,4 +1,10 @@
-﻿namespace Startitecture.Orm.Model.Tests
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="SelectionTestRow.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Orm.Model.Tests
 {
     using System;
 

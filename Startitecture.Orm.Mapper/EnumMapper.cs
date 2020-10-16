@@ -1,34 +1,31 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EnumMapper.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Maps enumerations to string values.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
+    using System.Threading;
 
-    using Startitecture.Core;
+    using JetBrains.Annotations;
 
     /// <summary>
     /// Maps enumerations to string values.
     /// </summary>
     internal static class EnumMapper
     {
-        #region Static Fields
-
         /// <summary>
-        /// The _types.
+        /// The types.
         /// </summary>
-        private static readonly MemoryCache<Type, Dictionary<string, object>> Types = new MemoryCache<Type, Dictionary<string, object>>();
-
-        #endregion
-
-        #region Public Methods and Operators
+        private static readonly ConcurrentDictionary<Type, Lazy<Dictionary<string, object>>> TypesCache =
+            new ConcurrentDictionary<Type, Lazy<Dictionary<string, object>>>();
 
         /// <summary>
         /// Maps an enumeration from a string.
@@ -42,27 +39,34 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// An object representing the enumeration specified by <paramref name="value"/>.
         /// </returns>
-        public static object EnumFromString(Type enumType, string value)
+        public static object EnumFromString([NotNull] Type enumType, string value)
         {
-            var map = Types.Get(
-                enumType, 
-                () =>
-                    {
-                        var values = Enum.GetValues(enumType);
+            if (enumType == null)
+            {
+                throw new ArgumentNullException(nameof(enumType));
+            }
 
-                        var dictionary = new Dictionary<string, object>(values.Length, StringComparer.InvariantCultureIgnoreCase);
+            var lazyMap = new Lazy<Dictionary<string, object>>(() => CreateDictionary(enumType), LazyThreadSafetyMode.ExecutionAndPublication);
+            var map = TypesCache.GetOrAdd(enumType, key => lazyMap).Value;
 
-                        foreach (var v in values)
-                        {
-                            dictionary.Add(v.ToString(), v);
-                        }
-
-                        return dictionary;
-                    });
+            ////var map = Types.Get(
+            ////    enumType,
+            ////    () => { return CreateDictionary(enumType); });
 
             return map[value];
         }
 
-        #endregion
+        private static Dictionary<string, object> CreateDictionary(Type enumType)
+        {
+            var values = Enum.GetValues(enumType);
+            var dictionary = new Dictionary<string, object>(values.Length, StringComparer.InvariantCultureIgnoreCase);
+
+            foreach (var value in values)
+            {
+                dictionary.Add(value.ToString(), value);
+            }
+
+            return dictionary;
+        }
     }
 }

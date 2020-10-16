@@ -17,7 +17,7 @@ namespace Startitecture.Orm.Schema
     /// <summary>
     /// Represents a qualified name for a schema entity or attribute.
     /// </summary>
-    public struct QualifiedName : IEquatable<QualifiedName>
+    public readonly struct QualifiedName : IEquatable<QualifiedName>
     {
         /// <summary>
         /// The comparison properties.
@@ -102,8 +102,6 @@ namespace Startitecture.Orm.Schema
         /// </summary>
         public string Attribute { get; }
 
-        #region Equality and Comparison Methods and Operators
-
         /// <summary>
         /// Determines if two values of the same type are equal.
         /// </summary>
@@ -144,7 +142,6 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return this.toString;
@@ -156,7 +153,6 @@ namespace Startitecture.Orm.Schema
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -169,9 +165,8 @@ namespace Startitecture.Orm.Schema
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -190,7 +185,5 @@ namespace Startitecture.Orm.Schema
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
     }
 }

@@ -62,46 +62,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public void Execute_TableValueInsertForFields_DoesNotThrowException()
         {
             var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                              {
@@ -139,10 +139,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 fieldInsertCommand.Execute(
                     fields.Select(
                         field => new FieldTableTypeRow
-                                     {
-                                         Name = field.Name,
-                                         Description = field.Description
-                                     }));
+                        {
+                            Name = field.Name,
+                            Description = field.Description
+                        }));
 
                 transaction.Commit();
             }
@@ -166,54 +166,54 @@ namespace Startitecture.Orm.SqlClient.Tests
                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
-                                             {
-                                                 FirstName = "King",
-                                                 MiddleName = "T.",
-                                                 LastName = "Animal"
-                                             });
+                                         {
+                                             FirstName = "King",
+                                             MiddleName = "T.",
+                                             LastName = "Animal"
+                                         });
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                                     {
-                                         Name = "Internal ID",
-                                         Description = "Unique ID used internally"
-                                     };
+                {
+                    Name = "Internal ID",
+                    Description = "Unique ID used internally"
+                };
 
                 var firstName = new Field
-                                    {
-                                        Name = "First Name",
-                                        Description = "The person's first name"
-                                    };
+                {
+                    Name = "First Name",
+                    Description = "The person's first name"
+                };
 
                 var lastName = new Field
-                                   {
-                                       Name = "Last Name",
-                                       Description = "The person's last name"
-                                   };
+                {
+                    Name = "Last Name",
+                    Description = "The person's last name"
+                };
 
                 var yearlyWage = new Field
-                                     {
-                                         Name = "Yearly Wage",
-                                         Description = "The base wage paid year over year."
-                                     };
+                {
+                    Name = "Yearly Wage",
+                    Description = "The base wage paid year over year."
+                };
 
                 var hireDate = new Field
-                                   {
-                                       Name = "Hire Date",
-                                       Description = "The date and time of hire for the person"
-                                   };
+                {
+                    Name = "Hire Date",
+                    Description = "The date and time of hire for the person"
+                };
 
                 var bonusTarget = new Field
-                                      {
-                                          Name = "Bonus Target",
-                                          Description = "The target bonus for the person"
-                                      };
+                {
+                    Name = "Bonus Target",
+                    Description = "The target bonus for the person"
+                };
 
                 var contactNumbers = new Field
-                                         {
-                                             Name = "Contact Numbers",
-                                             Description = "A list of contact numbers for the person in order of preference"
-                                         };
+                {
+                    Name = "Contact Numbers",
+                    Description = "A list of contact numbers for the person in order of preference"
+                };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -265,11 +265,11 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
-                                            {
-                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                                LastModifiedTime = expected.SubmittedTime
-                                            };
+                                 {
+                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                     LastModifiedTime = expected.SubmittedTime
+                                 };
 
                 var valuesCommand =
                     new TableValuedInsert<FieldValueRow>(commandProvider, provider.DatabaseContext)
@@ -287,16 +287,16 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                               {
-                                                   FieldValueElementId = e.FieldValueElementId,
-                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                   Order = e.Order,
-                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                   FloatElement = e.Element as double? ?? e.Element as float?,
-                                                   IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                   MoneyElement = e.Element as decimal?,
-                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                               }).ToList();
+                                    {
+                                        FieldValueElementId = e.FieldValueElementId,
+                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                        Order = e.Order,
+                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                        FloatElement = e.Element as double? ?? e.Element as float?,
+                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                        MoneyElement = e.Element as decimal?,
+                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                    }).ToList();
 
                 var elementsCommand = new TableValuedInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext)
                     .SelectResults(row => row.FieldValueId, row => row.Order);
@@ -344,10 +344,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues
                                               select new GenericSubmissionValueTableTypeRow
-                                                         {
-                                                             GenericSubmissionId = submissionId,
-                                                             GenericSubmissionValueId = v.FieldValueId
-                                                         };
+                                              {
+                                                  GenericSubmissionId = submissionId,
+                                                  GenericSubmissionValueId = v.FieldValueId
+                                              };
 
                 var submissionCommand = new TableValuedInsert<GenericSubmissionValueTableTypeRow>(commandProvider, provider.DatabaseContext);
                 submissionCommand.Execute(genericValueSubmissions);
@@ -366,46 +366,46 @@ namespace Startitecture.Orm.SqlClient.Tests
         public async Task ExecuteAsync_TableValueInsertForFields_DoesNotThrowException()
         {
             var internalId = new Field
-                             {
-                                 Name = "INS_Internal ID",
-                                 Description = "Unique ID used internally"
-                             };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                            {
-                                Name = "INS_First Name",
-                                Description = "The person's first name"
-                            };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                           {
-                               Name = "INS_Last Name",
-                               Description = "The person's last name"
-                           };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                             {
-                                 Name = "INS_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                           {
-                               Name = "INS_Hire Date",
-                               Description = "The date and time of hire for the person"
-                           };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                              {
-                                  Name = "INS_Bonus Target",
-                                  Description = "The target bonus for the person"
-                              };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                 {
-                                     Name = "INS_Contact Numbers",
-                                     Description = "A list of contact numbers for the person in order of preference"
-                                 };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                          {
@@ -444,10 +444,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 await fieldInsertCommand.ExecuteAsync(
                         fields.Select(
                             field => new FieldTableTypeRow
-                                     {
-                                         Name = field.Name,
-                                         Description = field.Description
-                                     }))
+                            {
+                                Name = field.Name,
+                                Description = field.Description
+                            }))
                     .ConfigureAwait(false);
 
                 await transaction.CommitAsync().ConfigureAwait(false);
@@ -483,46 +483,46 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                                     {
-                                         Name = "Internal ID",
-                                         Description = "Unique ID used internally"
-                                     };
+                {
+                    Name = "Internal ID",
+                    Description = "Unique ID used internally"
+                };
 
                 var firstName = new Field
-                                    {
-                                        Name = "First Name",
-                                        Description = "The person's first name"
-                                    };
+                {
+                    Name = "First Name",
+                    Description = "The person's first name"
+                };
 
                 var lastName = new Field
-                                   {
-                                       Name = "Last Name",
-                                       Description = "The person's last name"
-                                   };
+                {
+                    Name = "Last Name",
+                    Description = "The person's last name"
+                };
 
                 var yearlyWage = new Field
-                                     {
-                                         Name = "Yearly Wage",
-                                         Description = "The base wage paid year over year."
-                                     };
+                {
+                    Name = "Yearly Wage",
+                    Description = "The base wage paid year over year."
+                };
 
                 var hireDate = new Field
-                                   {
-                                       Name = "Hire Date",
-                                       Description = "The date and time of hire for the person"
-                                   };
+                {
+                    Name = "Hire Date",
+                    Description = "The date and time of hire for the person"
+                };
 
                 var bonusTarget = new Field
-                                      {
-                                          Name = "Bonus Target",
-                                          Description = "The target bonus for the person"
-                                      };
+                {
+                    Name = "Bonus Target",
+                    Description = "The target bonus for the person"
+                };
 
                 var contactNumbers = new Field
-                                         {
-                                             Name = "Contact Numbers",
-                                             Description = "A list of contact numbers for the person in order of preference"
-                                         };
+                {
+                    Name = "Contact Numbers",
+                    Description = "A list of contact numbers for the person in order of preference"
+                };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -574,11 +574,11 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
-                                            {
-                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                                LastModifiedTime = expected.SubmittedTime
-                                            };
+                                 {
+                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                     LastModifiedTime = expected.SubmittedTime
+                                 };
 
                 var valuesCommand =
                     new TableValuedInsert<FieldValueRow>(commandProvider, provider.DatabaseContext)
@@ -596,16 +596,16 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                               {
-                                                   FieldValueElementId = e.FieldValueElementId,
-                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                   Order = e.Order,
-                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                   FloatElement = e.Element as double? ?? e.Element as float?,
-                                                   IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                   MoneyElement = e.Element as decimal?,
-                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                               }).ToList();
+                                    {
+                                        FieldValueElementId = e.FieldValueElementId,
+                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                        Order = e.Order,
+                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                        FloatElement = e.Element as double? ?? e.Element as float?,
+                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                        MoneyElement = e.Element as decimal?,
+                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                    }).ToList();
 
                 var elementsCommand = new TableValuedInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext)
                     .SelectResults(row => row.FieldValueId, row => row.Order);
@@ -653,10 +653,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues
                                               select new GenericSubmissionValueTableTypeRow
-                                                         {
-                                                             GenericSubmissionId = submissionId,
-                                                             GenericSubmissionValueId = v.FieldValueId
-                                                         };
+                                              {
+                                                  GenericSubmissionId = submissionId,
+                                                  GenericSubmissionValueId = v.FieldValueId
+                                              };
 
                 var submissionCommand = new TableValuedInsert<GenericSubmissionValueTableTypeRow>(commandProvider, provider.DatabaseContext);
                 await submissionCommand.ExecuteAsync(genericValueSubmissions).ConfigureAwait(false);
@@ -770,10 +770,10 @@ SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementRows AS tvp;
                 // Attach the values to the submission
                 var genericValueSubmissions = (from v in Enumerable.Range(1, 5)
                                                select new GenericSubmissionValueTableTypeRow
-                                                          {
-                                                              GenericSubmissionId = 6,
-                                                              GenericSubmissionValueId = v
-                                                          }).ToList();
+                                               {
+                                                   GenericSubmissionId = 6,
+                                                   GenericSubmissionValueId = v
+                                               }).ToList();
 
                 var structuredCommandProvider = genericValueSubmissions.MockCommandProvider(
                     new DataAnnotationsDefinitionProvider(),

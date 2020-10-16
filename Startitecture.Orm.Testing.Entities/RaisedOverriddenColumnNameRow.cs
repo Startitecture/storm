@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="RaisedOverriddenColumnNameRow.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -72,8 +72,6 @@ namespace Startitecture.Orm.Testing.Entities
         [Relation]
         public RelatedRow RelatedRow { get; set; }
 
-        #region Equality and Comparison Methods
-
         /// <summary>
         /// Determines if two values of the same type are equal.
         /// </summary>
@@ -114,19 +112,17 @@ namespace Startitecture.Orm.Testing.Entities
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return this.Name;
         }
 
         /// <summary>
-        /// Serves as the default hash function. 
+        /// Serves as the default hash function.
         /// </summary>
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -138,7 +134,9 @@ namespace Startitecture.Orm.Testing.Entities
         /// <returns>
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
-        /// <param name="obj">The object to compare with the current object. </param><filterpriority>2</filterpriority>
+        /// <param name="obj">
+        /// The object to compare with the current object.
+        /// </param>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -155,8 +153,5 @@ namespace Startitecture.Orm.Testing.Entities
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
-
     }
 }

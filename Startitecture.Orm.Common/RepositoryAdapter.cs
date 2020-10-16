@@ -413,7 +413,7 @@ VALUES ({columnValues})";
                 }
                 else if (type == typeof(string))
                 {
-                    // out of memory exception occurs if trying to save more than 4000 characters to SQL Server CE NText column. 
+                    // out of memory exception occurs if trying to save more than 4000 characters to SQL Server CE NText column.
                     // Set before attempting to set Size, or Size will always max out at 4000
                     var length = (value as string ?? Convert.ToString(value, CultureInfo.CurrentCulture))?.Length;
 
@@ -718,9 +718,9 @@ VALUES ({columnValues})";
                 $"{this.NameQualifier.Escape(entityDefinition.EntityContainer)}.{this.NameQualifier.Escape(entityDefinition.EntityName)}");
 
             var joinClause = new JoinClause(this.DefinitionProvider, this.NameQualifier)
-                                 {
-                                     Indent = indent
-                                 };
+            {
+                Indent = indent
+            };
 
             var joinClauseText = joinClause.Create(entitySet.Relations);
             var filter = new StringBuilder(new string(' ', indent)).Append(SqlWhereClause);

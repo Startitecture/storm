@@ -171,10 +171,10 @@ namespace Startitecture.Orm.Testing.Moq
             var attributeIndexDictionary = attributes.Distinct(new ReferenceNameComparer())
                 .Select(
                     (definition, i) => new
-                                           {
-                                               Index = i,
-                                               Attribute = definition
-                                           })
+                    {
+                        Index = i,
+                        Attribute = definition
+                    })
                 .ToDictionary(arg => arg.Attribute.ReferenceName, arg => arg.Index);
 
             var reader = new Mock<IDataReader>();

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Field.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
@@ -16,7 +16,7 @@ namespace Startitecture.Orm.Testing.Model
     /// </summary>
     public class Field : IEquatable<Field>
     {
-         /// <summary>
+        /// <summary>
         /// The comparison properties.
         /// </summary>
         private static readonly Func<Field, object>[] ComparisonProperties =
@@ -25,25 +25,25 @@ namespace Startitecture.Orm.Testing.Model
                 item => item.Description
             };
 
-         /// <summary>
-         /// Initializes a new instance of the <see cref="Field"/> class.
-         /// </summary>
-         /// <param name="fieldId">
-         /// The field ID.
-         /// </param>
-         public Field(int fieldId)
-         {
-             this.FieldId = fieldId;
-         }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Field"/> class.
+        /// </summary>
+        /// <param name="fieldId">
+        /// The field ID.
+        /// </param>
+        public Field(int fieldId)
+        {
+            this.FieldId = fieldId;
+        }
 
-         /// <summary>
-         /// Initializes a new instance of the <see cref="Field"/> class.
-         /// </summary>
-         public Field()
-         {
-         }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Field"/> class.
+        /// </summary>
+        public Field()
+        {
+        }
 
-         /// <summary>
+        /// <summary>
         /// Gets the field ID.
         /// </summary>
         public int? FieldId { get; private set; }
@@ -57,8 +57,6 @@ namespace Startitecture.Orm.Testing.Model
         /// Gets or sets the description.
         /// </summary>
         public string Description { get; set; }
-
-        #region Equality and Comparison Methods and Operators
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -100,7 +98,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -113,9 +110,8 @@ namespace Startitecture.Orm.Testing.Model
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -140,7 +136,5 @@ namespace Startitecture.Orm.Testing.Model
         {
             return this.Name;
         }
-
-        #endregion
     }
 }

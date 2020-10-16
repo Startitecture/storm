@@ -1,11 +1,11 @@
 // --------------------------------------------------------------------------------------------------------------------
 // <copyright file="IgnoreAttribute.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Declares properties that shouldn't be included in selection statements.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Schema
 {

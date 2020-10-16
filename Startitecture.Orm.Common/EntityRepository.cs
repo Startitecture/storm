@@ -171,8 +171,6 @@ namespace Startitecture.Orm.Common
             return await this.RepositoryProvider.DeleteAsync(targetSet).ConfigureAwait(false);
         }
 
-        #region Methods
-
         /// <summary>
         /// Gets the model's identity (auto number, sequence, etc.) property, if it has one.
         /// </summary>
@@ -354,7 +352,5 @@ namespace Startitecture.Orm.Common
 
             return entity;
         }
-
-        #endregion
     }
 }

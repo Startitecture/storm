@@ -36,8 +36,6 @@ namespace Startitecture.Orm.Model
             this.LinkType = linkType;
         }
 
-        #region Public Properties
-
         /// <summary>
         /// Gets the link type.
         /// </summary>
@@ -47,8 +45,6 @@ namespace Startitecture.Orm.Model
         /// Gets the linked selection.
         /// </summary>
         public IEntitySet Selection { get; }
-
-        #endregion
 
         /// <inheritdoc />
         public override string ToString()

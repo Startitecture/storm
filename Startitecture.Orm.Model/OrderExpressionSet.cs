@@ -26,7 +26,7 @@ namespace Startitecture.Orm.Model
         private readonly List<OrderExpression> expressions = new List<OrderExpression>();
 
         /// <summary>
-        /// The expressions.
+        /// Gets the expressions in the order expression set.
         /// </summary>
         public IEnumerable<OrderExpression> Expressions => this.expressions;
 

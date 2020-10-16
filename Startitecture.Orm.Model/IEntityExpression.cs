@@ -1,7 +1,16 @@
-﻿namespace Startitecture.Orm.Model
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="IEntityExpression.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Orm.Model
 {
     using System.Collections.Generic;
 
+    /// <summary>
+    /// Provides an interface for expressions related to other selections.
+    /// </summary>
     public interface IEntityExpression
     {
         /// <summary>

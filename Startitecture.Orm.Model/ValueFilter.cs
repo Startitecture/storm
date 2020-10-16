@@ -1,11 +1,11 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ValueFilter.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Contains a filter for a specific item attribute.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Model
 {
@@ -27,9 +27,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// Selects all of the non-null values from the value filter.
         /// </summary>
-        public static readonly Func<IValueFilter, IEnumerable<object>> SelectNonNullValues = x => x.FilterValues.Where(v => v != null); 
-
-        #region Constants
+        public static readonly Func<IValueFilter, IEnumerable<object>> SelectNonNullValues = x => x.FilterValues.Where(v => v != null);
 
         /// <summary>
         /// The to string format.
@@ -51,18 +49,10 @@ namespace Startitecture.Orm.Model
                 item => item.values
             };
 
-        #endregion
-
-        #region Fields
-
         /// <summary>
         /// The values.
         /// </summary>
         private readonly List<object> values = new List<object>();
-
-        #endregion
-
-        #region Constructors and Destructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ValueFilter"/> class.
@@ -126,10 +116,6 @@ namespace Startitecture.Orm.Model
             this.values.AddRange(values);
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <inheritdoc />
         public AttributeLocation AttributeLocation { get; }
 
@@ -138,10 +124,6 @@ namespace Startitecture.Orm.Model
 
         /// <inheritdoc />
         public IEnumerable<object> FilterValues => this.values;
-
-        #endregion
-
-        #region Equality and Comparison Methods and Operators
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -183,7 +165,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -196,9 +177,8 @@ namespace Startitecture.Orm.Model
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -228,7 +208,5 @@ namespace Startitecture.Orm.Model
         {
             return string.Format(CultureInfo.CurrentCulture, ToStringFormat, this.AttributeLocation, string.Join(ValueSeparator, this.FilterValues));
         }
-
-        #endregion
     }
 }

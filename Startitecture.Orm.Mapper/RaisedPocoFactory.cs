@@ -1,12 +1,13 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="RaisedPocoFactory.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Mapper
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Data;
     using System.Diagnostics;
@@ -29,18 +30,19 @@ namespace Startitecture.Orm.Mapper
         /// <summary>
         /// The POCO factories.
         /// </summary>
-        private static readonly MemoryCache<Tuple<string, PocoDataRequest>, PocoDelegateInfo> PocoFactories =
-            new MemoryCache<Tuple<string, PocoDataRequest>, PocoDelegateInfo>();
+        private static readonly ConcurrentDictionary<Tuple<string, PocoDataRequest>, Lazy<PocoDelegateInfo>> PocoFactories =
+            new ConcurrentDictionary<Tuple<string, PocoDataRequest>, Lazy<PocoDelegateInfo>>();
 
         /// <summary>
         /// The relation properties cache.
         /// </summary>
-        private static readonly MemoryCache<string, PropertyInfo> RelationPropertiesMemoryCache = new MemoryCache<string, PropertyInfo>();
+        private static readonly ConcurrentDictionary<string, Lazy<PropertyInfo>> RelationPropertiesMemoryCache =
+            new ConcurrentDictionary<string, Lazy<PropertyInfo>>();
 
         /// <summary>
         /// The POCO cache. Not static because we do not want to cache POCOs beyond the connection context.
         /// </summary>
-        private readonly MemoryCache<string, object> pocoMemoryCache = new MemoryCache<string, object>();
+        private readonly ConcurrentDictionary<string, Lazy<object>> pocoMemoryCache = new ConcurrentDictionary<string, Lazy<object>>();
 
         /// <summary>
         /// The definition provider.
@@ -65,7 +67,7 @@ namespace Startitecture.Orm.Mapper
         /// <inheritdoc />
         public void Dispose()
         {
-            this.pocoMemoryCache.Dispose();
+            this.pocoMemoryCache.Clear();
         }
 
         /// <summary>
@@ -98,7 +100,10 @@ namespace Startitecture.Orm.Mapper
             {
                 var entityDefinition = this.definitionProvider.Resolve<T>();
                 var pocoKey = GetPocoKey(entityDefinition, reader, entityDefinition.PrimaryKeyAttributes.OrderBy(x => x.Ordinal).ToList());
-                var poco = (T)this.pocoMemoryCache.Get(pocoKey, () => GetPocoFromReader<T>(dataRequest, entityDefinition.QualifiedName, reader));
+                var poco = (T)this.pocoMemoryCache.GetOrAdd(
+                        pocoKey,
+                        key => new Lazy<object>(() => GetPocoFromReader<T>(dataRequest, entityDefinition.QualifiedName, reader)))
+                    .Value;
 
                 var relationAttributes = entityDefinition.AllAttributes.Where(x => x.AttributeTypes == EntityAttributeTypes.Relation);
 
@@ -124,9 +129,11 @@ namespace Startitecture.Orm.Mapper
                                                   EntityAlias = relationAttribute.Alias
                                               };
 
-                    var relatedEntity = this.pocoMemoryCache.Get(
-                        relatedPocoKey,
-                        () => this.GetRelatedEntity(entityDefinition.QualifiedName, dataRequest, reader, entityReference));
+                    var relatedEntity = this.pocoMemoryCache.GetOrAdd(
+                            relatedPocoKey,
+                            key => new Lazy<object>(
+                                () => this.GetRelatedEntity(entityDefinition.QualifiedName, dataRequest, reader, entityReference)))
+                        .Value;
 
                     // Prevents "ghost" POCO properties when resolving second-order or higher relations.
                     if (relatedEntity == null)
@@ -146,7 +153,7 @@ namespace Startitecture.Orm.Mapper
                     }
                 }
 
-                return poco;                
+                return poco;
             }
         }
 
@@ -225,7 +232,10 @@ namespace Startitecture.Orm.Mapper
         {
             var baseKey = new Tuple<string, PocoDataRequest>(entityName, dataRequest);
             var baseDirectAttributes = dataRequest.AttributeDefinitions.Where(x => x.IsReferencedDirect).ToList();
-            var basePocoDelegate = PocoFactories.Get(baseKey, () => FlatPocoFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes));
+            var basePocoDelegate = PocoFactories.GetOrAdd(
+                    baseKey,
+                    key => new Lazy<PocoDelegateInfo>(() => FlatPocoFactory.CreateDelegate(dataRequest, typeof(T), baseDirectAttributes)))
+                .Value;
 
             T poco;
 #if DEBUG
@@ -295,7 +305,10 @@ namespace Startitecture.Orm.Mapper
                 // The property info is specific to the raised property on our POCO.
                 var entityType = currentEntity.GetType();
                 var relationKey = string.Concat(entityType, '.', relationName);
-                var propertyInfo = RelationPropertiesMemoryCache.Get(relationKey, () => entityType.GetProperty(relationName));
+                var propertyInfo = RelationPropertiesMemoryCache.GetOrAdd(
+                        relationKey,
+                        key => new Lazy<PropertyInfo>(() => entityType.GetProperty(relationName)))
+                    .Value;
 
                 if (propertyInfo == null)
                 {
@@ -364,9 +377,10 @@ namespace Startitecture.Orm.Mapper
             var relatedAttributes = dataRequest.AttributeDefinitions.Where(x => x.ReferenceNode?.Value == relatedEntityLocation).ToList();
             var relatedType = relatedEntityLocation.EntityType;
 
-            var relatedPocoDelegate = PocoFactories.Get(
-                relatedKey,
-                () => FlatPocoFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes));
+            var relatedPocoDelegate = PocoFactories.GetOrAdd(
+                    relatedKey,
+                    key => new Lazy<PocoDelegateInfo>(() => FlatPocoFactory.CreateDelegate(dataRequest, relatedType, relatedAttributes)))
+                .Value;
 
             object relatedEntity;
 #if DEBUG

@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityLocation.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // <summary>
 //   Contains the location for a data entity.
@@ -125,7 +125,7 @@ namespace Startitecture.Orm.Model
         public string Name { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the location is virtual. When true, this location will not be traversed for setting 
+        /// Gets or sets a value indicating whether the location is virtual. When true, this location will not be traversed for setting
         /// physical properties.
         /// </summary>
         public bool IsVirtual { get; set; }
@@ -219,7 +219,6 @@ namespace Startitecture.Orm.Model
         /// <exception cref="ArgumentException">
         /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
-        /// <filterpriority>2</filterpriority>
         public int CompareTo(object obj)
         {
             return Evaluate.Compare(this, obj);
@@ -253,9 +252,8 @@ namespace Startitecture.Orm.Model
         /// Returns the fully qualified type name of this instance.
         /// </summary>
         /// <returns>
-        /// A <see cref="String" /> containing a fully qualified type name.
+        /// A <see cref="string" /> containing a fully qualified type name.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return string.Format(CultureInfo.CurrentCulture, ToStringFormat, this.Container, this.Alias ?? this.Name);
@@ -267,7 +265,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A 32-bit signed integer that is the hash code for this instance.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return this.hashCode.Value;
@@ -280,9 +277,8 @@ namespace Startitecture.Orm.Model
         /// true if <paramref name="obj"/> and this instance are the same type and represent the same value; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current instance. 
+        /// The object to compare with the current instance.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);

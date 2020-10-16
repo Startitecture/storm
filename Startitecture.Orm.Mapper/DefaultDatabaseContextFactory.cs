@@ -53,7 +53,7 @@ namespace Startitecture.Orm.Mapper
         /// <paramref name="connectionString"/> or <paramref name="providerName"/> is null or whitespace.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        /// <paramref name="repositoryAdapter"/> is null
+        /// <paramref name="repositoryAdapter"/> is null.
         /// </exception>
         public DefaultDatabaseContextFactory(
             [NotNull] string connectionString,

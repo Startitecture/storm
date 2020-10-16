@@ -1,6 +1,6 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright company="Startitecture" file="GlobalSuppressions.cs">
-//   Copyright 2017 Startitecture. All rights reserved.
+// <copyright file="GlobalSuppressions.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 

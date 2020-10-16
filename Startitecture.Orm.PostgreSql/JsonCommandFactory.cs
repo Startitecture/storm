@@ -68,9 +68,9 @@ namespace Startitecture.Orm.PostgreSql
             try
             {
                 var parameter = new NpgsqlParameter(tableCommand.ParameterName, NpgsqlDbType.Jsonb)
-                                {
-                                    Value = items
-                                };
+                {
+                    Value = items
+                };
 
                 npgsqlCommand.Parameters.Add(parameter);
             }

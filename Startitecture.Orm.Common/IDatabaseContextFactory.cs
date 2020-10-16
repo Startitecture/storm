@@ -1,11 +1,11 @@
 // --------------------------------------------------------------------------------------------------------------------
-// <copyright file="IDatabaseFactory.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+// <copyright file="IDatabaseContextFactory.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Provides an interface for classes that create database instances.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Common
 {

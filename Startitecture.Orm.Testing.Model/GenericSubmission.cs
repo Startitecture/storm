@@ -28,7 +28,7 @@ namespace Startitecture.Orm.Testing.Model
             {
                 item => item.Subject,
                 item => item.SubmittedBy,
-                item => item.SubmittedTime, 
+                item => item.SubmittedTime,
                 item => item.SubmissionValues
             };
 
@@ -98,11 +98,9 @@ namespace Startitecture.Orm.Testing.Model
         public DateTimeOffset SubmittedTime { get; private set; }
 
         /// <summary>
-        /// The submission values.
+        /// Gets the submission values.
         /// </summary>
         public IEnumerable<FieldValue> SubmissionValues => this.submissionValues;
-
-        #region Equality and Comparison Methods and Operators
 
         /// <summary>
         /// Determines if two values of the same type are equal.
@@ -144,7 +142,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return $"'{this.Subject}' by {this.SubmittedBy} at {this.SubmittedTime}";
@@ -156,7 +153,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -169,9 +165,8 @@ namespace Startitecture.Orm.Testing.Model
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">
-        /// The object to compare with the current object. 
+        /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -190,8 +185,6 @@ namespace Startitecture.Orm.Testing.Model
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
 
         /// <summary>
         /// The set value.

@@ -95,7 +95,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return $"{this.AttributeLocation}='{this.Value}'";
@@ -107,7 +106,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -122,7 +120,6 @@ namespace Startitecture.Orm.Model
         /// <param name="obj">
         /// The object to compare with the current object.
         /// </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);

@@ -17,7 +17,7 @@ namespace Startitecture.Orm.Model
 
     /// <summary>
     /// Contains metadata for a data entity.
-    /// TODO: Do sorted set by column ordinals
+    /// TODO: Do sorted set by column ordinals.
     /// </summary>
     public class EntityDefinition : IEntityDefinition
     {
@@ -171,7 +171,7 @@ namespace Startitecture.Orm.Model
             var reference = this.DefinitionProvider.GetEntityReference(attributeLocation.PropertyInfo);
             var location = this.DefinitionProvider.GetEntityLocation(reference);
             var entityName = attributeLocation.EntityReference.EntityAlias ?? location.Alias ?? location.Name;
-            
+
             return this.returnableAttributes.Value.FirstOrDefault(
                 definition => (definition.Entity.Alias ?? definition.Entity.Name) == entityName
                               && definition.PropertyName == attributeLocation.PropertyInfo.Name);

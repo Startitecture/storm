@@ -616,8 +616,6 @@ namespace Startitecture.Orm.Model
 
         ////#endregion
 
-        #region Relations
-
         /// <summary>
         /// Sets the default relations for the entity set using the specified <paramref name="definitionProvider"/>.
         /// </summary>
@@ -1152,10 +1150,6 @@ namespace Startitecture.Orm.Model
         ////    return this.AddRelation(entityRelation);
         ////}
 
-        #endregion
-
-        #region Linked Statements
-
         /// <summary>
         /// Combines the results of the current selection with the specified selection.
         /// </summary>
@@ -1201,8 +1195,6 @@ namespace Startitecture.Orm.Model
             return this;
         }
 
-        #endregion
-
         /// <summary>
         /// Sets the current entity set's <see cref="ParentExpression"/> to the specified <paramref name="expression"/>.
         /// </summary>
@@ -1227,12 +1219,11 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Returns a <see cref="String"/> that represents the current <see cref="Object"/>.
+        /// Returns a <see cref="string"/> that represents the current <see cref="object"/>.
         /// </summary>
         /// <returns>
-        /// A <see cref="String"/> that represents the current <see cref="Object"/>.
+        /// A <see cref="string"/> that represents the current <see cref="object"/>.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return string.Join(ValueSeparator, this.Filters.OrderBy(x => x.AttributeLocation?.ToString()));
@@ -1402,66 +1393,66 @@ namespace Startitecture.Orm.Model
             }
         }
 
-/*
-        /// <summary>
-        /// Adds a <see cref="ValueFilter"/> to the selection.
-        /// </summary>
-        /// <param name="valueFilter">
-        /// The value filter to add.
-        /// </param>
-        /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="valueFilter"/> is null.
-        /// </exception>
-        private EntitySet<T> AddFilter([NotNull] ValueFilter valueFilter)
-        {
-            if (valueFilter == null)
-            {
-                throw new ArgumentNullException(nameof(valueFilter));
-            }
-
-            this.valueFilters.Add(valueFilter);
-            return this;
-        }
-*/
-
-/*
-        /// <summary>
-        /// Adds a BETWEEN filter.
-        /// </summary>
-        /// <param name="propertyExpression">
-        /// The property expression.
-        /// </param>
-        /// <param name="leftValue">
-        /// The left value.
-        /// </param>
-        /// <param name="rightValue">
-        /// The right value.
-        /// </param>
-        private void AddRangeFilter(LambdaExpression propertyExpression, object leftValue, object rightValue)
-        {
-            if (Evaluate.RecursiveEquals(leftValue, rightValue))
-            {
-                this.valueFilters.Add(new ValueFilter(propertyExpression, FilterType.Equality, leftValue));
-            }
-            else
-            {
-                // Needed when caller can't or won't assign the values such that the lower bound property value is less than the upper 
-                // bound property value.
-                bool valuesFlipped = leftValue is IComparable comparable && rightValue is IComparable value && comparable.CompareTo(value) > 0;
-
-                if (valuesFlipped)
+        /*
+                /// <summary>
+                /// Adds a <see cref="ValueFilter"/> to the selection.
+                /// </summary>
+                /// <param name="valueFilter">
+                /// The value filter to add.
+                /// </param>
+                /// <returns>
+                /// The current <see cref="EntitySelection{T}"/>.
+                /// </returns>
+                /// <exception cref="ArgumentNullException">
+                /// <paramref name="valueFilter"/> is null.
+                /// </exception>
+                private EntitySet<T> AddFilter([NotNull] ValueFilter valueFilter)
                 {
-                    var tempValue = leftValue;
-                    leftValue = rightValue;
-                    rightValue = tempValue;
-                }
+                    if (valueFilter == null)
+                    {
+                        throw new ArgumentNullException(nameof(valueFilter));
+                    }
 
-                this.valueFilters.Add(new ValueFilter(propertyExpression, FilterType.Between, leftValue, rightValue));
-            }
-        }
-*/
+                    this.valueFilters.Add(valueFilter);
+                    return this;
+                }
+        */
+
+        /*
+                /// <summary>
+                /// Adds a BETWEEN filter.
+                /// </summary>
+                /// <param name="propertyExpression">
+                /// The property expression.
+                /// </param>
+                /// <param name="leftValue">
+                /// The left value.
+                /// </param>
+                /// <param name="rightValue">
+                /// The right value.
+                /// </param>
+                private void AddRangeFilter(LambdaExpression propertyExpression, object leftValue, object rightValue)
+                {
+                    if (Evaluate.RecursiveEquals(leftValue, rightValue))
+                    {
+                        this.valueFilters.Add(new ValueFilter(propertyExpression, FilterType.Equality, leftValue));
+                    }
+                    else
+                    {
+                        // Needed when caller can't or won't assign the values such that the lower bound property value is less than the upper
+                        // bound property value.
+                        bool valuesFlipped = leftValue is IComparable comparable && rightValue is IComparable value && comparable.CompareTo(value) > 0;
+
+                        if (valuesFlipped)
+                        {
+                            var tempValue = leftValue;
+                            leftValue = rightValue;
+                            rightValue = tempValue;
+                        }
+
+                        this.valueFilters.Add(new ValueFilter(propertyExpression, FilterType.Between, leftValue, rightValue));
+                    }
+                }
+        */
     }
 }

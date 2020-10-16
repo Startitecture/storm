@@ -1,11 +1,11 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Document.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Represents a document in the system with one or more document versions.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Testing.Model
 {
@@ -106,8 +106,6 @@ namespace Startitecture.Orm.Testing.Model
             }
         }
 
-        #region Equality Methods and Operators
-
         /// <summary>
         /// Determines if two values of the same type are equal.
         /// </summary>
@@ -192,7 +190,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <exception cref="ArgumentException">
         /// <paramref name="obj"/> is not the same type as this instance.
         /// </exception>
-        /// <filterpriority>2</filterpriority>
         public int CompareTo(object obj)
         {
             return Evaluate.Compare(this, obj);
@@ -220,7 +217,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A string that represents the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override string ToString()
         {
             return this.Identifier;
@@ -232,7 +228,6 @@ namespace Startitecture.Orm.Testing.Model
         /// <returns>
         /// A hash code for the current object.
         /// </returns>
-        /// <filterpriority>2</filterpriority>
         public override int GetHashCode()
         {
             return Evaluate.GenerateHashCode(this, ComparisonProperties);
@@ -245,7 +240,6 @@ namespace Startitecture.Orm.Testing.Model
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
         /// <param name="obj">The object to compare with the current object. </param>
-        /// <filterpriority>2</filterpriority>
         public override bool Equals(object obj)
         {
             return Evaluate.Equals(this, obj);
@@ -262,8 +256,6 @@ namespace Startitecture.Orm.Testing.Model
         {
             return Evaluate.Equals(this, other, ComparisonProperties);
         }
-
-        #endregion
 
         /// <summary>
         /// Adds a document version to the internal linked list.

@@ -170,7 +170,7 @@ namespace Startitecture.Orm.Common
                 this.definitionProvider.Resolve(relationLocation.EntityType)
                     .DirectAttributes.FirstOrDefault(x => x.PropertyName == entityRelation.RelationExpression.GetPropertyName());
 
-            var relationEntity = this.nameQualifier.GetPhysicalName(relationAttribute.Entity); 
+            var relationEntity = this.nameQualifier.GetPhysicalName(relationAttribute.Entity);
             var relationName = this.nameQualifier.Qualify(relationAttribute, relationLocation);
 
             if (string.IsNullOrWhiteSpace(relationLocation.Alias) && useAliasSuffix == false)

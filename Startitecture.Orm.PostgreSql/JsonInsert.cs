@@ -272,9 +272,9 @@ FROM jsonb_to_recordset({this.nameQualifier.AddParameterPrefix(this.ParameterNam
                             .ToList();
 
                         ////var setColumnClauses =
-                            ////this.EntityDefinition.DirectAttributes.From(definition => definition.IsIdentityColumn)
-                            ////    .Select(id => $"{this.nameQualifier.Escape(id.PhysicalName)} = DEFAULT")
-                            ////    .Union(targetColumns.Select((t, i) => $"{t} = {excludedColumns[i]}")).ToList();
+                        ////this.EntityDefinition.DirectAttributes.From(definition => definition.IsIdentityColumn)
+                        ////    .Select(id => $"{this.nameQualifier.Escape(id.PhysicalName)} = DEFAULT")
+                        ////    .Union(targetColumns.Select((t, i) => $"{t} = {excludedColumns[i]}")).ToList();
 
                         commandBuilder.AppendLine()
                             .AppendLine($"ON CONFLICT ({string.Join(", ", conflictColumnHints.Any() ? conflictColumnHints : primaryKeyColumns)})")

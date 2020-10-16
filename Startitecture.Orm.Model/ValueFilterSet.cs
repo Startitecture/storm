@@ -68,10 +68,10 @@ namespace Startitecture.Orm.Model
             foreach (var keyAttribute in entityDefinition.PrimaryKeyAttributes)
             {
                 var entityReference = new EntityReference
-                                          {
-                                              EntityAlias = keyAttribute.Entity.Alias,
-                                              EntityType = keyAttribute.Entity.EntityType
-                                          };
+                {
+                    EntityAlias = keyAttribute.Entity.Alias,
+                    EntityType = keyAttribute.Entity.EntityType
+                };
                 var attributeLocation = new AttributeLocation(keyAttribute.PropertyInfo, entityReference);
                 var valueFilter = new ValueFilter(attributeLocation, FilterType.Equality, keyAttribute.GetValueDelegate.DynamicInvoke(entity));
 
@@ -89,10 +89,10 @@ namespace Startitecture.Orm.Model
             foreach (var attribute in entityDefinition.DirectAttributes)
             {
                 var entityReference = new EntityReference
-                                          {
-                                              EntityAlias = attribute.Entity.Alias,
-                                              EntityType = attribute.Entity.EntityType
-                                          };
+                {
+                    EntityAlias = attribute.Entity.Alias,
+                    EntityType = attribute.Entity.EntityType
+                };
                 var attributeLocation = new AttributeLocation(attribute.PropertyInfo, entityReference);
                 var valueFilter = new ValueFilter(attributeLocation, FilterType.Equality, attribute.GetValueDelegate.DynamicInvoke(entity));
                 this.valueFilters.Add(valueFilter);
@@ -528,7 +528,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Adds a between filter for the specified attribute
+        /// Adds a between filter for the specified attribute.
         /// </summary>
         /// <param name="selector">
         /// The attribute selector.
@@ -575,7 +575,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Adds a between filter for the specified attribute
+        /// Adds a between filter for the specified attribute.
         /// </summary>
         /// <param name="selector">
         /// The attribute selector.
@@ -749,7 +749,7 @@ namespace Startitecture.Orm.Model
             }
             else
             {
-                // Needed when caller can't or won't assign the values such that the lower bound property value is less than the upper 
+                // Needed when caller can't or won't assign the values such that the lower bound property value is less than the upper
                 // bound property value.
                 bool valuesFlipped = leftValue is IComparable comparable && rightValue is IComparable value && comparable.CompareTo(value) > 0;
 

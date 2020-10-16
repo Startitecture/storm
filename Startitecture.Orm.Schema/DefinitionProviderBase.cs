@@ -10,11 +10,11 @@
 namespace Startitecture.Orm.Schema
 {
     using System;
+    using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using System.Runtime.Caching;
 
     using JetBrains.Annotations;
 
@@ -27,14 +27,22 @@ namespace Startitecture.Orm.Schema
     public abstract class DefinitionProviderBase : IEntityDefinitionProvider
     {
         /// <summary>
-        /// The cache lock.
+        /// The cache of definitions created by the definition providers.
         /// </summary>
-        private static readonly object CacheLock = new object();
+        private static readonly ConcurrentDictionary<string, Lazy<IEntityDefinition>> DefinitionCache =
+            new ConcurrentDictionary<string, Lazy<IEntityDefinition>>();
 
         /// <summary>
-        /// The type name policy.
+        /// The cache of entity references created by the definition providers.
         /// </summary>
-        private static readonly CacheItemPolicy ItemPolicy = new CacheItemPolicy { AbsoluteExpiration = ObjectCache.InfiniteAbsoluteExpiration };
+        private static readonly ConcurrentDictionary<EntityReference, Lazy<EntityLocation>> ReferenceCache =
+            new ConcurrentDictionary<EntityReference, Lazy<EntityLocation>>();
+
+        /// <summary>
+        /// The cache of entity attribute lists created by the definition providers.
+        /// </summary>
+        private static readonly ConcurrentDictionary<string, Lazy<IEnumerable<EntityAttributeDefinition>>> AttributeListCache =
+            new ConcurrentDictionary<string, Lazy<IEnumerable<EntityAttributeDefinition>>>();
 
         /// <inheritdoc />
         public IEntityDefinition Resolve<TItem>()
@@ -50,9 +58,10 @@ namespace Startitecture.Orm.Schema
                 throw new ArgumentNullException(nameof(type));
             }
 
+            // Separates the definitions by provider in the event multiple definitions are use in the same runtime.
             var cacheKey = $"{this.GetType().FullName}:{type.FullName}";
-            var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, type, this.CreateEntityDefinition, ItemPolicy);
-            return result.Item;
+            var result = DefinitionCache.GetOrAdd(cacheKey, key => new Lazy<IEntityDefinition>(() => this.CreateEntityDefinition(type))).Value;
+            return result;
         }
 
         /// <inheritdoc />
@@ -63,15 +72,12 @@ namespace Startitecture.Orm.Schema
                 throw new ArgumentNullException(nameof(entityReference));
             }
 
-            var cacheKey = $"{typeof(IEntityDefinition).FullName}:{entityReference}";
-            var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(
-                CacheLock,
-                cacheKey,
-                entityReference,
-                this.GetEntityLocationByReference,
-                ItemPolicy);
+            var result = ReferenceCache.GetOrAdd(
+                    entityReference,
+                    reference => new Lazy<EntityLocation>(() => this.GetEntityLocationByReference(entityReference)))
+                .Value;
 
-            return result.Item;
+            return result;
         }
 
         /// <inheritdoc />
@@ -84,9 +90,12 @@ namespace Startitecture.Orm.Schema
 
             var listName = typeof(List<EntityAttributeDefinition>).ToRuntimeName();
             var cacheKey = $"{this.GetType().FullName}:{entityType.FullName}:{listName}";
-            var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(CacheLock, cacheKey, entityType, this.GetAttributeDefinitions, ItemPolicy);
+            var result = AttributeListCache.GetOrAdd(
+                    cacheKey,
+                    key => new Lazy<IEnumerable<EntityAttributeDefinition>>(() => this.GetAttributeDefinitions(entityType)))
+                .Value;
 
-            return result.Item;
+            return result;
         }
 
         /// <inheritdoc />
@@ -255,14 +264,18 @@ namespace Startitecture.Orm.Schema
         private static AttributeReference GetRelatedEntityAttributeReference(MemberInfo propertyInfo)
         {
             var relatedEntity = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
-            var relatedEntityReference = new EntityReference { EntityType = relatedEntity.EntityType, EntityAlias = relatedEntity.EntityAlias };
+            var relatedEntityReference = new EntityReference
+                                         {
+                                             EntityType = relatedEntity.EntityType,
+                                             EntityAlias = relatedEntity.EntityAlias
+                                         };
 
             return new AttributeReference
-                       {
-                           EntityReference = relatedEntityReference,
-                           Name = propertyInfo.Name,
-                           PhysicalName = relatedEntity.PhysicalName ?? propertyInfo.Name
-                       };
+            {
+                EntityReference = relatedEntityReference,
+                Name = propertyInfo.Name,
+                PhysicalName = relatedEntity.PhysicalName ?? propertyInfo.Name
+            };
         }
 
         /// <summary>
@@ -281,11 +294,11 @@ namespace Startitecture.Orm.Schema
         {
             var entityType = entityProperty.PropertyType;
             var relationReference = new EntityReference
-                                        {
-                                            EntityType = entityType,
-                                            ContainerType = entityPath.First?.Value.EntityType,
-                                            EntityAlias = entityProperty.Name
-                                        };
+            {
+                EntityType = entityType,
+                ContainerType = entityPath.First?.Value.EntityType,
+                EntityAlias = entityProperty.Name
+            };
 
             var relationLocation = this.GetEntityLocation(relationReference);
 
@@ -358,7 +371,7 @@ namespace Startitecture.Orm.Schema
 
                 yield return entityAttributeDefinition;
             }
-            
+
             foreach (var propertyInfo in this.GetRelationPropertyInfos(entityProperties))
             {
                 var attributeName = this.GetPhysicalName(propertyInfo);
@@ -394,7 +407,12 @@ namespace Startitecture.Orm.Schema
         /// </returns>
         private EntityDefinition CreateEntityDefinition(Type type)
         {
-            return new EntityDefinition(this, new EntityReference { EntityType = type });
+            var entityReference = new EntityReference
+                                  {
+                                      EntityType = type
+                                  };
+
+            return new EntityDefinition(this, entityReference);
         }
 
         /// <summary>
@@ -408,7 +426,11 @@ namespace Startitecture.Orm.Schema
         /// </returns>
         private IEnumerable<EntityAttributeDefinition> GetAttributeDefinitions(Type entityType)
         {
-            var entityReference = new EntityReference { EntityType = entityType };
+            var entityReference = new EntityReference
+                                  {
+                                      EntityType = entityType
+                                  };
+
             var entityLocation = this.GetEntityLocation(entityReference);
 
             var entityPath = new LinkedList<EntityLocation>();
@@ -445,11 +467,11 @@ namespace Startitecture.Orm.Schema
                 {
                     attributeTypes |= EntityAttributeTypes.ExplicitRelatedAttribute;
                     var relatedEntityReference = new EntityReference
-                                                     {
-                                                         EntityType = attributeReference.EntityReference.EntityType,
-                                                         ContainerType = entityType,
-                                                         EntityAlias = attributeReference.EntityReference.EntityAlias
-                                                     };
+                    {
+                        EntityType = attributeReference.EntityReference.EntityType,
+                        ContainerType = entityType,
+                        EntityAlias = attributeReference.EntityReference.EntityAlias
+                    };
 
                     var relatedLocation = this.GetEntityLocation(relatedEntityReference);
 

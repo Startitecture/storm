@@ -68,7 +68,7 @@ namespace Startitecture.Orm.AutoMapper
             catch (AutoMapperMappingException ex)
             {
                 throw new OperationException(input, ex.Message, ex);
-            }        
+            }
         }
 
         /// <inheritdoc />

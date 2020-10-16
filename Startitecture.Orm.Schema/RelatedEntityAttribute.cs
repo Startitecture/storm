@@ -1,11 +1,11 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="RelatedEntityAttribute.cs" company="Startitecture">
-//   Copyright 2017 Startitecture. All rights reserved.
+//   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
+// --------------------------------------------------------------------------------------------------------------------
 // <summary>
 //   Marks a property as a related attribute from another table.
 // </summary>
-// --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.Schema
 {
@@ -19,8 +19,6 @@ namespace Startitecture.Orm.Schema
     [AttributeUsage(AttributeTargets.Property)]
     public sealed class RelatedEntityAttribute : Attribute
     {
-        #region Constructors and Destructors
-
         /// <summary>
         /// Initializes a new instance of the <see cref="RelatedEntityAttribute"/> class.
         /// </summary>
@@ -52,10 +50,6 @@ namespace Startitecture.Orm.Schema
             this.EntityAlias = entityAlias;
         }
 
-        #endregion
-
-        #region Public Properties
-
         /// <summary>
         /// Gets the entity type to which the attribute is related.
         /// </summary>
@@ -70,7 +64,5 @@ namespace Startitecture.Orm.Schema
         /// Gets or sets the physical name of the associated column, if different from the property name.
         /// </summary>
         public string PhysicalName { get; set; }
-
-        #endregion
     }
 }

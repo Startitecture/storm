@@ -20,7 +20,7 @@ namespace Startitecture.Orm.Model
         /// <summary>
         /// The product of the JOIN should include only rows in which both entities have matching results.
         /// </summary>
-        InnerJoin = 0, 
+        InnerJoin = 0,
 
         /// <summary>
         /// The product of the JOIN must always include the left (source) entity; the relation entity columns will return NULL if there is no match.

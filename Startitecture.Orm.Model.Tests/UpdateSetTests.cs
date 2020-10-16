@@ -30,23 +30,23 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_DirectData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                                AnotherValueColumn = 12,
-                                AnotherColumn = "Some Other Value"
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
                 .From(
@@ -93,23 +93,23 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RaisedDirectData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                                AnotherValueColumn = 12,
-                                AnotherColumn = "Some Other Value"
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
                 .From(
@@ -156,27 +156,27 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RelatedData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                                AnotherValueColumn = 12,
-                                AnotherColumn = "Some Other Value"
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateOperation = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
                 .From(
@@ -224,27 +224,27 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RaisedRelatedData_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                                AnotherValueColumn = 12,
-                                AnotherColumn = "Some Other Value"
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+                AnotherValueColumn = 12,
+                AnotherColumn = "Some Other Value"
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateOperation = new UpdateSet<DataRow>().Set(match, new DataAnnotationsDefinitionProvider())
                 .From(
@@ -292,27 +292,27 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_DirectDataSpecificSetValuesFromItem_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var target = new DataRow
-                             {
-                                 NormalColumn = "UpdatedNormalColumn",
-                                 NullableColumn = null
-                             };
+            {
+                NormalColumn = "UpdatedNormalColumn",
+                NullableColumn = null
+            };
             var updateSet = new UpdateSet<DataRow>().Set(target, row => row.NormalColumn, row => row.NullableColumn)
                 .From(
                     set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
@@ -347,28 +347,28 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RaisedDirectDataSpecificSetValuesFromItem_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
 
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var target = new DataRow
-                             {
-                                 NormalColumn = "UpdatedNormalColumn",
-                                 NullableColumn = null
-                             };
+            {
+                NormalColumn = "UpdatedNormalColumn",
+                NullableColumn = null
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(target, row => row.NormalColumn, row => row.NullableColumn)
                 .From(
@@ -404,32 +404,32 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RelatedDataSpecificSetValuesFromItem_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
 
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var target = new DataRow
-                             {
-                                 NormalColumn = "UpdatedNormalColumn",
-                                 NullableColumn = null
-                             };
+            {
+                NormalColumn = "UpdatedNormalColumn",
+                NullableColumn = null
+            };
             var updateSet = new UpdateSet<DataRow>().Set(target, row => row.NormalColumn, row => row.NullableColumn)
                 .From(
                     set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
@@ -466,32 +466,32 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RaisedRelatedDataSpecificSetValuesFromItem_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
 
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var target = new DataRow
-                             {
-                                 NormalColumn = "UpdatedNormalColumn",
-                                 NullableColumn = null
-                             };
+            {
+                NormalColumn = "UpdatedNormalColumn",
+                NullableColumn = null
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(target, row => row.NormalColumn, row => row.NullableColumn)
                 .From(
@@ -529,21 +529,21 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_DirectDataSpecificSetValuesExplicit_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(row => row.NormalColumn, "UpdatedNormalColumn")
                 .Set(row => row.NullableColumn, null)
@@ -580,22 +580,22 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RaisedDirectDataSpecificSetValuesExplicit_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
 
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(row => row.NormalColumn, "UpdatedNormalColumn")
                 .Set(row => row.NullableColumn, null)
@@ -632,26 +632,26 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RelatedDataSpecificSetValuesExplicit_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
 
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(row => row.NormalColumn, "UpdatedNormalColumn")
                 .Set(row => row.NullableColumn, null)
@@ -690,26 +690,26 @@ namespace Startitecture.Orm.Model.Tests
         public void Set_RaisedRelatedDataSpecificSetValuesExplicit_MatchesExpected()
         {
             var match = new DataRow
-                            {
-                                NormalColumn = "NormalColumn",
-                                RelatedAlias = new FakeRelatedRow
-                                                   {
-                                                       RelatedProperty = "Related"
-                                                   },
-                                NullableColumn = "CouldHaveBeenNull",
-                                ValueColumn = 2,
-                                NullableValueColumn = null,
-                            };
+            {
+                NormalColumn = "NormalColumn",
+                RelatedAlias = new FakeRelatedRow
+                {
+                    RelatedProperty = "Related"
+                },
+                NullableColumn = "CouldHaveBeenNull",
+                ValueColumn = 2,
+                NullableValueColumn = null,
+            };
 
             var baseline = new DataRow
-                               {
-                                   FakeDataId = 10
-                               };
+            {
+                FakeDataId = 10
+            };
 
             var boundary = new DataRow
-                               {
-                                   FakeDataId = 20
-                               };
+            {
+                FakeDataId = 20
+            };
 
             var updateSet = new UpdateSet<DataRow>().Set(row => row.NormalColumn, "UpdatedNormalColumn")
                 .Set(row => row.NullableColumn, null)

@@ -53,46 +53,46 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public void Insert_ListOfFields_DoesNotThrowException()
         {
             var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                              {
@@ -116,10 +116,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
-                                 {
-                                     Name = field.Name,
-                                     Description = field.Description
-                                 });
+                    {
+                        Name = field.Name,
+                        Description = field.Description
+                    });
 
                 var transaction = provider.BeginTransaction();
                 fieldRepository.Insert(fieldRows, null); // Nothing special here
@@ -135,46 +135,46 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public void InsertForResults_TableValueInsertForFieldsWithReturn_MatchesExpected()
         {
             var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                              {
@@ -198,10 +198,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
-                                 {
-                                     Name = field.Name,
-                                     Description = field.Description
-                                 });
+                    {
+                        Name = field.Name,
+                        Description = field.Description
+                    });
 
                 var transaction = provider.BeginTransaction();
                 var actual = fieldRepository.InsertForResults(fieldRows, null);
@@ -233,54 +233,54 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
-                                             {
-                                                 FirstName = "King",
-                                                 MiddleName = "T.",
-                                                 LastName = "Animal"
-                                             });
+                                         {
+                                             FirstName = "King",
+                                             MiddleName = "T.",
+                                             LastName = "Animal"
+                                         });
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                                     {
-                                         Name = "Internal ID",
-                                         Description = "Unique ID used internally"
-                                     };
+                {
+                    Name = "Internal ID",
+                    Description = "Unique ID used internally"
+                };
 
                 var firstName = new Field
-                                    {
-                                        Name = "First Name",
-                                        Description = "The person's first name"
-                                    };
+                {
+                    Name = "First Name",
+                    Description = "The person's first name"
+                };
 
                 var lastName = new Field
-                                   {
-                                       Name = "Last Name",
-                                       Description = "The person's last name"
-                                   };
+                {
+                    Name = "Last Name",
+                    Description = "The person's last name"
+                };
 
                 var yearlyWage = new Field
-                                     {
-                                         Name = "Yearly Wage",
-                                         Description = "The base wage paid year over year."
-                                     };
+                {
+                    Name = "Yearly Wage",
+                    Description = "The base wage paid year over year."
+                };
 
                 var hireDate = new Field
-                                   {
-                                       Name = "Hire Date",
-                                       Description = "The date and time of hire for the person"
-                                   };
+                {
+                    Name = "Hire Date",
+                    Description = "The date and time of hire for the person"
+                };
 
                 var bonusTarget = new Field
-                                      {
-                                          Name = "Bonus Target",
-                                          Description = "The target bonus for the person"
-                                      };
+                {
+                    Name = "Bonus Target",
+                    Description = "The target bonus for the person"
+                };
 
                 var contactNumbers = new Field
-                                         {
-                                             Name = "Contact Numbers",
-                                             Description = "A list of contact numbers for the person in order of preference"
-                                         };
+                {
+                    Name = "Contact Numbers",
+                    Description = "A list of contact numbers for the person in order of preference"
+                };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -330,11 +330,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueRow
-                                            {
-                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                                LastModifiedTime = expected.SubmittedTime
-                                            };
+                                 {
+                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                     LastModifiedTime = expected.SubmittedTime
+                                 };
 
                 var insertedValues = fieldValueRepository.InsertForResults(
                         valuesList,
@@ -357,17 +357,17 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                               {
-                                                   FieldValueElementId = e.FieldValueElementId,
-                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                   Order = e.Order,
-                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                   FloatElement = e.Element as double? ?? e.Element as float?,
-                                                   IntegerElement =
+                                    {
+                                        FieldValueElementId = e.FieldValueElementId,
+                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                        Order = e.Order,
+                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                        FloatElement = e.Element as double? ?? e.Element as float?,
+                                        IntegerElement =
                                                        e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                   MoneyElement = e.Element as decimal?,
-                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                               }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
+                                        MoneyElement = e.Element as decimal?,
+                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                    }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
 
                 var insertedElements = fieldValueElementRepository.InsertForResults(
                         elementsList.Values,
@@ -415,10 +415,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues.Values
                                               select new GenericSubmissionValueRow
-                                                         {
-                                                             GenericSubmissionId = submissionId,
-                                                             GenericSubmissionValueId = v.FieldValueId
-                                                         };
+                                              {
+                                                  GenericSubmissionId = submissionId,
+                                                  GenericSubmissionValueId = v.FieldValueId
+                                              };
 
                 var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 genericSubmissionValueRepository.Insert(genericValueSubmissions, null);
@@ -434,46 +434,46 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public void ExecuteForResults_GenericSubmission_DatabaseMatchesExpected()
         {
             var internalId = new Field
-                                 {
-                                     Name = "MERGE_Existing_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "MERGE_Existing_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "MERGE_Existing_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "MERGE_Existing_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "MERGE_NonExisting_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "MERGE_NonExisting_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "MERGE_NonExisting_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -489,11 +489,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
                                      ?? identityRepository.Save(
                                          new DomainIdentity(Environment.UserName)
-                                             {
-                                                 FirstName = "King",
-                                                 MiddleName = "T.",
-                                                 LastName = "Animal"
-                                             });
+                                         {
+                                             FirstName = "King",
+                                             MiddleName = "T.",
+                                             LastName = "Animal"
+                                         });
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = identityRepository.FirstOrDefault(
@@ -501,11 +501,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                           .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)))
                                   ?? identityRepository.Save(
                                       new DomainIdentity(domainIdentifier2)
-                                          {
-                                              FirstName = "Foo",
-                                              MiddleName = "J.",
-                                              LastName = "Bar"
-                                          });
+                                      {
+                                          FirstName = "Foo",
+                                          MiddleName = "J.",
+                                          LastName = "Bar"
+                                      });
 
                 // We will add to this submission later.
                 baselineSubmission = new GenericSubmission("My MERGE Submission", domainIdentity);
@@ -629,46 +629,46 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task InsertAsync_ListOfFields_DoesNotThrowException()
         {
             var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                              {
@@ -692,10 +692,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
-                                 {
-                                     Name = field.Name,
-                                     Description = field.Description
-                                 });
+                    {
+                        Name = field.Name,
+                        Description = field.Description
+                    });
 
                 var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
                 await fieldRepository.InsertAsync(fieldRows, null).ConfigureAwait(false); // Nothing special here
@@ -714,46 +714,46 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task InsertForResultsAsync_TableValueInsertForFieldsWithReturn_MatchesExpected()
         {
             var internalId = new Field
-                                 {
-                                     Name = "INS_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "INS_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "INS_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "INS_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "INS_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "INS_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "INS_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "INS_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "INS_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "INS_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "INS_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "INS_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "INS_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "INS_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var fields = new List<Field>
                              {
@@ -778,10 +778,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
-                             {
-                                 Name = field.Name,
-                                 Description = field.Description
-                             });
+                    {
+                        Name = field.Name,
+                        Description = field.Description
+                    });
 
                 var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
                 var actual = await fieldRepository.InsertForResultsAsync(fieldRows, null).ConfigureAwait(false);
@@ -825,46 +825,46 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                                 {
-                                     Name = "Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+                {
+                    Name = "Internal ID",
+                    Description = "Unique ID used internally"
+                };
 
                 var firstName = new Field
-                                {
-                                    Name = "First Name",
-                                    Description = "The person's first name"
-                                };
+                {
+                    Name = "First Name",
+                    Description = "The person's first name"
+                };
 
                 var lastName = new Field
-                               {
-                                   Name = "Last Name",
-                                   Description = "The person's last name"
-                               };
+                {
+                    Name = "Last Name",
+                    Description = "The person's last name"
+                };
 
                 var yearlyWage = new Field
-                                 {
-                                     Name = "Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+                {
+                    Name = "Yearly Wage",
+                    Description = "The base wage paid year over year."
+                };
 
                 var hireDate = new Field
-                               {
-                                   Name = "Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+                {
+                    Name = "Hire Date",
+                    Description = "The date and time of hire for the person"
+                };
 
                 var bonusTarget = new Field
-                                  {
-                                      Name = "Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+                {
+                    Name = "Bonus Target",
+                    Description = "The target bonus for the person"
+                };
 
                 var contactNumbers = new Field
-                                     {
-                                         Name = "Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+                {
+                    Name = "Contact Numbers",
+                    Description = "A list of contact numbers for the person in order of preference"
+                };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -915,11 +915,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueRow
-                                        {
-                                            FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                            LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                            LastModifiedTime = expected.SubmittedTime
-                                        };
+                                 {
+                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                     LastModifiedTime = expected.SubmittedTime
+                                 };
 
                 var insertedValues = fieldValueRepository.InsertForResults(
                         valuesList,
@@ -942,16 +942,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                           {
-                                               FieldValueElementId = e.FieldValueElementId,
-                                               FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                               Order = e.Order,
-                                               DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                               FloatElement = e.Element as double? ?? e.Element as float?,
-                                               IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                               MoneyElement = e.Element as decimal?,
-                                               TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                           }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
+                                    {
+                                        FieldValueElementId = e.FieldValueElementId,
+                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                        Order = e.Order,
+                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                        FloatElement = e.Element as double? ?? e.Element as float?,
+                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                        MoneyElement = e.Element as decimal?,
+                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                    }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
 
                 var insertedElements = fieldValueElementRepository.InsertForResults(
                         elementsList.Values,
@@ -1004,10 +1004,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues.Values
                                               select new GenericSubmissionValueRow
-                                                     {
-                                                         GenericSubmissionId = submissionId,
-                                                         GenericSubmissionValueId = v.FieldValueId
-                                                     };
+                                              {
+                                                  GenericSubmissionId = submissionId,
+                                                  GenericSubmissionValueId = v.FieldValueId
+                                              };
 
                 var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
                 await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
@@ -1026,46 +1026,46 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task ExecuteForResultsAsync_GenericSubmission_DatabaseMatchesExpected()
         {
             var internalId = new Field
-                                 {
-                                     Name = "MERGE_Existing_Internal ID",
-                                     Description = "Unique ID used internally"
-                                 };
+            {
+                Name = "MERGE_Existing_Internal ID",
+                Description = "Unique ID used internally"
+            };
 
             var firstName = new Field
-                                {
-                                    Name = "MERGE_Existing_First Name",
-                                    Description = "The person's first name"
-                                };
+            {
+                Name = "MERGE_Existing_First Name",
+                Description = "The person's first name"
+            };
 
             var lastName = new Field
-                               {
-                                   Name = "MERGE_Existing_Last Name",
-                                   Description = "The person's last name"
-                               };
+            {
+                Name = "MERGE_Existing_Last Name",
+                Description = "The person's last name"
+            };
 
             var yearlyWage = new Field
-                                 {
-                                     Name = "MERGE_Existing_Yearly Wage",
-                                     Description = "The base wage paid year over year."
-                                 };
+            {
+                Name = "MERGE_Existing_Yearly Wage",
+                Description = "The base wage paid year over year."
+            };
 
             var hireDate = new Field
-                               {
-                                   Name = "MERGE_NonExisting_Hire Date",
-                                   Description = "The date and time of hire for the person"
-                               };
+            {
+                Name = "MERGE_NonExisting_Hire Date",
+                Description = "The date and time of hire for the person"
+            };
 
             var bonusTarget = new Field
-                                  {
-                                      Name = "MERGE_NonExisting_Bonus Target",
-                                      Description = "The target bonus for the person"
-                                  };
+            {
+                Name = "MERGE_NonExisting_Bonus Target",
+                Description = "The target bonus for the person"
+            };
 
             var contactNumbers = new Field
-                                     {
-                                         Name = "MERGE_NonExisting_Contact Numbers",
-                                         Description = "A list of contact numbers for the person in order of preference"
-                                     };
+            {
+                Name = "MERGE_NonExisting_Contact Numbers",
+                Description = "A list of contact numbers for the person in order of preference"
+            };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -1225,10 +1225,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
             var fieldItems = from f in fields
                              select new FieldRow
-                                        {
-                                            Name = f.Name,
-                                            Description = f.Description
-                                        };
+                             {
+                                 Name = f.Name,
+                                 Description = f.Description
+                             };
 
             var transaction = provider.BeginTransaction();
 
@@ -1260,11 +1260,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
                               select new FieldValueTableTypeRow
-                                         {
-                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                             LastModifiedTime = v.LastModifiedTime
-                                         };
+                              {
+                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                  LastModifiedTime = v.LastModifiedTime
+                              };
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
@@ -1294,16 +1294,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
                                  select new FieldValueElementTableTypeRow
-                                            {
-                                                FieldValueElementId = e.FieldValueElementId,
-                                                FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                                Order = e.Order,
-                                                DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                                FloatElement = e.Element as double? ?? e.Element as float?,
-                                                IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                                MoneyElement = e.Element as decimal?,
-                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                            }).ToList();
+                                 {
+                                     FieldValueElementId = e.FieldValueElementId,
+                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                     Order = e.Order,
+                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                     FloatElement = e.Element as double? ?? e.Element as float?,
+                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                     MoneyElement = e.Element as decimal?,
+                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                 }).ToList();
 
             var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
             var mergedValueElements = fieldValueElementRepository.InsertForResults(
@@ -1359,10 +1359,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues.Values
                                           select new GenericSubmissionValueTableTypeRow
-                                                     {
-                                                         GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                                     };
+                                          {
+                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                          };
 
             var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
             genericSubmissionValueRepository.Insert(genericValueSubmissions, null);
@@ -1384,10 +1384,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
             var fieldItems = from f in fields
                              select new FieldRow
-                                    {
-                                        Name = f.Name,
-                                        Description = f.Description
-                                    };
+                             {
+                                 Name = f.Name,
+                                 Description = f.Description
+                             };
 
             var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
 
@@ -1419,11 +1419,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
                               select new FieldValueTableTypeRow
-                                     {
-                                         FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                         LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                         LastModifiedTime = v.LastModifiedTime
-                                     };
+                              {
+                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                  LastModifiedTime = v.LastModifiedTime
+                              };
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
@@ -1453,16 +1453,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
                                  select new FieldValueElementTableTypeRow
-                                        {
-                                            FieldValueElementId = e.FieldValueElementId,
-                                            FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                            Order = e.Order,
-                                            DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                            FloatElement = e.Element as double? ?? e.Element as float?,
-                                            IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                            MoneyElement = e.Element as decimal?,
-                                            TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                        }).ToList();
+                                 {
+                                     FieldValueElementId = e.FieldValueElementId,
+                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                     Order = e.Order,
+                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                     FloatElement = e.Element as double? ?? e.Element as float?,
+                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                     MoneyElement = e.Element as decimal?,
+                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                 }).ToList();
 
             var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
             var mergedValueElements = (await fieldValueElementRepository.InsertForResultsAsync(
@@ -1523,10 +1523,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues.Values
                                           select new GenericSubmissionValueTableTypeRow
-                                                 {
-                                                     GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                                     GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                                 };
+                                          {
+                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                          };
 
             var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
             await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);

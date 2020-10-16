@@ -54,31 +54,31 @@ namespace Startitecture.Orm.Mapper.Tests
         public static ComplexFlatRow CreateFakeComplexRow()
         {
             return new ComplexFlatRow
-                       {
-                           CreatedByDescription = MyString, 
-                           CreatedByFakeMultiReferenceEntityId = MyInt, 
-                           CreatedByUniqueName = MyString, 
-                           UniqueName = MyString, 
-                           FakeSubEntityId = MyInt, 
-                           FakeSubSubEntityId = MyInt, 
-                           ModifiedByUniqueName = MyString, 
-                           ModifiedTime = MyDateTimeOffset, 
-                           Description = MyString, 
-                           FakeSubSubEntityUniqueName = MyString, 
-                           FakeEnumerationId = MyInt, 
-                           CreationTime = MyDateTimeOffset, 
-                           FakeSubEntityUniqueName = MyString, 
-                           FakeDependentEntityDependentTimeValue = MyNullableDateTimeOffset, 
-                           FakeSubEntityUniqueOtherId = MyShort, 
-                           FakeOtherEnumerationId = MyInt, 
-                           FakeSubSubEntityDescription = MyString, 
-                           FakeDependentEntityId = MyNullableInt, 
-                           FakeSubEntityDescription = MyString, 
-                           FakeDependentEntityDependentIntegerValue = MyNullableInt, 
-                           ModifiedByDescription = MyString, 
-                           ModifiedByFakeMultiReferenceEntityId = MyInt, 
-                           FakeComplexEntityId = MyInt
-                       };
+            {
+                CreatedByDescription = MyString,
+                CreatedByFakeMultiReferenceEntityId = MyInt,
+                CreatedByUniqueName = MyString,
+                UniqueName = MyString,
+                FakeSubEntityId = MyInt,
+                FakeSubSubEntityId = MyInt,
+                ModifiedByUniqueName = MyString,
+                ModifiedTime = MyDateTimeOffset,
+                Description = MyString,
+                FakeSubSubEntityUniqueName = MyString,
+                FakeEnumerationId = MyInt,
+                CreationTime = MyDateTimeOffset,
+                FakeSubEntityUniqueName = MyString,
+                FakeDependentEntityDependentTimeValue = MyNullableDateTimeOffset,
+                FakeSubEntityUniqueOtherId = MyShort,
+                FakeOtherEnumerationId = MyInt,
+                FakeSubSubEntityDescription = MyString,
+                FakeDependentEntityId = MyNullableInt,
+                FakeSubEntityDescription = MyString,
+                FakeDependentEntityDependentIntegerValue = MyNullableInt,
+                ModifiedByDescription = MyString,
+                ModifiedByFakeMultiReferenceEntityId = MyInt,
+                FakeComplexEntityId = MyInt
+            };
         }
 
         /// <summary>
@@ -95,39 +95,39 @@ namespace Startitecture.Orm.Mapper.Tests
             var createdBy = new MultiReferenceRow { Description = MyString, FakeMultiReferenceEntityId = MyInt, UniqueName = MyString };
             var fakeSubSubEntity = new SubSubRow { FakeSubSubEntityId = MyInt, UniqueName = MyString, Description = MyString };
             var fakeSubEntity = new SubRow
-                                    {
-                                        FakeSubEntityId = MyInt,
-                                        FakeSubSubEntityId = MyInt,
-                                        SubSubEntity = fakeSubSubEntity,
-                                        UniqueName = MyString,
-                                        UniqueOtherId = MyShort,
-                                        Description = MyString
-                                    };
+            {
+                FakeSubEntityId = MyInt,
+                FakeSubSubEntityId = MyInt,
+                SubSubEntity = fakeSubSubEntity,
+                UniqueName = MyString,
+                UniqueOtherId = MyShort,
+                Description = MyString
+            };
 
             var modifiedBy = new MultiReferenceRow { FakeMultiReferenceEntityId = MyInt, Description = MyString, UniqueName = MyString };
 
             var fakeDependentEntity = new DependentRow
-                                          {
-                                              FakeDependentEntityId = MyInt,
-                                              DependentIntegerValue = MyInt,
-                                              DependentTimeValue = MyDateTimeOffset
-                                          };
+            {
+                FakeDependentEntityId = MyInt,
+                DependentIntegerValue = MyInt,
+                DependentTimeValue = MyDateTimeOffset
+            };
 
             return new ComplexRaisedRow
-                       {
-                           CreatedBy = createdBy,
-                           UniqueName = MyString,
-                           FakeSubEntityId = MyInt,
-                           SubEntity = fakeSubEntity,
-                           ModifiedBy = modifiedBy,
-                           DependentEntity = withDependentEntity ? fakeDependentEntity : null,
-                           ModifiedTime = MyDateTimeOffset,
-                           Description = MyString,
-                           FakeEnumerationId = MyInt,
-                           CreationTime = MyDateTimeOffset,
-                           FakeOtherEnumerationId = MyInt,
-                           ComplexEntityId = MyInt
-                       };
+            {
+                CreatedBy = createdBy,
+                UniqueName = MyString,
+                FakeSubEntityId = MyInt,
+                SubEntity = fakeSubEntity,
+                ModifiedBy = modifiedBy,
+                DependentEntity = withDependentEntity ? fakeDependentEntity : null,
+                ModifiedTime = MyDateTimeOffset,
+                Description = MyString,
+                FakeEnumerationId = MyInt,
+                CreationTime = MyDateTimeOffset,
+                FakeOtherEnumerationId = MyInt,
+                ComplexEntityId = MyInt
+            };
         }
     }
 }

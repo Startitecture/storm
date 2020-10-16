@@ -16,7 +16,6 @@ namespace Startitecture.Orm.Schema.Tests
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
-    using System.Runtime.Caching;
 
     using JetBrains.Annotations;
 
@@ -33,16 +32,6 @@ namespace Startitecture.Orm.Schema.Tests
     public class DataAnnotationsDefinitionProviderTests
     {
         /// <summary>
-        /// The cache lock.
-        /// </summary>
-        private static readonly object CacheLock = new object();
-
-        /// <summary>
-        /// The type name policy.
-        /// </summary>
-        private static readonly CacheItemPolicy ItemPolicy = new CacheItemPolicy { AbsoluteExpiration = ObjectCache.InfiniteAbsoluteExpiration };
-
-        /// <summary>
         /// The get entity reference test.
         /// </summary>
         [TestMethod]
@@ -51,11 +40,11 @@ namespace Startitecture.Orm.Schema.Tests
             var target = new DataAnnotationsDefinitionProvider();
             Expression<Func<ComplexRaisedRow, object>> expression = row => row.FakeOtherEnumerationId;
             var expected = new EntityReference
-                               {
-                                   ContainerType = null,
-                                   EntityType = typeof(ComplexRaisedRow),
-                                   EntityAlias = null
-                               };
+            {
+                ContainerType = null,
+                EntityType = typeof(ComplexRaisedRow),
+                EntityAlias = null
+            };
             var actual = target.GetEntityReference(expression);
             Assert.AreEqual(expected, actual);
         }
@@ -69,11 +58,11 @@ namespace Startitecture.Orm.Schema.Tests
             var target = new DataAnnotationsDefinitionProvider();
             Expression<Func<ComplexRaisedRow, object>> expression = row => row.SubEntity.FakeSubSubEntityId;
             var expected = new EntityReference
-                               {
-                                   ContainerType = null,
-                                   EntityType = typeof(SubRow),
-                                   EntityAlias = nameof(ComplexRaisedRow.SubEntity)
-                               };
+            {
+                ContainerType = null,
+                EntityType = typeof(SubRow),
+                EntityAlias = nameof(ComplexRaisedRow.SubEntity)
+            };
 
             var actual = target.GetEntityReference(expression);
             Assert.AreEqual(expected, actual);
@@ -88,11 +77,11 @@ namespace Startitecture.Orm.Schema.Tests
             var target = new DataAnnotationsDefinitionProvider();
             Expression<Func<ComplexFlatRow, object>> expression = row => row.FakeSubEntityUniqueName;
             var expected = new EntityReference
-                               {
-                                   ContainerType = null,
-                                   EntityType = typeof(SubRow),
-                                   EntityAlias = null
-                               };
+            {
+                ContainerType = null,
+                EntityType = typeof(SubRow),
+                EntityAlias = null
+            };
 
             var actual = target.GetEntityReference(expression);
             Assert.AreEqual(expected, actual);
@@ -107,11 +96,11 @@ namespace Startitecture.Orm.Schema.Tests
             var target = new DataAnnotationsDefinitionProvider();
             Expression<Func<ComplexFlatRow, object>> expression = row => row.CreatedByUniqueName;
             var expected = new EntityReference
-                               {
-                                   ContainerType = null,
-                                   EntityType = typeof(MultiReferenceRow),
-                                   EntityAlias = "CreatedBy"
-                               };
+            {
+                ContainerType = null,
+                EntityType = typeof(MultiReferenceRow),
+                EntityAlias = "CreatedBy"
+            };
 
             var actual = target.GetEntityReference(expression);
             Assert.AreEqual(expected, actual);
@@ -125,11 +114,11 @@ namespace Startitecture.Orm.Schema.Tests
         {
             var target = new DataAnnotationsDefinitionProvider();
             var expected = new EntityReference
-                               {
-                                   ContainerType = null,
-                                   EntityType = typeof(ComplexRaisedRow),
-                                   EntityAlias = null
-                               };
+            {
+                ContainerType = null,
+                EntityType = typeof(ComplexRaisedRow),
+                EntityAlias = null
+            };
             var actual = target.GetEntityReference(
                 typeof(ComplexRaisedRow).GetProperty(nameof(ComplexRaisedRow.FakeOtherEnumerationId)) ?? throw new InvalidOperationException());
 
@@ -144,11 +133,11 @@ namespace Startitecture.Orm.Schema.Tests
         {
             var target = new DataAnnotationsDefinitionProvider();
             var expected = new EntityReference
-                               {
-                                   ContainerType = null,
-                                   EntityType = typeof(SubRow),
-                                   EntityAlias = null
-                               };
+            {
+                ContainerType = null,
+                EntityType = typeof(SubRow),
+                EntityAlias = null
+            };
 
             var actual = target.GetEntityReference(
                 typeof(ComplexFlatRow).GetProperty(nameof(ComplexFlatRow.FakeSubEntityUniqueName)) ?? throw new InvalidOperationException());
@@ -164,11 +153,11 @@ namespace Startitecture.Orm.Schema.Tests
         {
             var target = new DataAnnotationsDefinitionProvider();
             var expected = new EntityReference
-                               {
-                                   ContainerType = null,
-                                   EntityType = typeof(MultiReferenceRow),
-                                   EntityAlias = "CreatedBy"
-                               };
+            {
+                ContainerType = null,
+                EntityType = typeof(MultiReferenceRow),
+                EntityAlias = "CreatedBy"
+            };
 
             var actual = target.GetEntityReference(
                 typeof(ComplexFlatRow).GetProperty(nameof(ComplexFlatRow.CreatedByUniqueName)) ?? throw new InvalidOperationException());
@@ -192,11 +181,11 @@ namespace Startitecture.Orm.Schema.Tests
 
             var actual = target.GetEntityLocation(
                 new EntityReference
-                    {
-                        ContainerType = null,
-                        EntityType = typeof(SubRow),
-                        EntityAlias = null
-                    });
+                {
+                    ContainerType = null,
+                    EntityType = typeof(SubRow),
+                    EntityAlias = null
+                });
 
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
@@ -217,11 +206,11 @@ namespace Startitecture.Orm.Schema.Tests
 
             var actual = target.GetEntityLocation(
                 new EntityReference
-                    {
-                        ContainerType = null,
-                        EntityType = typeof(MultiReferenceRow),
-                        EntityAlias = "CreatedBy"
-                    });
+                {
+                    ContainerType = null,
+                    EntityType = typeof(MultiReferenceRow),
+                    EntityAlias = "CreatedBy"
+                });
 
             Assert.AreEqual(expected, actual, string.Join(Environment.NewLine, expected.GetDifferences(actual)));
         }
@@ -249,8 +238,12 @@ namespace Startitecture.Orm.Schema.Tests
         /// </returns>
         private static IEnumerable<EntityAttributeDefinition> GetAttributeDefinitions(Type entityType)
         {
-            var entityReference = new EntityReference { EntityType = entityType };
-            var entityLocation = GetEntityLocation(entityReference);
+            var entityReference = new EntityReference
+                                  {
+                                      EntityType = entityType
+                                  };
+
+            var entityLocation = GetEntityLocationByReference(entityReference);
 
             var entityPath = new LinkedList<EntityLocation>();
             entityPath.AddLast(entityLocation);
@@ -280,13 +273,13 @@ namespace Startitecture.Orm.Schema.Tests
                 {
                     attributeTypes |= EntityAttributeTypes.ExplicitRelatedAttribute;
                     var relatedEntityReference = new EntityReference
-                                                     {
-                                                         EntityType = attributeReference.EntityReference.EntityType,
-                                                         ContainerType = entityType,
-                                                         EntityAlias = attributeReference.EntityReference.EntityAlias
-                                                     };
+                    {
+                        EntityType = attributeReference.EntityReference.EntityType,
+                        ContainerType = entityType,
+                        EntityAlias = attributeReference.EntityReference.EntityAlias
+                    };
 
-                    var relatedLocation = GetEntityLocation(relatedEntityReference);
+                    var relatedLocation = GetEntityLocationByReference(relatedEntityReference);
 
                     // This is not a physical object on the POCO, so we indicate it as virtual.
                     relatedLocation.IsVirtual = true;
@@ -359,13 +352,13 @@ namespace Startitecture.Orm.Schema.Tests
         {
             var entityType = entityProperty.PropertyType;
             var relationReference = new EntityReference
-                                        {
-                                            EntityType = entityType,
-                                            ContainerType = entityPath.First?.Value.EntityType,
-                                            EntityAlias = entityProperty.Name
-                                        };
+            {
+                EntityType = entityType,
+                ContainerType = entityPath.First?.Value.EntityType,
+                EntityAlias = entityProperty.Name
+            };
 
-            var relationLocation = GetEntityLocation(relationReference);
+            var relationLocation = GetEntityLocationByReference(relationReference);
 
             entityPath.AddLast(relationLocation);
 
@@ -410,7 +403,7 @@ namespace Startitecture.Orm.Schema.Tests
                 var attributeReference = GetRelatedEntityAttributeReference(propertyInfo);
 
                 // This is not a physical object on the POCO, so we indicate it as virtual.
-                var relatedLocation = GetEntityLocation(attributeReference.EntityReference);
+                var relatedLocation = GetEntityLocationByReference(attributeReference.EntityReference);
                 relatedLocation.IsVirtual = true;
 
                 entityPath.AddLast(relatedLocation);
@@ -430,7 +423,7 @@ namespace Startitecture.Orm.Schema.Tests
 
                 yield return entityAttributeDefinition;
             }
-            
+
             foreach (var propertyInfo in GetRelationPropertyInfos(entityProperties))
             {
                 var attributeName = GetPhysicalName(propertyInfo);
@@ -470,28 +463,6 @@ namespace Startitecture.Orm.Schema.Tests
         }
 
         /// <summary>
-        /// Gets the entity location.
-        /// </summary>
-        /// <param name="entityReference">
-        /// The entity reference.
-        /// </param>
-        /// <returns>
-        /// The <see cref="EntityLocation"/>.
-        /// </returns>
-        private static EntityLocation GetEntityLocation(EntityReference entityReference)
-        {
-            var cacheKey = $"{typeof(IEntityDefinition).FullName}:{entityReference}";
-            var result = MemoryCache.Default.GetOrLazyAddExistingWithResult(
-                CacheLock,
-                cacheKey,
-                entityReference,
-                GetEntityLocationByReference,
-                ItemPolicy);
-
-            return result.Item;
-        }
-
-        /// <summary>
         /// Gets the filtered entity properties.
         /// </summary>
         /// <param name="entityType">
@@ -519,14 +490,18 @@ namespace Startitecture.Orm.Schema.Tests
         private static AttributeReference GetRelatedEntityAttributeReference(MemberInfo propertyInfo)
         {
             var relatedEntity = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>();
-            var relatedEntityReference = new EntityReference { EntityType = relatedEntity?.EntityType, EntityAlias = relatedEntity?.EntityAlias };
+            var relatedEntityReference = new EntityReference
+                                         {
+                                             EntityType = relatedEntity?.EntityType,
+                                             EntityAlias = relatedEntity?.EntityAlias
+                                         };
 
             return new AttributeReference
-                       {
-                           EntityReference = relatedEntityReference,
-                           Name = propertyInfo.Name,
-                           PhysicalName = relatedEntity?.PhysicalName ?? propertyInfo.Name
-                       };
+            {
+                EntityReference = relatedEntityReference,
+                Name = propertyInfo.Name,
+                PhysicalName = relatedEntity?.PhysicalName ?? propertyInfo.Name
+            };
         }
 
         /// <summary>
@@ -575,21 +550,21 @@ namespace Startitecture.Orm.Schema.Tests
                     continue;
                 }
 
-                // Ignore collections and interfaces. 
+                // Ignore collections and interfaces.
                 if (propertyInfo.PropertyType.IsInterface || propertyInfo.PropertyType.IsSubclassOf(typeof(IEnumerable<>)))
                 {
                     continue;
                 }
 
                 yield return new AttributeReference
-                                 {
-                                     EntityReference = GetEntityReference(propertyInfo),
-                                     Name = propertyInfo.Name,
-                                     PropertyInfo = propertyInfo,
-                                     PhysicalName = GetPhysicalName(propertyInfo),
-                                     IsRelatedAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>() != null,
-                                     IsRelation = propertyInfo.GetCustomAttribute<RelationAttribute>() != null
-                                 };
+                {
+                    EntityReference = GetEntityReference(propertyInfo),
+                    Name = propertyInfo.Name,
+                    PropertyInfo = propertyInfo,
+                    PhysicalName = GetPhysicalName(propertyInfo),
+                    IsRelatedAttribute = propertyInfo.GetCustomAttribute<RelatedEntityAttribute>() != null,
+                    IsRelation = propertyInfo.GetCustomAttribute<RelationAttribute>() != null
+                };
             }
         }
 
@@ -609,12 +584,23 @@ namespace Startitecture.Orm.Schema.Tests
 
             if (relatedEntityAttribute != null)
             {
-                return new EntityReference { EntityType = relatedEntityAttribute.EntityType, EntityAlias = relatedEntityAttribute.EntityAlias };
+                return new EntityReference
+                       {
+                           EntityType = relatedEntityAttribute.EntityType,
+                           EntityAlias = relatedEntityAttribute.EntityAlias
+                       };
             }
 
             return relationAttribute != null
-                       ? new EntityReference { EntityType = propertyInfo.PropertyType, EntityAlias = propertyInfo.Name }
-                       : new EntityReference { EntityType = propertyInfo.DeclaringType };
+                       ? new EntityReference
+                         {
+                             EntityType = propertyInfo.PropertyType,
+                             EntityAlias = propertyInfo.Name
+                         }
+                       : new EntityReference
+                         {
+                             EntityType = propertyInfo.DeclaringType
+                         };
         }
 
         /// <summary>
@@ -645,7 +631,12 @@ namespace Startitecture.Orm.Schema.Tests
             else if (relationAttribute != null)
             {
                 // Treat as an entity location.
-                var entityReference = new EntityReference { EntityType = entityProperty.PropertyType, EntityAlias = entityProperty.Name };
+                var entityReference = new EntityReference
+                                      {
+                                          EntityType = entityProperty.PropertyType,
+                                          EntityAlias = entityProperty.Name
+                                      };
+
                 physicalName = GetEntityLocationByReference(entityReference).Name;
             }
 
