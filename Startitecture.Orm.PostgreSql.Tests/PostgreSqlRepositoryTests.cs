@@ -121,9 +121,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         Description = field.Description
                     });
 
-                var transaction = provider.BeginTransaction();
-                fieldRepository.Insert(fieldRows, null); // Nothing special here
-                transaction.Commit();
+                using (var transaction = provider.BeginTransaction())
+                {
+                    fieldRepository.Insert(fieldRows, null); // Nothing special here
+                    transaction.Commit();
+                }
             }
         }
 
@@ -203,15 +205,17 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         Description = field.Description
                     });
 
-                var transaction = provider.BeginTransaction();
-                var actual = fieldRepository.InsertForResults(fieldRows, null);
-
-                foreach (var fieldRow in actual)
+                using (var transaction = provider.BeginTransaction())
                 {
-                    Assert.AreNotEqual(0, fieldRow.FieldId);
-                }
+                    var actual = fieldRepository.InsertForResults(fieldRows, null);
 
-                transaction.Commit();
+                    foreach (var fieldRow in actual)
+                    {
+                        Assert.AreNotEqual(0, fieldRow.FieldId);
+                    }
+
+                    transaction.Commit();
+                }
             }
         }
 
@@ -319,110 +323,112 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
-                var transaction = provider.BeginTransaction();
-                submissionRepository.Save(expected);
-
-                var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
-                Assert.AreNotEqual(0, submissionId);
-
-                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-
-                // Do the field values
-                var valuesList = from v in expected.SubmissionValues
-                                 select new FieldValueRow
-                                 {
-                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                     LastModifiedTime = expected.SubmittedTime
-                                 };
-
-                var insertedValues = fieldValueRepository.InsertForResults(
-                        valuesList,
-                        insert => insert.Returning(
-                            row => row.FieldValueId,
-                            row => row.FieldId,
-                            row => row.LastModifiedByDomainIdentifierId,
-                            row => row.LastModifiedTime))
-                    .ToDictionary(row => row.FieldId, row => row);
-
-                // Map back to the domain object if needed.
-                foreach (var value in expected.SubmissionValues.Where(value => value.FieldValueId.HasValue == false))
+                using (var transaction = provider.BeginTransaction())
                 {
-                    var input = insertedValues[value.Field.FieldId.GetValueOrDefault()];
-                    this.mapper.MapTo(input, value);
-                }
+                    submissionRepository.Save(expected);
 
-                var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+                    var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
+                    Assert.AreNotEqual(0, submissionId);
 
-                // Do the field value elements
-                var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
-                                    select new FieldValueElementTableTypeRow
-                                    {
-                                        FieldValueElementId = e.FieldValueElementId,
-                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                        Order = e.Order,
-                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                        FloatElement = e.Element as double? ?? e.Element as float?,
-                                        IntegerElement =
+                    var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+
+                    // Do the field values
+                    var valuesList = from v in expected.SubmissionValues
+                                     select new FieldValueRow
+                                            {
+                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                                LastModifiedTime = expected.SubmittedTime
+                                            };
+
+                    var insertedValues = fieldValueRepository.InsertForResults(
+                            valuesList,
+                            insert => insert.Returning(
+                                row => row.FieldValueId,
+                                row => row.FieldId,
+                                row => row.LastModifiedByDomainIdentifierId,
+                                row => row.LastModifiedTime))
+                        .ToDictionary(row => row.FieldId, row => row);
+
+                    // Map back to the domain object if needed.
+                    foreach (var value in expected.SubmissionValues.Where(value => value.FieldValueId.HasValue == false))
+                    {
+                        var input = insertedValues[value.Field.FieldId.GetValueOrDefault()];
+                        this.mapper.MapTo(input, value);
+                    }
+
+                    var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+
+                    // Do the field value elements
+                    var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
+                                        select new FieldValueElementTableTypeRow
+                                               {
+                                                   FieldValueElementId = e.FieldValueElementId,
+                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                   Order = e.Order,
+                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                   FloatElement = e.Element as double? ?? e.Element as float?,
+                                                   IntegerElement =
                                                        e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                        MoneyElement = e.Element as decimal?,
-                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                    }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
+                                                   MoneyElement = e.Element as decimal?,
+                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                               }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
 
-                var insertedElements = fieldValueElementRepository.InsertForResults(
-                        elementsList.Values,
-                        insert => insert.Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
-                    .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
+                    var insertedElements = fieldValueElementRepository.InsertForResults(
+                            elementsList.Values,
+                            insert => insert.Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
+                        .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
 
-                foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
-                {
-                    var key = new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order);
-                    var input = insertedElements[key];
-                    this.mapper.MapTo(input, element);
-                    elementsList[key].FieldValueElementId = input.FieldValueElementId;
+                    foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
+                    {
+                        var key = new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order);
+                        var input = insertedElements[key];
+                        this.mapper.MapTo(input, element);
+                        elementsList[key].FieldValueElementId = input.FieldValueElementId;
+                    }
+
+                    var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                    dateElementRepository.Insert(
+                        elementsList.Values.Where(row => row.DateElement.HasValue),
+                        insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
+
+                    var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                    floatElementRepository.Insert(
+                        elementsList.Values.Where(row => row.FloatElement.HasValue),
+                        insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
+
+                    var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                    integerElementRepository.Insert(
+                        elementsList.Values.Where(row => row.IntegerElement.HasValue),
+                        insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
+
+                    var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                    moneyElementRepository.Insert(
+                        elementsList.Values.Where(row => row.MoneyElement.HasValue),
+                        insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
+
+                    var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                    textElementRepository.Insert(
+                        elementsList.Values.Where(row => row.TextElement != null),
+                        insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement));
+
+                    // Attach the values to the submission
+                    var genericValueSubmissions = from v in insertedValues.Values
+                                                  select new GenericSubmissionValueRow
+                                                         {
+                                                             GenericSubmissionId = submissionId,
+                                                             GenericSubmissionValueId = v.FieldValueId
+                                                         };
+
+                    var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                    genericSubmissionValueRepository.Insert(genericValueSubmissions, null);
+                    transaction.Commit();
                 }
-
-                var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-                dateElementRepository.Insert(
-                    elementsList.Values.Where(row => row.DateElement.HasValue),
-                    insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
-
-                var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-                floatElementRepository.Insert(
-                    elementsList.Values.Where(row => row.FloatElement.HasValue),
-                    insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
-
-                var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-                integerElementRepository.Insert(
-                    elementsList.Values.Where(row => row.IntegerElement.HasValue),
-                    insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
-
-                var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-                moneyElementRepository.Insert(
-                    elementsList.Values.Where(row => row.MoneyElement.HasValue),
-                    insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
-
-                var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-                textElementRepository.Insert(
-                    elementsList.Values.Where(row => row.TextElement != null),
-                    insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement));
-
-                // Attach the values to the submission
-                var genericValueSubmissions = from v in insertedValues.Values
-                                              select new GenericSubmissionValueRow
-                                              {
-                                                  GenericSubmissionId = submissionId,
-                                                  GenericSubmissionValueId = v.FieldValueId
-                                              };
-
-                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                genericSubmissionValueRepository.Insert(genericValueSubmissions, null);
-                transaction.Commit();
             }
         }
 
@@ -697,9 +703,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         Description = field.Description
                     });
 
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
-                await fieldRepository.InsertAsync(fieldRows, null).ConfigureAwait(false); // Nothing special here
-                await transaction.CommitAsync().ConfigureAwait(false);
+                await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
+                {
+                    await fieldRepository.InsertAsync(fieldRows, null).ConfigureAwait(false); // Nothing special here
+                    await transaction.CommitAsync().ConfigureAwait(false);
+                }
             }
         }
 
@@ -778,20 +786,22 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
-                    {
-                        Name = field.Name,
-                        Description = field.Description
-                    });
+                             {
+                                 Name = field.Name,
+                                 Description = field.Description
+                             });
 
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
-                var actual = await fieldRepository.InsertForResultsAsync(fieldRows, null).ConfigureAwait(false);
-
-                foreach (var fieldRow in actual)
+                await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
                 {
-                    Assert.AreNotEqual(0, fieldRow.FieldId);
-                }
+                    var actual = await fieldRepository.InsertForResultsAsync(fieldRows, null).ConfigureAwait(false);
 
-                await transaction.CommitAsync().ConfigureAwait(false);
+                    foreach (var fieldRow in actual)
+                    {
+                        Assert.AreNotEqual(0, fieldRow.FieldId);
+                    }
+
+                    await transaction.CommitAsync().ConfigureAwait(false);
+                }
             }
         }
 
@@ -904,114 +914,117 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
-                await submissionRepository.SaveAsync(expected).ConfigureAwait(false);
-
-                var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
-                Assert.AreNotEqual(0, submissionId);
-
-                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-
-                // Do the field values
-                var valuesList = from v in expected.SubmissionValues
-                                 select new FieldValueRow
-                                 {
-                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                     LastModifiedTime = expected.SubmittedTime
-                                 };
-
-                var insertedValues = fieldValueRepository.InsertForResults(
-                        valuesList,
-                        insert => insert.Returning(
-                            row => row.FieldValueId,
-                            row => row.FieldId,
-                            row => row.LastModifiedByDomainIdentifierId,
-                            row => row.LastModifiedTime))
-                    .ToDictionary(row => row.FieldId, row => row);
-
-                // Map back to the domain object if needed.
-                foreach (var value in expected.SubmissionValues.Where(value => value.FieldValueId.HasValue == false))
+                await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
                 {
-                    var input = insertedValues[value.Field.FieldId.GetValueOrDefault()];
-                    this.mapper.MapTo(input, value);
+                    await submissionRepository.SaveAsync(expected).ConfigureAwait(false);
+
+                    var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
+                    Assert.AreNotEqual(0, submissionId);
+
+                    var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+
+                    // Do the field values
+                    var valuesList = from v in expected.SubmissionValues
+                                     select new FieldValueRow
+                                            {
+                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                                LastModifiedTime = expected.SubmittedTime
+                                            };
+
+                    var insertedValues = fieldValueRepository.InsertForResults(
+                            valuesList,
+                            insert => insert.Returning(
+                                row => row.FieldValueId,
+                                row => row.FieldId,
+                                row => row.LastModifiedByDomainIdentifierId,
+                                row => row.LastModifiedTime))
+                        .ToDictionary(row => row.FieldId, row => row);
+
+                    // Map back to the domain object if needed.
+                    foreach (var value in expected.SubmissionValues.Where(value => value.FieldValueId.HasValue == false))
+                    {
+                        var input = insertedValues[value.Field.FieldId.GetValueOrDefault()];
+                        this.mapper.MapTo(input, value);
+                    }
+
+                    var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+
+                    // Do the field value elements
+                    var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
+                                        select new FieldValueElementTableTypeRow
+                                               {
+                                                   FieldValueElementId = e.FieldValueElementId,
+                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                   Order = e.Order,
+                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                   FloatElement = e.Element as double? ?? e.Element as float?,
+                                                   IntegerElement =
+                                                       e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                   MoneyElement = e.Element as decimal?,
+                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                               }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
+
+                    var insertedElements = fieldValueElementRepository.InsertForResults(
+                            elementsList.Values,
+                            insert => insert.Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
+                        .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
+
+                    foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
+                    {
+                        var key = new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order);
+                        var input = insertedElements[key];
+                        this.mapper.MapTo(input, element);
+                        elementsList[key].FieldValueElementId = input.FieldValueElementId;
+                    }
+
+                    var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                    await dateElementRepository.InsertAsync(
+                            elementsList.Values.Where(row => row.DateElement.HasValue),
+                            insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement))
+                        .ConfigureAwait(false);
+
+                    var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                    await floatElementRepository.InsertAsync(
+                            elementsList.Values.Where(row => row.FloatElement.HasValue),
+                            insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement))
+                        .ConfigureAwait(false);
+
+                    var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                    await integerElementRepository.InsertAsync(
+                            elementsList.Values.Where(row => row.IntegerElement.HasValue),
+                            insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement))
+                        .ConfigureAwait(false);
+
+                    var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                    await moneyElementRepository.InsertAsync(
+                            elementsList.Values.Where(row => row.MoneyElement.HasValue),
+                            insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement))
+                        .ConfigureAwait(false);
+
+                    var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                    await textElementRepository.InsertAsync(
+                            elementsList.Values.Where(row => row.TextElement != null),
+                            insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement))
+                        .ConfigureAwait(false);
+
+                    // Attach the values to the submission
+                    var genericValueSubmissions = from v in insertedValues.Values
+                                                  select new GenericSubmissionValueRow
+                                                         {
+                                                             GenericSubmissionId = submissionId,
+                                                             GenericSubmissionValueId = v.FieldValueId
+                                                         };
+
+                    var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                    await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
+                    await transaction.CommitAsync().ConfigureAwait(false);
                 }
-
-                var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-
-                // Do the field value elements
-                var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
-                                    select new FieldValueElementTableTypeRow
-                                    {
-                                        FieldValueElementId = e.FieldValueElementId,
-                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                        Order = e.Order,
-                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                        FloatElement = e.Element as double? ?? e.Element as float?,
-                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                        MoneyElement = e.Element as decimal?,
-                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                    }).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
-
-                var insertedElements = fieldValueElementRepository.InsertForResults(
-                        elementsList.Values,
-                        insert => insert.Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
-                    .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order));
-
-                foreach (var element in expected.SubmissionValues.SelectMany(value => value.Elements))
-                {
-                    var key = new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order);
-                    var input = insertedElements[key];
-                    this.mapper.MapTo(input, element);
-                    elementsList[key].FieldValueElementId = input.FieldValueElementId;
-                }
-
-                var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-                await dateElementRepository.InsertAsync(
-                        elementsList.Values.Where(row => row.DateElement.HasValue),
-                        insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement))
-                    .ConfigureAwait(false);
-
-                var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-                await floatElementRepository.InsertAsync(
-                        elementsList.Values.Where(row => row.FloatElement.HasValue),
-                        insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement))
-                    .ConfigureAwait(false);
-
-                var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-                await integerElementRepository.InsertAsync(
-                        elementsList.Values.Where(row => row.IntegerElement.HasValue),
-                        insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement))
-                    .ConfigureAwait(false);
-
-                var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-                await moneyElementRepository.InsertAsync(
-                        elementsList.Values.Where(row => row.MoneyElement.HasValue),
-                        insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement))
-                    .ConfigureAwait(false);
-
-                var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-                await textElementRepository.InsertAsync(
-                        elementsList.Values.Where(row => row.TextElement != null),
-                        insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement))
-                    .ConfigureAwait(false);
-
-                // Attach the values to the submission
-                var genericValueSubmissions = from v in insertedValues.Values
-                                              select new GenericSubmissionValueRow
-                                              {
-                                                  GenericSubmissionId = submissionId,
-                                                  GenericSubmissionValueId = v.FieldValueId
-                                              };
-
-                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
-                await transaction.CommitAsync().ConfigureAwait(false);
             }
         }
 
@@ -1230,143 +1243,144 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                  Description = f.Description
                              };
 
-            var transaction = provider.BeginTransaction();
-
-            var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
-            var mergedFields = fieldRepository.InsertForResults(
-                    fieldItems,
-                    insert => insert.OnConflict(row => row.Name)
-                        .Upsert(row => row.Description)
-                        .Returning(row => row.FieldId, row => row.Name, row => row.Description))
-                .ToDictionary(row => row.Name, row => row);
-
-            foreach (var field in fields)
+            using (var transaction = provider.BeginTransaction())
             {
-                mergedFields.TryGetValue(field.Name, out var input);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
+                var mergedFields = fieldRepository.InsertForResults(
+                        fieldItems,
+                        insert => insert.OnConflict(row => row.Name)
+                            .Upsert(row => row.Description)
+                            .Returning(row => row.FieldId, row => row.Name, row => row.Description))
+                    .ToDictionary(row => row.Name, row => row);
 
-                // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
-                // aren't IDs for baseline fields.
-                if (input == null)
+                foreach (var field in fields)
                 {
-                    continue;
+                    mergedFields.TryGetValue(field.Name, out var input);
+
+                    // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
+                    // aren't IDs for baseline fields.
+                    if (input == null)
+                    {
+                        continue;
+                    }
+
+                    this.mapper.MapTo(input, field);
                 }
 
-                this.mapper.MapTo(input, field);
+                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
+                submissionRepository.Save(submission);
+
+                // Could be mapped as well.
+                var fieldValues = from v in submission.SubmissionValues
+                                  select new FieldValueTableTypeRow
+                                         {
+                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                             LastModifiedTime = v.LastModifiedTime
+                                         };
+
+                // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
+                // only inserted rows matched back to their original fields.
+                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+                var mergedFieldValues = fieldValueRepository.InsertForResults(
+                        fieldValues,
+                        insert => insert.OnConflict(row => row.FieldValueId)
+                            .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
+                            .Returning(
+                                row => row.FieldValueId,
+                                row => row.FieldId,
+                                row => row.LastModifiedByDomainIdentifierId,
+                                row => row.LastModifiedTime))
+                    .ToDictionary(row => row.FieldId, row => row);
+
+                Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
+
+                // Map back to the domain object. TODO: Automate?
+                foreach (var value in submission.SubmissionValues)
+                {
+                    var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
+                    this.mapper.MapTo(input, value);
+                    Assert.IsTrue(value.FieldValueId.HasValue);
+                }
+
+                // Now merge in the field value elements.
+                // Do the field value elements
+                var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
+                                     select new FieldValueElementTableTypeRow
+                                            {
+                                                FieldValueElementId = e.FieldValueElementId,
+                                                FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                Order = e.Order,
+                                                DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                FloatElement = e.Element as double? ?? e.Element as float?,
+                                                IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                MoneyElement = e.Element as decimal?,
+                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                            }).ToList();
+
+                var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+                var mergedValueElements = fieldValueElementRepository.InsertForResults(
+                        valueElements,
+                        insert => insert.OnConflict(row => row.FieldValueElementId)
+                            .Upsert(row => row.Order)
+                            .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
+                    .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
+
+                foreach (var element in valueElements)
+                {
+                    var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
+                    element.FieldValueElementId = input.FieldValueElementId;
+                    Assert.IsTrue(element.FieldValueElementId.HasValue);
+                }
+
+                // Note that we use the value elements for insertion because mergeValueElements will only have what is in the FieldValueElement row.
+                var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                dateElementRepository.Insert(
+                    valueElements.Where(row => row.DateElement.HasValue),
+                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                        .OnConflict(row => row.DateElementId)
+                        .Upsert(row => row.Value));
+
+                var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                floatElementRepository.Insert(
+                    valueElements.Where(row => row.FloatElement.HasValue),
+                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                        .OnConflict(row => row.FloatElementId)
+                        .Upsert(row => row.Value));
+
+                var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                integerElementRepository.Insert(
+                    valueElements.Where(row => row.IntegerElement.HasValue),
+                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                        .OnConflict(row => row.IntegerElementId)
+                        .Upsert(row => row.Value));
+
+                var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                moneyElementRepository.Insert(
+                    valueElements.Where(row => row.MoneyElement.HasValue),
+                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                        .OnConflict(row => row.MoneyElementId)
+                        .Upsert(row => row.Value));
+
+                var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                textElementRepository.Insert(
+                    valueElements.Where(row => row.TextElement != null),
+                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                        .OnConflict(row => row.TextElementId)
+                        .Upsert(row => row.Value));
+
+                // Attach the values to the submission
+                var genericValueSubmissions = from v in mergedFieldValues.Values
+                                              select new GenericSubmissionValueTableTypeRow
+                                                     {
+                                                         GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                                     };
+
+                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                genericSubmissionValueRepository.Insert(genericValueSubmissions, null);
+                transaction.Commit();
             }
-
-            var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-            submissionRepository.Save(submission);
-
-            // Could be mapped as well.
-            var fieldValues = from v in submission.SubmissionValues
-                              select new FieldValueTableTypeRow
-                              {
-                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                  LastModifiedTime = v.LastModifiedTime
-                              };
-
-            // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
-            // only inserted rows matched back to their original fields.
-            var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-            var mergedFieldValues = fieldValueRepository.InsertForResults(
-                    fieldValues,
-                    insert => insert.OnConflict(row => row.FieldValueId)
-                        .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
-                        .Returning(
-                            row => row.FieldValueId,
-                            row => row.FieldId,
-                            row => row.LastModifiedByDomainIdentifierId,
-                            row => row.LastModifiedTime))
-                .ToDictionary(row => row.FieldId, row => row);
-
-            Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
-
-            // Map back to the domain object. TODO: Automate?
-            foreach (var value in submission.SubmissionValues)
-            {
-                var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
-                this.mapper.MapTo(input, value);
-                Assert.IsTrue(value.FieldValueId.HasValue);
-            }
-
-            // Now merge in the field value elements.
-            // Do the field value elements
-            var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
-                                 select new FieldValueElementTableTypeRow
-                                 {
-                                     FieldValueElementId = e.FieldValueElementId,
-                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                     Order = e.Order,
-                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                     FloatElement = e.Element as double? ?? e.Element as float?,
-                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                     MoneyElement = e.Element as decimal?,
-                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                 }).ToList();
-
-            var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-            var mergedValueElements = fieldValueElementRepository.InsertForResults(
-                    valueElements,
-                    insert => insert.OnConflict(row => row.FieldValueElementId)
-                        .Upsert(row => row.Order)
-                        .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
-                .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
-
-            foreach (var element in valueElements)
-            {
-                var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
-                element.FieldValueElementId = input.FieldValueElementId;
-                Assert.IsTrue(element.FieldValueElementId.HasValue);
-            }
-
-            // Note that we use the value elements for insertion because mergeValueElements will only have what is in the FieldValueElement row.
-            var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-            dateElementRepository.Insert(
-                valueElements.Where(row => row.DateElement.HasValue),
-                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
-                    .OnConflict(row => row.DateElementId)
-                    .Upsert(row => row.Value));
-
-            var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-            floatElementRepository.Insert(
-                valueElements.Where(row => row.FloatElement.HasValue),
-                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
-                    .OnConflict(row => row.FloatElementId)
-                    .Upsert(row => row.Value));
-
-            var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-            integerElementRepository.Insert(
-                valueElements.Where(row => row.IntegerElement.HasValue),
-                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
-                    .OnConflict(row => row.IntegerElementId)
-                    .Upsert(row => row.Value));
-
-            var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-            moneyElementRepository.Insert(
-                valueElements.Where(row => row.MoneyElement.HasValue),
-                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
-                    .OnConflict(row => row.MoneyElementId)
-                    .Upsert(row => row.Value));
-
-            var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-            textElementRepository.Insert(
-                valueElements.Where(row => row.TextElement != null),
-                insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
-                    .OnConflict(row => row.TextElementId)
-                    .Upsert(row => row.Value));
-
-            // Attach the values to the submission
-            var genericValueSubmissions = from v in mergedFieldValues.Values
-                                          select new GenericSubmissionValueTableTypeRow
-                                          {
-                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                          };
-
-            var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-            genericSubmissionValueRepository.Insert(genericValueSubmissions, null);
-            transaction.Commit();
         }
 
         /// <summary>
@@ -1389,148 +1403,151 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                  Description = f.Description
                              };
 
-            var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
-
-            var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
-            var mergedFields = (await fieldRepository.InsertForResultsAsync(
-                                        fieldItems,
-                                        insert => insert.OnConflict(row => row.Name)
-                                            .Upsert(row => row.Description)
-                                            .Returning(row => row.FieldId, row => row.Name, row => row.Description))
-                                    .ConfigureAwait(false)).ToDictionary(row => row.Name, row => row);
-
-            foreach (var field in fields)
+            await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
             {
-                mergedFields.TryGetValue(field.Name, out var input);
+                var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
+                var mergedFields = (await fieldRepository.InsertForResultsAsync(
+                                            fieldItems,
+                                            insert => insert.OnConflict(row => row.Name)
+                                                .Upsert(row => row.Description)
+                                                .Returning(row => row.FieldId, row => row.Name, row => row.Description))
+                                        .ConfigureAwait(false)).ToDictionary(row => row.Name, row => row);
 
-                // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
-                // aren't IDs for baseline fields.
-                if (input == null)
+                foreach (var field in fields)
                 {
-                    continue;
+                    mergedFields.TryGetValue(field.Name, out var input);
+
+                    // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
+                    // aren't IDs for baseline fields.
+                    if (input == null)
+                    {
+                        continue;
+                    }
+
+                    this.mapper.MapTo(input, field);
                 }
 
-                this.mapper.MapTo(input, field);
+                var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
+                await submissionRepository.SaveAsync(submission).ConfigureAwait(false);
+
+                // Could be mapped as well.
+                var fieldValues = from v in submission.SubmissionValues
+                                  select new FieldValueTableTypeRow
+                                         {
+                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                             LastModifiedTime = v.LastModifiedTime
+                                         };
+
+                // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
+                // only inserted rows matched back to their original fields.
+                var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+                var mergedFieldValues = (await fieldValueRepository.InsertForResultsAsync(
+                                                 fieldValues,
+                                                 insert => insert.OnConflict(row => row.FieldValueId)
+                                                     .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
+                                                     .Returning(
+                                                         row => row.FieldValueId,
+                                                         row => row.FieldId,
+                                                         row => row.LastModifiedByDomainIdentifierId,
+                                                         row => row.LastModifiedTime))
+                                             .ConfigureAwait(false)).ToDictionary(row => row.FieldId, row => row);
+
+                Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
+
+                // Map back to the domain object. TODO: Automate?
+                foreach (var value in submission.SubmissionValues)
+                {
+                    var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
+                    this.mapper.MapTo(input, value);
+                    Assert.IsTrue(value.FieldValueId.HasValue);
+                }
+
+                // Now merge in the field value elements.
+                // Do the field value elements
+                var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
+                                     select new FieldValueElementTableTypeRow
+                                            {
+                                                FieldValueElementId = e.FieldValueElementId,
+                                                FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                Order = e.Order,
+                                                DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                FloatElement = e.Element as double? ?? e.Element as float?,
+                                                IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                MoneyElement = e.Element as decimal?,
+                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                            }).ToList();
+
+                var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+                var mergedValueElements = (await fieldValueElementRepository.InsertForResultsAsync(
+                                                   valueElements,
+                                                   insert => insert.OnConflict(row => row.FieldValueElementId)
+                                                       .Upsert(row => row.Order)
+                                                       .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
+                                               .ConfigureAwait(false)).ToDictionary(
+                    row => new Tuple<long, int>(row.FieldValueId, row.Order),
+                    row => row);
+
+                foreach (var element in valueElements)
+                {
+                    var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
+                    element.FieldValueElementId = input.FieldValueElementId;
+                    Assert.IsTrue(element.FieldValueElementId.HasValue);
+                }
+
+                // Note that we use the value elements for insertion because mergeValueElements will only have what is in the FieldValueElement row.
+                var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                await dateElementRepository.InsertAsync(
+                        valueElements.Where(row => row.DateElement.HasValue),
+                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                            .OnConflict(row => row.DateElementId)
+                            .Upsert(row => row.Value))
+                    .ConfigureAwait(false);
+
+                var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                await floatElementRepository.InsertAsync(
+                        valueElements.Where(row => row.FloatElement.HasValue),
+                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                            .OnConflict(row => row.FloatElementId)
+                            .Upsert(row => row.Value))
+                    .ConfigureAwait(false);
+
+                var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                await integerElementRepository.InsertAsync(
+                        valueElements.Where(row => row.IntegerElement.HasValue),
+                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                            .OnConflict(row => row.IntegerElementId)
+                            .Upsert(row => row.Value))
+                    .ConfigureAwait(false);
+
+                var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                await moneyElementRepository.InsertAsync(
+                        valueElements.Where(row => row.MoneyElement.HasValue),
+                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                            .OnConflict(row => row.MoneyElementId)
+                            .Upsert(row => row.Value))
+                    .ConfigureAwait(false);
+
+                var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                await textElementRepository.InsertAsync(
+                        valueElements.Where(row => row.TextElement != null),
+                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                            .OnConflict(row => row.TextElementId)
+                            .Upsert(row => row.Value))
+                    .ConfigureAwait(false);
+
+                // Attach the values to the submission
+                var genericValueSubmissions = from v in mergedFieldValues.Values
+                                              select new GenericSubmissionValueTableTypeRow
+                                                     {
+                                                         GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                                     };
+
+                var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
+                await transaction.CommitAsync().ConfigureAwait(false);
             }
-
-            var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-            await submissionRepository.SaveAsync(submission).ConfigureAwait(false);
-
-            // Could be mapped as well.
-            var fieldValues = from v in submission.SubmissionValues
-                              select new FieldValueTableTypeRow
-                              {
-                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                  LastModifiedTime = v.LastModifiedTime
-                              };
-
-            // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
-            // only inserted rows matched back to their original fields.
-            var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-            var mergedFieldValues = (await fieldValueRepository.InsertForResultsAsync(
-                                             fieldValues,
-                                             insert => insert.OnConflict(row => row.FieldValueId)
-                                                 .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
-                                                 .Returning(
-                                                     row => row.FieldValueId,
-                                                     row => row.FieldId,
-                                                     row => row.LastModifiedByDomainIdentifierId,
-                                                     row => row.LastModifiedTime))
-                                         .ConfigureAwait(false)).ToDictionary(row => row.FieldId, row => row);
-
-            Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
-
-            // Map back to the domain object. TODO: Automate?
-            foreach (var value in submission.SubmissionValues)
-            {
-                var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
-                this.mapper.MapTo(input, value);
-                Assert.IsTrue(value.FieldValueId.HasValue);
-            }
-
-            // Now merge in the field value elements.
-            // Do the field value elements
-            var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
-                                 select new FieldValueElementTableTypeRow
-                                 {
-                                     FieldValueElementId = e.FieldValueElementId,
-                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                     Order = e.Order,
-                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                     FloatElement = e.Element as double? ?? e.Element as float?,
-                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                     MoneyElement = e.Element as decimal?,
-                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                 }).ToList();
-
-            var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-            var mergedValueElements = (await fieldValueElementRepository.InsertForResultsAsync(
-                                               valueElements,
-                                               insert => insert.OnConflict(row => row.FieldValueElementId)
-                                                   .Upsert(row => row.Order)
-                                                   .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
-                                           .ConfigureAwait(false)).ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
-
-            foreach (var element in valueElements)
-            {
-                var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
-                element.FieldValueElementId = input.FieldValueElementId;
-                Assert.IsTrue(element.FieldValueElementId.HasValue);
-            }
-
-            // Note that we use the value elements for insertion because mergeValueElements will only have what is in the FieldValueElement row.
-            var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-            await dateElementRepository.InsertAsync(
-                    valueElements.Where(row => row.DateElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
-                        .OnConflict(row => row.DateElementId)
-                        .Upsert(row => row.Value))
-                .ConfigureAwait(false);
-
-            var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-            await floatElementRepository.InsertAsync(
-                    valueElements.Where(row => row.FloatElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
-                        .OnConflict(row => row.FloatElementId)
-                        .Upsert(row => row.Value))
-                .ConfigureAwait(false);
-
-            var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-            await integerElementRepository.InsertAsync(
-                    valueElements.Where(row => row.IntegerElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
-                        .OnConflict(row => row.IntegerElementId)
-                        .Upsert(row => row.Value))
-                .ConfigureAwait(false);
-
-            var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-            await moneyElementRepository.InsertAsync(
-                    valueElements.Where(row => row.MoneyElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
-                        .OnConflict(row => row.MoneyElementId)
-                        .Upsert(row => row.Value))
-                .ConfigureAwait(false);
-
-            var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-            await textElementRepository.InsertAsync(
-                    valueElements.Where(row => row.TextElement != null),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
-                        .OnConflict(row => row.TextElementId)
-                        .Upsert(row => row.Value))
-                .ConfigureAwait(false);
-
-            // Attach the values to the submission
-            var genericValueSubmissions = from v in mergedFieldValues.Values
-                                          select new GenericSubmissionValueTableTypeRow
-                                          {
-                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                          };
-
-            var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-            await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
-            await transaction.CommitAsync().ConfigureAwait(false);
         }
     }
 }

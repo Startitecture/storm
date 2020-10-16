@@ -197,8 +197,8 @@ namespace Startitecture.Orm.SqlClient.Tests
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            using (var transaction = provider.BeginTransaction())
             {
-                var transaction = provider.BeginTransaction();
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -345,114 +345,117 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var submissionRepository = new SqlClientRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
-                var transaction = provider.BeginTransaction();
-
-                submissionRepository.Save(expected);
-
-                var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
-                Assert.AreNotEqual(0, submissionId);
-
-                // Do the field values
-                var valuesList = from v in expected.SubmissionValues
-                                 select new FieldValueTableTypeRow
-                                 {
-                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                     LastModifiedTime = expected.SubmittedTime
-                                 };
-
-                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-
-                // One field value per field.
-                var fieldValues = fieldValueRepository.InsertForResults(valuesList, insert => insert.SelectResults(row => row.FieldId));
-
-                // Get a dictionary of the values based on Field ID, which should have been updated from the previous operation.
-                var submissionValues = expected.SubmissionValues.ToDictionary(value => value.Field.FieldId, value => value);
-
-                // Map back to the domain object.
-                foreach (var value in fieldValues)
+                using (var transaction = provider.BeginTransaction())
                 {
-                    var output = submissionValues[value.FieldId];
-                    this.mapper.MapTo(value, output);
+
+                    submissionRepository.Save(expected);
+
+                    var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
+                    Assert.AreNotEqual(0, submissionId);
+
+                    // Do the field values
+                    var valuesList = from v in expected.SubmissionValues
+                                     select new FieldValueTableTypeRow
+                                            {
+                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                                LastModifiedTime = expected.SubmittedTime
+                                            };
+
+                    var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+
+                    // One field value per field.
+                    var fieldValues = fieldValueRepository.InsertForResults(valuesList, insert => insert.SelectResults(row => row.FieldId));
+
+                    // Get a dictionary of the values based on Field ID, which should have been updated from the previous operation.
+                    var submissionValues = expected.SubmissionValues.ToDictionary(value => value.Field.FieldId, value => value);
+
+                    // Map back to the domain object.
+                    foreach (var value in fieldValues)
+                    {
+                        var output = submissionValues[value.FieldId];
+                        this.mapper.MapTo(value, output);
+                    }
+
+                    // Attach the values to the submission
+                    var genericValueSubmissions = from v in submissionValues.Values
+                                                  select new GenericSubmissionValueTableTypeRow
+                                                         {
+                                                             GenericSubmissionId = submissionId,
+                                                             GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                                         };
+
+                    var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                    submissionValuesRepository.Insert(genericValueSubmissions, null);
+
+                    // Do the field value elements
+                    var valueElements = expected.SubmissionValues.SelectMany(value => value.Elements)
+                        .ToDictionary(
+                            element => new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order),
+                            element => element);
+
+                    var elementsList = (from e in valueElements.Values
+                                        select new FieldValueElementTableTypeRow
+                                               {
+                                                   FieldValueElementId = e.FieldValueElementId,
+                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                   Order = e.Order,
+                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                   FloatElement = e.Element as double? ?? e.Element as float?,
+                                                   IntegerElement =
+                                                       e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                   MoneyElement = e.Element as decimal?,
+                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                               }).ToList();
+
+                    var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+                    var fieldValueElements = fieldValueElementRepository.InsertForResults(
+                            elementsList,
+                            insert => insert.SelectResults(row => row.FieldValueId, row => row.Order))
+                        .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
+
+                    // Assign FieldValueElementId back to the elements list and map to the domain models.
+                    foreach (var element in elementsList)
+                    {
+                        var input = fieldValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
+                        element.FieldValueElementId = input.FieldValueElementId;
+                        this.mapper.MapTo(input, valueElements[new Tuple<long, int>(element.FieldValueId, element.Order)]);
+                    }
+
+                    Assert.IsTrue(valueElements.Values.All(element => element.FieldValueElementId > 0));
+
+                    var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                    dateElementRepository.Insert(
+                        elementsList.Where(row => row.DateElement.HasValue),
+                        insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
+
+                    var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                    floatElementRepository.Insert(
+                        elementsList.Where(row => row.FloatElement.HasValue),
+                        insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
+
+                    var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                    integerElementRepository.Insert(
+                        elementsList.Where(row => row.IntegerElement.HasValue),
+                        insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
+
+                    var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                    moneyElementRepository.Insert(
+                        elementsList.Where(row => row.MoneyElement.HasValue),
+                        insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
+
+                    var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                    textElementRepository.Insert(
+                        elementsList.Where(row => row.TextElement != null),
+                        insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
+                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement));
+
+                    transaction.Commit();
                 }
-
-                // Attach the values to the submission
-                var genericValueSubmissions = from v in submissionValues.Values
-                                              select new GenericSubmissionValueTableTypeRow
-                                              {
-                                                  GenericSubmissionId = submissionId,
-                                                  GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                              };
-
-                var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                submissionValuesRepository.Insert(genericValueSubmissions, null);
-
-                // Do the field value elements
-                var valueElements = expected.SubmissionValues.SelectMany(value => value.Elements)
-                    .ToDictionary(
-                        element => new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order),
-                        element => element);
-
-                var elementsList = (from e in valueElements.Values
-                                    select new FieldValueElementTableTypeRow
-                                    {
-                                        FieldValueElementId = e.FieldValueElementId,
-                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                        Order = e.Order,
-                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                        FloatElement = e.Element as double? ?? e.Element as float?,
-                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                        MoneyElement = e.Element as decimal?,
-                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                    }).ToList();
-
-                var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-                var fieldValueElements = fieldValueElementRepository.InsertForResults(
-                        elementsList,
-                        insert => insert.SelectResults(row => row.FieldValueId, row => row.Order))
-                    .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
-
-                // Assign FieldValueElementId back to the elements list and map to the domain models.
-                foreach (var element in elementsList)
-                {
-                    var input = fieldValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
-                    element.FieldValueElementId = input.FieldValueElementId;
-                    this.mapper.MapTo(input, valueElements[new Tuple<long, int>(element.FieldValueId, element.Order)]);
-                }
-
-                Assert.IsTrue(valueElements.Values.All(element => element.FieldValueElementId > 0));
-
-                var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-                dateElementRepository.Insert(
-                    elementsList.Where(row => row.DateElement.HasValue),
-                    insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
-
-                var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-                floatElementRepository.Insert(
-                    elementsList.Where(row => row.FloatElement.HasValue),
-                    insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
-
-                var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-                integerElementRepository.Insert(
-                    elementsList.Where(row => row.IntegerElement.HasValue),
-                    insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
-
-                var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-                moneyElementRepository.Insert(
-                    elementsList.Where(row => row.MoneyElement.HasValue),
-                    insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
-
-                var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-                textElementRepository.Insert(
-                    elementsList.Where(row => row.TextElement != null),
-                    insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
-                        .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement));
-
-                transaction.Commit();
             }
         }
 
@@ -519,16 +522,16 @@ namespace Startitecture.Orm.SqlClient.Tests
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            using (var transaction = provider.BeginTransaction())
             {
-                var transaction = provider.BeginTransaction();
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
                 fieldRepository.Merge(
                     from f in fields
                     select new FieldTableTypeRow
-                    {
-                        Name = f.Name,
-                        Description = f.Description
-                    },
+                           {
+                               Name = f.Name,
+                               Description = f.Description
+                           },
                     merge => merge.On<FieldTableTypeRow>(row => row.Name, row => row.Name));
 
                 transaction.Commit();
@@ -773,8 +776,8 @@ namespace Startitecture.Orm.SqlClient.Tests
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
             {
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
 
                 var fieldSelection = Query.SelectEntities<FieldRow>(
@@ -790,10 +793,10 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var fieldRows = from f in fields
                                 select new FieldTableTypeRow
-                                {
-                                    Name = f.Name,
-                                    Description = f.Description
-                                };
+                                       {
+                                           Name = f.Name,
+                                           Description = f.Description
+                                       };
 
                 await fieldRepository.InsertAsync(fieldRows, null).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
@@ -866,8 +869,8 @@ namespace Startitecture.Orm.SqlClient.Tests
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
             {
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -1021,123 +1024,124 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var submissionRepository = new SqlClientRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
-
-                await submissionRepository.SaveAsync(expected).ConfigureAwait(false);
-
-                var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
-                Assert.AreNotEqual(0, submissionId);
-
-                // Do the field values
-                var valuesList = from v in expected.SubmissionValues
-                                 select new FieldValueTableTypeRow
-                                 {
-                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                     LastModifiedTime = expected.SubmittedTime
-                                 };
-
-                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-
-                // One field value per field.
-                var fieldValues = await fieldValueRepository
-                                      .InsertForResultsAsync(valuesList, insert => insert.SelectResults(row => row.FieldId))
-                                      .ConfigureAwait(false);
-
-                // Get a dictionary of the values based on Field ID, which should have been updated from the previous operation.
-                var submissionValues = expected.SubmissionValues.ToDictionary(value => value.Field.FieldId, value => value);
-
-                // Map back to the domain object.
-                foreach (var value in fieldValues)
+                await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
                 {
-                    var output = submissionValues[value.FieldId];
-                    this.mapper.MapTo(value, output);
+                    await submissionRepository.SaveAsync(expected).ConfigureAwait(false);
+
+                    var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
+                    Assert.AreNotEqual(0, submissionId);
+
+                    // Do the field values
+                    var valuesList = from v in expected.SubmissionValues
+                                     select new FieldValueTableTypeRow
+                                            {
+                                                FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                                LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                                LastModifiedTime = expected.SubmittedTime
+                                            };
+
+                    var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+
+                    // One field value per field.
+                    var fieldValues = await fieldValueRepository.InsertForResultsAsync(valuesList, insert => insert.SelectResults(row => row.FieldId))
+                                          .ConfigureAwait(false);
+
+                    // Get a dictionary of the values based on Field ID, which should have been updated from the previous operation.
+                    var submissionValues = expected.SubmissionValues.ToDictionary(value => value.Field.FieldId, value => value);
+
+                    // Map back to the domain object.
+                    foreach (var value in fieldValues)
+                    {
+                        var output = submissionValues[value.FieldId];
+                        this.mapper.MapTo(value, output);
+                    }
+
+                    // Attach the values to the submission
+                    var genericValueSubmissions = from v in submissionValues.Values
+                                                  select new GenericSubmissionValueTableTypeRow
+                                                         {
+                                                             GenericSubmissionId = submissionId,
+                                                             GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                                         };
+
+                    var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                    await submissionValuesRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
+
+                    // Do the field value elements
+                    var valueElements = expected.SubmissionValues.SelectMany(value => value.Elements)
+                        .ToDictionary(
+                            element => new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order),
+                            element => element);
+
+                    var elementsList = (from e in valueElements.Values
+                                        select new FieldValueElementTableTypeRow
+                                               {
+                                                   FieldValueElementId = e.FieldValueElementId,
+                                                   FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                   Order = e.Order,
+                                                   DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                   FloatElement = e.Element as double? ?? e.Element as float?,
+                                                   IntegerElement =
+                                                       e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                   MoneyElement = e.Element as decimal?,
+                                                   TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                               }).ToList();
+
+                    var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+                    var fieldValueElements = (await fieldValueElementRepository.InsertForResultsAsync(
+                                                      elementsList,
+                                                      insert => insert.SelectResults(row => row.FieldValueId, row => row.Order))
+                                                  .ConfigureAwait(false)).ToDictionary(
+                        row => new Tuple<long, int>(row.FieldValueId, row.Order),
+                        row => row);
+
+                    // Assign FieldValueElementId back to the elements list and map to the domain models.
+                    foreach (var element in elementsList)
+                    {
+                        var input = fieldValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
+                        element.FieldValueElementId = input.FieldValueElementId;
+                        this.mapper.MapTo(input, valueElements[new Tuple<long, int>(element.FieldValueId, element.Order)]);
+                    }
+
+                    Assert.IsTrue(valueElements.Values.All(element => element.FieldValueElementId > 0));
+
+                    var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                    await dateElementRepository.InsertAsync(
+                            elementsList.Where(row => row.DateElement.HasValue),
+                            insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement))
+                        .ConfigureAwait(false);
+
+                    var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                    await floatElementRepository.InsertAsync(
+                            elementsList.Where(row => row.FloatElement.HasValue),
+                            insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement))
+                        .ConfigureAwait(false);
+
+                    var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                    await integerElementRepository.InsertAsync(
+                            elementsList.Where(row => row.IntegerElement.HasValue),
+                            insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement))
+                        .ConfigureAwait(false);
+
+                    var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                    await moneyElementRepository.InsertAsync(
+                            elementsList.Where(row => row.MoneyElement.HasValue),
+                            insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement))
+                        .ConfigureAwait(false);
+
+                    var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                    await textElementRepository.InsertAsync(
+                            elementsList.Where(row => row.TextElement != null),
+                            insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
+                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement))
+                        .ConfigureAwait(false);
+
+                    await transaction.CommitAsync().ConfigureAwait(false);
                 }
-
-                // Attach the values to the submission
-                var genericValueSubmissions = from v in submissionValues.Values
-                                              select new GenericSubmissionValueTableTypeRow
-                                              {
-                                                  GenericSubmissionId = submissionId,
-                                                  GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                              };
-
-                var submissionValuesRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                await submissionValuesRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
-
-                // Do the field value elements
-                var valueElements = expected.SubmissionValues.SelectMany(value => value.Elements)
-                    .ToDictionary(
-                        element => new Tuple<long, int>(element.FieldValue.FieldValueId.GetValueOrDefault(), element.Order),
-                        element => element);
-
-                var elementsList = (from e in valueElements.Values
-                                    select new FieldValueElementTableTypeRow
-                                    {
-                                        FieldValueElementId = e.FieldValueElementId,
-                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                        Order = e.Order,
-                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                        FloatElement = e.Element as double? ?? e.Element as float?,
-                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                        MoneyElement = e.Element as decimal?,
-                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                    }).ToList();
-
-                var fieldValueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-                var fieldValueElements = (await fieldValueElementRepository.InsertForResultsAsync(
-                                                  elementsList,
-                                                  insert => insert.SelectResults(row => row.FieldValueId, row => row.Order))
-                                              .ConfigureAwait(false)).ToDictionary(
-                    row => new Tuple<long, int>(row.FieldValueId, row.Order),
-                    row => row);
-
-                // Assign FieldValueElementId back to the elements list and map to the domain models.
-                foreach (var element in elementsList)
-                {
-                    var input = fieldValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
-                    element.FieldValueElementId = input.FieldValueElementId;
-                    this.mapper.MapTo(input, valueElements[new Tuple<long, int>(element.FieldValueId, element.Order)]);
-                }
-
-                Assert.IsTrue(valueElements.Values.All(element => element.FieldValueElementId > 0));
-
-                var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-                await dateElementRepository.InsertAsync(
-                        elementsList.Where(row => row.DateElement.HasValue),
-                        insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement))
-                    .ConfigureAwait(false);
-
-                var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-                await floatElementRepository.InsertAsync(
-                        elementsList.Where(row => row.FloatElement.HasValue),
-                        insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement))
-                    .ConfigureAwait(false);
-
-                var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-                await integerElementRepository.InsertAsync(
-                        elementsList.Where(row => row.IntegerElement.HasValue),
-                        insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement))
-                    .ConfigureAwait(false);
-
-                var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-                await moneyElementRepository.InsertAsync(
-                        elementsList.Where(row => row.MoneyElement.HasValue),
-                        insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement))
-                    .ConfigureAwait(false);
-
-                var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-                await textElementRepository.InsertAsync(
-                        elementsList.Where(row => row.TextElement != null),
-                        insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement))
-                    .ConfigureAwait(false);
-
-                await transaction.CommitAsync().ConfigureAwait(false);
             }
         }
 
@@ -1207,8 +1211,8 @@ namespace Startitecture.Orm.SqlClient.Tests
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
             {
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
                 var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
                 await fieldRepository.MergeAsync(
                         from f in fields
@@ -1424,131 +1428,132 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             // Merge in the field values.
             var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
-            var transaction = provider.BeginTransaction();
-
-            var fieldRows = fieldRepository.MergeForResults(
-                    fieldItems,
-                    merge => merge.OnImplicit(row => row.Name).SelectFromInserted(row => row.Name))
-                .ToDictionary(row => row.Name, row => row);
-
-            foreach (var field in fields)
+            using (var transaction = provider.BeginTransaction())
             {
-                fieldRows.TryGetValue(field.Name, out var input);
+                var fieldRows = fieldRepository.MergeForResults(
+                        fieldItems,
+                        merge => merge.OnImplicit(row => row.Name).SelectFromInserted(row => row.Name))
+                    .ToDictionary(row => row.Name, row => row);
 
-                // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
-                // aren't IDs for baseline fields.
-                if (input == null)
+                foreach (var field in fields)
                 {
-                    continue;
+                    fieldRows.TryGetValue(field.Name, out var input);
+
+                    // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
+                    // aren't IDs for baseline fields.
+                    if (input == null)
+                    {
+                        continue;
+                    }
+
+                    this.mapper.MapTo(input, field);
                 }
 
-                this.mapper.MapTo(input, field);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
+                submissionRepository.Save(submission);
+
+                // Could be mapped as well.
+                var fieldValues = from v in submission.SubmissionValues
+                                  select new FieldValueTableTypeRow
+                                         {
+                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                             LastModifiedTime = v.LastModifiedTime
+                                         };
+
+                // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
+                // only inserted rows matched back to their original fields.
+                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+                var mergedFieldValues = fieldValueRepository.MergeForResults(
+                        fieldValues,
+                        merge => merge.OnImplicit(row => row.FieldValueId).SelectFromInserted(row => row.FieldId))
+                    .ToDictionary(row => row.FieldId, row => row);
+
+                Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
+
+                // Map back to the domain object. TODO: Automate?
+                foreach (var value in submission.SubmissionValues)
+                {
+                    var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
+                    this.mapper.MapTo(input, value);
+                    Assert.IsTrue(value.FieldValueId.HasValue);
+                }
+
+                // Now merge in the field value elements.
+                // Do the field value elements
+                var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
+                                     select new FieldValueElementTableTypeRow
+                                            {
+                                                FieldValueElementId = e.FieldValueElementId,
+                                                FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                Order = e.Order,
+                                                DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                FloatElement = e.Element as double? ?? e.Element as float?,
+                                                IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                MoneyElement = e.Element as decimal?,
+                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                            }).ToList();
+
+                var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+                var mergedValueElements = valueElementRepository.MergeForResults(
+                        valueElements,
+                        merge => merge.OnImplicit(row => row.FieldValueId, row => row.Order)
+                            ////.DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
+                            .SelectFromInserted(row => row.FieldValueId, row => row.Order)) // Generally this is the same as the MERGE INTO
+                    .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
+
+                foreach (var element in valueElements)
+                {
+                    var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
+                    element.FieldValueElementId = input.FieldValueElementId;
+                }
+
+                var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                dateElementRepository.MergeForResults(
+                    valueElements.Where(row => row.DateElement.HasValue),
+                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId));
+
+                var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                floatElementRepository.MergeForResults(
+                    valueElements.Where(row => row.FloatElement.HasValue),
+                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId));
+
+                var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                integerElementRepository.MergeForResults(
+                    valueElements.Where(row => row.IntegerElement.HasValue),
+                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId));
+
+                var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                moneyElementRepository.MergeForResults(
+                    valueElements.Where(row => row.MoneyElement.HasValue),
+                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId));
+
+                var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                textElementRepository.MergeForResults(
+                    valueElements.Where(row => row.TextElement != null),
+                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElementId));
+
+                // Attach the values to the submission
+                var genericValueSubmissions = from v in mergedFieldValues.Values
+                                              select new GenericSubmissionValueTableTypeRow
+                                                     {
+                                                         GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                                     };
+
+                var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                submissionValueRepository.Merge(
+                    genericValueSubmissions,
+                    merge => merge.OnImplicit(row => row.GenericSubmissionValueId)
+                        .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId));
+
+                transaction.Commit();
             }
-
-            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-            submissionRepository.Save(submission);
-
-            // Could be mapped as well.
-            var fieldValues = from v in submission.SubmissionValues
-                              select new FieldValueTableTypeRow
-                              {
-                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                  LastModifiedTime = v.LastModifiedTime
-                              };
-
-            // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
-            // only inserted rows matched back to their original fields.
-            var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-            var mergedFieldValues = fieldValueRepository.MergeForResults(
-                    fieldValues,
-                    merge => merge.OnImplicit(row => row.FieldValueId).SelectFromInserted(row => row.FieldId))
-                .ToDictionary(row => row.FieldId, row => row);
-
-            Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
-
-            // Map back to the domain object. TODO: Automate?
-            foreach (var value in submission.SubmissionValues)
-            {
-                var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
-                this.mapper.MapTo(input, value);
-                Assert.IsTrue(value.FieldValueId.HasValue);
-            }
-
-            // Now merge in the field value elements.
-            // Do the field value elements
-            var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
-                                 select new FieldValueElementTableTypeRow
-                                 {
-                                     FieldValueElementId = e.FieldValueElementId,
-                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                     Order = e.Order,
-                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                     FloatElement = e.Element as double? ?? e.Element as float?,
-                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                     MoneyElement = e.Element as decimal?,
-                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                 }).ToList();
-
-            var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-            var mergedValueElements = valueElementRepository.MergeForResults(
-                    valueElements,
-                    merge => merge.OnImplicit(row => row.FieldValueId, row => row.Order)
-                        ////.DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
-                        .SelectFromInserted(row => row.FieldValueId, row => row.Order)) // Generally this is the same as the MERGE INTO
-                .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
-
-            foreach (var element in valueElements)
-            {
-                var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
-                element.FieldValueElementId = input.FieldValueElementId;
-            }
-
-            var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-            dateElementRepository.MergeForResults(
-                valueElements.Where(row => row.DateElement.HasValue),
-                merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
-                    .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId));
-
-            var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-            floatElementRepository.MergeForResults(
-                valueElements.Where(row => row.FloatElement.HasValue),
-                merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
-                    .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId));
-
-            var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-            integerElementRepository.MergeForResults(
-                valueElements.Where(row => row.IntegerElement.HasValue),
-                merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
-                    .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId));
-
-            var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-            moneyElementRepository.MergeForResults(
-                valueElements.Where(row => row.MoneyElement.HasValue),
-                merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
-                    .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId));
-
-            var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-            textElementRepository.MergeForResults(
-                valueElements.Where(row => row.TextElement != null),
-                merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
-                    .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElementId));
-
-            // Attach the values to the submission
-            var genericValueSubmissions = from v in mergedFieldValues.Values
-                                          select new GenericSubmissionValueTableTypeRow
-                                          {
-                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                          };
-
-            var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-            submissionValueRepository.Merge(
-                genericValueSubmissions,
-                merge => merge.OnImplicit(row => row.GenericSubmissionValueId)
-                    .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId));
-
-            transaction.Commit();
         }
 
         /// <summary>
@@ -1576,138 +1581,140 @@ namespace Startitecture.Orm.SqlClient.Tests
 
             // Merge in the field values.
             var fieldRepository = new SqlClientRepository<Field, FieldRow>(provider, this.mapper);
-            var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
 
-            var fieldRows = fieldRepository.MergeForResults(
-                    fieldItems,
-                    merge => merge.OnImplicit(row => row.Name).SelectFromInserted(row => row.Name))
-                .ToDictionary(row => row.Name, row => row);
-
-            foreach (var field in fields)
+            await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
             {
-                fieldRows.TryGetValue(field.Name, out var input);
+                var fieldRows = fieldRepository.MergeForResults(
+                        fieldItems,
+                        merge => merge.OnImplicit(row => row.Name).SelectFromInserted(row => row.Name))
+                    .ToDictionary(row => row.Name, row => row);
 
-                // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
-                // aren't IDs for baseline fields.
-                if (input == null)
+                foreach (var field in fields)
                 {
-                    continue;
+                    fieldRows.TryGetValue(field.Name, out var input);
+
+                    // Because we are doing a subset, and we know we will get back baseline fields. If MERGE is messed up this will error later when there
+                    // aren't IDs for baseline fields.
+                    if (input == null)
+                    {
+                        continue;
+                    }
+
+                    this.mapper.MapTo(input, field);
                 }
 
-                this.mapper.MapTo(input, field);
+                var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
+                await submissionRepository.SaveAsync(submission).ConfigureAwait(false);
+
+                // Could be mapped as well.
+                var fieldValues = from v in submission.SubmissionValues
+                                  select new FieldValueTableTypeRow
+                                         {
+                                             FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                             LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
+                                             LastModifiedTime = v.LastModifiedTime
+                                         };
+
+                // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
+                // only inserted rows matched back to their original fields.
+                var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
+                var mergedFieldValues = (await fieldValueRepository.MergeForResultsAsync(
+                                                 fieldValues,
+                                                 merge => merge.OnImplicit(row => row.FieldValueId).SelectFromInserted(row => row.FieldId))
+                                             .ConfigureAwait(false)).ToDictionary(row => row.FieldId, row => row);
+
+                Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
+
+                // Map back to the domain object. TODO: Automate?
+                foreach (var value in submission.SubmissionValues)
+                {
+                    var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
+                    this.mapper.MapTo(input, value);
+                    Assert.IsTrue(value.FieldValueId.HasValue);
+                }
+
+                // Now merge in the field value elements.
+                // Do the field value elements
+                var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
+                                     select new FieldValueElementTableTypeRow
+                                            {
+                                                FieldValueElementId = e.FieldValueElementId,
+                                                FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                                Order = e.Order,
+                                                DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                                FloatElement = e.Element as double? ?? e.Element as float?,
+                                                IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                                MoneyElement = e.Element as decimal?,
+                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                            }).ToList();
+
+                var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
+                var mergedValueElements = (await valueElementRepository.MergeForResultsAsync(
+                                                   valueElements,
+                                                   merge => merge.OnImplicit(row => row.FieldValueId, row => row.Order)
+                                                       ////.DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
+                                                       .SelectFromInserted(row => row.FieldValueId, row => row.Order))
+                                               .ConfigureAwait(false)) // Generally this is the same as the MERGE INTO
+                    .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
+
+                foreach (var element in valueElements)
+                {
+                    var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
+                    element.FieldValueElementId = input.FieldValueElementId;
+                }
+
+                var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
+                await dateElementRepository.MergeForResultsAsync(
+                        valueElements.Where(row => row.DateElement.HasValue),
+                        merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                            .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId))
+                    .ConfigureAwait(false);
+
+                var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
+                await floatElementRepository.MergeForResultsAsync(
+                        valueElements.Where(row => row.FloatElement.HasValue),
+                        merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                            .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId))
+                    .ConfigureAwait(false);
+
+                var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
+                await integerElementRepository.MergeForResultsAsync(
+                        valueElements.Where(row => row.IntegerElement.HasValue),
+                        merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                            .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId))
+                    .ConfigureAwait(false);
+
+                var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
+                await moneyElementRepository.MergeForResultsAsync(
+                        valueElements.Where(row => row.MoneyElement.HasValue),
+                        merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                            .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId))
+                    .ConfigureAwait(false);
+
+                var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
+                await textElementRepository.MergeForResultsAsync(
+                        valueElements.Where(row => row.TextElement != null),
+                        merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                            .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElementId))
+                    .ConfigureAwait(false);
+
+                // Attach the values to the submission
+                var genericValueSubmissions = from v in mergedFieldValues.Values
+                                              select new GenericSubmissionValueTableTypeRow
+                                                     {
+                                                         GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
+                                                         GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
+                                                     };
+
+                var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
+                await submissionValueRepository.MergeAsync(
+                        genericValueSubmissions,
+                        merge => merge.OnImplicit(row => row.GenericSubmissionValueId)
+                            .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId))
+                    .ConfigureAwait(false);
+
+                await transaction.CommitAsync().ConfigureAwait(false);
             }
-
-            var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-            await submissionRepository.SaveAsync(submission).ConfigureAwait(false);
-
-            // Could be mapped as well.
-            var fieldValues = from v in submission.SubmissionValues
-                              select new FieldValueTableTypeRow
-                              {
-                                  FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                  LastModifiedByDomainIdentifierId = v.LastModifiedBy.DomainIdentityId.GetValueOrDefault(),
-                                  LastModifiedTime = v.LastModifiedTime
-                              };
-
-            // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
-            // only inserted rows matched back to their original fields.
-            var fieldValueRepository = new SqlClientRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-            var mergedFieldValues = (await fieldValueRepository.MergeForResultsAsync(
-                                             fieldValues,
-                                             merge => merge.OnImplicit(row => row.FieldValueId).SelectFromInserted(row => row.FieldId))
-                                         .ConfigureAwait(false)).ToDictionary(row => row.FieldId, row => row);
-
-            Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
-
-            // Map back to the domain object. TODO: Automate?
-            foreach (var value in submission.SubmissionValues)
-            {
-                var input = mergedFieldValues[value.Field.FieldId.GetValueOrDefault()];
-                this.mapper.MapTo(input, value);
-                Assert.IsTrue(value.FieldValueId.HasValue);
-            }
-
-            // Now merge in the field value elements.
-            // Do the field value elements
-            var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
-                                 select new FieldValueElementTableTypeRow
-                                 {
-                                     FieldValueElementId = e.FieldValueElementId,
-                                     FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                     Order = e.Order,
-                                     DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                     FloatElement = e.Element as double? ?? e.Element as float?,
-                                     IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                     MoneyElement = e.Element as decimal?,
-                                     TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                 }).ToList();
-
-            var valueElementRepository = new SqlClientRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-            var mergedValueElements = (await valueElementRepository.MergeForResultsAsync(
-                                               valueElements,
-                                               merge => merge.OnImplicit(row => row.FieldValueId, row => row.Order)
-                                                   ////.DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
-                                                   .SelectFromInserted(row => row.FieldValueId, row => row.Order))
-                                           .ConfigureAwait(false)) // Generally this is the same as the MERGE INTO
-                .ToDictionary(row => new Tuple<long, int>(row.FieldValueId, row.Order), row => row);
-
-            foreach (var element in valueElements)
-            {
-                var input = mergedValueElements[new Tuple<long, int>(element.FieldValueId, element.Order)];
-                element.FieldValueElementId = input.FieldValueElementId;
-            }
-
-            var dateElementRepository = new SqlClientRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
-            await dateElementRepository.MergeForResultsAsync(
-                    valueElements.Where(row => row.DateElement.HasValue),
-                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
-                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId))
-                .ConfigureAwait(false);
-
-            var floatElementRepository = new SqlClientRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
-            await floatElementRepository.MergeForResultsAsync(
-                    valueElements.Where(row => row.FloatElement.HasValue),
-                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
-                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId))
-                .ConfigureAwait(false);
-
-            var integerElementRepository = new SqlClientRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
-            await integerElementRepository.MergeForResultsAsync(
-                    valueElements.Where(row => row.IntegerElement.HasValue),
-                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
-                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId))
-                .ConfigureAwait(false);
-
-            var moneyElementRepository = new SqlClientRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
-            await moneyElementRepository.MergeForResultsAsync(
-                    valueElements.Where(row => row.MoneyElement.HasValue),
-                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
-                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId))
-                .ConfigureAwait(false);
-
-            var textElementRepository = new SqlClientRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
-            await textElementRepository.MergeForResultsAsync(
-                    valueElements.Where(row => row.TextElement != null),
-                    merge => merge.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
-                        .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElementId))
-                .ConfigureAwait(false);
-
-            // Attach the values to the submission
-            var genericValueSubmissions = from v in mergedFieldValues.Values
-                                          select new GenericSubmissionValueTableTypeRow
-                                          {
-                                              GenericSubmissionId = submission.GenericSubmissionId.GetValueOrDefault(),
-                                              GenericSubmissionValueId = v.FieldValueId.GetValueOrDefault()
-                                          };
-
-            var submissionValueRepository = new SqlClientRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-            await submissionValueRepository.MergeAsync(
-                    genericValueSubmissions,
-                    merge => merge.OnImplicit(row => row.GenericSubmissionValueId)
-                        .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId))
-                .ConfigureAwait(false);
-
-            await transaction.CommitAsync().ConfigureAwait(false);
         }
     }
 }

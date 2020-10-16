@@ -51,19 +51,20 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = new DatabaseContext(connectionString, providerName, statementCompiler))
             {
-                target.OpenSharedConnection();
-                var transaction = target.Connection.BeginTransaction() as SqlTransaction;
-                Assert.IsNotNull(transaction);
-
                 var sqlConnection = target.Connection as SqlConnection;
+
                 Assert.IsNotNull(sqlConnection);
 
-                using (var command = new SqlCommand("SELECT TOP 1 * FROM sys.tables", sqlConnection, transaction))
+                using (var transaction = sqlConnection.BeginTransaction())
                 {
-                    command.ExecuteNonQuery();
-                }
+                    using (var command = new SqlCommand("SELECT TOP 1 * FROM sys.tables", sqlConnection, transaction))
+                    {
+                        target.AssociateTransaction(command);
+                        command.ExecuteNonQuery();
+                    }
 
-                transaction.Rollback();
+                    transaction.Rollback();
+                }
             }
         }
 
@@ -75,6 +76,7 @@ namespace Startitecture.Orm.Mapper.Tests
         public void ExecuteQuery_SqlQuery_ExecutesQueryWithExpectedResults()
         {
             var providerName = "System.Data.SqlClient";
+
 #if !NET472
             if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, providerName, StringComparison.Ordinal)) == false)
             {
@@ -127,6 +129,7 @@ namespace Startitecture.Orm.Mapper.Tests
         public async Task QueryAsync_SqlQuery_ExecutesQueryWithExpectedResults()
         {
             var providerName = "System.Data.SqlClient";
+
 #if !NET472
             if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, providerName, StringComparison.Ordinal)) == false)
             {

@@ -28,7 +28,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Startitecture.Core" Version="1.0.0-beta7" />
+    <PackageReference Include="Startitecture.Core" Version="1.0.0-beta8" />
     <PackageReference Include="Startitecture.Orm" Version="1.0.0-beta3" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.118">
       <PrivateAssets>all</PrivateAssets>
