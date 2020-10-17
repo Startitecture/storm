@@ -51,6 +51,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             using (var target = new DatabaseContext(connectionString, providerName, statementCompiler))
             {
+                target.OpenSharedConnection();
                 var sqlConnection = target.Connection as SqlConnection;
 
                 Assert.IsNotNull(sqlConnection);
@@ -59,7 +60,6 @@ namespace Startitecture.Orm.Mapper.Tests
                 {
                     using (var command = new SqlCommand("SELECT TOP 1 * FROM sys.tables", sqlConnection, transaction))
                     {
-                        target.AssociateTransaction(command);
                         command.ExecuteNonQuery();
                     }
 
