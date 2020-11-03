@@ -14,6 +14,8 @@ namespace Startitecture.Orm.Mapper
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
+    using System.Linq;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -48,11 +50,12 @@ namespace Startitecture.Orm.Mapper
         /// <exception cref="ArgumentNullException">
         /// <paramref name="tableCommandFactory"/> is null.
         /// </exception>
-        protected TableCommand([NotNull] IDbTableCommandFactory tableCommandFactory, IDatabaseContext databaseContext)
+        protected TableCommand([NotNull] IDbTableCommandFactory tableCommandFactory, [NotNull] IDatabaseContext databaseContext)
         {
             this.tableCommandFactory = tableCommandFactory ?? throw new ArgumentNullException(nameof(tableCommandFactory));
-            this.DatabaseContext = databaseContext;
+            this.DatabaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
             this.EntityDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
+            this.NameQualifier = this.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <summary>
@@ -85,13 +88,14 @@ namespace Startitecture.Orm.Mapper
         protected IEntityDefinition ItemDefinition { get; private set; }
 
         /// <summary>
-        /// Gets the item type passed to <see cref="Execute{TItem}"/> or <see cref="ExecuteForResults{TItem}"/>.
+        /// Gets the name qualifier for this command.
         /// </summary>
-        /// <remarks>
-        /// For implementers: This property is not set until the <see cref="Execute{TItem}"/> or <see cref="ExecuteForResults{TItem}"/> methods are
-        /// called.
-        /// </remarks>
-        protected Type ItemType { get; private set; }
+        protected INameQualifier NameQualifier { get; }
+
+        /// <summary>
+        /// Gets the from expressions declared by the caller, if any.
+        /// </summary>
+        protected List<LambdaExpression> FromColumnExpressions { get; } = new List<LambdaExpression>();
 
         /// <summary>
         /// Executes the the insertion without retrieving inserted values.
@@ -240,6 +244,65 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
+        /// Gets the matched attributes between the source and target definitions.
+        /// </summary>
+        /// <param name="insertAttributes">
+        /// The attributes to be inserted into the target table.
+        /// </param>
+        /// <returns>
+        /// A <see cref="Dictionary{TKey,TValue}"/> of source attributes indexed by target attributes.
+        /// </returns>
+        /// <remarks>
+        /// If there is no declaration of source attributes to insert from, then they are implicitly matched using
+        /// <see cref="EntityAttributeDefinition.PhysicalName"/>.
+        /// </remarks>
+        protected Dictionary<EntityAttributeDefinition, EntityAttributeDefinition> GetMatchedAttributes(
+            IEnumerable<EntityAttributeDefinition> insertAttributes)
+        {
+            return (this.FromColumnExpressions.Any()
+                        ? insertAttributes.Select(
+                            (ia, i) => new
+                                       {
+                                           InsertAttribute = ia,
+                                           SourceAttribute = this.ItemDefinition.Find(this.FromColumnExpressions.ElementAt(i))
+                                       })
+                        : from sourceAttribute in this.ItemDefinition.DirectAttributes
+                          join insertAttribute in insertAttributes on sourceAttribute.PhysicalName equals insertAttribute.PhysicalName
+                          orderby sourceAttribute.Ordinal
+                          select new
+                                 {
+                                     InsertAttribute = insertAttribute,
+                                     SourceAttribute = sourceAttribute
+                                 }).ToDictionary(arg => arg.InsertAttribute, arg => arg.SourceAttribute);
+        }
+
+        /// <summary>
+        /// Gets the attributes to select out of the INSERTED table.
+        /// </summary>
+        /// <param name="insertAttributes">
+        /// The attributes that will be inserted into the table.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of attributes that will be inserted into the INSERTED table.
+        /// </returns>
+        /// <remarks>
+        /// This method will automatically add IDENTITY columns. If an IDENTITY column is already present, then it is detected so that there are no
+        /// duplicate attributes.
+        /// </remarks>
+        protected IEnumerable<EntityAttributeDefinition> GetInsertedAttributes(IEnumerable<EntityAttributeDefinition> insertAttributes)
+        {
+            var insertedAttributes = new List<EntityAttributeDefinition>();
+
+            if (this.EntityDefinition.RowIdentity.HasValue)
+            {
+                insertedAttributes.Add(this.EntityDefinition.RowIdentity.GetValueOrDefault());
+            }
+
+            insertedAttributes.AddRange(insertAttributes.Where(definition => definition.IsIdentityColumn == false));
+            return insertedAttributes;
+        }
+
+        /// <summary>
         /// Fills the return list with POCOs hydrated from the reader.
         /// </summary>
         /// <param name="reader">
@@ -281,7 +344,6 @@ namespace Startitecture.Orm.Mapper
         private void SetCommandProperties<TItem>()
         {
             this.ItemDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>();
-            this.ItemType = typeof(TItem);
             this.ParameterName = $"{this.ItemDefinition.EntityName}Rows";
         }
 

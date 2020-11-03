@@ -52,10 +52,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 .ForMember(value => value.LastModifiedTime, expression => expression.MapFrom(row => row.FieldValue.LastModifiedTime))
                 .ForMember(value => value.FieldValueId, expression => expression.MapFrom(row => row.FieldValue.FieldValueId));
 
-            this.CreateMap<FieldValueElementTableTypeRow, FieldValueElement>()
+            this.CreateMap<FieldValueElementPgFlatRow, FieldValueElement>()
                 .ForMember(element => element.FieldValue, expression => expression.Ignore());
 
-            this.CreateMap<FieldValueElementRow, FieldValueElementTableTypeRow>();
+            this.CreateMap<FieldValueElementRow, FieldValueElementPgFlatRow>();
         }
     }
 }

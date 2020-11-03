@@ -1,10 +1,7 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="TableValuedInsertTests.cs" company="Startitecture">
+// <copyright file="JsonInsertTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
-// <summary>
-//   The structured insert command tests
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 namespace Startitecture.Orm.SqlClient.Tests
@@ -26,28 +23,22 @@ namespace Startitecture.Orm.SqlClient.Tests
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
-    using Startitecture.Orm.SqlClient;
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
     using Startitecture.Orm.Testing.Model;
     using Startitecture.Orm.Testing.Moq;
 
     /// <summary>
-    /// The structured insert command tests.
+    /// A class for testing JSON inserts.
     /// </summary>
     [TestClass]
-    public class TableValuedInsertTests
+    public class JsonInsertTests
     {
         /// <summary>
         /// The entity mapper.
         /// </summary>
         private readonly IEntityMapper mapper = new AutoMapperEntityMapper(
-            new Mapper(
-                new MapperConfiguration(
-                    expression =>
-                        {
-                            expression.AddProfile<GenericSubmissionMappingProfile>();
-                        })));
+            new Mapper(new MapperConfiguration(expression => { expression.AddProfile<GenericSubmissionMappingProfile>(); })));
 
         /// <summary>
         /// Gets the configuration root.
@@ -59,60 +50,60 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void Execute_TableValueInsertForFields_DoesNotThrowException()
+        public void Execute_JsonInsertForFields_DoesNotThrowException()
         {
             var internalId = new Field
-            {
-                Name = "INS_Internal ID",
-                Description = "Unique ID used internally"
-            };
+                             {
+                                 Name = "INS_Internal ID",
+                                 Description = "Unique ID used internally"
+                             };
 
             var firstName = new Field
-            {
-                Name = "INS_First Name",
-                Description = "The person's first name"
-            };
+                            {
+                                Name = "INS_First Name",
+                                Description = "The person's first name"
+                            };
 
             var lastName = new Field
-            {
-                Name = "INS_Last Name",
-                Description = "The person's last name"
-            };
+                           {
+                               Name = "INS_Last Name",
+                               Description = "The person's last name"
+                           };
 
             var yearlyWage = new Field
-            {
-                Name = "INS_Yearly Wage",
-                Description = "The base wage paid year over year."
-            };
+                             {
+                                 Name = "INS_Yearly Wage",
+                                 Description = "The base wage paid year over year."
+                             };
 
             var hireDate = new Field
-            {
-                Name = "INS_Hire Date",
-                Description = "The date and time of hire for the person"
-            };
+                           {
+                               Name = "INS_Hire Date",
+                               Description = "The date and time of hire for the person"
+                           };
 
             var bonusTarget = new Field
-            {
-                Name = "INS_Bonus Target",
-                Description = "The target bonus for the person"
-            };
+                              {
+                                  Name = "INS_Bonus Target",
+                                  Description = "The target bonus for the person"
+                              };
 
             var contactNumbers = new Field
-            {
-                Name = "INS_Contact Numbers",
-                Description = "A list of contact numbers for the person in order of preference"
-            };
+                                 {
+                                     Name = "INS_Contact Numbers",
+                                     Description = "A list of contact numbers for the person in order of preference"
+                                 };
 
             var fields = new List<Field>
-                             {
-                                 internalId,
-                                 firstName,
-                                 lastName,
-                                 yearlyWage,
-                                 hireDate,
-                                 bonusTarget,
-                                 contactNumbers
-                             };
+                         {
+                             internalId,
+                             firstName,
+                             lastName,
+                             yearlyWage,
+                             hireDate,
+                             bonusTarget,
+                             contactNumbers
+                         };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -121,7 +112,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var transaction = provider.BeginTransaction();
 
                 // Set up the structured command provider.
-                var structuredCommandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
+                var structuredCommandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -134,15 +125,15 @@ namespace Startitecture.Orm.SqlClient.Tests
                         .Where(set => set.Include(row => row.FieldId, existingFields.Select(field => field.FieldId).ToArray())));
 
                 fieldRepository.DeleteSelection(fieldSelection);
-                var fieldInsertCommand = new TableValuedInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
+                var fieldInsertCommand = new JsonInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
 
                 fieldInsertCommand.Execute(
                     fields.Select(
                         field => new FieldTableTypeRow
-                        {
-                            Name = field.Name,
-                            Description = field.Description
-                        }));
+                                 {
+                                     Name = field.Name,
+                                     Description = field.Description
+                                 }));
 
                 transaction.Commit();
             }
@@ -153,7 +144,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
-        public void ExecuteWithIdentityUpdate_TableValuedInsertForGenericSubmission_DoesNotThrowException()
+        public void ExecuteWithIdentityUpdate_JsonInsertForGenericSubmission_DoesNotThrowException()
         {
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -174,46 +165,46 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                {
-                    Name = "Internal ID",
-                    Description = "Unique ID used internally"
-                };
+                                 {
+                                     Name = "Internal ID",
+                                     Description = "Unique ID used internally"
+                                 };
 
                 var firstName = new Field
-                {
-                    Name = "First Name",
-                    Description = "The person's first name"
-                };
+                                {
+                                    Name = "First Name",
+                                    Description = "The person's first name"
+                                };
 
                 var lastName = new Field
-                {
-                    Name = "Last Name",
-                    Description = "The person's last name"
-                };
+                               {
+                                   Name = "Last Name",
+                                   Description = "The person's last name"
+                               };
 
                 var yearlyWage = new Field
-                {
-                    Name = "Yearly Wage",
-                    Description = "The base wage paid year over year."
-                };
+                                 {
+                                     Name = "Yearly Wage",
+                                     Description = "The base wage paid year over year."
+                                 };
 
                 var hireDate = new Field
-                {
-                    Name = "Hire Date",
-                    Description = "The date and time of hire for the person"
-                };
+                               {
+                                   Name = "Hire Date",
+                                   Description = "The date and time of hire for the person"
+                               };
 
                 var bonusTarget = new Field
-                {
-                    Name = "Bonus Target",
-                    Description = "The target bonus for the person"
-                };
+                                  {
+                                      Name = "Bonus Target",
+                                      Description = "The target bonus for the person"
+                                  };
 
                 var contactNumbers = new Field
-                {
-                    Name = "Contact Numbers",
-                    Description = "A list of contact numbers for the person in order of preference"
-                };
+                                     {
+                                         Name = "Contact Numbers",
+                                         Description = "A list of contact numbers for the person in order of preference"
+                                     };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -260,18 +251,18 @@ namespace Startitecture.Orm.SqlClient.Tests
                 Assert.AreNotEqual(0, submissionId);
 
                 // Set up the structured command provider.
-                var commandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
+                var commandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
-                                 {
-                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                     LastModifiedTime = expected.SubmittedTime
-                                 };
+                                        {
+                                            FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                            LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                            LastModifiedTime = expected.SubmittedTime
+                                        };
 
-                var valuesCommand = new TableValuedInsert<FieldValueRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var valuesCommand = new JsonInsert<FieldValueRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
                 var insertedValues = valuesCommand.ExecuteForResults(valuesList).ToList();
 
                 // Map back to the domain object.
@@ -284,18 +275,18 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                    {
-                                        FieldValueElementId = e.FieldValueElementId,
-                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                        Order = e.Order,
-                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                        FloatElement = e.Element as double? ?? e.Element as float?,
-                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                        MoneyElement = e.Element as decimal?,
-                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                    }).ToList();
+                                           {
+                                               FieldValueElementId = e.FieldValueElementId,
+                                               FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                               Order = e.Order,
+                                               DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                               FloatElement = e.Element as double? ?? e.Element as float?,
+                                               IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                               MoneyElement = e.Element as decimal?,
+                                               TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                           }).ToList();
 
-                var elementsCommand = new TableValuedInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var elementsCommand = new JsonInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
 
                 // Reassign with our added identities
                 // TODO: create dictionary for seeks
@@ -307,31 +298,31 @@ namespace Startitecture.Orm.SqlClient.Tests
                     this.mapper.MapTo(input, element);
                 }
 
-                var dateElementsCommand = new TableValuedInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
                 dateElementsCommand.Execute(elementsList.Where(row => row.DateElement.HasValue));
 
-                var floatElementsCommand = new TableValuedInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
+                var floatElementsCommand = new JsonInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.FloatElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement);
 
                 floatElementsCommand.Execute(elementsList.Where(row => row.FloatElement.HasValue));
 
-                var integerElementsCommand = new TableValuedInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
+                var integerElementsCommand = new JsonInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.IntegerElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
                 integerElementsCommand.Execute(elementsList.Where(row => row.IntegerElement.HasValue));
 
-                var moneyElementsCommand = new TableValuedInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
+                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.MoneyElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
                 moneyElementsCommand.Execute(elementsList.Where(row => row.MoneyElement.HasValue));
 
-                var textElementsCommand = new TableValuedInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
+                var textElementsCommand = new JsonInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.TextElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
@@ -340,12 +331,12 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues
                                               select new GenericSubmissionValueTableTypeRow
-                                              {
-                                                  GenericSubmissionId = submissionId,
-                                                  GenericSubmissionValueId = v.FieldValueId
-                                              };
+                                                     {
+                                                         GenericSubmissionId = submissionId,
+                                                         GenericSubmissionValueId = v.FieldValueId
+                                                     };
 
-                var submissionCommand = new TableValuedInsert<GenericSubmissionValueTableTypeRow>(commandProvider, provider.DatabaseContext);
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext);
                 submissionCommand.Execute(genericValueSubmissions);
                 transaction.Commit();
             }
@@ -355,53 +346,53 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The execute test.
         /// </summary>
         /// <returns>
-        /// A <see cref="Task"/> representing the asynchronous unit test.
+        /// A <see cref="Task" /> representing the asynchronous unit test.
         /// </returns>
         [TestMethod]
         [TestCategory("Integration")]
-        public async Task ExecuteAsync_TableValueInsertForFields_DoesNotThrowException()
+        public async Task ExecuteAsyncJsonInsertForFields_DoesNotThrowException()
         {
             var internalId = new Field
-            {
-                Name = "INS_Internal ID",
-                Description = "Unique ID used internally"
-            };
+                             {
+                                 Name = "INS_Internal ID",
+                                 Description = "Unique ID used internally"
+                             };
 
             var firstName = new Field
-            {
-                Name = "INS_First Name",
-                Description = "The person's first name"
-            };
+                            {
+                                Name = "INS_First Name",
+                                Description = "The person's first name"
+                            };
 
             var lastName = new Field
-            {
-                Name = "INS_Last Name",
-                Description = "The person's last name"
-            };
+                           {
+                               Name = "INS_Last Name",
+                               Description = "The person's last name"
+                           };
 
             var yearlyWage = new Field
-            {
-                Name = "INS_Yearly Wage",
-                Description = "The base wage paid year over year."
-            };
+                             {
+                                 Name = "INS_Yearly Wage",
+                                 Description = "The base wage paid year over year."
+                             };
 
             var hireDate = new Field
-            {
-                Name = "INS_Hire Date",
-                Description = "The date and time of hire for the person"
-            };
+                           {
+                               Name = "INS_Hire Date",
+                               Description = "The date and time of hire for the person"
+                           };
 
             var bonusTarget = new Field
-            {
-                Name = "INS_Bonus Target",
-                Description = "The target bonus for the person"
-            };
+                              {
+                                  Name = "INS_Bonus Target",
+                                  Description = "The target bonus for the person"
+                              };
 
             var contactNumbers = new Field
-            {
-                Name = "INS_Contact Numbers",
-                Description = "A list of contact numbers for the person in order of preference"
-            };
+                                 {
+                                     Name = "INS_Contact Numbers",
+                                     Description = "A list of contact numbers for the person in order of preference"
+                                 };
 
             var fields = new List<Field>
                          {
@@ -421,7 +412,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
 
                 // Set up the structured command provider.
-                var structuredCommandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
+                var structuredCommandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -435,15 +426,15 @@ namespace Startitecture.Orm.SqlClient.Tests
                     .ConfigureAwait(false);
 
                 await fieldRepository.DeleteSelectionAsync(fieldSelection).ConfigureAwait(false);
-                var fieldInsertCommand = new TableValuedInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
+                var fieldInsertCommand = new JsonInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
 
                 await fieldInsertCommand.ExecuteAsync(
                         fields.Select(
                             field => new FieldTableTypeRow
-                            {
-                                Name = field.Name,
-                                Description = field.Description
-                            }))
+                                     {
+                                         Name = field.Name,
+                                         Description = field.Description
+                                     }))
                     .ConfigureAwait(false);
 
                 await transaction.CommitAsync().ConfigureAwait(false);
@@ -454,11 +445,11 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The execute test.
         /// </summary>
         /// <returns>
-        /// A <see cref="Task"/> representing the asynchronous unit test.
+        /// A <see cref="Task" /> representing the asynchronous unit test.
         /// </returns>
         [TestMethod]
         [TestCategory("Integration")]
-        public async Task ExecuteWithIdentityUpdateAsync_TableValuedInsertForGenericSubmission_DoesNotThrowException()
+        public async Task ExecuteWithIdentityUpdateAsync_JsonInsertForGenericSubmission_DoesNotThrowException()
         {
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
 
@@ -467,58 +458,59 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
 
                 var domainIdentity = await identityRepository.FirstOrDefaultAsync(
-                                         Query.Select<DomainIdentity>()
-                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName))).ConfigureAwait(false)
-                                     ?? await identityRepository.SaveAsync(
-                                         new DomainIdentity(Environment.UserName)
-                                         {
-                                             FirstName = "King",
-                                             MiddleName = "T.",
-                                             LastName = "Animal"
-                                         }).ConfigureAwait(false);
+                                             Query.Select<DomainIdentity>()
+                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
+                                         .ConfigureAwait(false) ?? await identityRepository.SaveAsync(
+                                             new DomainIdentity(Environment.UserName)
+                                             {
+                                                 FirstName = "King",
+                                                 MiddleName = "T.",
+                                                 LastName = "Animal"
+                                             })
+                                         .ConfigureAwait(false);
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                {
-                    Name = "Internal ID",
-                    Description = "Unique ID used internally"
-                };
+                                 {
+                                     Name = "Internal ID",
+                                     Description = "Unique ID used internally"
+                                 };
 
                 var firstName = new Field
-                {
-                    Name = "First Name",
-                    Description = "The person's first name"
-                };
+                                {
+                                    Name = "First Name",
+                                    Description = "The person's first name"
+                                };
 
                 var lastName = new Field
-                {
-                    Name = "Last Name",
-                    Description = "The person's last name"
-                };
+                               {
+                                   Name = "Last Name",
+                                   Description = "The person's last name"
+                               };
 
                 var yearlyWage = new Field
-                {
-                    Name = "Yearly Wage",
-                    Description = "The base wage paid year over year."
-                };
+                                 {
+                                     Name = "Yearly Wage",
+                                     Description = "The base wage paid year over year."
+                                 };
 
                 var hireDate = new Field
-                {
-                    Name = "Hire Date",
-                    Description = "The date and time of hire for the person"
-                };
+                               {
+                                   Name = "Hire Date",
+                                   Description = "The date and time of hire for the person"
+                               };
 
                 var bonusTarget = new Field
-                {
-                    Name = "Bonus Target",
-                    Description = "The target bonus for the person"
-                };
+                                  {
+                                      Name = "Bonus Target",
+                                      Description = "The target bonus for the person"
+                                  };
 
                 var contactNumbers = new Field
-                {
-                    Name = "Contact Numbers",
-                    Description = "A list of contact numbers for the person in order of preference"
-                };
+                                     {
+                                         Name = "Contact Numbers",
+                                         Description = "A list of contact numbers for the person in order of preference"
+                                     };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -543,7 +535,8 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
                 var existingFields = await fieldRepository.SelectEntitiesAsync(
-                                         new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues))).ConfigureAwait(false);
+                                             new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues)))
+                                         .ConfigureAwait(false);
 
                 foreach (var field in existingFields)
                 {
@@ -565,18 +558,18 @@ namespace Startitecture.Orm.SqlClient.Tests
                 Assert.AreNotEqual(0, submissionId);
 
                 // Set up the structured command provider.
-                var commandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
+                var commandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
-                                 {
-                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                     LastModifiedTime = expected.SubmittedTime
-                                 };
+                                        {
+                                            FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                            LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                            LastModifiedTime = expected.SubmittedTime
+                                        };
 
-                var valuesCommand = new TableValuedInsert<FieldValueRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var valuesCommand = new JsonInsert<FieldValueRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
                 var insertedValues = (await valuesCommand.ExecuteForResultsAsync(valuesList).ConfigureAwait(false)).ToList();
 
                 // Map back to the domain object.
@@ -589,18 +582,18 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                    {
-                                        FieldValueElementId = e.FieldValueElementId,
-                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                        Order = e.Order,
-                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                        FloatElement = e.Element as double? ?? e.Element as float?,
-                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                        MoneyElement = e.Element as decimal?,
-                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                    }).ToList();
+                                           {
+                                               FieldValueElementId = e.FieldValueElementId,
+                                               FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                               Order = e.Order,
+                                               DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                               FloatElement = e.Element as double? ?? e.Element as float?,
+                                               IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                               MoneyElement = e.Element as decimal?,
+                                               TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                           }).ToList();
 
-                var elementsCommand = new TableValuedInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var elementsCommand = new JsonInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
 
                 // Reassign with our added identities
                 // TODO: create dictionary for seeks
@@ -612,31 +605,31 @@ namespace Startitecture.Orm.SqlClient.Tests
                     this.mapper.MapTo(input, element);
                 }
 
-                var dateElementsCommand = new TableValuedInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
                 await dateElementsCommand.ExecuteAsync(elementsList.Where(row => row.DateElement.HasValue)).ConfigureAwait(false);
 
-                var floatElementsCommand = new TableValuedInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
+                var floatElementsCommand = new JsonInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.FloatElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement);
 
                 await floatElementsCommand.ExecuteAsync(elementsList.Where(row => row.FloatElement.HasValue)).ConfigureAwait(false);
 
-                var integerElementsCommand = new TableValuedInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
+                var integerElementsCommand = new JsonInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.IntegerElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
                 await integerElementsCommand.ExecuteAsync(elementsList.Where(row => row.IntegerElement.HasValue)).ConfigureAwait(false);
 
-                var moneyElementsCommand = new TableValuedInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
+                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.MoneyElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
                 await moneyElementsCommand.ExecuteAsync(elementsList.Where(row => row.MoneyElement.HasValue)).ConfigureAwait(false);
 
-                var textElementsCommand = new TableValuedInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
+                var textElementsCommand = new JsonInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.TextElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
@@ -645,12 +638,12 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues
                                               select new GenericSubmissionValueTableTypeRow
-                                              {
-                                                  GenericSubmissionId = submissionId,
-                                                  GenericSubmissionValueId = v.FieldValueId
-                                              };
+                                                     {
+                                                         GenericSubmissionId = submissionId,
+                                                         GenericSubmissionValueId = v.FieldValueId
+                                                     };
 
-                var submissionCommand = new TableValuedInsert<GenericSubmissionValueTableTypeRow>(commandProvider, provider.DatabaseContext);
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext);
                 await submissionCommand.ExecuteAsync(genericValueSubmissions).ConfigureAwait(false);
                 await transaction.CommitAsync().ConfigureAwait(false);
             }
@@ -660,7 +653,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_TableValuedInsertWithIdentityColumnSelectResults_CommandTextMatchesExpected()
+        public void CommandText_JsonInsertWithIdentityColumnSelectResults_CommandTextMatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -675,13 +668,10 @@ namespace Startitecture.Orm.SqlClient.Tests
                 databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
                 ////structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
                 structuredCommandProvider
-                    .Setup(
-                        provider => provider.Create(
-                            It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<FieldValueTableTypeRow>>()))
+                    .Setup(provider => provider.Create(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<FieldValueTableTypeRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var valuesCommand = new TableValuedInsert<FieldValueRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var valuesCommand = new JsonInsert<FieldValueRow>(structuredCommandProvider.Object, databaseContext.Object)
                     .SelectFromInserted(row => row.FieldValueId, row => row.FieldId)
                     .SelectFromSource<FieldValueTableTypeRow>(
                         set => set.On(row => row.FieldId, row => row.FieldId),
@@ -690,18 +680,21 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 valuesCommand.Execute(new List<FieldValueTableTypeRow>());
 
-                const string Expected = @"DECLARE @inserted table([FieldValueId] bigint, [FieldId] int);
+                const string Expected = @"DECLARE @sourceRows table([FieldId] int, [LastModifiedByDomainIdentifierId] int, [LastModifiedTime] datetimeoffset);
+INSERT INTO @sourceRows ([FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
+SELECT [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime] FROM OPENJSON(@FieldValueRows)
+WITH ([FieldId] int '$.FieldId', [LastModifiedByDomainIdentifierId] int '$.LastModifiedByDomainIdentifierId', [LastModifiedTime] datetimeoffset '$.LastModifiedTime');
+DECLARE @inserted table([FieldValueId] bigint, [FieldId] int);
 INSERT INTO [dbo].[FieldValue]
 ([FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
 OUTPUT INSERTED.[FieldValueId], INSERTED.[FieldId]
 INTO @inserted ([FieldValueId], [FieldId])
-SELECT [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime] FROM @FieldValueRows AS source;
+SELECT [FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime] FROM @sourceRows AS source;
 SELECT i.[FieldValueId], i.[FieldId], s.[LastModifiedByDomainIdentifierId], s.[LastModifiedTime]
 FROM @inserted AS i
-INNER JOIN @FieldValueRows AS s
+INNER JOIN @sourceRows AS s
 ON i.[FieldId] = s.[FieldId];
 ";
-
                 var actual = valuesCommand.CommandText;
                 Assert.AreEqual(Expected, actual);
             }
@@ -711,7 +704,7 @@ ON i.[FieldId] = s.[FieldId];
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_TableValuedInsertForFlattenedType_MatchesExpected()
+        public void CommandText_JsonInsertForFlattenedType_MatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -726,21 +719,22 @@ ON i.[FieldId] = s.[FieldId];
                 databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
                 ////structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
                 structuredCommandProvider
-                    .Setup(
-                        provider => provider.Create(
-                            It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
+                    .Setup(provider => provider.Create(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var dateElementsCommand = new TableValuedInsert<DateElementRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider.Object, databaseContext.Object)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
                 dateElementsCommand.Execute(new List<FieldValueElementTableTypeRow>());
 
-                const string Expected = @"INSERT INTO [dbo].[DateElement]
+                const string Expected = @"DECLARE @sourceRows table([FieldValueElementId] bigint, [DateElement] datetimeoffset);
+INSERT INTO @sourceRows ([FieldValueElementId], [DateElement])
+SELECT [FieldValueElementId], [DateElement] FROM OPENJSON(@FieldValueElementRows)
+WITH ([FieldValueElementId] bigint '$.FieldValueElementId', [DateElement] datetimeoffset '$.DateElement');
+INSERT INTO [dbo].[DateElement]
 ([DateElementId], [Value])
-SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementRows AS source;
+SELECT [FieldValueElementId], [DateElement] FROM @sourceRows AS source;
 ";
                 var actual = dateElementsCommand.CommandText;
                 Assert.AreEqual(Expected, actual);
@@ -751,7 +745,7 @@ SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementRows AS sourc
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_TableValueInsertForNonIdentityKey_CommandTextMatchesExpected()
+        public void CommandText_JsonInsertForNonIdentityKey_CommandTextMatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -767,21 +761,25 @@ SELECT [FieldValueElementId], [DateElement] FROM @FieldValueElementRows AS sourc
                 // Attach the values to the submission
                 var genericValueSubmissions = (from v in Enumerable.Range(1, 5)
                                                select new GenericSubmissionValueTableTypeRow
-                                               {
-                                                   GenericSubmissionId = 6,
-                                                   GenericSubmissionValueId = v
-                                               }).ToList();
+                                                      {
+                                                          GenericSubmissionId = 6,
+                                                          GenericSubmissionValueId = v
+                                                      }).ToList();
 
                 var structuredCommandProvider = genericValueSubmissions.MockCommandProvider(
                     new DataAnnotationsDefinitionProvider(),
                     new TransactSqlQualifier());
 
-                var submissionCommand = new TableValuedInsert<GenericSubmissionValueRow>(structuredCommandProvider.Object, databaseContext.Object);
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider.Object, databaseContext.Object);
                 submissionCommand.Execute(genericValueSubmissions);
 
-                const string Expected = @"INSERT INTO [dbo].[GenericSubmissionValue]
+                const string Expected = @"DECLARE @sourceRows table([GenericSubmissionValueId] bigint, [GenericSubmissionId] int);
+INSERT INTO @sourceRows ([GenericSubmissionValueId], [GenericSubmissionId])
+SELECT [GenericSubmissionValueId], [GenericSubmissionId] FROM OPENJSON(@GenericSubmissionValueRows)
+WITH ([GenericSubmissionValueId] bigint '$.GenericSubmissionValueId', [GenericSubmissionId] int '$.GenericSubmissionId');
+INSERT INTO [dbo].[GenericSubmissionValue]
 ([GenericSubmissionValueId], [GenericSubmissionId])
-SELECT [GenericSubmissionValueId], [GenericSubmissionId] FROM @GenericSubmissionValueRows AS source;
+SELECT [GenericSubmissionValueId], [GenericSubmissionId] FROM @sourceRows AS source;
 ";
                 var actual = submissionCommand.CommandText;
                 Assert.AreEqual(Expected, actual);

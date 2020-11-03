@@ -59,7 +59,11 @@ namespace Startitecture.Orm.SqlClient.Tests
             this.CreateMap<FieldValueElementTableTypeRow, FieldValueElement>()
                 .ForMember(element => element.FieldValue, expression => expression.Ignore());
 
+            this.CreateMap<FieldValueElementFlatRow, FieldValueElement>()
+                .ForMember(element => element.FieldValue, expression => expression.Ignore());
+
             this.CreateMap<FieldValueElementRow, FieldValueElementTableTypeRow>();
+            this.CreateMap<FieldValueElementRow, FieldValueElementFlatRow>();
         }
     }
 }

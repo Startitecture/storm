@@ -361,7 +361,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                     // Do the field value elements
                     var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
-                                        select new FieldValueElementTableTypeRow
+                                        select new FieldValueElementPgFlatRow
                                                {
                                                    FieldValueElementId = e.FieldValueElementId,
                                                    FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
@@ -391,31 +391,31 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     dateElementRepository.Insert(
                         elementsList.Values.Where(row => row.DateElement.HasValue),
                         insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement));
+                            .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement));
 
                     var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
                     floatElementRepository.Insert(
                         elementsList.Values.Where(row => row.FloatElement.HasValue),
                         insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement));
+                            .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement));
 
                     var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
                     integerElementRepository.Insert(
                         elementsList.Values.Where(row => row.IntegerElement.HasValue),
                         insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement));
+                            .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement));
 
                     var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
                     moneyElementRepository.Insert(
                         elementsList.Values.Where(row => row.MoneyElement.HasValue),
                         insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement));
+                            .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement));
 
                     var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
                     textElementRepository.Insert(
                         elementsList.Values.Where(row => row.TextElement != null),
                         insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
-                            .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement));
+                            .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement));
 
                     // Attach the values to the submission
                     var genericValueSubmissions = from v in insertedValues.Values
@@ -581,7 +581,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 actual.Load(values.Values);
 
                 var valueElementRows = provider.SelectEntities(
-                        Query.Select<FieldValueElementTableTypeRow>()
+                        Query.Select<FieldValueElementPgFlatRow>()
                             .From(
                                 set => set.LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
                                     .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
@@ -952,7 +952,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                     // Do the field value elements
                     var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
-                                        select new FieldValueElementTableTypeRow
+                                        select new FieldValueElementPgFlatRow
                                                {
                                                    FieldValueElementId = e.FieldValueElementId,
                                                    FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
@@ -982,35 +982,35 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     await dateElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.DateElement.HasValue),
                             insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
-                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement))
                         .ConfigureAwait(false);
 
                     var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
                     await floatElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.FloatElement.HasValue),
                             insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
-                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement))
                         .ConfigureAwait(false);
 
                     var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
                     await integerElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.IntegerElement.HasValue),
                             insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
-                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement))
                         .ConfigureAwait(false);
 
                     var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
                     await moneyElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.MoneyElement.HasValue),
                             insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
-                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement))
                         .ConfigureAwait(false);
 
                     var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
                     await textElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.TextElement != null),
                             insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
-                                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement))
                         .ConfigureAwait(false);
 
                     // Attach the values to the submission
@@ -1180,7 +1180,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 actual.Load(values.Values);
 
                 var valueElementRows = provider.SelectEntities(
-                        Query.Select<FieldValueElementTableTypeRow>()
+                        Query.Select<FieldValueElementPgFlatRow>()
                             .From(
                                 set => set.LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
                                     .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
@@ -1306,7 +1306,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Now merge in the field value elements.
                 // Do the field value elements
                 var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
-                                     select new FieldValueElementTableTypeRow
+                                     select new FieldValueElementPgFlatRow
                                             {
                                                 FieldValueElementId = e.FieldValueElementId,
                                                 FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
@@ -1337,35 +1337,35 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
                 dateElementRepository.Insert(
                     valueElements.Where(row => row.DateElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                    insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement)
                         .OnConflict(row => row.DateElementId)
                         .Upsert(row => row.Value));
 
                 var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
                 floatElementRepository.Insert(
                     valueElements.Where(row => row.FloatElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                    insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement)
                         .OnConflict(row => row.FloatElementId)
                         .Upsert(row => row.Value));
 
                 var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
                 integerElementRepository.Insert(
                     valueElements.Where(row => row.IntegerElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                    insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement)
                         .OnConflict(row => row.IntegerElementId)
                         .Upsert(row => row.Value));
 
                 var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
                 moneyElementRepository.Insert(
                     valueElements.Where(row => row.MoneyElement.HasValue),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                    insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement)
                         .OnConflict(row => row.MoneyElementId)
                         .Upsert(row => row.Value));
 
                 var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
                 textElementRepository.Insert(
                     valueElements.Where(row => row.TextElement != null),
-                    insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                    insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement)
                         .OnConflict(row => row.TextElementId)
                         .Upsert(row => row.Value));
 
@@ -1466,7 +1466,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Now merge in the field value elements.
                 // Do the field value elements
                 var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
-                                     select new FieldValueElementTableTypeRow
+                                     select new FieldValueElementPgFlatRow
                                             {
                                                 FieldValueElementId = e.FieldValueElementId,
                                                 FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
@@ -1499,7 +1499,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var dateElementRepository = new PostgreSqlRepository<FieldValueElement, DateElementRow>(provider, this.mapper);
                 await dateElementRepository.InsertAsync(
                         valueElements.Where(row => row.DateElement.HasValue),
-                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                        insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement)
                             .OnConflict(row => row.DateElementId)
                             .Upsert(row => row.Value))
                     .ConfigureAwait(false);
@@ -1507,7 +1507,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
                 await floatElementRepository.InsertAsync(
                         valueElements.Where(row => row.FloatElement.HasValue),
-                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                        insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement)
                             .OnConflict(row => row.FloatElementId)
                             .Upsert(row => row.Value))
                     .ConfigureAwait(false);
@@ -1515,7 +1515,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
                 await integerElementRepository.InsertAsync(
                         valueElements.Where(row => row.IntegerElement.HasValue),
-                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                        insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement)
                             .OnConflict(row => row.IntegerElementId)
                             .Upsert(row => row.Value))
                     .ConfigureAwait(false);
@@ -1523,7 +1523,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
                 await moneyElementRepository.InsertAsync(
                         valueElements.Where(row => row.MoneyElement.HasValue),
-                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                        insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement)
                             .OnConflict(row => row.MoneyElementId)
                             .Upsert(row => row.Value))
                     .ConfigureAwait(false);
@@ -1531,7 +1531,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
                 await textElementRepository.InsertAsync(
                         valueElements.Where(row => row.TextElement != null),
-                        insert => insert.From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                        insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement)
                             .OnConflict(row => row.TextElementId)
                             .Upsert(row => row.Value))
                     .ConfigureAwait(false);

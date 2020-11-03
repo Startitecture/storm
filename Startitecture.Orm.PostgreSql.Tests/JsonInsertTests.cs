@@ -236,14 +236,14 @@ ON CONFLICT DO NOTHING;
                     .Setup(
                         provider => provider.Create(
                             It.IsAny<ITableCommand>(),
-                            It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
+                            It.IsAny<IEnumerable<FieldValueElementPgFlatRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
                 var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider.Object, databaseContext.Object)
                     .InsertInto(row => row.DateElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
+                    .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement);
 
-                dateElementsCommand.Execute(new List<FieldValueElementTableTypeRow>());
+                dateElementsCommand.Execute(new List<FieldValueElementPgFlatRow>());
 
                 const string Expected = @"INSERT INTO ""dbo"".""DateElement""
 (""DateElementId"", ""Value"")
@@ -575,7 +575,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
 
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
-                                    select new FieldValueElementTableTypeRow
+                                    select new FieldValueElementPgFlatRow
                                     {
                                         FieldValueElementId = e.FieldValueElementId,
                                         FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
@@ -587,7 +587,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                         TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                     }).ToList();
 
-                var elementsCommand = new JsonInsert<FieldValueElementTableTypeRow>(structuredCommandProvider, provider.DatabaseContext)
+                var elementsCommand = new JsonInsert<FieldValueElementPgFlatRow>(structuredCommandProvider, provider.DatabaseContext)
                     .Returning(row => row.FieldValueId, row => row.Order);
 
                 // Reassign with our added identities
@@ -601,31 +601,31 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
 
                 var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.DateElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
+                    .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement);
 
                 dateElementsCommand.Execute(elementsList.Where(row => row.DateElement.HasValue));
 
                 var floatElementsCommand = new JsonInsert<FloatElementRow>(structuredCommandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.FloatElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement);
+                    .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement);
 
                 floatElementsCommand.Execute(elementsList.Where(row => row.FloatElement.HasValue));
 
                 var integerElementsCommand = new JsonInsert<IntegerElementRow>(structuredCommandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.IntegerElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
+                    .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
                 integerElementsCommand.Execute(elementsList.Where(row => row.IntegerElement.HasValue));
 
                 var moneyElementsCommand = new JsonInsert<MoneyElementRow>(structuredCommandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.MoneyElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
+                    .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
                 moneyElementsCommand.Execute(elementsList.Where(row => row.MoneyElement.HasValue));
 
                 var textElementsCommand = new JsonInsert<TextElementRow>(structuredCommandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.TextElementId, row => row.Value)
-                    .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
+                    .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement);
 
                 textElementsCommand.Execute(elementsList.Where(row => row.TextElement != null));
 
@@ -792,7 +792,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 actual.Load(values.Values);
 
                 var valueElementRows = provider.SelectEntities(
-                        Query.Select<FieldValueElementTableTypeRow>()
+                        Query.Select<FieldValueElementPgFlatRow>()
                             .From(
                                 set => set.LeftJoin<DateElementRow>(row => row.FieldValueElementId, row => row.DateElementId)
                                     .LeftJoin<FloatElementRow>(row => row.FieldValueElementId, row => row.FloatElementId)
@@ -913,7 +913,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             // Now merge in the field value elements.
             // Do the field value elements
             var valueElements = (from e in submission.SubmissionValues.SelectMany(value => value.Elements)
-                                 select new FieldValueElementTableTypeRow
+                                 select new FieldValueElementPgFlatRow
                                  {
                                      FieldValueElementId = e.FieldValueElementId,
                                      FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
@@ -940,35 +940,35 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
             }
 
             var dateElementsCommand = new JsonInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
+                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement)
                 .OnConflict(row => row.DateElementId)
                 .Upsert(row => row.Value);
 
             dateElementsCommand.Execute(valueElements.Where(row => row.DateElement.HasValue));
 
             var floatElementsCommand = new JsonInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
+                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement)
                 .OnConflict(row => row.FloatElementId)
                 .Upsert(row => row.Value);
 
             floatElementsCommand.Execute(valueElements.Where(row => row.FloatElement.HasValue));
 
             var integerElementsCommand = new JsonInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement)
+                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement)
                 .OnConflict(row => row.IntegerElementId)
                 .Upsert(row => row.Value);
 
             integerElementsCommand.Execute(valueElements.Where(row => row.IntegerElement.HasValue));
 
             var moneyElementsCommand = new JsonInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement)
+                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement)
                 .OnConflict(row => row.MoneyElementId)
                 .Upsert(row => row.Value);
 
             moneyElementsCommand.Execute(valueElements.Where(row => row.MoneyElement.HasValue));
 
             var textElementsCommand = new JsonInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
-                .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement)
+                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement)
                 .OnConflict(row => row.TextElementId)
                 .Upsert(row => row.Value);
 

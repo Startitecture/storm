@@ -11,6 +11,7 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
+    using System.Reflection;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -77,15 +78,26 @@ namespace Startitecture.Orm.SqlClient
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
         /// </exception>
-        public void Insert<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedInsert<TEntity>> insertAction)
+        public void Insert<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
+            TransactSqlInsertBase<TEntity> insertCommand;
+
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             insertAction?.Invoke(insertCommand);
             insertCommand.Execute(items);
         }
@@ -108,15 +120,31 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The <see cref="Task"/> that is performing the insert.
         /// </returns>
-        public async Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedInsert<TEntity>> insertAction)
+        public async Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            TransactSqlInsertBase<TEntity> insertCommand;
+
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             insertAction?.Invoke(insertCommand);
             await insertCommand.ExecuteAsync(items).ConfigureAwait(false);
         }
@@ -141,15 +169,31 @@ namespace Startitecture.Orm.SqlClient
         /// </exception>
         public IEnumerable<TItem> InsertForResults<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            Action<TableValuedInsert<TEntity>> insertAction)
+            Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            TransactSqlInsertBase<TEntity> insertCommand;
+
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             insertAction?.Invoke(insertCommand);
             var entities = insertCommand.ExecuteForResults(items);
             return this.EntityMapper.Map<List<TItem>>(entities);
@@ -175,15 +219,31 @@ namespace Startitecture.Orm.SqlClient
         /// </exception>
         public async Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            Action<TableValuedInsert<TEntity>> insertAction)
+            Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            TransactSqlInsertBase<TEntity> insertCommand;
+
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             insertAction?.Invoke(insertCommand);
             var entities = await insertCommand.ExecuteForResultsAsync(items).ConfigureAwait(false);
             return this.EntityMapper.Map<List<TItem>>(entities);
@@ -207,15 +267,26 @@ namespace Startitecture.Orm.SqlClient
         /// <remarks>
         /// In SQL Server, MERGE operations are not guaranteed to be atomic.
         /// </remarks>
-        public void Merge<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedMerge<TEntity>> mergeAction)
+        public void Merge<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            TransactSqlMergeBase<TEntity> mergeCommand;
+
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             mergeAction?.Invoke(mergeCommand);
             mergeCommand.Execute(items);
         }
@@ -241,15 +312,26 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The <see cref="Task"/> that is executing the merge operation.
         /// </returns>
-        public async Task MergeAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TableValuedMerge<TEntity>> mergeAction)
+        public async Task MergeAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            TransactSqlMergeBase<TEntity> mergeCommand;
+
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             mergeAction?.Invoke(mergeCommand);
             await mergeCommand.ExecuteAsync(items).ConfigureAwait(false);
         }
@@ -277,15 +359,26 @@ namespace Startitecture.Orm.SqlClient
         /// </remarks>
         public IEnumerable<TItem> MergeForResults<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            Action<TableValuedMerge<TEntity>> mergeAction)
+            Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            TransactSqlMergeBase<TEntity> mergeCommand;
+
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             mergeAction?.Invoke(mergeCommand);
             var entities = mergeCommand.ExecuteForResults(items);
             return this.EntityMapper.Map<List<TItem>>(entities);
@@ -314,15 +407,26 @@ namespace Startitecture.Orm.SqlClient
         /// </remarks>
         public async Task<IEnumerable<TItem>> MergeForResultsAsync<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            Action<TableValuedMerge<TEntity>> mergeAction)
+            Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            TransactSqlMergeBase<TEntity> mergeCommand;
+
+            if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
+            {
+                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+            else
+            {
+                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+            }
+
             mergeAction?.Invoke(mergeCommand);
             var entities = await mergeCommand.ExecuteForResultsAsync(items).ConfigureAwait(false);
             return this.EntityMapper.Map<List<TItem>>(entities);

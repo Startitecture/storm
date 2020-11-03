@@ -1,28 +1,23 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="FieldValueElementTableTypeRow.cs" company="Startitecture">
+// <copyright file="FieldValueElementFlatRow.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
-// <summary>
-//   Represents a user-defined table type for the FieldValueRow entity.
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace Startitecture.Orm.Testing.Entities.TableTypes
+namespace Startitecture.Orm.Testing.Entities
 {
     using System;
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
     using System.Data.SqlTypes;
 
-    using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
 
     /// <summary>
-    /// Represents a user-defined table type for the <see cref="FieldValueRow"/> entity.
+    /// Represents a flattened field value element row.
     /// </summary>
-    [TableType("FieldValueElementTableType")]
     [Table("FieldValueElement", Schema = "dbo")]
-    public class FieldValueElementTableTypeRow : EntityBase
+    public class FieldValueElementFlatRow
     {
         /// <summary>
         /// Gets or sets the field value element ID.

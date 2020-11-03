@@ -11,6 +11,7 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
+    using System.Data.SqlTypes;
     using System.Linq;
 
     using JetBrains.Annotations;
@@ -27,7 +28,21 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// The mappers.
         /// </summary>
-        private static readonly Dictionary<Tuple<Type, Type>, IValueMapper> Mappers = new Dictionary<Tuple<Type, Type>, IValueMapper>();
+        private static readonly Dictionary<Tuple<Type, Type>, IValueMapper> Mappers = new Dictionary<Tuple<Type, Type>, IValueMapper>
+                                                                                      {
+                                                                                          {
+                                                                                              new Tuple<Type, Type>(
+                                                                                                  typeof(decimal),
+                                                                                                  typeof(SqlMoney)),
+                                                                                              new MoneyMapper()
+                                                                                          },
+                                                                                          {
+                                                                                              new Tuple<Type, Type>(
+                                                                                                  typeof(decimal),
+                                                                                                  typeof(SqlMoney?)),
+                                                                                              new MoneyMapper()
+                                                                                          }
+                                                                                      };
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TransactSqlAdapter"/> class.

@@ -1579,7 +1579,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 try
                 {
-                    var entity = new FieldRow { Name = "MahField", Description = "Mah Field Description" };
+                    var entity = new FieldRow
+                                 {
+                                     Name = "MahField",
+                                     Description = "Mah Field Description"
+                                 };
                     var actual = target.Insert(entity);
                     Assert.AreNotEqual(0, actual.FieldId);
                 }
@@ -3153,6 +3157,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             {
                 var actual = await target.ContainsAsync(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)))
                                  .ConfigureAwait(false);
+
                 Assert.IsTrue(actual);
             }
         }
@@ -3287,7 +3292,12 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 try
                 {
-                    var entity = new FieldRow { Name = "MahField", Description = "Mah Field Description" };
+                    var entity = new FieldRow
+                                 {
+                                     Name = "MahField",
+                                     Description = "Mah Field Description"
+                                 };
+
                     var actual = target.Insert(entity);
                     Assert.AreNotEqual(0, actual.FieldId);
                 }
