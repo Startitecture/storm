@@ -12,6 +12,7 @@ namespace Startitecture.Orm.SqlClient
 
     using JetBrains.Annotations;
 
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Schema;
 
     /// <summary>
@@ -23,7 +24,7 @@ namespace Startitecture.Orm.SqlClient
     /// <typeparam name="TEntity">
     /// The type of entity stored in the repository.
     /// </typeparam>
-    public interface ISqlClientRepository<TModel, TEntity>
+    public interface ISqlClientRepository<TModel, TEntity> : IEntityRepository<TModel>
         where TEntity : class, new()
     {
         /// <summary>
