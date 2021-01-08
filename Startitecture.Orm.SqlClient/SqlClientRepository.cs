@@ -14,8 +14,6 @@ namespace Startitecture.Orm.SqlClient
     using System.Reflection;
     using System.Threading.Tasks;
 
-    using JetBrains.Annotations;
-
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
@@ -29,7 +27,7 @@ namespace Startitecture.Orm.SqlClient
     /// <typeparam name="TEntity">
     /// The type of entity stored in the repository.
     /// </typeparam>
-    public class SqlClientRepository<TModel, TEntity> : EntityRepository<TModel, TEntity>
+    public class SqlClientRepository<TModel, TEntity> : EntityRepository<TModel, TEntity>, ISqlClientRepository<TModel, TEntity>
         where TEntity : class, new()
     {
         /// <summary>
@@ -78,7 +76,7 @@ namespace Startitecture.Orm.SqlClient
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
         /// </exception>
-        public void Insert<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction)
+        public void Insert<TItem>(IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
             TransactSqlInsertBase<TEntity> insertCommand;
 
@@ -120,7 +118,7 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The <see cref="Task"/> that is performing the insert.
         /// </returns>
-        public async Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction)
+        public async Task InsertAsync<TItem>(IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
             if (items == null)
             {
@@ -168,7 +166,7 @@ namespace Startitecture.Orm.SqlClient
         /// <paramref name="items"/> is null.
         /// </exception>
         public IEnumerable<TItem> InsertForResults<TItem>(
-            [NotNull] IEnumerable<TItem> items,
+            IEnumerable<TItem> items,
             Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
             if (items == null)
@@ -218,7 +216,7 @@ namespace Startitecture.Orm.SqlClient
         /// <paramref name="items"/> is null.
         /// </exception>
         public async Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
-            [NotNull] IEnumerable<TItem> items,
+            IEnumerable<TItem> items,
             Action<TransactSqlInsertBase<TEntity>> insertAction)
         {
             if (items == null)
@@ -267,7 +265,7 @@ namespace Startitecture.Orm.SqlClient
         /// <remarks>
         /// In SQL Server, MERGE operations are not guaranteed to be atomic.
         /// </remarks>
-        public void Merge<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction)
+        public void Merge<TItem>(IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)
             {
@@ -312,7 +310,7 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The <see cref="Task"/> that is executing the merge operation.
         /// </returns>
-        public async Task MergeAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction)
+        public async Task MergeAsync<TItem>(IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)
             {
@@ -358,7 +356,7 @@ namespace Startitecture.Orm.SqlClient
         /// In SQL Server, MERGE operations are not guaranteed to be atomic.
         /// </remarks>
         public IEnumerable<TItem> MergeForResults<TItem>(
-            [NotNull] IEnumerable<TItem> items,
+            IEnumerable<TItem> items,
             Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)
@@ -406,7 +404,7 @@ namespace Startitecture.Orm.SqlClient
         /// In SQL Server, MERGE operations are not guaranteed to be atomic.
         /// </remarks>
         public async Task<IEnumerable<TItem>> MergeForResultsAsync<TItem>(
-            [NotNull] IEnumerable<TItem> items,
+            IEnumerable<TItem> items,
             Action<TransactSqlMergeBase<TEntity>> mergeAction)
         {
             if (items == null)

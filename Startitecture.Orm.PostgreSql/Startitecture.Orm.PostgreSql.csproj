@@ -8,10 +8,10 @@
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-beta4</Version>
+    <Version>1.0.0-beta5</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>PostgreSql connection library for the ST/ORM (Startitecture.Orm) package.</Description>
-    <Copyright>© 2020, Startitecture, LLC</Copyright>
+    <Copyright>© 2021, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
     <PackageIcon>Storm Logo.png</PackageIcon>

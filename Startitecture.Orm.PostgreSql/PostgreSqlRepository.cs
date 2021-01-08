@@ -13,8 +13,6 @@ namespace Startitecture.Orm.PostgreSql
     using System.Collections.Generic;
     using System.Threading.Tasks;
 
-    using JetBrains.Annotations;
-
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
 
@@ -27,7 +25,7 @@ namespace Startitecture.Orm.PostgreSql
     /// <typeparam name="TEntity">
     /// The type of entity stored in the repository.
     /// </typeparam>
-    public class PostgreSqlRepository<TModel, TEntity> : EntityRepository<TModel, TEntity>
+    public class PostgreSqlRepository<TModel, TEntity> : EntityRepository<TModel, TEntity>, IPostgreSqlRepository<TModel, TEntity>
         where TEntity : class, new()
     {
         /// <summary>
@@ -76,7 +74,7 @@ namespace Startitecture.Orm.PostgreSql
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
         /// </exception>
-        public void Insert<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
+        public void Insert<TItem>(IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
         {
             if (items == null)
             {
@@ -107,7 +105,7 @@ namespace Startitecture.Orm.PostgreSql
         /// <returns>
         /// The <see cref="Task"/> that is performing the insert.
         /// </returns>
-        public async Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
+        public async Task InsertAsync<TItem>(IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
         {
             if (items == null)
             {
@@ -139,7 +137,7 @@ namespace Startitecture.Orm.PostgreSql
         /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
         /// </returns>
         public IEnumerable<TItem> InsertForResults<TItem>(
-            [NotNull] IEnumerable<TItem> items,
+            IEnumerable<TItem> items,
             Action<JsonInsert<TEntity>> insertAction)
         {
             if (items == null)
@@ -173,7 +171,7 @@ namespace Startitecture.Orm.PostgreSql
         /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
         /// </returns>
         public async Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
-            [NotNull] IEnumerable<TItem> items,
+            IEnumerable<TItem> items,
             Action<JsonInsert<TEntity>> insertAction)
         {
             if (items == null)
