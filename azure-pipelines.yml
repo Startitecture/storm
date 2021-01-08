@@ -136,17 +136,18 @@ stages:
           artifact: 'Storm Test Publish Profile'
           publishLocation: pipeline
 
-    - job: MirrorGitHub
-      displayName: 'Mirror to GitHub'
-      pool:
-        vmImage: 'ubuntu-latest'
+      - task: gitsync@1
+        displayName: 'Sync Azure DevOps repository with GitHub'
+        inputs:
+          GitRepoUrl: 'https://%GitPat%@github.com/Startitecture/storm.git'
 
-      steps:
+    # - job: MirrorGitHub
+    #   displayName: 'Mirror to GitHub'
+    #   pool:
+    #     vmImage: 'ubuntu-latest'
 
-        - task: gitsync@1
-          displayName: 'Sync Azure DevOps repository with GitHub'
-          inputs:
-            GitRepoUrl: 'https://%GitPat%@github.com/Startitecture/storm.git'
+    #   steps:
+
 
         # - task: CmdLine@2
         #   displayName: 'Mirror to Github'
