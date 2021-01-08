@@ -138,7 +138,9 @@ stages:
 
     - job: MirrorGitHub
       displayName: 'Mirror to GitHub'
-      pool: 'ubuntu-latest'
+      pool:
+        vmImage: 'ubuntu-latest'
+
       steps:
         - checkout: none
 
