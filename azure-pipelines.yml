@@ -142,15 +142,19 @@ stages:
         vmImage: 'ubuntu-latest'
 
       steps:
-        - checkout: none
 
-        - task: CmdLine@2
-          displayName: 'Mirror to Github'
-          env:
-            GitPat: $(GithubPAT-Mirror)
+        - task: gitsync@1
+          displayName: 'Sync Azure DevOps repository with GitHub'
           inputs:
-            script: |
-              git clone --mirror  https://startitecture@dev.azure.com/startitecture/storm/_git/storm
-              cd $(build.sourcesdirectory)/storm
-              git remote add --mirror=fetch mirror https://%GitPat%@github.com/Startitecture/storm.git
-              git push mirror --progress --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/*
+            GitRepoUrl: 'https://%GitPat%@github.com/Startitecture/storm.git'
+
+        # - task: CmdLine@2
+        #   displayName: 'Mirror to Github'
+        #   env:
+        #     GitPat: $(GithubPAT-Mirror)
+        #   inputs:
+        #     script: |
+        #       git clone --mirror  https://startitecture@dev.azure.com/startitecture/storm/_git/storm
+        #       cd $(build.sourcesdirectory)/storm
+        #       git remote add --mirror=fetch mirror https://%GitPat%@github.com/Startitecture/storm.git
+        #       git push mirror --progress --prune +refs/remotes/origin/*:refs/heads/* +refs/tags/*:refs/tags/*
