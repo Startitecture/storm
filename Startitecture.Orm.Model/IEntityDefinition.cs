@@ -82,7 +82,7 @@ namespace Startitecture.Orm.Model
         /// </param>
         /// <returns>
         /// The first <see cref="EntityAttributeDefinition"/> that matches the attribute location, or
-        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
+        /// a default value if the definition is not found.
         /// </returns>
         EntityAttributeDefinition Find([NotNull] AttributeLocation attributeLocation);
 
@@ -97,7 +97,7 @@ namespace Startitecture.Orm.Model
         /// </param>
         /// <returns>
         /// The first <see cref="EntityAttributeDefinition"/> that matches the entity alias or name and property name, or
-        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
+        /// a default value if the definition is not found.
         /// </returns>
         /// <exception cref="System.ArgumentNullException">
         /// <paramref name="entityName"/> or <paramref name="propertyName"/> is null.
@@ -112,7 +112,7 @@ namespace Startitecture.Orm.Model
         /// </param>
         /// <returns>
         /// The first <see cref="EntityAttributeDefinition"/> that matches the attribute expression, or
-        /// <see cref="EntityAttributeDefinition.Empty"/> if the definition is not found.
+        /// a default value if the definition is not found.
         /// </returns>
         /// <remarks>
         /// If the declaring type of <paramref name="attributeExpression"/> is not the same as the type of the entity definition, the

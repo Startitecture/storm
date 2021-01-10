@@ -46,5 +46,17 @@ namespace Startitecture.Orm.Model
         /// Gets the entity attributes to set.
         /// </summary>
         IEnumerable<ValueState> AttributesToSet { get; }
+
+        /// <summary>
+        /// Maps the current selection to the target selection type.
+        /// </summary>
+        /// <typeparam name="TDestEntity">
+        /// The destination entity type.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="EntitySet{T}" /> for the destination type.
+        /// </returns>
+        UpdateSet<TDestEntity> MapSet<TDestEntity>()
+            where TDestEntity : class, new();
     }
 }

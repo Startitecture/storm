@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Common.Tests
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
 
     using global::AutoMapper;
 
@@ -38,15 +39,15 @@ namespace Startitecture.Orm.Common.Tests
             new Mapper(
                 new MapperConfiguration(
                     expression =>
-                        {
-                            expression.AddProfile<SubSubEntityMappingProfile>();
-                            expression.AddProfile<MultiReferenceEntityMappingProfile>();
-                            expression.AddProfile<CreatedByMappingProfile>();
-                            expression.AddProfile<ModifiedByMappingProfile>();
-                            expression.AddProfile<SubEntityMappingProfile>();
-                            expression.AddProfile<FakeComplexEntityMappingProfile>();
-                            expression.AddProfile<FakeDependentEntityMappingProfile>();
-                        })));
+                    {
+                        expression.AddProfile<SubSubEntityMappingProfile>();
+                        expression.AddProfile<MultiReferenceEntityMappingProfile>();
+                        expression.AddProfile<CreatedByMappingProfile>();
+                        expression.AddProfile<ModifiedByMappingProfile>();
+                        expression.AddProfile<SubEntityMappingProfile>();
+                        expression.AddProfile<FakeComplexEntityMappingProfile>();
+                        expression.AddProfile<FakeDependentEntityMappingProfile>();
+                    })));
 
         /// <summary>
         /// The save test.
@@ -130,16 +131,14 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
+            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySet<ComplexRaisedRow>>()))
                 .Returns(this.mapper.Map<ComplexRaisedRow>(baseline));
 
             repositoryProvider.Setup(
-                    provider => provider.Contains(
-                        It.Is<IEntitySet>(selection => (int?)selection.PropertyValues.FirstOrDefault() == 22)))
+                    provider => provider.Contains(It.Is<IEntitySet>(selection => (int?)selection.PropertyValues.FirstOrDefault() == 22)))
                 .Returns(true);
 
-            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<ComplexRaisedRow>>()))
-                .Returns(1);
+            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<ComplexRaisedRow>>())).Returns(1);
 
             using (var provider = repositoryProvider.Object)
             {
@@ -244,6 +243,111 @@ namespace Startitecture.Orm.Common.Tests
             }
 
             Assert.AreEqual(5, actual);
+        }
+
+        /// <summary>
+        /// Tests the update method.
+        /// </summary>
+        [TestMethod]
+        public void Update_UpdateModelSet_MappedToUpdateEntitySet()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<SubSubRow>>())).Returns(1);
+
+            int actual;
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
+                actual = repository.Update(
+                    new UpdateSet<SubSubEntity>().Set(entity => entity.UniqueName, "newName")
+                        .Where(filterSet => filterSet.AreEqual(entity => entity.UniqueName, "bar")));
+            }
+
+            Assert.AreEqual(1, actual);
+        }
+
+        /// <summary>
+        /// A test for the UpdateAsync method.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task"/> representing the result of the asynchronous operation.
+        /// </returns>
+        [TestMethod]
+        public async Task UpdateAsync_UpdateModelSet_MappedToUpdateEntitySet()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubSubRow>>())).Returns(Task.FromResult(1));
+
+            int actual;
+
+            await using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
+                actual = await repository.UpdateAsync(
+                                 new UpdateSet<SubSubEntity>().Set(entity => entity.UniqueName, "newName")
+                                     .Where(filterSet => filterSet.AreEqual(entity => entity.UniqueName, "bar")))
+                             .ConfigureAwait(false);
+            }
+
+            Assert.AreEqual(1, actual);
+        }
+
+        /// <summary>
+        /// Tests the UpdateSingle method.
+        /// </summary>
+        [TestMethod]
+        public void UpdateSingle_ModelInput_MappedToEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<SubSubRow>>())).Verifiable();
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
+                var subSubEntity = new SubSubEntity("myUniqueName", 34)
+                                   {
+                                       Description = "my description"
+                                   };
+
+                repository.UpdateSingle(34, subSubEntity, entity => entity.Description);
+            }
+
+            repositoryProvider.Verify();
+        }
+
+        /// <summary>
+        /// Tests the UpdateSingleAsync method.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task"/> representing the result of the asynchronous operation.
+        /// </returns>
+        [TestMethod]
+        public async Task UpdateSingleAsyncTest()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubSubRow>>())).Verifiable();
+
+            await using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
+                var subSubEntity = new SubSubEntity("myUniqueName", 34)
+                                   {
+                                       Description = "my description"
+                                   };
+
+                await repository.UpdateSingleAsync(34, subSubEntity, entity => entity.Description).ConfigureAwait(false);
+            }
+
+            repositoryProvider.Verify();
         }
     }
 }

@@ -1,4 +1,6 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Startitecture.Orm.Model;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="UpdateSetTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -16,6 +18,8 @@ namespace Startitecture.Orm.Model.Tests
 
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
+    using Startitecture.Orm.Testing.Model.Contracts;
+    using Startitecture.Orm.Testing.Model.Entities;
 
     /// <summary>
     /// The update set tests.
@@ -739,6 +743,23 @@ namespace Startitecture.Orm.Model.Tests
 
             var actual = updateSet.PropertyValues.ToArray();
             CollectionAssert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// Tests that the DTO properties are mapped correctly for a direct data object.
+        /// </summary>
+        [TestMethod]
+        public void MapSet_DirectDataUpdateSetFromDtoToRow_PropertiesMatchExpected()
+        {
+            var expected = new UpdateSet<DocumentDto>().Set(dto => dto.Identifier, "foo123-35")
+                .Set(dto => dto.VersionNumber, 35)
+                .Where(set => set.AreEqual(dto => dto.Identifier, "foo123-34"));
+
+            var actual = expected.MapSet<DocumentRow>();
+            CollectionAssert.AreEqual(expected.Filters.ToList(), actual.Filters.ToList());
+            CollectionAssert.AreEqual(expected.AttributesToSet.ToList(), actual.AttributesToSet.ToList());
+            Assert.AreEqual(typeof(DocumentRow), actual.EntityType);
+            CollectionAssert.AreEqual(expected.PropertyValues.ToList(), actual.PropertyValues.ToList());
         }
     }
 }

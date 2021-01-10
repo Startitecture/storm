@@ -12,6 +12,8 @@ namespace Startitecture.Orm.Common
     using System;
     using System.Collections.Generic;
     using System.Globalization;
+    using System.Linq;
+    using System.Linq.Expressions;
     using System.Reflection;
     using System.Threading.Tasks;
 
@@ -96,6 +98,102 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public int Update<TItem>([NotNull] UpdateSet<TItem> updateSet)
+        {
+            if (updateSet == null)
+            {
+                throw new ArgumentNullException(nameof(updateSet));
+            }
+
+            var mappedSet = updateSet.MapSet<TEntity>();
+            return this.RepositoryProvider.Update(mappedSet);
+        }
+
+        /// <inheritdoc />
+        public async Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet)
+        {
+            if (updateSet == null)
+            {
+                throw new ArgumentNullException(nameof(updateSet));
+            }
+
+            var mappedSet = updateSet.MapSet<TEntity>();
+            return await this.RepositoryProvider.UpdateAsync(mappedSet).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public void UpdateSingle<TKey, TItem>(
+            [NotNull] TKey key,
+            [NotNull] TItem source,
+            [NotNull] params Expression<Func<TItem, object>>[] setExpressions)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (setExpressions == null)
+            {
+                throw new ArgumentNullException(nameof(setExpressions));
+            }
+
+            var updateSet = new UpdateSet<TEntity>().Set(
+                    this.GetExampleEntity(source).Item,
+                    setExpressions.Select(
+                            expr =>
+                            {
+                                var parameter = Expression.Parameter(typeof(TEntity), "value");
+                                var expression = Expression.Property(parameter, expr.GetPropertyName());
+                                return Expression.Lambda<Func<TEntity, object>>(expression, parameter);
+                            })
+                        .ToArray())
+                .Where(set => this.GetUniqueSet(key, set));
+
+            this.RepositoryProvider.Update(updateSet);
+        }
+
+        /// <inheritdoc />
+        public async Task UpdateSingleAsync<TKey, TItem>(
+            [NotNull] TKey key,
+            [NotNull] TItem source,
+            [NotNull] params Expression<Func<TItem, object>>[] setExpressions)
+        {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (setExpressions == null)
+            {
+                throw new ArgumentNullException(nameof(setExpressions));
+            }
+
+            var updateSet = new UpdateSet<TEntity>().Set(
+                    this.GetExampleEntity(source).Item,
+                    setExpressions.Select(
+                            expr =>
+                            {
+                                var parameter = Expression.Parameter(typeof(TEntity), "value");
+                                var expression = Expression.Property(parameter, expr.GetPropertyName());
+                                return Expression.Lambda<Func<TEntity, object>>(expression, parameter);
+                            })
+                        .ToArray())
+                .Where(set => this.GetUniqueSet(key, set));
+
+            await this.RepositoryProvider.UpdateAsync(updateSet).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public int Delete<TItem>([NotNull] TItem example)
         {
             if (example == null)
@@ -103,9 +201,8 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(example));
             }
 
-            var entity = this.GetExampleEntity(example);
-            var uniqueItemSelection = this.GetUniqueItemSelection(entity);
-            return this.RepositoryProvider.Delete(uniqueItemSelection);
+            var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(example, set));
+            return this.RepositoryProvider.Delete(entitySet);
         }
 
         /// <inheritdoc />
@@ -116,9 +213,8 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(example));
             }
 
-            var entity = this.GetExampleEntity(example);
-            var uniqueItemSelection = this.GetUniqueItemSelection(entity);
-            return await this.RepositoryProvider.DeleteAsync(uniqueItemSelection).ConfigureAwait(false);
+            var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(example, set));
+            return await this.RepositoryProvider.DeleteAsync(entitySet).ConfigureAwait(false);
         }
 
         /// <inheritdoc />

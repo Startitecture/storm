@@ -36,6 +36,26 @@ namespace Startitecture.Orm.Model
         public IEnumerable<IValueFilter> ValueFilters => this.valueFilters;
 
         /// <summary>
+        /// Adds an <see cref="IValueFilter"/> to the value filter set.
+        /// </summary>
+        /// <param name="valueFilter">
+        /// The filter to add.
+        /// </param>
+        /// <returns>
+        /// The current <see cref="ValueFilterSet{T}"/>.
+        /// </returns>
+        public ValueFilterSet<T> Add([NotNull] IValueFilter valueFilter)
+        {
+            if (valueFilter == null)
+            {
+                throw new ArgumentNullException(nameof(valueFilter));
+            }
+
+            this.valueFilters.Add(valueFilter);
+            return this;
+        }
+
+        /// <summary>
         /// Matches the primary key of the specified <paramref name="entity"/>.
         /// </summary>
         /// <param name="entity">
@@ -44,13 +64,19 @@ namespace Startitecture.Orm.Model
         /// <param name="definitionProvider">
         /// The definition provider for the entity.
         /// </param>
+        /// <param name="explicitKeyAttributes">
+        /// The explicit key attributes for this match.
+        /// </param>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <remarks>
         /// This operation will clear any existing filters.
         /// </remarks>
-        public ValueFilterSet<T> MatchKey([NotNull] T entity, [NotNull] IEntityDefinitionProvider definitionProvider)
+        public ValueFilterSet<T> MatchKey(
+            [NotNull] T entity,
+            [NotNull] IEntityDefinitionProvider definitionProvider,
+            [NotNull] params Expression<Func<T, object>>[] explicitKeyAttributes)
         {
             if (entity == null)
             {
@@ -62,16 +88,24 @@ namespace Startitecture.Orm.Model
                 throw new ArgumentNullException(nameof(definitionProvider));
             }
 
+            if (explicitKeyAttributes == null)
+            {
+                throw new ArgumentNullException(nameof(explicitKeyAttributes));
+            }
+
             this.valueFilters.Clear();
             var entityDefinition = definitionProvider.Resolve<T>();
+            var keyAttributes = explicitKeyAttributes.Any()
+                                    ? explicitKeyAttributes.Select(entityDefinition.Find)
+                                    : entityDefinition.PrimaryKeyAttributes;
 
-            foreach (var keyAttribute in entityDefinition.PrimaryKeyAttributes)
+            foreach (var keyAttribute in keyAttributes)
             {
                 var entityReference = new EntityReference
-                {
-                    EntityAlias = keyAttribute.Entity.Alias,
-                    EntityType = keyAttribute.Entity.EntityType
-                };
+                                      {
+                                          EntityAlias = keyAttribute.Entity.Alias,
+                                          EntityType = keyAttribute.Entity.EntityType
+                                      };
                 var attributeLocation = new AttributeLocation(keyAttribute.PropertyInfo, entityReference);
                 var valueFilter = new ValueFilter(attributeLocation, FilterType.Equality, keyAttribute.GetValueDelegate.DynamicInvoke(entity));
 
@@ -84,15 +118,15 @@ namespace Startitecture.Orm.Model
                 return this;
             }
 
-            Trace.TraceWarning($"{typeof(TimeZoneInfo).FullName} does not have any key attributes defined.");
+            Trace.TraceWarning($"{typeof(T).FullName} does not have any key attributes defined.");
 
             foreach (var attribute in entityDefinition.DirectAttributes)
             {
                 var entityReference = new EntityReference
-                {
-                    EntityAlias = attribute.Entity.Alias,
-                    EntityType = attribute.Entity.EntityType
-                };
+                                      {
+                                          EntityAlias = attribute.Entity.Alias,
+                                          EntityType = attribute.Entity.EntityType
+                                      };
                 var attributeLocation = new AttributeLocation(attribute.PropertyInfo, entityReference);
                 var valueFilter = new ValueFilter(attributeLocation, FilterType.Equality, attribute.GetValueDelegate.DynamicInvoke(entity));
                 this.valueFilters.Add(valueFilter);
@@ -111,7 +145,7 @@ namespace Startitecture.Orm.Model
         /// The selectors of the attributes to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         public ValueFilterSet<T> Matching(T example, params Expression<Func<T, object>>[] selectors)
         {
@@ -147,7 +181,7 @@ namespace Startitecture.Orm.Model
         /// The type of the value.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -173,7 +207,7 @@ namespace Startitecture.Orm.Model
         /// The type of the value.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -181,39 +215,6 @@ namespace Startitecture.Orm.Model
         public ValueFilterSet<T> AreEqual<TEntity, TValue>([NotNull] Expression<Func<TEntity, TValue>> valueExpression, TValue value)
         {
             return this.AreEqual(valueExpression as LambdaExpression, value);
-        }
-
-        /// <summary>
-        /// Adds a equality filter for the specified property.
-        /// </summary>
-        /// <param name="valueExpression">
-        /// The value expression.
-        /// </param>
-        /// <param name="value">
-        /// The value to match.
-        /// </param>
-        /// <typeparam name="TValue">
-        /// The type of the value.
-        /// </typeparam>
-        /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="valueExpression"/> is null.
-        /// </exception>
-        public ValueFilterSet<T> AreEqual<TValue>([NotNull] LambdaExpression valueExpression, TValue value)
-        {
-            if (valueExpression == null)
-            {
-                throw new ArgumentNullException(nameof(valueExpression));
-            }
-
-            var valueFilter = Evaluate.IsNull(value)
-                                  ? new ValueFilter(valueExpression, FilterType.IsNull, value)
-                                  : new ValueFilter(valueExpression, FilterType.Equality, value);
-
-            this.valueFilters.Add(valueFilter);
-            return this;
         }
 
         /// <summary>
@@ -229,7 +230,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -261,7 +262,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -290,7 +291,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -322,7 +323,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -351,7 +352,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -383,7 +384,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -412,7 +413,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -444,7 +445,7 @@ namespace Startitecture.Orm.Model
         /// The type of value to evaluate.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="valueExpression"/> is null.
@@ -473,7 +474,7 @@ namespace Startitecture.Orm.Model
         /// The inclusion values.
         /// </param>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         public ValueFilterSet<T> Include<TValue>(Expression<Func<T, TValue>> selector, params TValue[] inclusionValues)
         {
@@ -508,7 +509,7 @@ namespace Startitecture.Orm.Model
         /// The inclusion values.
         /// </param>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         public ValueFilterSet<T> Include<TEntity, TValue>(Expression<Func<TEntity, TValue>> selector, params TValue[] inclusionValues)
         {
@@ -543,7 +544,7 @@ namespace Startitecture.Orm.Model
         /// The type of the value to compare.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selector"/>, <paramref name="minValue"/> or <paramref name="maxValue"/> is null.
@@ -593,7 +594,7 @@ namespace Startitecture.Orm.Model
         /// The type of the value to compare.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selector"/>, <paramref name="minValue"/> or <paramref name="maxValue"/> is null.
@@ -640,7 +641,7 @@ namespace Startitecture.Orm.Model
         /// The selectors of the attributes to match.
         /// </param>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         public ValueFilterSet<T> Between(T baseline, T boundary, params Expression<Func<T, object>>[] selectors)
         {
@@ -691,7 +692,7 @@ namespace Startitecture.Orm.Model
         /// The type of entity in which the match is to be found.
         /// </typeparam>
         /// <returns>
-        /// The current <see cref="EntitySelection{T}"/>.
+        /// The current <see cref="ValueFilterSet{T}"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="sourceAttribute"/>, <paramref name="entitySet"/>, or <paramref name="matchAttribute"/> is null.
@@ -726,6 +727,39 @@ namespace Startitecture.Orm.Model
 
             var setExpression = new RelationExpression(entitySet, entityRelations);
             this.valueFilters.Add(setExpression);
+            return this;
+        }
+
+        /// <summary>
+        /// Adds a equality filter for the specified property.
+        /// </summary>
+        /// <param name="valueExpression">
+        /// The value expression.
+        /// </param>
+        /// <param name="value">
+        /// The value to match.
+        /// </param>
+        /// <typeparam name="TValue">
+        /// The type of the value.
+        /// </typeparam>
+        /// <returns>
+        /// The current <see cref="ValueFilterSet{T}"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="valueExpression"/> is null.
+        /// </exception>
+        private ValueFilterSet<T> AreEqual<TValue>([NotNull] LambdaExpression valueExpression, TValue value)
+        {
+            if (valueExpression == null)
+            {
+                throw new ArgumentNullException(nameof(valueExpression));
+            }
+
+            var valueFilter = Evaluate.IsNull(value)
+                                  ? new ValueFilter(valueExpression, FilterType.IsNull, value)
+                                  : new ValueFilter(valueExpression, FilterType.Equality, value);
+
+            this.valueFilters.Add(valueFilter);
             return this;
         }
 

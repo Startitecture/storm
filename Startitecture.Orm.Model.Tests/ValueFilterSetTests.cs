@@ -1,4 +1,5 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ValueFilterSetTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -13,6 +14,7 @@ namespace Startitecture.Orm.Model.Tests
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     using Startitecture.Core;
+    using Startitecture.Orm.Schema;
     using Startitecture.Orm.Testing.Entities;
 
     /// <summary>
@@ -137,6 +139,70 @@ namespace Startitecture.Orm.Model.Tests
             var expected = new ValueFilter(valueExpression, FilterType.LessThanOrEqualTo, 35);
             var actual = target.ValueFilters.First();
             Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// Tests the MatchKey method.
+        /// </summary>
+        [TestMethod]
+        public void MatchKey_ImplicitKey_MatchesPrimaryKey()
+        {
+            var dataRow = new DataRow
+                          {
+                              FakeDataId = 43,
+                              AnotherColumn = "test",
+                              AnotherValueColumn = 33,
+                              NormalColumn = "foo",
+                              NullableColumn = null,
+                              NullableValueColumn = null,
+                              ValueColumn = 44
+                          };
+
+            var target = new ValueFilterSet<DataRow>().MatchKey(
+                dataRow,
+                new DataAnnotationsDefinitionProvider());
+
+            Expression<Func<DataRow, int>> valueExpression = row => row.FakeDataId;
+            var expected = new ValueFilter(valueExpression, FilterType.Equality, dataRow.FakeDataId);
+            var actual = target.ValueFilters.First();
+
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// Tests the MatchKey method.
+        /// </summary>
+        [TestMethod]
+        public void MatchKey_ExplicitKey_MatchesExplicitKey()
+        {
+            var dataRow = new DataRow
+                          {
+                              FakeDataId = 43,
+                              AnotherColumn = "test",
+                              AnotherValueColumn = 33,
+                              NormalColumn = "foo",
+                              NullableColumn = null,
+                              NullableValueColumn = null,
+                              ValueColumn = 44
+                          };
+
+            var target = new ValueFilterSet<DataRow>().MatchKey(
+                dataRow,
+                new DataAnnotationsDefinitionProvider(),
+                row => row.AnotherColumn,
+                row => row.AnotherValueColumn);
+
+            Expression<Func<DataRow, string>> keyColumn1 = row => row.AnotherColumn;
+            Expression<Func<DataRow, int>> keyColumn2 = row => row.AnotherValueColumn;
+            var expected = new[]
+                           {
+                               new ValueFilter(keyColumn1, FilterType.Equality, dataRow.AnotherColumn),
+                               new ValueFilter(keyColumn2, FilterType.Equality, dataRow.AnotherValueColumn)
+                           };
+
+            var actual = target.ValueFilters.ToArray();
+
+            CollectionAssert.AreEqual(expected, actual);
         }
     }
 }

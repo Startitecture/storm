@@ -753,6 +753,7 @@ namespace Startitecture.Orm.Model.Tests
 
             CollectionAssert.AreEqual(expected.Filters.ToList(), actual.Filters.ToList());
             CollectionAssert.AreEqual(expected.Relations.ToList(), actual.Relations.ToList());
+            CollectionAssert.AreEqual(expected.OrderByExpressions.ToList(), actual.OrderByExpressions.ToList());
         }
     }
 }

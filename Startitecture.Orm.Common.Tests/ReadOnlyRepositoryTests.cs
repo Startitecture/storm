@@ -164,54 +164,6 @@ namespace Startitecture.Orm.Common.Tests
         }
 
         /// <summary>
-        /// The contains entity with string unique key specified returns true.
-        /// </summary>
-        [TestMethod]
-        public void Contains_EntityWithStringUniqueKeySpecified_ReturnsTrue()
-        {
-            var repositoryProvider = new Mock<IRepositoryProvider>();
-            var definitionProvider = new DataAnnotationsDefinitionProvider();
-            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-
-            repositoryProvider.Setup(
-                    provider => provider.Contains(
-                        It.Is<EntitySet<ComplexRaisedRow>>(
-                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
-                .Returns(true);
-
-            using (var provider = repositoryProvider.Object)
-            {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper, row => row.UniqueName);
-                var actual = target.Contains("UniqueName");
-                Assert.IsTrue(actual);
-            }
-        }
-
-        /// <summary>
-        /// The contains entity with value type unique key specified returns true.
-        /// </summary>
-        [TestMethod]
-        public void Contains_EntityWithValueTypeUniqueKeySpecified_ReturnsTrue()
-        {
-            var repositoryProvider = new Mock<IRepositoryProvider>();
-            var definitionProvider = new DataAnnotationsDefinitionProvider();
-            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-
-            repositoryProvider.Setup(
-                    provider => provider.Contains(
-                        It.Is<EntitySet<DependentRow>>(
-                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as int? == 24)))
-                .Returns(true);
-
-            using (var provider = repositoryProvider.Object)
-            {
-                var target = new ReadOnlyRepository<DependentEntity, DependentRow>(provider, this.mapper, row => row.DependentIntegerValue);
-                var actual = target.Contains(24);
-                Assert.IsTrue(actual);
-            }
-        }
-
-        /// <summary>
         /// The contains_ entity with dynamic unique key specified_ returns true.
         /// </summary>
         [TestMethod]
@@ -229,10 +181,9 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper, row => row.UniqueName);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
                 dynamic key = new ExpandoObject();
                 key.UniqueName = "UniqueName";
-                key.Foo = 12;
 
                 var actual = target.Contains(key);
 
@@ -258,13 +209,12 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper, row => row.UniqueName);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
 
                 var actual = target.Contains(
                     new
                     {
                         UniqueName = "UniqueName",
-                        Foo = 12
                     });
 
                 Assert.IsTrue(actual);
@@ -307,7 +257,7 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
+            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySet<ComplexRaisedRow>>()))
                 .Returns(this.mapper.Map<ComplexRaisedRow>(existing));
 
             using (var provider = repositoryProvider.Object)
@@ -374,7 +324,7 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
+            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySet<ComplexRaisedRow>>()))
                 .Returns(this.mapper.Map<ComplexRaisedRow>(existing));
 
             using (var provider = repositoryProvider.Object)
@@ -449,7 +399,7 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySelection<ComplexRaisedRow>>()))
+            repositoryProvider.Setup(provider => provider.FirstOrDefault(It.IsAny<EntitySet<ComplexRaisedRow>>()))
                 .Returns(this.mapper.Map<ComplexRaisedRow>(existing));
 
             using (var provider = repositoryProvider.Object)
@@ -488,76 +438,6 @@ namespace Startitecture.Orm.Common.Tests
         }
 
         /// <summary>
-        /// The contains entity with string unique key specified returns true.
-        /// </summary>
-        [TestMethod]
-        public void FirstOrDefault_EntityWithStringUniqueKeySpecified_ReturnsEntity()
-        {
-            var repositoryProvider = new Mock<IRepositoryProvider>();
-            var definitionProvider = new DataAnnotationsDefinitionProvider();
-            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            var expected = new ComplexRaisedRow
-            {
-                ComplexEntityId = 34,
-                CreatedByFakeMultiReferenceEntityId = 3335,
-                CreationTime = DateTimeOffset.Now,
-                Description = "Foo",
-                FakeEnumerationId = 3,
-                FakeOtherEnumerationId = 6,
-                ModifiedByFakeMultiReferenceEntityId = 998,
-                UniqueName = "UniqueName"
-            };
-
-            repositoryProvider.Setup(
-                    provider => provider.FirstOrDefault(
-                        It.Is<EntitySelection<ComplexRaisedRow>>(
-                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
-                .Returns(expected);
-
-            var entityMapper = this.mapper;
-
-            using (var provider = repositoryProvider.Object)
-            {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper, row => row.UniqueName);
-                var actual = target.FirstOrDefault("UniqueName");
-                Assert.AreEqual(entityMapper.Map<ComplexEntity>(expected), actual);
-            }
-        }
-
-        /// <summary>
-        /// The contains entity with value type unique key specified returns true.
-        /// </summary>
-        [TestMethod]
-        public void FirstOrDefault_EntityWithValueTypeUniqueKeySpecified_ReturnsEntity()
-        {
-            var repositoryProvider = new Mock<IRepositoryProvider>();
-            var definitionProvider = new DataAnnotationsDefinitionProvider();
-            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-
-            var expected = new DependentRow
-            {
-                FakeDependentEntityId = 46,
-                DependentIntegerValue = 24,
-                DependentTimeValue = DateTimeOffset.Now
-            };
-
-            repositoryProvider.Setup(
-                    provider => provider.FirstOrDefault(
-                        It.Is<EntitySelection<DependentRow>>(
-                            selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as int? == 24)))
-                .Returns(expected);
-
-            var entityMapper = this.mapper;
-
-            using (var provider = repositoryProvider.Object)
-            {
-                var target = new ReadOnlyRepository<DependentEntity, DependentRow>(provider, entityMapper, row => row.DependentIntegerValue);
-                var actual = target.FirstOrDefault(24);
-                Assert.AreEqual(entityMapper.Map<DependentEntity>(expected), actual);
-            }
-        }
-
-        /// <summary>
         /// The contains_ entity with dynamic unique key specified_ returns true.
         /// </summary>
         [TestMethod]
@@ -581,7 +461,7 @@ namespace Startitecture.Orm.Common.Tests
 
             repositoryProvider.Setup(
                     provider => provider.FirstOrDefault(
-                        It.Is<EntitySelection<ComplexRaisedRow>>(
+                        It.Is<EntitySet<ComplexRaisedRow>>(
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
                 .Returns(expected);
 
@@ -589,10 +469,9 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper, row => row.UniqueName);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper);
                 dynamic key = new ExpandoObject();
                 key.UniqueName = "UniqueName";
-                key.Foo = 12;
 
                 var actual = target.FirstOrDefault(key);
 
@@ -624,7 +503,7 @@ namespace Startitecture.Orm.Common.Tests
 
             repositoryProvider.Setup(
                     provider => provider.FirstOrDefault(
-                        It.Is<EntitySelection<ComplexRaisedRow>>(
+                        It.Is<EntitySet<ComplexRaisedRow>>(
                             selection => selection.PropertyValues.Count() == 1 && selection.PropertyValues.First() as string == "UniqueName")))
                 .Returns(expected);
 
@@ -632,13 +511,12 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper, row => row.UniqueName);
+                var target = new ReadOnlyRepository<ComplexEntity, ComplexRaisedRow>(provider, entityMapper);
 
                 var actual = target.FirstOrDefault(
                     new
                     {
                         UniqueName = "UniqueName",
-                        Foo = 12
                     });
 
                 Assert.AreEqual(entityMapper.Map<ComplexEntity>(expected), actual);
@@ -678,7 +556,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper, row => row.Identifier);
+                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper);
                 var actual = target.FirstOrDefault(Query.From<DocumentDto>().Where(set => set.AreEqual(dto => dto.Identifier, "1234-1")));
                 Assert.AreEqual(entityMapper.Map<Document>(expected), actual);
             }
@@ -717,7 +595,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper, row => row.Identifier);
+                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper);
                 var actual = target.FirstOrDefault(select => select.Where(set => set.AreEqual(dto => dto.Identifier, "1234-1")));
                 Assert.AreEqual(entityMapper.Map<Document>(expected), actual);
             }
@@ -749,7 +627,7 @@ namespace Startitecture.Orm.Common.Tests
 
             using (var provider = repositoryProvider.Object)
             {
-                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper, row => row.Identifier);
+                var target = new ReadOnlyRepository<Document, DocumentRow>(provider, entityMapper);
                 var actual = target.DynamicFirstOrDefault(
                     Query.SelectEntities<DocumentRow>(
                         select => select.Select(
@@ -784,7 +662,7 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.SelectEntities(It.IsAny<EntitySelection<SubRow>>()))
+            repositoryProvider.Setup(provider => provider.SelectEntities(It.IsAny<EntitySet<SubRow>>()))
                 .Returns(this.mapper.Map<List<SubRow>>(expected));
 
             using (var provider = repositoryProvider.Object)
@@ -828,7 +706,7 @@ namespace Startitecture.Orm.Common.Tests
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
 
-            repositoryProvider.Setup(provider => provider.SelectEntities(It.IsAny<EntitySelection<SubRow>>()))
+            repositoryProvider.Setup(provider => provider.SelectEntities(It.IsAny<EntitySet<SubRow>>()))
                 .Returns(this.mapper.Map<List<SubRow>>(expected));
 
             using (var provider = repositoryProvider.Object)
@@ -863,11 +741,26 @@ namespace Startitecture.Orm.Common.Tests
         public void DynamicSelect_ReadOnlyRepositoryWithItemSelection_MatchesExpected()
         {
             var expected = new List<dynamic>
+                           {
+                               new
                                {
-                                   new { Name = "asidf", OtherId = (short)58, SubSubEntityUniqueName = "jasdyri" },
-                                   new { Name = "safd", OtherId = (short)546, SubSubEntityUniqueName = "jasdyri" },
-                                   new { Name = "gjkdf", OtherId = (short)52, SubSubEntityUniqueName = "jasdyri" }
-                               };
+                                   Name = "asidf",
+                                   OtherId = (short)58,
+                                   SubSubEntityUniqueName = "jasdyri"
+                               },
+                               new
+                               {
+                                   Name = "safd",
+                                   OtherId = (short)546,
+                                   SubSubEntityUniqueName = "jasdyri"
+                               },
+                               new
+                               {
+                                   Name = "gjkdf",
+                                   OtherId = (short)52,
+                                   SubSubEntityUniqueName = "jasdyri"
+                               }
+                           };
 
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();

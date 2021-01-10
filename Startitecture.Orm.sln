@@ -69,6 +69,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.PostgreSq
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Startitecture.Orm.Schema.Tests", "Startitecture.Orm.Schema.Tests\Startitecture.Orm.Schema.Tests.csproj", "{318F6112-87F3-4624-AA7A-9753ACD50C94}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{4048B3CF-3610-4783-AE24-1FA662875CB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -437,9 +439,22 @@ Global
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{C5D4A33E-8DB6-4AF3-8406-17AC4241FBB2} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{2541775F-1B34-4E5A-95BB-B8961633114A} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{49E494DC-E001-49AA-A420-A7BB8D852A86} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{40106EBF-BF23-427D-B3AD-9D32EBF54FDF} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{EC7CD13B-7F25-4F71-9C22-E3AB8BD9AAFD} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{B5B67152-6020-41D7-8E11-CF94F448BEA6} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{628FE999-E820-466C-BB85-96EFF48FA58F} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{DB9EBF4B-7D16-4DCC-8971-0EB21538A22B} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{AA999909-59CF-45BE-AAB1-3FA55125585D} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{225431BF-846F-4036-8995-27E947EB1D58} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+		{318F6112-87F3-4624-AA7A-9753ACD50C94} = {4048B3CF-3610-4783-AE24-1FA662875CB8}
+	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 		SolutionGuid = {8836AFFF-81BC-4FD9-91A1-C78F367E7813}
+		EnterpriseLibraryConfigurationToolBinariesPath = C:\Program Files (x86)\Microsoft Enterprise Library 5.0\Bin
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
 		CategoryFile = Simple Application Framework.vsmdi

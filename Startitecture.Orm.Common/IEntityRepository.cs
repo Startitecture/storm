@@ -10,6 +10,7 @@
 namespace Startitecture.Orm.Common
 {
     using System;
+    using System.Linq.Expressions;
     using System.Threading.Tasks;
 
     using Startitecture.Orm.Model;
@@ -43,6 +44,83 @@ namespace Startitecture.Orm.Common
         /// The saved <typeparamref name="TModel"/> instance.
         /// </returns>
         Task<TModel> SaveAsync(TModel model);
+
+        /// <summary>
+        /// Updates a set of entities in the repository.
+        /// </summary>
+        /// <param name="updateSet">
+        /// The update set that defines the entities and entity attributes to update.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of entity to update.
+        /// </typeparam>
+        /// <returns>
+        /// The number of affected entities as an <see cref="int"/>.
+        /// </returns>
+        /// <remarks>
+        /// The number of affected entities can include rows affected by triggers on the target table.
+        /// </remarks>
+        int Update<TItem>(UpdateSet<TItem> updateSet);
+
+        /// <summary>
+        /// Updates a set of entities in the repository.
+        /// </summary>
+        /// <param name="updateSet">
+        /// The update set that defines the entities and entity attributes to update.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of entity to update.
+        /// </typeparam>
+        /// <returns>
+        /// The number of affected entities as an <see cref="int"/>.
+        /// </returns>
+        /// <remarks>
+        /// The number of affected entities can include rows affected by triggers on the target table.
+        /// </remarks>
+        Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet);
+
+        /// <summary>
+        /// Updates a selection of entities in the repository.
+        /// </summary>
+        /// <typeparam name="TKey">
+        /// The type of the key that identifies the entity to update.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        /// The type of entity in the repository.
+        /// </typeparam>
+        /// <param name="key">
+        /// The key that identifies the entity.
+        /// </param>
+        /// <param name="source">
+        /// The item that contains the update.
+        /// </param>
+        /// <param name="setExpressions">
+        /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
+        /// </param>
+        void UpdateSingle<TKey, TItem>(TKey key, TItem source, params Expression<Func<TItem, object>>[] setExpressions);
+
+        /// <summary>
+        /// Updates a selection of entities in the repository.
+        /// </summary>
+        /// <typeparam name="TKey">
+        /// The type of the key that identifies the entity to update.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        /// The type of entity in the repository.
+        /// </typeparam>
+        /// <param name="key">
+        /// The key that identifies the entity.
+        /// </param>
+        /// <param name="source">
+        /// The item that contains the update.
+        /// </param>
+        /// <param name="setExpressions">
+        /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Task"/> that is performing the update.
+        /// </returns>
+        Task UpdateSingleAsync<TKey, TItem>(TKey key, TItem source, params Expression<Func<TItem, object>>[] setExpressions);
 
         /// <summary>
         /// Deletes a single item in the database.

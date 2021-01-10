@@ -42,11 +42,6 @@ namespace Startitecture.Orm.Common
         private readonly IComparer<TEntity> selectionComparer;
 
         /// <summary>
-        /// The unique key expressions.
-        /// </summary>
-        private readonly List<LambdaExpression> uniqueKeyExpressions = new List<LambdaExpression>();
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ReadOnlyRepository{TModel,TEntity}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
@@ -55,14 +50,8 @@ namespace Startitecture.Orm.Common
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
-        /// <param name="uniqueKeyExpressions">
-        /// The unique key expressions for the entity, if any.
-        /// </param>
-        public ReadOnlyRepository(
-            IRepositoryProvider repositoryProvider,
-            IEntityMapper entityMapper,
-            params Expression<Func<TEntity, object>>[] uniqueKeyExpressions)
-            : this(repositoryProvider, entityMapper, null, uniqueKeyExpressions)
+        public ReadOnlyRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
+            : this(repositoryProvider, entityMapper, null)
         {
         }
 
@@ -78,27 +67,15 @@ namespace Startitecture.Orm.Common
         /// <param name="selectionComparer">
         /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
-        /// <param name="uniqueKeyExpressions">
-        /// The unique key expressions for the entity, if any.
-        /// </param>
         public ReadOnlyRepository(
             [NotNull] IRepositoryProvider repositoryProvider,
             [NotNull] IEntityMapper entityMapper,
-            IComparer<TEntity> selectionComparer,
-            [NotNull] params Expression<Func<TEntity, object>>[] uniqueKeyExpressions)
+            IComparer<TEntity> selectionComparer)
         {
             // The entity mapper, and its resolution context, is intended to last only for the lifetime of the repository.
             this.EntityMapper = entityMapper ?? throw new ArgumentNullException(nameof(entityMapper));
             this.RepositoryProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
             this.selectionComparer = selectionComparer;
-
-            if (uniqueKeyExpressions == null)
-            {
-                throw new ArgumentNullException(nameof(uniqueKeyExpressions));
-            }
-
-            this.uniqueKeyExpressions.Clear();
-            this.uniqueKeyExpressions.AddRange(uniqueKeyExpressions);
         }
 
         /// <summary>
@@ -119,12 +96,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            var exampleEntity = this.GetExampleEntity(candidate);
-            var entitySet = this.uniqueKeyExpressions.Any()
-                                ? this.GetUniqueKeySet(exampleEntity)
-                                : new EntitySet<TEntity>().Where(
-                                    set => set.MatchKey(exampleEntity, this.RepositoryProvider.EntityDefinitionProvider));
-
+            var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(candidate, set));
             return this.RepositoryProvider.Contains(entitySet);
         }
 
@@ -136,12 +108,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            var exampleEntity = this.GetExampleEntity(candidate);
-            var entitySet = this.uniqueKeyExpressions.Any()
-                                ? this.GetUniqueKeySet(exampleEntity)
-                                : new EntitySet<TEntity>().Where(
-                                    set => set.MatchKey(exampleEntity, this.RepositoryProvider.EntityDefinitionProvider));
-
+            var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(candidate, set));
             return await this.RepositoryProvider.ContainsAsync(entitySet).ConfigureAwait(false);
         }
 
@@ -175,8 +142,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            var exampleEntity = this.GetExampleEntity(candidate);
-            var entitySet = this.GetUniqueItemSelection(exampleEntity);
+            var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(candidate, set));
             entitySet.SetDefaultRelations(this.RepositoryProvider.EntityDefinitionProvider);
 
             var dataItem = this.RepositoryProvider.FirstOrDefault(entitySet);
@@ -198,8 +164,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(candidate));
             }
 
-            var exampleEntity = this.GetExampleEntity(candidate);
-            var entitySet = this.GetUniqueItemSelection(exampleEntity);
+            var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(candidate, set));
             entitySet.SetDefaultRelations(this.RepositoryProvider.EntityDefinitionProvider);
 
             var dataItem = await this.RepositoryProvider.FirstOrDefaultAsync(entitySet).ConfigureAwait(false);
@@ -352,34 +317,6 @@ namespace Startitecture.Orm.Common
         }
 
         /// <summary>
-        /// Gets a unique item selection for the specified entity.
-        /// </summary>
-        /// <param name="entity">
-        /// The entity to create the selection for.
-        /// </param>
-        /// <returns>
-        /// A <see cref="EntitySelection{T}"/> for the specified entity.
-        /// </returns>
-        protected virtual EntitySelection<TEntity> GetUniqueItemSelection(TEntity entity)
-        {
-            var entitySelection = new EntitySelection<TEntity>();
-
-            if (this.uniqueKeyExpressions.Count == 0)
-            {
-                entitySelection.Where(set => set.MatchKey(entity, this.RepositoryProvider.EntityDefinitionProvider));
-            }
-            else
-            {
-                foreach (var keyExpression in this.uniqueKeyExpressions)
-                {
-                    entitySelection.Where(set => set.AreEqual(keyExpression, keyExpression.Compile().DynamicInvoke(entity)));
-                }
-            }
-
-            return entitySelection;
-        }
-
-        /// <summary>
         /// Constructs the entity for the specified data item.
         /// </summary>
         /// <param name="entity">
@@ -414,7 +351,7 @@ namespace Startitecture.Orm.Common
         /// <exception cref="OperationException">
         /// The key cannot be applied to the <typeparamref name="TEntity"/>. The inner exception contains details as to why.
         /// </exception>
-        protected TEntity GetExampleEntity<TItem>([NotNull] TItem key)
+        protected MapResult<TEntity> GetExampleEntity<TItem>([NotNull] TItem key)
         {
             if (key == null)
             {
@@ -423,12 +360,10 @@ namespace Startitecture.Orm.Common
 
             TEntity exampleEntity;
             var entityDefinition = this.RepositoryProvider.EntityDefinitionProvider.Resolve<TEntity>();
-
-            var keyDefinitions = this.uniqueKeyExpressions.Count == 0
-                                    ? entityDefinition.PrimaryKeyAttributes
-                                    : this.uniqueKeyExpressions.Select(entityDefinition.Find);
-
+            var keyDefinitions = entityDefinition.PrimaryKeyAttributes;
             var keyType = key.GetType();
+
+            var values = new Dictionary<string, object>();
 
             // Single key value
             if (keyType.IsValueType || key is string)
@@ -440,6 +375,7 @@ namespace Startitecture.Orm.Common
                 try
                 {
                     keyDefinition.SetValueDelegate.DynamicInvoke(exampleEntity, key);
+                    values.Add(keyDefinition.PropertyName, key);
                 }
                 catch (ArgumentException ex)
                 {
@@ -490,13 +426,20 @@ namespace Startitecture.Orm.Common
                         // Handle dynamics
                         exampleEntity = new TEntity();
 
-                        foreach (var attribute in keyDefinitions)
+                        foreach (var keyValue in expando)
                         {
+                            var attribute = entityDefinition.Find(entityDefinition.EntityName, keyValue.Key);
+
+                            if (attribute == default)
+                            {
+                                continue;
+                            }
+
                             try
                             {
-                                attribute.SetValueDelegate.DynamicInvoke(
-                                    exampleEntity,
-                                    expando.FirstOrDefault(pair => pair.Key == attribute.PropertyName).Value);
+                                var value = expando.FirstOrDefault(pair => pair.Key == attribute.PropertyName).Value;
+                                attribute.SetValueDelegate.DynamicInvoke(exampleEntity, value);
+                                values.Add(attribute.PropertyName, value);
                             }
                             catch (ArgumentException ex)
                             {
@@ -542,9 +485,8 @@ namespace Startitecture.Orm.Common
 
                         // Handle anonymous types, require all key definitions to be set.
                         exampleEntity = new TEntity();
-                        bool anyNull = false;
 
-                        foreach (var attribute in keyDefinitions)
+                        foreach (var attribute in entityDefinition.DirectAttributes)
                         {
                             try
                             {
@@ -552,11 +494,11 @@ namespace Startitecture.Orm.Common
 
                                 if (value == null)
                                 {
-                                    anyNull = true;
-                                    break;
+                                    continue;
                                 }
 
                                 attribute.SetValueDelegate.DynamicInvoke(exampleEntity, value);
+                                values.Add(attribute.PropertyName, value);
                             }
                             catch (ArgumentException ex)
                             {
@@ -596,38 +538,71 @@ namespace Startitecture.Orm.Common
                             }
                         }
 
-                        // If any key definitions are null, our last resort is to try the mapper.
-                        if (anyNull)
-                        {
-                            exampleEntity = this.EntityMapper.Map<TEntity>(key);
-                        }
-
                         break;
                 }
             }
 
-            return exampleEntity;
+            return new MapResult<TEntity>(exampleEntity, values);
         }
 
         /// <summary>
-        /// Gets a unique key set for the <paramref name="exampleEntity"/>.
+        /// Gets a unique set query for the specified candidate item.
         /// </summary>
-        /// <param name="exampleEntity">
-        /// The example entity to get a unique key set for.
+        /// <typeparam name="TItem">
+        /// The type of the candidate item.
+        /// </typeparam>
+        /// <param name="candidate">
+        /// The candidate item.
         /// </param>
+        /// <param name="valueFilterSet"></param>
         /// <returns>
-        /// An <see cref="EntitySet{TEntity}"/> based on the unique keys specified in the <see cref="ReadOnlyRepository{TModel,TEntity}"/>.
+        /// An <see cref="EntitySet{T}"/> for the specified <paramref name="candidate"/>.
         /// </returns>
-        private EntitySet<TEntity> GetUniqueKeySet(TEntity exampleEntity)
+        protected void GetUniqueSet<TItem>(TItem candidate, ValueFilterSet<TEntity> valueFilterSet)
         {
-            var selection = new EntitySet<TEntity>();
+            var mapResult = this.GetExampleEntity(candidate);
 
-            foreach (var keyExpression in this.uniqueKeyExpressions)
+            // Detect keys
+            var definitionProvider = this.RepositoryProvider.EntityDefinitionProvider;
+
+            // Assume that value or string types equal a surrogate primary key.
+            if (typeof(TItem).IsValueType || candidate is string)
             {
-                selection.Where(set => set.AreEqual(keyExpression, keyExpression.Compile().DynamicInvoke(exampleEntity)));
+                valueFilterSet.MatchKey(mapResult.Item, definitionProvider);
             }
+            else if (typeof(TItem) == typeof(TEntity))
+            {
+                var entityDefinition = definitionProvider.Resolve<TEntity>();
 
-            return selection;
+                foreach (var attribute in entityDefinition.DirectAttributes)
+                {
+                    var value = attribute.GetValueDelegate.DynamicInvoke(mapResult.Item);
+
+                    if (value == null || 0.Equals(value) || Guid.Empty.Equals(value))
+                    {
+                        continue;
+                    }
+
+                    var parameter = Expression.Parameter(typeof(TEntity), "value");
+                    var property = Expression.Property(parameter, attribute.PropertyName);
+                    var expression = Expression.Lambda(property, parameter);
+                    valueFilterSet.Add(new ValueFilter(new AttributeLocation(expression), FilterType.Equality, value));
+                }
+            }
+            else if (mapResult.Values.Any() == false)
+            {
+                throw new BusinessException(candidate, $"No properties were set on the candidate object {candidate}.");
+            }
+            else
+            {
+                foreach (var valueSet in mapResult.Values)
+                {
+                    var parameter = Expression.Parameter(typeof(TEntity), "value");
+                    var property = Expression.Property(parameter, valueSet.Key);
+                    var expression = Expression.Lambda(property, parameter);
+                    valueFilterSet.Add(new ValueFilter(new AttributeLocation(expression), FilterType.Equality, valueSet.Value));
+                }
+            }
         }
 
         /// <summary>

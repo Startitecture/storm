@@ -92,6 +92,23 @@ namespace Startitecture.Orm.Model
         /// <inheritdoc />
         public IEnumerable<IValueFilter> Filters => this.filters;
 
+        /// <inheritdoc />
+        public UpdateSet<TDestEntity> MapSet<TDestEntity>()
+            where TDestEntity : class, new()
+        {
+            var sourceSet = this;
+            var targetSet = new UpdateSet<TDestEntity>
+                            {
+                                ParentExpression = sourceSet.ParentExpression
+                            };
+
+            // TODO: Enhance by locating entity attributes using item properties.
+            targetSet.attributesToSet.AddRange(sourceSet.attributesToSet);
+            targetSet.filters.AddRange(sourceSet.Filters);
+            targetSet.relations.AddRange(sourceSet.Relations);
+            return targetSet;
+        }
+
         /// <summary>
         /// Sets all updateable values for the update set.
         /// </summary>

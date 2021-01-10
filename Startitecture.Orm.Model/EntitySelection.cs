@@ -14,8 +14,6 @@ namespace Startitecture.Orm.Model
     using System.Linq;
     using System.Linq.Expressions;
 
-    using JetBrains.Annotations;
-
     /// <summary>
     /// Creates selection criteria for repository entities.
     /// </summary>
