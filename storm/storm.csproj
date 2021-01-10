@@ -4,7 +4,7 @@
     <TargetFrameworks>netstandard2.1;net472</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <Version>1.0.0-beta3</Version>
+    <Version>1.0.0-beta4</Version>
     <Company>Startitecture, LLC</Company>
     <Product>ST/ORM</Product>
     <Description>An ORM that combines the speed of micro-ORMs with the flexibility of fluent queries and complex POCOs.</Description>
