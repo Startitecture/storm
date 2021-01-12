@@ -9,13 +9,10 @@ namespace Startitecture.Orm.SqlClient
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Linq.Expressions;
-    using System.Text;
 
     using JetBrains.Annotations;
 
     using Startitecture.Orm.Common;
-    using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
 
     /// <summary>
@@ -39,7 +36,6 @@ namespace Startitecture.Orm.SqlClient
             : base(tableCommandFactory, databaseContext)
         {
         }
-
 
         /// <inheritdoc />
         protected override string DeclareSourceTable(IEnumerable<EntityAttributeDefinition> sourceAttributes)

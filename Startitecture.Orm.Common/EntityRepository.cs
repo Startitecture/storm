@@ -149,7 +149,8 @@ namespace Startitecture.Orm.Common
                             {
                                 var parameter = Expression.Parameter(typeof(TEntity), "value");
                                 var expression = Expression.Property(parameter, expr.GetPropertyName());
-                                return Expression.Lambda<Func<TEntity, object>>(expression, parameter);
+                                var conversion = Expression.Convert(expression, typeof(object));
+                                return Expression.Lambda<Func<TEntity, object>>(conversion, parameter);
                             })
                         .ToArray())
                 .Where(set => this.GetUniqueSet(key, set));

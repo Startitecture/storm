@@ -6,7 +6,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-beta7</Version>
+    <Version>1.0.0-beta8</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>Adds a ST/ORM IEntityMapper implementation based on AutoMapper.</Description>
     <Copyright>© 2020, Startitecture, LLC</Copyright>
@@ -16,6 +16,7 @@
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <NeutralLanguage>English (United States)</NeutralLanguage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

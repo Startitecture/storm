@@ -329,7 +329,7 @@ namespace Startitecture.Orm.Common.Tests
         /// A <see cref="Task"/> representing the result of the asynchronous operation.
         /// </returns>
         [TestMethod]
-        public async Task UpdateSingleAsyncTest()
+        public async Task UpdateSingleAsync_ModelInput_MappedToEntity()
         {
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
@@ -345,6 +345,67 @@ namespace Startitecture.Orm.Common.Tests
                                    };
 
                 await repository.UpdateSingleAsync(34, subSubEntity, entity => entity.Description).ConfigureAwait(false);
+            }
+
+            repositoryProvider.Verify();
+        }
+
+        /// <summary>
+        /// Tests the UpdateSingle method.
+        /// </summary>
+        [TestMethod]
+        public void UpdateSingle_AnonymousTypeInput_MappedToEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<SubRow>>())).Verifiable();
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubEntity, SubRow>(provider, this.mapper);
+
+                repository.UpdateSingle(
+                    4444,
+                    new
+                    {
+                        UniqueOtherId = (short)65,
+                        Description = "new desc"
+                    },
+                    entity => entity.UniqueOtherId,
+                    entity => entity.Description);
+            }
+
+            repositoryProvider.Verify();
+        }
+
+        /// <summary>
+        /// Tests the UpdateSingleAsync method.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task"/> representing the result of the asynchronous operation.
+        /// </returns>
+        [TestMethod]
+        public async Task UpdateSingleAsync_AnonymousTypeInput_MappedToEntity()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<SubRow>>())).Verifiable();
+
+            await using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubEntity, SubRow>(provider, this.mapper);
+
+                await repository.UpdateSingleAsync(
+                    4444,
+                    new
+                    {
+                        UniqueOtherId = (short)65,
+                        Description = "new desc"
+                    },
+                    entity => entity.UniqueOtherId,
+                    entity => entity.Description);
             }
 
             repositoryProvider.Verify();

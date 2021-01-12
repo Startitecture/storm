@@ -405,8 +405,9 @@ VALUES ({columnValues})";
                     // PostgreSQL .NET driver wont cast enum to int
                     parameter.Value = (int)value;
                 }
-                else if (type == typeof(Guid)) // TODO: why??
+                else if (type == typeof(Guid))
                 {
+                    // TODO: why??
                     parameter.Value = value.ToString();
                     parameter.DbType = DbType.String;
                     parameter.Size = 40;

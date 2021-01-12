@@ -8,7 +8,7 @@
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-beta6</Version>
+    <Version>1.0.0-beta7</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>PostgreSql connection library for the ST/ORM (Startitecture.Orm) package.</Description>
     <Copyright>© 2021, Startitecture, LLC</Copyright>
@@ -17,6 +17,7 @@
     <PackageIcon>Storm Logo.png</PackageIcon>
     <PackageTags>sql orm microorm objectrelationalmapper crud query storm postgres postgresql</PackageTags>
     <NeutralLanguage>en-US</NeutralLanguage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

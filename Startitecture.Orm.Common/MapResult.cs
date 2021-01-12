@@ -1,4 +1,10 @@
-﻿namespace Startitecture.Orm.Common
+﻿// --------------------------------------------------------------------------------------------------------------------
+// <copyright file="MapResult.cs" company="Startitecture">
+//   Copyright (c) Startitecture. All rights reserved.
+// </copyright>
+// --------------------------------------------------------------------------------------------------------------------
+
+namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;

@@ -5,7 +5,7 @@
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-beta7</Version>
+    <Version>1.0.0-beta8</Version>
     <Authors>Startitecture, LLC</Authors>
     <Company>Startitecture, LLC</Company>
     <Description>Common library for the ST/ORM (Startitecture.Orm) package.</Description>
@@ -16,6 +16,7 @@
     <PackageIcon>Storm Logo.png</PackageIcon>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <NeutralLanguage>English (United States)</NeutralLanguage>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="stylecop.json" />
