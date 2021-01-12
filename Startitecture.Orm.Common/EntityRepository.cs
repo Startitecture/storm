@@ -142,19 +142,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
-            var updateSet = new UpdateSet<TEntity>().Set(
-                    this.GetExampleEntity(source).Item,
-                    setExpressions.Select(
-                            expr =>
-                            {
-                                var parameter = Expression.Parameter(typeof(TEntity), "value");
-                                var expression = Expression.Property(parameter, expr.GetPropertyName());
-                                var conversion = Expression.Convert(expression, typeof(object));
-                                return Expression.Lambda<Func<TEntity, object>>(conversion, parameter);
-                            })
-                        .ToArray())
-                .Where(set => this.GetUniqueSet(key, set));
-
+            var updateSet = this.GetUniqueUpdateSet(key, source, setExpressions);
             this.RepositoryProvider.Update(updateSet);
         }
 
@@ -179,18 +167,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(setExpressions));
             }
 
-            var updateSet = new UpdateSet<TEntity>().Set(
-                    this.GetExampleEntity(source).Item,
-                    setExpressions.Select(
-                            expr =>
-                            {
-                                var parameter = Expression.Parameter(typeof(TEntity), "value");
-                                var expression = Expression.Property(parameter, expr.GetPropertyName());
-                                return Expression.Lambda<Func<TEntity, object>>(expression, parameter);
-                            })
-                        .ToArray())
-                .Where(set => this.GetUniqueSet(key, set));
-
+            var updateSet = this.GetUniqueUpdateSet(key, source, setExpressions);
             await this.RepositoryProvider.UpdateAsync(updateSet).ConfigureAwait(false);
         }
 
@@ -448,6 +425,46 @@ namespace Startitecture.Orm.Common
             }
 
             return entity;
+        }
+
+        /// <summary>
+        /// Generates an update set for the specified <paramref name="key"/>, <paramref name="source"/>, and <paramref name="setExpressions"/>.
+        /// </summary>
+        /// <typeparam name="TKey">
+        /// The type of key that identifies the entity to update.
+        /// </typeparam>
+        /// <typeparam name="TItem">
+        /// The type of the item containing the source values to update.
+        /// </typeparam>
+        /// <param name="key">
+        /// An item that uniquely identifies the entity.
+        /// </param>
+        /// <param name="source">
+        /// An item that contains the source values to update in the target entity.
+        /// </param>
+        /// <param name="setExpressions">
+        /// The expressions to limit the update to. If no expressions are specified, all updateable attributes are updated.
+        /// </param>
+        /// <returns>
+        /// An <see cref="UpdateSet{T}"/> for the specified key, source and attributes to set.
+        /// </returns>
+        private UpdateSet<TEntity> GetUniqueUpdateSet<TKey, TItem>(
+            TKey key,
+            TItem source,
+            IEnumerable<Expression<Func<TItem, object>>> setExpressions)
+        {
+            return new UpdateSet<TEntity>().Set(
+                    this.GetExampleEntity(source).Item,
+                    setExpressions.Select(
+                            expr =>
+                            {
+                                var parameter = Expression.Parameter(typeof(TEntity), "value");
+                                var expression = Expression.Property(parameter, expr.GetPropertyName());
+                                var conversion = Expression.Convert(expression, typeof(object));
+                                return Expression.Lambda<Func<TEntity, object>>(conversion, parameter);
+                            })
+                        .ToArray())
+                .Where(set => this.GetUniqueSet(key, set));
         }
     }
 }

@@ -5,6 +5,7 @@
     <LangVersion>8.0</LangVersion>
 
     <IsPackable>false</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

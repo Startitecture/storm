@@ -121,7 +121,7 @@ namespace Startitecture.Orm.AutoMapper
         /// The type of property on the destination that will be resolved.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="TTarget"/> that was resolved for the <paramref name="context"/>.
+        /// The <typeparamref name="TTarget"/> that was resolved for the <paramref name="context"/>.
         /// </returns>
         private static TTarget ResolveItem<TReference, TTarget>(
             ResolutionContext context,

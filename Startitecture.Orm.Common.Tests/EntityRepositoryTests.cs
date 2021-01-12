@@ -391,7 +391,7 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.Update(It.IsAny<UpdateSet<SubRow>>())).Verifiable();
+            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubRow>>())).Verifiable();
 
             await using (var provider = repositoryProvider.Object)
             {
@@ -405,7 +405,7 @@ namespace Startitecture.Orm.Common.Tests
                         Description = "new desc"
                     },
                     entity => entity.UniqueOtherId,
-                    entity => entity.Description);
+                    entity => entity.Description).ConfigureAwait(false);
             }
 
             repositoryProvider.Verify();

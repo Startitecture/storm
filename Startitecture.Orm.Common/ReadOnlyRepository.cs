@@ -554,12 +554,21 @@ namespace Startitecture.Orm.Common
         /// <param name="candidate">
         /// The candidate item.
         /// </param>
-        /// <param name="valueFilterSet"></param>
-        /// <returns>
-        /// An <see cref="EntitySet{T}"/> for the specified <paramref name="candidate"/>.
-        /// </returns>
-        protected void GetUniqueSet<TItem>(TItem candidate, ValueFilterSet<TEntity> valueFilterSet)
+        /// <param name="valueFilterSet">
+        /// The filters that define the unique set.
+        /// </param>
+        protected void GetUniqueSet<TItem>([NotNull] TItem candidate, [NotNull] ValueFilterSet<TEntity> valueFilterSet)
         {
+            if (candidate == null)
+            {
+                throw new ArgumentNullException(nameof(candidate));
+            }
+
+            if (valueFilterSet == null)
+            {
+                throw new ArgumentNullException(nameof(valueFilterSet));
+            }
+
             var mapResult = this.GetExampleEntity(candidate);
 
             // Detect keys

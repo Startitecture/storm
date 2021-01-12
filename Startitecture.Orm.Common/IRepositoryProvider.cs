@@ -118,7 +118,7 @@ namespace Startitecture.Orm.Common
         /// The type of scalar to return.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="T"/>.
+        /// The scalar value as a <typeparamref name="T"/>.
         /// </returns>
         T GetScalar<T>(ISelection selection);
 
@@ -132,7 +132,7 @@ namespace Startitecture.Orm.Common
         /// The type of scalar to return.
         /// </typeparam>
         /// <returns>
-        /// The <see cref="T"/>.
+        /// The scalar value as a <typeparamref name="T"/>.
         /// </returns>
         Task<T> GetScalarAsync<T>(ISelection selection);
 

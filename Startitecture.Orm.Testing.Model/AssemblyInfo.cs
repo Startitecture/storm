@@ -3,8 +3,8 @@
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-// <summary>
-//   AssemblyInfo.cs
-// </summary>
+
+using System.Resources;
 
 [assembly: System.CLSCompliant(false)]
+[assembly: NeutralResourcesLanguage("en-US")]

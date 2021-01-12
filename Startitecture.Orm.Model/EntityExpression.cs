@@ -123,7 +123,7 @@ namespace Startitecture.Orm.Model
         /// </typeparam>
         /// <returns>
         /// A new <see cref="EntitySelection{T}"/> for entities of type <typeparamref name="TSelection"/>, with the current entity expression as the
-        /// <see cref="EntitySelection{T}.ParentExpression"/>.
+        /// <see cref="EntitySet{T}.ParentExpression"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="matchAttributes"/> is null.

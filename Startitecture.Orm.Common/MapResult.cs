@@ -19,6 +19,15 @@ namespace Startitecture.Orm.Common
     /// </typeparam>
     public class MapResult<T>
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MapResult{T}"/> class.
+        /// </summary>
+        /// <param name="item">
+        /// The item that was mapped.
+        /// </param>
+        /// <param name="values">
+        /// The values that were mapped.
+        /// </param>
         public MapResult([NotNull] T item, [NotNull] Dictionary<string, object> values)
         {
             if (item == null)
