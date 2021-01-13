@@ -253,6 +253,28 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public T GetScalar<T>([NotNull] ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return this.RepositoryProvider.GetScalar<T>(selection);
+        }
+
+        /// <inheritdoc />
+        public async Task<T> GetScalarAsync<T>([NotNull] ISelection selection)
+        {
+            if (selection == null)
+            {
+                throw new ArgumentNullException(nameof(selection));
+            }
+
+            return await this.RepositoryProvider.GetScalarAsync<T>(selection).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public IEnumerable<TModel> SelectAll()
         {
             var exampleSelection = new EntitySelection<TEntity>();

@@ -216,6 +216,34 @@ namespace Startitecture.Orm.Common
         Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection);
 
         /// <summary>
+        /// Gets a scalar result from the specified query.
+        /// </summary>
+        /// <param name="selection">
+        /// A selection for the specified scalar to return.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of scalar to return.
+        /// </typeparam>
+        /// <returns>
+        /// The scalar value as a <typeparamref name="T"/>.
+        /// </returns>
+        T GetScalar<T>(ISelection selection);
+
+        /// <summary>
+        /// Gets a scalar result from the specified query.
+        /// </summary>
+        /// <param name="selection">
+        /// A selection for the specified scalar to return.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of scalar to return.
+        /// </typeparam>
+        /// <returns>
+        /// The scalar value as a <typeparamref name="T"/>.
+        /// </returns>
+        Task<T> GetScalarAsync<T>(ISelection selection);
+
+        /// <summary>
         /// Selects all the domain models of the type <typeparamref name="TModel"/> in the repository.
         /// </summary>
         /// <returns>
