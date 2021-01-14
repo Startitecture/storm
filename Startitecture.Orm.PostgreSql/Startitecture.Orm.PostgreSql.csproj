@@ -8,7 +8,7 @@
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-beta8</Version>
+    <Version>1.0.0-rc1</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>PostgreSql connection library for the ST/ORM (Startitecture.Orm) package.</Description>
     <Copyright>© 2021, Startitecture, LLC</Copyright>
@@ -49,16 +49,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="3.3.0">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Npgsql" Version="4.1.5" />
-    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.7.0">
+    <PackageReference Include="Npgsql" Version="5.0.1.1" />
+    <PackageReference Include="NuGet.Build.Tasks.Pack" Version="5.8.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
