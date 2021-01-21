@@ -653,6 +653,12 @@ VALUES ({columnValues})";
 
             if (entitySet.Page.RowOffset + entitySet.Page.Size > 0)
             {
+                if (entitySet.OrderByExpressions.Any() == false)
+                {
+                    // If we don't have an ORDER BY clause then we can't use OFFSET/FETCH NEXT.
+                    throw new RepositoryException(entitySet, "Paging is not supported when no order expressions have been set.");
+                }
+
                 fetchSelect.AppendLine().Append(new string(' ', indent));
                 fetchSelect.Append($"OFFSET @{indexOffset + entitySet.PropertyValues.Count() - 2} ROWS");
 

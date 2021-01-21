@@ -8,6 +8,7 @@ namespace Startitecture.Orm.SqlClient.Tests
 {
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
     using Startitecture.Orm.Schema;
     using Startitecture.Orm.SqlClient;
@@ -50,6 +51,44 @@ VALUES (@0, @1, @2)";
             var target = new TransactSqlAdapter(new DataAnnotationsDefinitionProvider());
             var actual = target.CreateInsertionStatement<DependentRow>();
             Assert.AreEqual(Expected, actual);
+        }
+
+        /// <summary>
+        /// The selection statement direct data matches expected.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(RepositoryException))]
+        public void CreateSelectionStatement_PageWithoutOrder_ThrowsException()
+        {
+            var transactionSelection = Query
+                .Select<DataRow>(
+                    row => row.FakeDataId,
+                    row => row.NormalColumn,
+                    row => row.NullableColumn,
+                    row => row.NullableValueColumn,
+                    row => row.ValueColumn,
+                    row => row.AnotherColumn,
+                    row => row.AnotherValueColumn)
+                .From(
+                    set => set.InnerJoin(row => row.FakeDataId, row => row.Related.FakeDataId)
+                        .InnerJoin(row => row.Related.RelatedId, row => row.DependencyEntity.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.OtherAlias.FakeDataId)
+                        .InnerJoin(row => row.OtherAlias.RelatedId, row => row.RelatedDependency.ComplexEntityId)
+                        .InnerJoin(row => row.FakeDataId, row => row.RelatedAlias.FakeDataId)
+                        .LeftJoin<SubDataRow>(row => row.FakeDataId, row => row.FakeSubDataId))
+                .Where(
+                    set => set.AreEqual(row => row.ValueColumn, 2)
+                        .AreEqual(row => row.NullableColumn, "CouldHaveBeenNull")
+                        .AreEqual(row => row.NullableValueColumn, null)
+                        .Between(row => row.FakeDataId, 10, 20)
+                        .GreaterThanOrEqualTo(row => row.NormalColumn, "Greater")
+                        .LessThanOrEqualTo(row => row.AnotherColumn, "Less")
+                        .Include(row => row.AnotherValueColumn, 5, 10, 15, 20))
+                .Seek(set => set.Skip(5).Take(5));
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlAdapter(definitionProvider);
+            var actual = target.CreateSelectionStatement(transactionSelection);
         }
 
         /// <summary>
