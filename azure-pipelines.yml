@@ -10,7 +10,7 @@ trigger:
 variables:
   - group: Git-Push
   - name: buildConfiguration
-    value: 'Release'
+    value: 'Debug'
 
 stages:
 - stage: BuildTestMirrorPackages
