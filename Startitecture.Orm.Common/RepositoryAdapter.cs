@@ -278,6 +278,13 @@ SET
             {
                 var attributeDefinition = entityDefinition.Find(valueState.AttributeLocation);
 
+                if (attributeDefinition == default)
+                {
+                    throw new RepositoryException(
+                        valueState.AttributeLocation,
+                        $"The attribute location '{valueState.AttributeLocation}' could not be found in the definition for '{entityDefinition}'.");
+                }
+
                 // Skip attributes that can't be updated, as defined by the entity definition.
                 if (entityDefinition.IsUpdateable(attributeDefinition) == false)
                 {
@@ -725,9 +732,9 @@ VALUES ({columnValues})";
                 $"{this.NameQualifier.Escape(entityDefinition.EntityContainer)}.{this.NameQualifier.Escape(entityDefinition.EntityName)}");
 
             var joinClause = new JoinClause(this.DefinitionProvider, this.NameQualifier)
-            {
-                Indent = indent
-            };
+                             {
+                                 Indent = indent
+                             };
 
             var joinClauseText = joinClause.Create(entitySet.Relations);
             var filter = new StringBuilder(new string(' ', indent)).Append(SqlWhereClause);
@@ -931,6 +938,13 @@ WHERE {keyPredicate})");
 
             var attribute = entityDefinition.Find(attributeExpression);
 
+            if (attribute == default)
+            {
+                throw new RepositoryException(
+                    attributeExpression,
+                    $"The expression '{attributeExpression}' could not be found in the definition for '{entityDefinition}'.");
+            }
+
             switch (aggregateFunction)
             {
                 case AggregateFunction.None:
@@ -1028,6 +1042,8 @@ WHERE {keyPredicate})");
 
             foreach (var filter in valueFilters)
             {
+                var filterDefinition = this.DefinitionProvider.Resolve(filter.AttributeLocation.EntityReference.EntityType);
+
                 if (filter is RelationExpression subQuery)
                 {
                     subQueryCount++;
@@ -1052,8 +1068,8 @@ WHERE {keyPredicate})");
 
                         foreach (var subFilter in entitySet.Filters)
                         {
-                            var filterDefinition = this.DefinitionProvider.Resolve(subFilter.AttributeLocation.EntityReference.EntityType);
-                            var attribute = this.GetAttributeDefinition(filterDefinition, subFilter.AttributeLocation);
+                            var subFilterDefinition = this.DefinitionProvider.Resolve(subFilter.AttributeLocation.EntityReference.EntityType);
+                            var attribute = this.GetAttributeDefinition(subFilterDefinition, subFilter.AttributeLocation);
                             var entityAlias = this.NameQualifier.Escape($"{attribute.Entity.Alias ?? attribute.Entity.Name}{subQueryCount}");
                             var referenceName = $"{entityAlias}.{this.NameQualifier.Escape(attribute.Alias ?? attribute.PhysicalName)}";
                             var setValues = subFilter.FilterValues.Where(Evaluate.IsSet).ToList();
@@ -1076,6 +1092,12 @@ WHERE {keyPredicate})");
                     }
 
                     filterTokens.Add(string.Concat(subQueryText, ')'));
+                }
+                else if (entityDefinition.Find(filter.AttributeLocation) == default)
+                {
+                    var referenceName = this.GetReferenceName(filterDefinition, filter.AttributeLocation);
+                    var setValues = filter.FilterValues.Where(Evaluate.IsSet).ToList();
+                    index = this.AddTokens(filter.FilterType, filter.FilterValues.First(), filterTokens, referenceName, setValues, index);
                 }
                 else
                 {
@@ -1109,6 +1131,14 @@ WHERE {keyPredicate})");
         private string GetReferenceName(IEntityDefinition entityDefinition, AttributeLocation attributeLocation)
         {
             var attribute = this.GetAttributeDefinition(entityDefinition, attributeLocation);
+
+            if (attribute == default)
+            {
+                throw new RepositoryException(
+                    attributeLocation,
+                    $"The attribute location '{attributeLocation}' could not be found in the definition for '{entityDefinition}'.");
+            }
+
             return this.NameQualifier.GetReferenceName(attribute);
         }
 
@@ -1287,14 +1317,25 @@ WHERE {keyPredicate})");
         /// </returns>
         private string CreateOrderByClause(IEnumerable<OrderExpression> orderExpressions)
         {
-            var clauses = (from orderExpression in orderExpressions
-                           let reference = this.DefinitionProvider.GetEntityReference(orderExpression.PropertyExpression)
-                           let location = this.DefinitionProvider.GetEntityLocation(reference)
-                           let attribute =
-                               this.DefinitionProvider.Resolve(location.EntityType)
-                                   .DirectAttributes.FirstOrDefault(x => x.PropertyName == orderExpression.PropertyExpression.GetPropertyName())
-                           let referenceName = this.NameQualifier.Qualify(attribute, location)
-                           select orderExpression.OrderDescending ? $"{referenceName} DESC" : referenceName).ToList();
+            var clauses = new List<string>();
+
+            foreach (var orderExpression in orderExpressions)
+            {
+                var reference = this.DefinitionProvider.GetEntityReference(orderExpression.PropertyExpression);
+                var location = this.DefinitionProvider.GetEntityLocation(reference);
+                var entityDefinition = this.DefinitionProvider.Resolve(location.EntityType);
+                var attribute = entityDefinition.DirectAttributes.FirstOrDefault(x => x.PropertyName == orderExpression.PropertyExpression.GetPropertyName());
+
+                if (attribute == default)
+                {
+                    throw new RepositoryException(
+                        location,
+                        $"The attribute location '{location}' could not be found in the definition for '{entityDefinition}'.");
+                }
+
+                string referenceName = this.NameQualifier.Qualify(attribute, location);
+                clauses.Add(orderExpression.OrderDescending ? $"{referenceName} DESC" : referenceName);
+            }
 
             return string.Join(ParameterSeparator, clauses);
         }

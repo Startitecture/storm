@@ -2910,5 +2910,31 @@ WHERE [dbo].[FakeData].[ValueColumn] = @0 AND
             var actual = target.CreateDeletionStatement(transactionSelection);
             Assert.AreEqual(Expected, actual);
         }
+
+        /// <summary>
+        /// Tests that a filter outside the entity aggregate is properly located and referenced.
+        /// </summary>
+        [TestMethod]
+        public void CreateSelectionStatement_FilterOnNonAggregateTable_MatchesExpected()
+        {
+            var query = Query.Select<DomainAggregateRow>(row => row.DomainAggregateId, row => row.Name)
+                .From(
+                    set => set.InnerJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                        .InnerJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId))
+                .Where(set => set.AreEqual<AssociationRow, long>(row => row.OtherAggregateId, 10));
+
+            const string Expected = @"SELECT
+    [dbo].[DomainAggregate].[DomainAggregateId],
+    [dbo].[DomainAggregate].[Name]
+FROM [dbo].[DomainAggregate]
+INNER JOIN [dbo].[Association] ON [dbo].[DomainAggregate].[DomainAggregateId] = [dbo].[Association].[DomainAggregateId]
+INNER JOIN [dbo].[OtherAggregate] ON [dbo].[Association].[OtherAggregateId] = [dbo].[OtherAggregate].[OtherAggregateId]
+WHERE [dbo].[Association].[OtherAggregateId] = @0";
+
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var target = new TransactSqlAdapter(definitionProvider);
+            var actual = target.CreateSelectionStatement(query);
+            Assert.AreEqual(Expected, actual);
+        }
     }
 }

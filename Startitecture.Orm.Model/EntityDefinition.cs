@@ -160,6 +160,12 @@ namespace Startitecture.Orm.Model
         private IEntityDefinitionProvider DefinitionProvider { get; }
 
         /// <inheritdoc />
+        public override string ToString()
+        {
+            return this.QualifiedName;
+        }
+
+        /// <inheritdoc />
         public EntityAttributeDefinition Find(AttributeLocation attributeLocation)
         {
             if (attributeLocation == null)

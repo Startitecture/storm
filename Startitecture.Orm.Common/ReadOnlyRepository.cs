@@ -120,7 +120,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.RepositoryProvider.Contains(selection.MapSet<TEntity>());
+            return this.RepositoryProvider.Contains(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>());
         }
 
         /// <inheritdoc />
@@ -131,7 +131,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return await this.RepositoryProvider.ContainsAsync(selection.MapSet<TEntity>()).ConfigureAwait(false);
+            return await this.RepositoryProvider.ContainsAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>()).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -186,7 +186,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var entity = this.RepositoryProvider.FirstOrDefault(selection.MapSet<TEntity>());
+            var entity = this.RepositoryProvider.FirstOrDefault(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>());
             return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
         }
 
@@ -198,7 +198,9 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var entity = await this.RepositoryProvider.FirstOrDefaultAsync(selection.MapSet<TEntity>()).ConfigureAwait(false);
+            var entity = await this.RepositoryProvider.FirstOrDefaultAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>())
+                             .ConfigureAwait(false);
+
             return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
         }
 
@@ -238,7 +240,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.RepositoryProvider.DynamicFirstOrDefault(selection.MapSelection<TEntity>());
+            return this.RepositoryProvider.DynamicFirstOrDefault(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>());
         }
 
         /// <inheritdoc />
@@ -249,7 +251,9 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return await this.RepositoryProvider.DynamicFirstOrDefaultAsync(selection.MapSelection<TEntity>()).ConfigureAwait(false);
+            return await this.RepositoryProvider
+                       .DynamicFirstOrDefaultAsync(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>())
+                       .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -298,8 +302,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var mappedSelection = selection.MapSet<TEntity>();
-            var entities = this.RepositoryProvider.SelectEntities(mappedSelection);
+            var entities = this.RepositoryProvider.SelectEntities(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>());
             return this.SelectResults(entities);
         }
 
@@ -311,8 +314,9 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var mappedSelection = selection.MapSet<TEntity>();
-            var entities = await this.RepositoryProvider.SelectEntitiesAsync(mappedSelection).ConfigureAwait(false);
+            var entities = await this.RepositoryProvider.SelectEntitiesAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>())
+                               .ConfigureAwait(false);
+
             return this.SelectResults(entities);
         }
 
@@ -324,7 +328,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return this.RepositoryProvider.DynamicSelect(selection.MapSelection<TEntity>());
+            return this.RepositoryProvider.DynamicSelect(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>());
         }
 
         /// <inheritdoc />
@@ -335,7 +339,8 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return await this.RepositoryProvider.DynamicSelectAsync(selection.MapSelection<TEntity>()).ConfigureAwait(false);
+            return await this.RepositoryProvider.DynamicSelectAsync(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>())
+                       .ConfigureAwait(false);
         }
 
         /// <summary>

@@ -251,6 +251,27 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// </summary>
         [TestMethod]
         [TestCategory("Integration")]
+        public void SelectDynamic_FilterOutsideAggregate_DoesNotThrowException()
+        {
+            var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
+
+            using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
+            {
+                var itemSelection = Query.Select<DomainAggregateRow>(row => row.DomainAggregateId, row => row.Name)
+                    .From(
+                        set => set.InnerJoin<AssociationRow>(row => row.DomainAggregateId, row => row.DomainAggregateId)
+                            .InnerJoin<AssociationRow, OtherAggregateRow>(row => row.OtherAggregateId, row => row.OtherAggregateId))
+                    .Where(set => set.AreEqual<AssociationRow, long>(row => row.OtherAggregateId, 10));
+
+                var actual = target.SelectEntities(itemSelection).OrderBy(x => x.Name).ToList();
+            }
+        }
+
+        /// <summary>
+        /// The get selection test.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
         public void SelectEntities_ExistingDomainAggregatesWithSubQuery_MatchesExpected()
         {
             var flag1 = new FlagAttributeRow

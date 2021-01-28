@@ -105,8 +105,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(updateSet));
             }
 
-            var mappedSet = updateSet.MapSet<TEntity>();
-            return this.RepositoryProvider.Update(mappedSet);
+            return this.RepositoryProvider.Update(updateSet as UpdateSet<TEntity> ?? updateSet.MapSet<TEntity>());
         }
 
         /// <inheritdoc />
@@ -117,8 +116,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(updateSet));
             }
 
-            var mappedSet = updateSet.MapSet<TEntity>();
-            return await this.RepositoryProvider.UpdateAsync(mappedSet).ConfigureAwait(false);
+            return await this.RepositoryProvider.UpdateAsync(updateSet as UpdateSet<TEntity> ?? updateSet.MapSet<TEntity>()).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -229,8 +227,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(entitySet));
             }
 
-            var targetSet = entitySet.MapSet<TEntity>();
-            return this.RepositoryProvider.Delete(targetSet);
+            return this.RepositoryProvider.Delete(entitySet as EntitySet<TEntity> ?? entitySet.MapSet<TEntity>());
         }
 
         /// <inheritdoc />
@@ -241,8 +238,7 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(entitySet));
             }
 
-            var targetSet = entitySet.MapSet<TEntity>();
-            return await this.RepositoryProvider.DeleteAsync(targetSet).ConfigureAwait(false);
+            return await this.RepositoryProvider.DeleteAsync(entitySet as EntitySet<TEntity> ?? entitySet.MapSet<TEntity>()).ConfigureAwait(false);
         }
 
         /// <summary>
