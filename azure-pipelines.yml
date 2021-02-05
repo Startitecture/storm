@@ -13,6 +13,8 @@ variables:
   - group: Git-Push
   - name: buildConfiguration
     value: 'Debug'
+  - name: ReleaseVersion
+    value: $(MajorVersion).$(MinorVersion).$(PatchVersion)
 
 stages:
 - stage: BuildTestMirrorPackages
@@ -26,53 +28,141 @@ stages:
 
       steps:
 
-      - task: NuGetInstaller@0
-        displayName: 'Nuget Installer'
-
-      - task: NuGetCommand@2
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore NuGet Packages'
         inputs:
           command: 'restore'
-          restoreSolution: '**/*.sln'
-          feedsToUse: 'config'
-          nugetConfigPath: 'nuget.config'
-          externalFeedCredentials: 'Nuget.org'
+          feedsToUse: 'select'
+          vstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Build Projects'
+        inputs:
+          command: 'build'
+          arguments: '-c $(BuildConfiguration) -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Run $(BuildConfiguration) Tests with Code Coverage'
+        inputs:
+          command: 'test'
+          projects: '**/*.Tests.csproj'
+          arguments: '-c $(BuildConfiguration) --collect "Code coverage" --filter TestCategory!="Integration"'
+          testRunTitle: 'Core Tests - $(BuildConfiguration)'
+
+      - task: NuGetToolInstaller@1
+        inputs:
+          versionSpec: 
+          checkLatest: true
+
+      # - task: NuGetCommand@2
+      #   inputs:
+      #     command: 'restore'
+      #     restoreSolution: '**/*.sln'
+      #     feedsToUse: 'config'
+      #     nugetConfigPath: 'nuget.config'
+      #     externalFeedCredentials: 'Nuget.org'
+
+      # - task: VSBuild@1
+      #   displayName: 'VS Build'
+      #   inputs:
+      #     solution: '**\*.sln'
+      #     configuration: $(buildConfiguration)
+      #     platform: 'any cpu'
+
+      # - task: VisualStudioTestPlatformInstaller@1
+      #   displayName: 'Set up VS Test Platform'
+      #   inputs:
+      #     packageFeedSelector: 'nugetOrg'
+      #     versionSelector: 'latestStable'
+
+      # - task: VSTest@2
+      #   displayName: 'Run VS Tests - $(BuildConfiguration)'
+      #   inputs:
+      #     testSelector: 'testAssemblies'
+      #     testAssemblyVer2: |
+      #       **\$(BuildConfiguration)\**\*.Tests.dll
+      #       !**\*TestAdapter.dll
+      #       !**\obj\**
+      #     searchFolder: '$(System.DefaultWorkingDirectory)'
+      #     testFiltercriteria: 'TestCategory!="Integration"'
+      #     codeCoverageEnabled: true
+      #     runOnlyImpactedTests: true
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Pack $(BuildConfiguration) configuration Pre-release Packages'
+        inputs:
+          command: 'pack'
+          packagesToPack: '**/*.csproj;!**/*.Tests.csproj'
+          packDirectory: '$(Build.ArtifactStagingDirectory)/Packages'
+          nobuild: true
+          includesymbols: true
+          includesource: true
+          versioningScheme: 'byEnvVar'
+          versionEnvVar: 'Build.BuildNumber'
+
+      - task: NuGetCommand@2
+        displayName: 'Push NuGet Packages Internal'
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/Packages/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+          allowPackageConflicts: true
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Build Projects'
+        inputs:
+          command: 'build'
+          arguments: '-c Release -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Run Release Tests with Code Coverage'
+        inputs:
+          command: 'test'
+          projects: '**/*.Tests.csproj'
+          arguments: '-c Release --collect "Code coverage"'
+          testRunTitle: 'Core Tests - Release'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Pack Release Packages'
+        inputs:
+          command: 'pack'
+          packagesToPack: '**/*.csproj;!**/*.Tests.csproj'
+          configuration: 'Release'
+          packDirectory: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
+          nobuild: true
+          includesymbols: true
+          includesource: true
+          versioningScheme: 'byEnvVar'
+          versionEnvVar: 'ReleaseVersion'
+
+      # - task: VSTest@2
+      #   displayName: 'Run VS Tests - Release'
+      #   inputs:
+      #     testSelector: 'testAssemblies'
+      #     testAssemblyVer2: |
+      #       **\release\**\*.Tests.dll
+      #       !**\*TestAdapter.dll
+      #       !**\obj\**
+      #     searchFolder: '$(System.DefaultWorkingDirectory)'
+      #     testFiltercriteria: 'TestCategory!="Integration"'
+      #     codeCoverageEnabled: true
+      #     runOnlyImpactedTests: true
 
       - task: VSBuild@1
         displayName: 'VS Build'
         inputs:
-          solution: '**\*.sln'
-          configuration: $(buildConfiguration)
+          solution: '**\*.sqlproj'
+          configuration: Release
           platform: 'any cpu'
 
-      - task: VisualStudioTestPlatformInstaller@1
-        displayName: 'Set up VS Test Platform'
+      - task: DocFxTask@0
+        displayName: 'Create DocFx documentation'
         inputs:
-          packageFeedSelector: 'nugetOrg'
-          versionSelector: 'latestStable'
-
-      - task: VSTest@2
-        displayName: 'Run VS Tests - $(BuildConfiguration)'
-        inputs:
-          testSelector: 'testAssemblies'
-          testAssemblyVer2: |
-            **\release\**\*.Tests.dll
-            !**\*TestAdapter.dll
-            !**\obj\**
-          searchFolder: '$(System.DefaultWorkingDirectory)'
-          testFiltercriteria: 'TestCategory!="Integration"'
-          codeCoverageEnabled: true
-          runOnlyImpactedTests: true
-
-      - task: PublishTestResults@2
-        displayName: 'Publish $(BuildConfiguration) Test Results Internal'
-        inputs:
-          testResultsFormat: 'VSTest'
-          testResultsFiles: '**/TEST-*.xml'
-          mergeTestResults: true
-          testRunTitle: 'Storm-CI $(BuildConfiguration)'
+          solution: 'docs\docfx.json'
 
       - task: CopyFiles@2
-        displayName: 'Copy Test Assemblies'
+        displayName: 'Copy $(BuildConfiguration) Test Assemblies'
         inputs:
           SourceFolder: '$(System.DefaultWorkingDirectory)'
           Contents: '**/*.Tests/bin/$(buildConfiguration)/**'
@@ -80,38 +170,26 @@ stages:
           CleanTargetFolder: true
 
       - task: PublishPipelineArtifact@1
-        displayName: 'Publish Test Assemblies'
+        displayName: 'Publish $(BuildConfiguration) Test Assemblies'
         inputs:
           targetPath: '$(Build.ArtifactStagingDirectory)/Tests'
           artifact: 'Tests'
           publishLocation: 'pipeline'
 
-      - task: VSBuild@1
-        displayName: 'VS Build'
-        inputs:
-          solution: '**\*.sln'
-          configuration: Release
-          platform: 'any cpu'
-
-      - task: NuGetCommand@2
-        displayName: 'Push NuGet Packages'
-        inputs:
-          command: 'push'
-          packagesToPush: '$(System.DefaultWorkingDirectory)/**/*.nupkg;$(System.DefaultWorkingDirectory)/**/*.snupkg'
-          nuGetFeedType: 'internal'
-          publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
-          allowPackageConflicts: true
-
       - task: CopyFiles@2
-        displayName: 'Copy NuGet Packages'
+        displayName: 'Copy Release Test Assemblies'
         inputs:
           SourceFolder: '$(System.DefaultWorkingDirectory)'
-          Contents: |
-            **/*.nupkg
-            **/*.snupkg
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
+          Contents: '**/*.Tests/bin/release/**'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/Release Tests'
           CleanTargetFolder: true
-          flattenFolders: true
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Release Test Assemblies'
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)/Release Tests'
+          artifact: 'Release Tests'
+          publishLocation: 'pipeline'
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish NuGet Package Build Artifacts'
@@ -120,10 +198,12 @@ stages:
           ArtifactName: 'NuGet Packages'
           publishLocation: 'Container'
 
-      - task: DocFxTask@0
-        displayName: 'Create DocFx documentation'
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish Release Package Build Artifacts'
         inputs:
-          solution: 'docs\docfx.json'
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
+          ArtifactName: 'Release Packages'
+          publishLocation: 'Container'
 
       - task: PublishPipelineArtifact@1
         inputs:
@@ -134,7 +214,7 @@ stages:
       - task: PublishPipelineArtifact@1
         displayName: 'Publish Test DACPAC'
         inputs:
-          targetPath: '$(System.DefaultWorkingDirectory)/Startitecture.Orm.Testing.Schema/bin/$(buildConfiguration)/Startitecture.Orm.Testing.Schema.dacpac'
+          targetPath: '$(System.DefaultWorkingDirectory)/Startitecture.Orm.Testing.Schema/bin/Release/Startitecture.Orm.Testing.Schema.dacpac'
           artifact: 'Storm Test DACPAC'
           publishLocation: 'pipeline'
 
