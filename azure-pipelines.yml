@@ -94,6 +94,7 @@ steps:
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'Build.BuildNumber'
     buildProperties: '-p:SymbolPackageFormat=snupkg'
+    verbosityPack: 'Diagnostic'
 
 - task: NuGetCommand@2
   displayName: 'Push NuGet Packages Internal'
