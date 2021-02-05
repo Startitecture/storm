@@ -21,66 +21,66 @@ pool:
 
 steps:
 
-- task: DotNetCoreCLI@2
-  displayName: 'Restore NuGet Packages'
-  inputs:
-    command: 'restore'
-    feedsToUse: 'select'
-    vstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Build Projects'
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-    arguments: '-c $(BuildConfiguration) -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
-
-- task: DotNetCoreCLI@2
-  displayName: 'Run $(BuildConfiguration) Tests with Code Coverage'
-  inputs:
-    command: 'test'
-    projects: '**/*.Tests.csproj'
-    arguments: '-c $(BuildConfiguration) --collect "Code coverage" --filter TestCategory!="Integration"'
-    testRunTitle: 'Core Tests - $(BuildConfiguration)'
-
-# - task: NuGetToolInstaller@1
-#   inputs:
-#     versionSpec: 
-#     checkLatest: true
-
-# - task: NuGetCommand@2
+# - task: DotNetCoreCLI@2
+#   displayName: 'Restore NuGet Packages'
 #   inputs:
 #     command: 'restore'
-#     restoreSolution: '**/*.sln'
-#     feedsToUse: 'config'
-#     nugetConfigPath: 'nuget.config'
-#     externalFeedCredentials: 'Nuget.org'
+#     feedsToUse: 'select'
+#     vstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
 
-# - task: VSBuild@1
-#   displayName: 'VS Build'
+# - task: DotNetCoreCLI@2
+#   displayName: 'Build Projects'
 #   inputs:
-#     solution: '**\*.sln'
-#     configuration: $(buildConfiguration)
-#     platform: 'any cpu'
+#     command: 'build'
+#     projects: '**/*.csproj'
+#     arguments: '-c $(BuildConfiguration) -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
 
-# - task: VisualStudioTestPlatformInstaller@1
-#   displayName: 'Set up VS Test Platform'
+# - task: DotNetCoreCLI@2
+#   displayName: 'Run $(BuildConfiguration) Tests with Code Coverage'
 #   inputs:
-#     packageFeedSelector: 'nugetOrg'
-#     versionSelector: 'latestStable'
+#     command: 'test'
+#     projects: '**/*.Tests.csproj'
+#     arguments: '-c $(BuildConfiguration) --collect "Code coverage" --filter TestCategory!="Integration"'
+#     testRunTitle: 'Core Tests - $(BuildConfiguration)'
 
-# - task: VSTest@2
-#   displayName: 'Run VS Tests - $(BuildConfiguration)'
-#   inputs:
-#     testSelector: 'testAssemblies'
-#     testAssemblyVer2: |
-#       **\$(BuildConfiguration)\**\*.Tests.dll
-#       !**\*TestAdapter.dll
-#       !**\obj\**
-#     searchFolder: '$(System.DefaultWorkingDirectory)'
-#     testFiltercriteria: 'TestCategory!="Integration"'
-#     codeCoverageEnabled: true
-#     runOnlyImpactedTests: true
+- task: NuGetToolInstaller@1
+  inputs:
+    versionSpec: 
+    checkLatest: true
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '**/*.sln'
+    feedsToUse: 'config'
+    nugetConfigPath: 'nuget.config'
+    externalFeedCredentials: 'Nuget.org'
+
+- task: VSBuild@1
+  displayName: 'VS Build'
+  inputs:
+    solution: '**\*.csproj'
+    configuration: $(buildConfiguration)
+    platform: 'any cpu'
+
+- task: VisualStudioTestPlatformInstaller@1
+  displayName: 'Set up VS Test Platform'
+  inputs:
+    packageFeedSelector: 'nugetOrg'
+    versionSelector: 'latestStable'
+
+- task: VSTest@2
+  displayName: 'Run VS Tests - $(BuildConfiguration)'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\$(BuildConfiguration)\**\*.Tests.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    testFiltercriteria: 'TestCategory!="Integration"'
+    codeCoverageEnabled: true
+    runOnlyImpactedTests: true
 
 - task: NuGetCommand@2
   inputs:
@@ -91,7 +91,6 @@ steps:
     versionEnvVar: 'Build.BuildNumber'
     includeSymbols: true
     buildProperties: 'SymbolPackageFormat=snupkg'
-
 
 # - task: DotNetCoreCLI@2
 #   displayName: 'Pack $(BuildConfiguration) configuration Pre-release Packages'
@@ -105,7 +104,6 @@ steps:
 #     versioningScheme: 'byEnvVar'
 #     versionEnvVar: 'Build.BuildNumber'
 #     buildProperties: '-p:SymbolPackageFormat=snupkg'
-#     verbosityPack: 'Diagnostic'
 
 - task: NuGetCommand@2
   displayName: 'Push NuGet Packages Internal'
@@ -116,47 +114,65 @@ steps:
     publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
     allowPackageConflicts: true
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build Projects'
-  inputs:
-    command: 'build'
-    projects: '**/*.csproj'
-    arguments: '-c Release -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
+# - task: DotNetCoreCLI@2
+#   displayName: 'Build Projects'
+#   inputs:
+#     command: 'build'
+#     projects: '**/*.csproj'
+#     arguments: '-c Release -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Run Release Tests with Code Coverage'
-  inputs:
-    command: 'test'
-    projects: '**/*.Tests.csproj'
-    arguments: '-c Release --collect "Code coverage" --filter TestCategory!="Integration"'
-    testRunTitle: 'Core Tests - Release'
+# - task: DotNetCoreCLI@2
+#   displayName: 'Run Release Tests with Code Coverage'
+#   inputs:
+#     command: 'test'
+#     projects: '**/*.Tests.csproj'
+#     arguments: '-c Release --collect "Code coverage" --filter TestCategory!="Integration"'
+#     testRunTitle: 'Core Tests - Release'
 
-- task: DotNetCoreCLI@2
-  displayName: 'Pack Release Packages'
+# - task: DotNetCoreCLI@2
+#   displayName: 'Pack Release Packages'
+#   inputs:
+#     command: 'pack'
+#     packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
+#     configuration: 'Release'
+#     packDirectory: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
+#     nobuild: true
+#     includesymbols: true
+#     includesource: true
+#     versioningScheme: 'byEnvVar'
+#     versionEnvVar: 'ReleaseVersion'
+#     buildProperties: '-p:SymbolPackageFormat=snupkg'
+
+- task: VSBuild@1
+  displayName: 'VS Build'
+  inputs:
+    solution: '**\*.csproj'
+    configuration: Release
+    platform: 'any cpu'
+
+- task: VSTest@2
+  displayName: 'Run VS Tests - Release'
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\release\**\*.Tests.dll
+      !**\*TestAdapter.dll
+      !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
+    testFiltercriteria: 'TestCategory!="Integration"'
+    codeCoverageEnabled: true
+    runOnlyImpactedTests: true
+
+- task: NuGetCommand@2
   inputs:
     command: 'pack'
     packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
     configuration: 'Release'
-    packDirectory: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
-    nobuild: true
-    includesymbols: true
-    includesource: true
+    packDestination: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'ReleaseVersion'
-    buildProperties: '-p:SymbolPackageFormat=snupkg'
-
-# - task: VSTest@2
-#   displayName: 'Run VS Tests - Release'
-#   inputs:
-#     testSelector: 'testAssemblies'
-#     testAssemblyVer2: |
-#       **\release\**\*.Tests.dll
-#       !**\*TestAdapter.dll
-#       !**\obj\**
-#     searchFolder: '$(System.DefaultWorkingDirectory)'
-#     testFiltercriteria: 'TestCategory!="Integration"'
-#     codeCoverageEnabled: true
-#     runOnlyImpactedTests: true
+    includeSymbols: true
+    buildProperties: 'SymbolPackageFormat=snupkg'
 
 - task: VSBuild@1
   displayName: 'VS Build'
