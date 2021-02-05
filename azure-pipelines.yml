@@ -86,13 +86,14 @@ steps:
   displayName: 'Pack $(BuildConfiguration) configuration Pre-release Packages'
   inputs:
     command: 'pack'
-    packagesToPack: '**/*.csproj;!**/*.Tests.csproj'
+    packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
     packDirectory: '$(Build.ArtifactStagingDirectory)/Packages'
     nobuild: true
     includesymbols: true
     includesource: true
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'Build.BuildNumber'
+    buildProperties: '-p:SymbolPackageFormat=snupkg'
 
 - task: NuGetCommand@2
   displayName: 'Push NuGet Packages Internal'
@@ -122,7 +123,7 @@ steps:
   displayName: 'Pack Release Packages'
   inputs:
     command: 'pack'
-    packagesToPack: '**/*.csproj;!**/*.Tests.csproj'
+    packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
     configuration: 'Release'
     packDirectory: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
     nobuild: true
@@ -130,6 +131,7 @@ steps:
     includesource: true
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'ReleaseVersion'
+    buildProperties: '-p:SymbolPackageFormat=snupkg'
 
 # - task: VSTest@2
 #   displayName: 'Run VS Tests - Release'
