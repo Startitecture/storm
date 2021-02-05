@@ -7,6 +7,8 @@
 trigger:
 - master
 
+name: $(MajorVersion).$(MinorVersion).$(PatchVersion)-rcf$(Date:yyyyMMdd)$(Rev:rr)
+
 variables:
   - group: Git-Push
   - name: buildConfiguration
@@ -84,14 +86,14 @@ stages:
           artifact: 'Tests'
           publishLocation: 'pipeline'
 
-      - task: NuGetCommand@2
-        displayName: 'Push NuGet Packages'
-        inputs:
-          command: 'push'
-          packagesToPush: '$(System.DefaultWorkingDirectory)/**/*.nupkg;$(System.DefaultWorkingDirectory)/**/*.snupkg'
-          nuGetFeedType: 'internal'
-          publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
-          allowPackageConflicts: true
+      # - task: NuGetCommand@2
+      #   displayName: 'Push NuGet Packages'
+      #   inputs:
+      #     command: 'push'
+      #     packagesToPush: '$(System.DefaultWorkingDirectory)/**/*.nupkg;$(System.DefaultWorkingDirectory)/**/*.snupkg'
+      #     nuGetFeedType: 'internal'
+      #     publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+      #     allowPackageConflicts: true
 
       - task: CopyFiles@2
         displayName: 'Copy NuGet Packages'
