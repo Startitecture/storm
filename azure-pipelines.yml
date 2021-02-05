@@ -149,7 +149,6 @@ steps:
   inputs:
     solution: '**\*.sqlproj'
     configuration: Release
-    platform: 'any cpu'
 
 - task: DocFxTask@0
   displayName: 'Create DocFx documentation'
