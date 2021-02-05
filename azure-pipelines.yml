@@ -90,7 +90,7 @@ steps:
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'Build.BuildNumber'
     includeSymbols: true
-    buildProperties: '-p SymbolPackageFormat=snupkg'
+    buildProperties: 'SymbolPackageFormat=snupkg'
 
 
 # - task: DotNetCoreCLI@2
