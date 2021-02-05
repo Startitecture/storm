@@ -59,7 +59,7 @@ steps:
 - task: VSBuild@1
   displayName: 'VS Build'
   inputs:
-    solution: '**\*.csproj'
+    solution: '**/*.sln'
     configuration: $(buildConfiguration)
     platform: 'any cpu'
 
@@ -146,7 +146,7 @@ steps:
 - task: VSBuild@1
   displayName: 'VS Build'
   inputs:
-    solution: '**\*.csproj'
+    solution: '**/*.sln'
     configuration: Release
     platform: 'any cpu'
 
@@ -174,11 +174,11 @@ steps:
     includeSymbols: true
     buildProperties: 'SymbolPackageFormat=snupkg'
 
-- task: VSBuild@1
-  displayName: 'VS Build'
-  inputs:
-    solution: '**\*.sqlproj'
-    configuration: Release
+# - task: VSBuild@1
+#   displayName: 'VS Build'
+#   inputs:
+#     solution: '**\*.sqlproj'
+#     configuration: Release
 
 - task: DocFxTask@0
   displayName: 'Create DocFx documentation'
