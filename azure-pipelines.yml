@@ -115,7 +115,7 @@ steps:
   inputs:
     command: 'test'
     projects: '**/*.Tests.csproj'
-    arguments: '-c Release --collect "Code coverage"'
+    arguments: '-c Release --collect "Code coverage" --filter TestCategory!="Integration"'
     testRunTitle: 'Core Tests - Release'
 
 - task: DotNetCoreCLI@2
