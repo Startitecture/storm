@@ -7,6 +7,8 @@
 trigger:
 - master
 
+name: $(MajorVersion).$(MinorVersion).$(PatchVersion)-preview$(Date:yyyyMMdd)$(Rev:rr)
+
 variables:
   - group: Git-Push
   - name: buildConfiguration
@@ -49,11 +51,11 @@ stages:
           versionSelector: 'latestStable'
 
       - task: VSTest@2
-        displayName: 'Run VS Tests'
+        displayName: 'Run VS Tests - $(BuildConfiguration)'
         inputs:
           testSelector: 'testAssemblies'
           testAssemblyVer2: |
-            **\*.Tests.dll
+            **\release\**\*.Tests.dll
             !**\*TestAdapter.dll
             !**\obj\**
           searchFolder: '$(System.DefaultWorkingDirectory)'
@@ -62,12 +64,12 @@ stages:
           runOnlyImpactedTests: true
 
       - task: PublishTestResults@2
-        displayName: 'Publish Test Results Internal'
+        displayName: 'Publish $(BuildConfiguration) Test Results Internal'
         inputs:
           testResultsFormat: 'VSTest'
           testResultsFiles: '**/TEST-*.xml'
           mergeTestResults: true
-          testRunTitle: 'Storm-CI'
+          testRunTitle: 'Storm-CI $(BuildConfiguration)'
 
       - task: CopyFiles@2
         displayName: 'Copy Test Assemblies'
@@ -83,6 +85,13 @@ stages:
           targetPath: '$(Build.ArtifactStagingDirectory)/Tests'
           artifact: 'Tests'
           publishLocation: 'pipeline'
+
+      - task: VSBuild@1
+        displayName: 'VS Build'
+        inputs:
+          solution: '**\*.sln'
+          configuration: Release
+          platform: 'any cpu'
 
       - task: NuGetCommand@2
         displayName: 'Push NuGet Packages'
