@@ -82,19 +82,30 @@ steps:
 #     codeCoverageEnabled: true
 #     runOnlyImpactedTests: true
 
-- task: DotNetCoreCLI@2
-  displayName: 'Pack $(BuildConfiguration) configuration Pre-release Packages'
+- task: NuGetCommand@2
   inputs:
     command: 'pack'
     packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
-    packDirectory: '$(Build.ArtifactStagingDirectory)/Packages'
-    nobuild: true
-    includesymbols: true
-    includesource: true
+    packDestination: '$(Build.ArtifactStagingDirectory)/Packages'
     versioningScheme: 'byEnvVar'
     versionEnvVar: 'Build.BuildNumber'
-    buildProperties: '-p:SymbolPackageFormat=snupkg'
-    verbosityPack: 'Diagnostic'
+    includeSymbols: true
+    buildProperties: '-p SymbolPackageFormat=snupkg'
+
+
+# - task: DotNetCoreCLI@2
+#   displayName: 'Pack $(BuildConfiguration) configuration Pre-release Packages'
+#   inputs:
+#     command: 'pack'
+#     packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
+#     packDirectory: '$(Build.ArtifactStagingDirectory)/Packages'
+#     nobuild: true
+#     includesymbols: true
+#     includesource: true
+#     versioningScheme: 'byEnvVar'
+#     versionEnvVar: 'Build.BuildNumber'
+#     buildProperties: '-p:SymbolPackageFormat=snupkg'
+#     verbosityPack: 'Diagnostic'
 
 - task: NuGetCommand@2
   displayName: 'Push NuGet Packages Internal'
