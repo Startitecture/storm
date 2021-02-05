@@ -32,6 +32,7 @@ steps:
   displayName: 'Build Projects'
   inputs:
     command: 'build'
+    projects: '**/*.csproj'
     arguments: '-c $(BuildConfiguration) -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
 
 - task: DotNetCoreCLI@2
@@ -106,6 +107,7 @@ steps:
   displayName: 'Build Projects'
   inputs:
     command: 'build'
+    projects: '**/*.csproj'
     arguments: '-c Release -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
 
 - task: DotNetCoreCLI@2
