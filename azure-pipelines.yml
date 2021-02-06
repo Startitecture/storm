@@ -12,7 +12,7 @@ name: $(MajorVersion).$(MinorVersion).$(PatchVersion)-rcf$(Date:yyyyMMdd)$(Rev:r
 variables:
   - group: Git-Push
   - name: buildConfiguration
-    value: 'Debug'
+    value: 'Release'
 
 stages:
 - stage: BuildTestMirrorPackages
