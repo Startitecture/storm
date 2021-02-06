@@ -7,10 +7,12 @@
 trigger:
 - master
 
+name: $(MajorVersion).$(MinorVersion).$(PatchVersion)-rcf$(Date:yyyyMMdd)$(Rev:rr)
+
 variables:
   - group: Git-Push
   - name: buildConfiguration
-    value: 'Debug'
+    value: 'Release'
 
 stages:
 - stage: BuildTestMirrorPackages
@@ -53,21 +55,13 @@ stages:
         inputs:
           testSelector: 'testAssemblies'
           testAssemblyVer2: |
-            **\*.Tests.dll
+            **\$(BuildConfiguration)\**\*.Tests.dll
             !**\*TestAdapter.dll
             !**\obj\**
           searchFolder: '$(System.DefaultWorkingDirectory)'
           testFiltercriteria: 'TestCategory!="Integration"'
           codeCoverageEnabled: true
           runOnlyImpactedTests: true
-
-      - task: PublishTestResults@2
-        displayName: 'Publish Test Results Internal'
-        inputs:
-          testResultsFormat: 'VSTest'
-          testResultsFiles: '**/TEST-*.xml'
-          mergeTestResults: true
-          testRunTitle: 'Storm-CI'
 
       - task: CopyFiles@2
         displayName: 'Copy Test Assemblies'
@@ -98,8 +92,8 @@ stages:
         inputs:
           SourceFolder: '$(System.DefaultWorkingDirectory)'
           Contents: |
-            **/*.nupkg
-            **/*.snupkg
+            **/$(BuildConfiguration)/*.nupkg
+            **/$(BuildConfiguration)/*.snupkg
           TargetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
           CleanTargetFolder: true
           flattenFolders: true
