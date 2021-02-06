@@ -1,17 +1,16 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <RunAnalyzersDuringBuild>true</RunAnalyzersDuringBuild>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-rc4</Version>
+    <Version>1.0.0</Version>
     <Authors>Startitecture, LLC</Authors>
     <Company>Startitecture, LLC</Company>
     <Description>Model library for the ST/ORM (Startitecture.Orm) package.</Description>
-    <Copyright>© 2020, Startitecture, LLC</Copyright>
+    <Copyright>© 2021, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
     <PackageIcon>Storm Logo.png</PackageIcon>
@@ -20,6 +19,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Product>ST/ORM</Product>
   </PropertyGroup>
   <ItemGroup>
     <None Remove="stylecop.json" />

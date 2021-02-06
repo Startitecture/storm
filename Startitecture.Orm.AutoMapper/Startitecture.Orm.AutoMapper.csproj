@@ -2,14 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0-rc3</Version>
+    <Version>1.0.0</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>Adds a ST/ORM IEntityMapper implementation based on AutoMapper.</Description>
-    <Copyright>© 2020, Startitecture, LLC</Copyright>
+    <Copyright>© 2021, Startitecture, LLC</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageIcon>Storm Logo.png</PackageIcon>
     <PackageTags>sql orm microorm objectrelationalmapper crud query objectmapper mapper automapper</PackageTags>
@@ -19,6 +18,7 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Product>ST/ORM</Product>
   </PropertyGroup>
 
   <ItemGroup>
