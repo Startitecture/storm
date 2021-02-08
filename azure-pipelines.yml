@@ -28,42 +28,91 @@ stages:
 
       steps:
 
-      - task: NuGetInstaller@0
-        displayName: 'Nuget Installer'
-
-      - task: NuGetCommand@2
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore NuGet Packages'
         inputs:
           command: 'restore'
-          restoreSolution: '**/*.sln'
-          feedsToUse: 'config'
-          nugetConfigPath: 'nuget.config'
-          externalFeedCredentials: 'Nuget.org'
+          feedsToUse: 'select'
+          vstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+          verbosityRestore: 'Normal'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Build Projects'
+        inputs:
+          command: 'build'
+          arguments: '-c $(BuildConfiguration) -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Run $(BuildConfiguration) Tests with Code Coverage'
+        inputs:
+          command: 'test'
+          projects: '**/*.Tests.csproj'
+          arguments: '-c $(BuildConfiguration) --collect "Code coverage"'
+          testRunTitle: 'Core Tests - $(BuildConfiguration)'
+
+      - task: NuGetToolInstaller@1
+        inputs:
+          versionSpec: 
+          checkLatest: true
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Pack $(BuildConfiguration) configuration Pre-release Packages'
+        inputs:
+          command: 'pack'
+          packagesToPack: '**/*.csproj;!**/*.Tests.csproj'
+          packDirectory: '$(Build.ArtifactStagingDirectory)/Packages'
+          nobuild: true
+          includesymbols: true
+          includesource: true
+          versioningScheme: 'byEnvVar'
+          versionEnvVar: 'Build.BuildNumber'
+          verbosityPack: 'Normal'
+
+      - task: NuGetCommand@2
+        displayName: 'Push NuGet Packages Internal'
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/Packages/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+          allowPackageConflicts: true
+          verbosityPush: 'Normal'
+
+      # - task: NuGetInstaller@0
+      #   displayName: 'Nuget Installer'
+
+      # - task: NuGetCommand@2
+      #   inputs:
+      #     command: 'restore'
+      #     restoreSolution: '**/*.sln'
+      #     feedsToUse: 'config'
+      #     nugetConfigPath: 'nuget.config'
+      #     externalFeedCredentials: 'Nuget.org'
 
       - task: VSBuild@1
         displayName: 'VS Build'
         inputs:
-          solution: '**\*.sln'
-          configuration: $(buildConfiguration)
-          platform: 'any cpu'
+          solution: '**\*.sqlproj'
+          configuration: Release
 
-      - task: VisualStudioTestPlatformInstaller@1
-        displayName: 'Set up VS Test Platform'
-        inputs:
-          packageFeedSelector: 'nugetOrg'
-          versionSelector: 'latestStable'
+      # - task: VisualStudioTestPlatformInstaller@1
+      #   displayName: 'Set up VS Test Platform'
+      #   inputs:
+      #     packageFeedSelector: 'nugetOrg'
+      #     versionSelector: 'latestStable'
 
-      - task: VSTest@2
-        displayName: 'Run VS Tests'
-        inputs:
-          testSelector: 'testAssemblies'
-          testAssemblyVer2: |
-            **\$(BuildConfiguration)\**\*.Tests.dll
-            !**\*TestAdapter.dll
-            !**\obj\**
-          searchFolder: '$(System.DefaultWorkingDirectory)'
-          testFiltercriteria: 'TestCategory!="Integration"'
-          codeCoverageEnabled: true
-          runOnlyImpactedTests: true
+      # - task: VSTest@2
+      #   displayName: 'Run VS Tests'
+      #   inputs:
+      #     testSelector: 'testAssemblies'
+      #     testAssemblyVer2: |
+      #       **\$(BuildConfiguration)\**\*.Tests.dll
+      #       !**\*TestAdapter.dll
+      #       !**\obj\**
+      #     searchFolder: '$(System.DefaultWorkingDirectory)'
+      #     testFiltercriteria: 'TestCategory!="Integration"'
+      #     codeCoverageEnabled: true
+      #     runOnlyImpactedTests: true
 
       - task: CopyFiles@2
         displayName: 'Copy Test Assemblies'
@@ -80,25 +129,25 @@ stages:
           artifact: 'Tests'
           publishLocation: 'pipeline'
 
-      - task: NuGetCommand@2
-        displayName: 'Push NuGet Packages'
-        inputs:
-          command: 'push'
-          packagesToPush: '$(System.DefaultWorkingDirectory)/**/*.nupkg;$(System.DefaultWorkingDirectory)/**/*.snupkg'
-          nuGetFeedType: 'internal'
-          publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
-          allowPackageConflicts: true
+      # - task: NuGetCommand@2
+      #   displayName: 'Push NuGet Packages'
+      #   inputs:
+      #     command: 'push'
+      #     packagesToPush: '$(System.DefaultWorkingDirectory)/**/*.nupkg;$(System.DefaultWorkingDirectory)/**/*.snupkg'
+      #     nuGetFeedType: 'internal'
+      #     publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+      #     allowPackageConflicts: true
 
-      - task: CopyFiles@2
-        displayName: 'Copy NuGet Packages'
-        inputs:
-          SourceFolder: '$(System.DefaultWorkingDirectory)'
-          Contents: |
-            **/$(BuildConfiguration)/*.nupkg
-            **/$(BuildConfiguration)/*.snupkg
-          TargetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
-          CleanTargetFolder: true
-          flattenFolders: true
+      # - task: CopyFiles@2
+      #   displayName: 'Copy NuGet Packages'
+      #   inputs:
+      #     SourceFolder: '$(System.DefaultWorkingDirectory)'
+      #     Contents: |
+      #       **/$(BuildConfiguration)/*.nupkg
+      #       **/$(BuildConfiguration)/*.snupkg
+      #     TargetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
+      #     CleanTargetFolder: true
+      #     flattenFolders: true
 
       - task: PublishBuildArtifacts@1
         displayName: 'Publish NuGet Package Build Artifacts'
