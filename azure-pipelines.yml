@@ -63,7 +63,7 @@ stages:
           packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
           packDirectory: '$(Build.ArtifactStagingDirectory)/Packages'
           nobuild: true
-          includesymbols: true
+          # includesymbols: true
           includesource: true
           versioningScheme: 'byEnvVar'
           versionEnvVar: 'Build.BuildNumber'
@@ -106,7 +106,7 @@ stages:
           packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
           packDirectory: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
           nobuild: true
-          includesymbols: true
+          # includesymbols: true
           includesource: true
           versioningScheme: 'byEnvVar'
           versionEnvVar: 'ReleaseVersion'
