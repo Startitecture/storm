@@ -47,7 +47,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
         /// <summary>
         /// Gets the configuration root.
         /// </summary>
-        private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appSettings.json", false).Build();
+        private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appsettings.json", false).Build();
 
         /// <summary>
         /// The command text test.
