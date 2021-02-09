@@ -67,7 +67,6 @@ stages:
           includesource: true
           versioningScheme: 'byEnvVar'
           versionEnvVar: 'Build.BuildNumber'
-          buildProperties: 'SymbolPackageFormat=snupkg'
           verbosityPack: 'Normal'
 
       - task: NuGetCommand@2
@@ -111,7 +110,6 @@ stages:
           includesource: true
           versioningScheme: 'byEnvVar'
           versionEnvVar: 'ReleaseVersion'
-          buildProperties: 'SymbolPackageFormat=snupkg'
           verbosityPack: 'Normal'
 
       - task: NuGetCommand@2
