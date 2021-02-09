@@ -12,11 +12,6 @@
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="appsettings.json.old">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\Startitecture.Orm.Mapper\Startitecture.Orm.Mapper.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Model\Startitecture.Orm.Model.csproj" />
     <ProjectReference Include="..\Startitecture.Orm.Schema\Startitecture.Orm.Schema.csproj" />
