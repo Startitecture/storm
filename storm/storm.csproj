@@ -18,6 +18,7 @@
     <PackageProjectUrl>https://github.com/Startitecture/storm</PackageProjectUrl>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
