@@ -10,6 +10,7 @@ namespace Startitecture.Orm.SqlClient.Tests
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using global::AutoMapper;
@@ -691,6 +692,7 @@ FROM @inserted AS i;
                                  };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
@@ -701,27 +703,33 @@ FROM @inserted AS i;
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = await identityRepository.FirstOrDefaultAsync(
                                              Query.Select<DomainIdentity>()
-                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
-                                         .ConfigureAwait(false) ?? await identityRepository.SaveAsync(
+                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)),
+                                             cancellationToken)
+                                         .ConfigureAwait(false)
+                                     ?? await identityRepository.SaveAsync(
                                              new DomainIdentity(Environment.UserName)
                                              {
                                                  FirstName = "King",
                                                  MiddleName = "T.",
                                                  LastName = "Animal"
-                                             })
+                                             },
+                                             cancellationToken)
                                          .ConfigureAwait(false);
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = await identityRepository.FirstOrDefaultAsync(
                                           Query.Select<DomainIdentity>()
-                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)))
-                                      .ConfigureAwait(false) ?? await identityRepository.SaveAsync(
+                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)),
+                                          cancellationToken)
+                                      .ConfigureAwait(false)
+                                  ?? await identityRepository.SaveAsync(
                                           new DomainIdentity(domainIdentifier2)
                                           {
                                               FirstName = "Foo",
                                               MiddleName = "J.",
                                               LastName = "Bar"
-                                          })
+                                          },
+                                          cancellationToken)
                                       .ConfigureAwait(false);
 
                 // We will add to this submission later.
@@ -765,20 +773,25 @@ FROM @inserted AS i;
                 await this.MergeSubmissionAsync(expected, provider).ConfigureAwait(false);
 
                 var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-                actual = await submissionRepository.FirstOrDefaultAsync(expected.GenericSubmissionId).ConfigureAwait(false);
+                actual = await submissionRepository.FirstOrDefaultAsync(expected.GenericSubmissionId, cancellationToken).ConfigureAwait(false);
 
                 var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                var values = (await fieldValueRepository.SelectEntitiesAsync(
-                                      Query.Select<GenericSubmissionValueRow>()
-                                          .From(
-                                              set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
-                                                  .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
-                                                  .InnerJoin(
-                                                      row => row.FieldValue.LastModifiedByDomainIdentifierId,
-                                                      row => row.FieldValue.LastModifiedBy.DomainIdentityId))
-                                          .Where(
-                                              set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())))
-                                  .ConfigureAwait(false)).ToDictionary(value => value.FieldValueId.GetValueOrDefault(), value => value);
+                var values = new Dictionary<long, FieldValue>();
+                await foreach (var item in fieldValueRepository.SelectEntitiesAsync(
+                                       Query.Select<GenericSubmissionValueRow>()
+                                           .From(
+                                               set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
+                                                   .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
+                                                   .InnerJoin(
+                                                       row => row.FieldValue.LastModifiedByDomainIdentifierId,
+                                                       row => row.FieldValue.LastModifiedBy.DomainIdentityId))
+                                           .Where(
+                                               set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    values.Add(item.FieldValueId.GetValueOrDefault(), item);
+                }
 
                 actual.Load(values.Values);
 
@@ -984,13 +997,19 @@ FROM @inserted AS i;
 
             // Merge in the field values.
             var commandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
-            var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
+            var cancellationToken = CancellationToken.None;
+            var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
             var fieldsCommand = new JsonMerge<FieldRow>(commandProvider, provider.DatabaseContext);
-            var mergedFields = (await fieldsCommand.OnImplicit(row => row.Name)
-                                    .SelectFromInserted()
-                                    .ExecuteForResultsAsync(fieldItems)
-                                    .ConfigureAwait(false)).ToList();
+            var mergedFields = new List<FieldRow>();
+
+            await foreach (var item in fieldsCommand.OnImplicit(row => row.Name)
+                               .SelectFromInserted()
+                               .ExecuteForResultsAsync(fieldItems, cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                mergedFields.Add(item);
+            }
 
             foreach (var field in fields)
             {
@@ -1007,7 +1026,7 @@ FROM @inserted AS i;
             }
 
             var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-            await submissionRepository.SaveAsync(submission).ConfigureAwait(false);
+            await submissionRepository.SaveAsync(submission, cancellationToken).ConfigureAwait(false);
 
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
@@ -1021,10 +1040,15 @@ FROM @inserted AS i;
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
             var fieldValueCommand = new JsonMerge<FieldValueRow>(commandProvider, provider.DatabaseContext);
-            var mergedFieldValues = (await fieldValueCommand.OnImplicit(row => row.FieldValueId)
-                                         .SelectFromInserted()
-                                         .ExecuteForResultsAsync(fieldValues)
-                                         .ConfigureAwait(false)).ToList();
+            var mergedFieldValues = new List<FieldValueRow>();
+
+            await foreach (var item in fieldValueCommand.OnImplicit(row => row.FieldValueId)
+                               .SelectFromInserted()
+                               .ExecuteForResultsAsync(fieldValues, cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                mergedFieldValues.Add(item);
+            }
 
             Assert.IsTrue(mergedFieldValues.All(row => row.FieldValueId > 0));
 
@@ -1052,12 +1076,16 @@ FROM @inserted AS i;
                                         }).ToList();
 
             var elementMergeCommand = new JsonMerge<FieldValueElementRow>(commandProvider, provider.DatabaseContext);
-            var mergedValueElements = (await elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
-                                           .DeleteUnmatchedInSource<FieldValueElementTableTypeRow
-                                           >(row => row.FieldValueId) // Get rid of extraneous elements
-                                           .SelectFromInserted()
-                                           .ExecuteForResultsAsync(valueElements)
-                                           .ConfigureAwait(false)).ToList();
+            var mergedValueElements = new List<FieldValueElementRow>();
+
+            await foreach (var item in elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
+                               .DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
+                               .SelectFromInserted()
+                               .ExecuteForResultsAsync(valueElements, cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                mergedValueElements.Add(item);
+            }
 
             foreach (var element in valueElements)
             {
@@ -1070,31 +1098,32 @@ FROM @inserted AS i;
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId);
 
-            await dateElementsCommand.ExecuteAsync(valueElements.Where(row => row.DateElement.HasValue)).ConfigureAwait(false);
+            await dateElementsCommand.ExecuteAsync(valueElements.Where(row => row.DateElement.HasValue), cancellationToken).ConfigureAwait(false);
 
             var floatElementsCommand = new JsonMerge<FloatElementRow>(commandProvider, provider.DatabaseContext)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId);
 
-            await floatElementsCommand.ExecuteAsync(valueElements.Where(row => row.FloatElement.HasValue)).ConfigureAwait(false);
+            await floatElementsCommand.ExecuteAsync(valueElements.Where(row => row.FloatElement.HasValue), cancellationToken).ConfigureAwait(false);
 
             var integerElementsCommand = new JsonMerge<IntegerElementRow>(commandProvider, provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
-            await integerElementsCommand.ExecuteAsync(valueElements.Where(row => row.IntegerElement.HasValue)).ConfigureAwait(false);
+            await integerElementsCommand.ExecuteAsync(valueElements.Where(row => row.IntegerElement.HasValue), cancellationToken)
+                .ConfigureAwait(false);
 
             var moneyElementsCommand = new JsonMerge<MoneyElementRow>(commandProvider, provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
-            await moneyElementsCommand.ExecuteAsync(valueElements.Where(row => row.MoneyElement.HasValue)).ConfigureAwait(false);
+            await moneyElementsCommand.ExecuteAsync(valueElements.Where(row => row.MoneyElement.HasValue), cancellationToken).ConfigureAwait(false);
 
             var textElementsCommand = new JsonMerge<TextElementRow>(commandProvider, provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
-            await textElementsCommand.ExecuteAsync(valueElements.Where(row => row.TextElement != null)).ConfigureAwait(false);
+            await textElementsCommand.ExecuteAsync(valueElements.Where(row => row.TextElement != null), cancellationToken).ConfigureAwait(false);
 
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues
@@ -1108,8 +1137,8 @@ FROM @inserted AS i;
                 .OnImplicit(row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId);
 
-            await submissionCommand.ExecuteAsync(genericValueSubmissions).ConfigureAwait(false);
-            await transaction.CommitAsync().ConfigureAwait(false);
+            await submissionCommand.ExecuteAsync(genericValueSubmissions, cancellationToken).ConfigureAwait(false);
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

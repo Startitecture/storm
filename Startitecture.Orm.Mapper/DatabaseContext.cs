@@ -14,6 +14,8 @@ namespace Startitecture.Orm.Mapper
     using System.Data;
     using System.Data.Common;
     using System.Globalization;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -196,8 +198,9 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
+        /// <param name="cancellationToken"></param>
         /// <inheritdoc />
-        public async Task OpenSharedConnectionAsync()
+        public async Task OpenSharedConnectionAsync(CancellationToken cancellationToken)
         {
             if (this.Connection is DbConnection asyncConnection)
             {
@@ -225,7 +228,7 @@ namespace Startitecture.Orm.Mapper
 
                 if (this.Connection.State == ConnectionState.Closed)
                 {
-                    await asyncConnection.OpenAsync().ConfigureAwait(false);
+                    await asyncConnection.OpenAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             else
@@ -240,10 +243,11 @@ namespace Startitecture.Orm.Mapper
             return this.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
+        /// <param name="cancellationToken"></param>
         /// <inheritdoc />
-        public async Task<ITransactionContext> BeginTransactionAsync()
+        public async Task<ITransactionContext> BeginTransactionAsync(CancellationToken cancellationToken)
         {
-            return await this.BeginTransactionAsync(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            return await this.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -256,7 +260,7 @@ namespace Startitecture.Orm.Mapper
 
                 // Return the transaction context, then on disposal set our copy to null.
                 var transactionContext = new TransactionContext(this.transaction);
-                transactionContext.Disposed += (sender, args) => this.transaction = null;
+                transactionContext.Disposed += (_, _) => this.transaction = null;
                 return transactionContext;
             }
             catch (InvalidOperationException ex)
@@ -270,21 +274,21 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel)
+        public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken)
         {
             try
             {
-                await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+                await this.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
 
                 if (this.Connection is DbConnection asyncConnection)
                 {
 #if NET472
                     this.transaction = asyncConnection.BeginTransaction(isolationLevel);
 #else
-                    this.transaction = await asyncConnection.BeginTransactionAsync(isolationLevel).ConfigureAwait(false);
+                    this.transaction = await asyncConnection.BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
 #endif
                     var transactionContext = new TransactionContext(this.transaction);
-                    transactionContext.Disposed += (sender, args) => this.transaction = null;
+                    transactionContext.Disposed += (_, _) => this.transaction = null;
                     return transactionContext;
                 }
 
@@ -333,21 +337,21 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public async Task ChangeDatabaseAsync([NotNull] string databaseName)
+        public async Task ChangeDatabaseAsync([NotNull] string databaseName, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(databaseName))
             {
                 throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(databaseName));
             }
 
-            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+            await this.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             if (this.Connection is DbConnection asyncConnection)
             {
 #if NET472
                 this.Connection.ChangeDatabase(databaseName);
 #else
-                await asyncConnection.ChangeDatabaseAsync(databaseName).ConfigureAwait(false);
+                await asyncConnection.ChangeDatabaseAsync(databaseName, cancellationToken).ConfigureAwait(false);
 #endif
             }
             else
@@ -379,7 +383,7 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public async Task<int> ExecuteAsync(string sql, params object[] args)
+        public async Task<int> ExecuteAsync(string sql, CancellationToken cancellationToken, params object[] args)
         {
             if (string.IsNullOrWhiteSpace(sql))
             {
@@ -391,7 +395,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(args));
             }
 
-            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+            await this.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             if (this.Connection is DbConnection asyncConnection)
             {
@@ -401,7 +405,7 @@ namespace Startitecture.Orm.Mapper
                 await using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
 #endif
                 {
-                    var returnValue = await command.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    var returnValue = await command.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                     return returnValue;
                 }
             }
@@ -437,7 +441,7 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public async Task<T> ExecuteScalarAsync<T>(string sql, params object[] args)
+        public async Task<T> ExecuteScalarAsync<T>(string sql, CancellationToken cancellationToken, params object[] args)
         {
             if (string.IsNullOrWhiteSpace(sql))
             {
@@ -449,7 +453,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(args));
             }
 
-            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+            await this.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
 
             if (this.Connection is DbConnection asyncConnection)
             {
@@ -459,7 +463,7 @@ namespace Startitecture.Orm.Mapper
                 await using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
 #endif
                 {
-                    var result = await command.ExecuteScalarAsync().ConfigureAwait(false);
+                    var result = await command.ExecuteScalarAsync(cancellationToken).ConfigureAwait(false);
                     return ConvertNullable<T>(result);
                 }
             }
@@ -504,7 +508,7 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<T>> QueryAsync<T>(string sql, params object[] args)
+        public async IAsyncEnumerable<T> QueryAsync<T>(string sql, [EnumeratorCancellation] CancellationToken cancellationToken, params object[] args)
         {
             if (sql == null)
             {
@@ -521,7 +525,7 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(args));
             }
 
-            await this.OpenSharedConnectionAsync().ConfigureAwait(false);
+            await this.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
             var entityDefinition = this.RepositoryAdapter.DefinitionProvider.Resolve<T>();
 
             if (this.Connection is DbConnection asyncConnection)
@@ -532,18 +536,18 @@ namespace Startitecture.Orm.Mapper
                 await using (var command = this.CreateAsyncCommand(asyncConnection, sql, args))
 #endif
                 {
-                    var results = new List<T>();
+                    ////var results = new List<T>();
 #if NET472
                     using (var dataReader = await command.ExecuteReaderAsync().ConfigureAwait(false))
 #else
-                    await using (var dataReader = await command.ExecuteReaderAsync().ConfigureAwait(false))
+                    await using (var dataReader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false))
 #endif
                     {
                         while (true)
                         {
-                            if (await dataReader.ReadAsync().ConfigureAwait(false) == false)
+                            if (await dataReader.ReadAsync(cancellationToken).ConfigureAwait(false) == false)
                             {
-                                break;
+                                yield break;
                             }
 
                             var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
@@ -552,37 +556,39 @@ namespace Startitecture.Orm.Mapper
                                                   };
 
                             var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
-                            results.Add(poco);
+                            yield return poco;
                         }
                     }
 
-                    return results;
+                    ////return results;
                 }
             }
-
-            using (var command = this.CreateCommand(this.Connection, sql, args))
+            else
             {
-                var results = new List<T>();
-                using (var dataReader = command.ExecuteReader())
+                using (var command = this.CreateCommand(this.Connection, sql, args))
                 {
-                    while (true)
+                    ////var results = new List<T>();
+                    using (var dataReader = command.ExecuteReader())
                     {
-                        if (dataReader.Read() == false)
+                        while (true)
                         {
-                            break;
+                            if (dataReader.Read() == false)
+                            {
+                                yield break;
+                            }
+
+                            var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
+                                                  {
+                                                      FirstColumn = 0
+                                                  };
+
+                            var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
+                            yield return poco;
                         }
-
-                        var pocoDataRequest = new PocoDataRequest(dataReader, entityDefinition, this)
-                                              {
-                                                  FirstColumn = 0
-                                              };
-
-                        var poco = this.pocoFactory.CreatePoco<T>(pocoDataRequest);
-                        results.Add(poco);
                     }
-                }
 
-                return results;
+                    ////return results;
+                }
             }
         }
 

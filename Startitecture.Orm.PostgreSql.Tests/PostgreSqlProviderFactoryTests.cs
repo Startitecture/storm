@@ -9,6 +9,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Microsoft.Extensions.Configuration;
@@ -1710,7 +1711,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
             await using (var provider = target.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var actual = await provider.DatabaseContext.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM dbo.\"AggregateOptionType\"")
+                var actual = await provider.DatabaseContext
+                                 .ExecuteScalarAsync<int>("SELECT COUNT(1) FROM dbo.\"AggregateOptionType\"", CancellationToken.None)
                                  .ConfigureAwait(false);
 
                 Assert.AreNotEqual(0, actual);
@@ -1730,6 +1732,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             List<DomainAggregateRow> expected;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -1738,7 +1741,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(topContainer2).ConfigureAwait(false);
+                await target.InsertAsync(topContainer2, cancellationToken).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -1747,7 +1750,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                await target.InsertAsync(subContainerA).ConfigureAwait(false);
+                await target.InsertAsync(subContainerA, cancellationToken).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -1756,7 +1759,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     IsSystem = false
                 };
 
-                await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
+                await target.InsertAsync(categoryAttribute20, cancellationToken).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -1765,7 +1768,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
+                await target.InsertAsync(timBobIdentity, cancellationToken).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -1774,7 +1777,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
+                await target.InsertAsync(fooBarIdentity, cancellationToken).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -1782,14 +1785,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
+                await target.InsertAsync(otherAggregate10, cancellationToken).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(template23).ConfigureAwait(false);
+                await target.InsertAsync(template23, cancellationToken).ConfigureAwait(false);
 
                 var aggregateOption1 = new AggregateOptionRow
                 {
@@ -1824,7 +1827,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate1).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate1, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate2 = new DomainAggregateRow
                 {
@@ -1846,7 +1849,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate2).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate2, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate3 = new DomainAggregateRow
                 {
@@ -1866,13 +1869,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate3).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate3, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                await target.InsertAsync(aggregateOption1).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption1, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                await target.InsertAsync(aggregateOption2).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption2, cancellationToken).ConfigureAwait(false);
 
                 var associationRow = new AssociationRow
                 {
@@ -1880,7 +1883,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     OtherAggregateId = otherAggregate10.OtherAggregateId
                 };
 
-                await target.InsertAsync(associationRow).ConfigureAwait(false);
+                await target.InsertAsync(associationRow, cancellationToken).ConfigureAwait(false);
 
                 expected = new List<DomainAggregateRow>
                                {
@@ -1905,7 +1908,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
                             .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
                     .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId));
 
-                var actual = (await target.SelectEntitiesAsync(itemSelection).ConfigureAwait(false)).OrderBy(x => x.Name).ToList();
+                var actual = new List<DomainAggregateRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(itemSelection, cancellationToken).ConfigureAwait(false))
+                {
+                    actual.Add(item);
+                }
+
+                actual = actual.OrderBy(x => x.Name)
+                    .ToList();
+
                 Assert.AreEqual(
                     expected.First(),
                     actual.First(),
@@ -1941,6 +1953,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -1949,7 +1962,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(topContainer2).ConfigureAwait(false);
+                await target.InsertAsync(topContainer2, cancellationToken).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -1958,7 +1971,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                await target.InsertAsync(subContainerA).ConfigureAwait(false);
+                await target.InsertAsync(subContainerA, cancellationToken).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -1967,7 +1980,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     IsSystem = false
                 };
 
-                await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
+                await target.InsertAsync(categoryAttribute20, cancellationToken).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -1976,7 +1989,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
+                await target.InsertAsync(timBobIdentity, cancellationToken).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -1985,7 +1998,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
+                await target.InsertAsync(fooBarIdentity, cancellationToken).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -1993,14 +2006,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
+                await target.InsertAsync(otherAggregate10, cancellationToken).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(template23).ConfigureAwait(false);
+                await target.InsertAsync(template23, cancellationToken).ConfigureAwait(false);
 
                 var aggregateOption1 = new AggregateOptionRow
                 {
@@ -2071,15 +2084,15 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate1).ConfigureAwait(false);
-                await target.InsertAsync(domainAggregate2).ConfigureAwait(false);
-                await target.InsertAsync(domainAggregate3).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate1, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate2, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate3, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                await target.InsertAsync(aggregateOption1).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption1, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                await target.InsertAsync(aggregateOption2).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption2, cancellationToken).ConfigureAwait(false);
 
                 var associationRow = new AssociationRow
                 {
@@ -2087,11 +2100,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     OtherAggregateId = otherAggregate10.OtherAggregateId
                 };
 
-                await target.InsertAsync(associationRow).ConfigureAwait(false);
+                await target.InsertAsync(associationRow, cancellationToken).ConfigureAwait(false);
 
-                await target.InsertAsync(flag1).ConfigureAwait(false);
-                await target.InsertAsync(flag2).ConfigureAwait(false);
-                await target.InsertAsync(flag3).ConfigureAwait(false);
+                await target.InsertAsync(flag1, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(flag2, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(flag3, cancellationToken).ConfigureAwait(false);
 
                 var flagAssociation1 = new DomainAggregateFlagAttributeRow
                 {
@@ -2124,11 +2137,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     FlagAttributeId = flag3.FlagAttributeId
                 };
 
-                await target.InsertAsync(flagAssociation1).ConfigureAwait(false);
-                await target.InsertAsync(flagAssociation2).ConfigureAwait(false);
-                await target.InsertAsync(flagAssociation3).ConfigureAwait(false);
-                await target.InsertAsync(flagAssociation4).ConfigureAwait(false);
-                await target.InsertAsync(flagAssociation5).ConfigureAwait(false);
+                await target.InsertAsync(flagAssociation1, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(flagAssociation2, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(flagAssociation3, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(flagAssociation4, cancellationToken).ConfigureAwait(false);
+                await target.InsertAsync(flagAssociation5, cancellationToken).ConfigureAwait(false);
 
                 var expected1 = new List<DomainAggregateRow>
                                     {
@@ -2156,7 +2169,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                     .Where(sub => sub.Include((FlagAttributeRow flagRow) => flagRow.Name, flag1.Name, flag2.Name)),
                                 row => row.DomainAggregateId));
 
-                var actual1 = (await target.SelectEntitiesAsync(itemSelection1).ConfigureAwait(false)).OrderBy(x => x.Name).ToList();
+                var actual1 = new List<DomainAggregateRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(itemSelection1, cancellationToken).ConfigureAwait(false))
+                {
+                    actual1.Add(item);
+                }
+
+                actual1 = actual1.OrderBy(x => x.Name)
+                    .ToList();
+
                 Assert.AreEqual(expected1.First(), actual1.First(), string.Join(Environment.NewLine, expected1.First().GetDifferences(actual1.First())));
                 CollectionAssert.AreEqual(expected1, actual1);
 
@@ -2195,7 +2217,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                             "Bar")),
                                 row => row.DomainAggregateId));
 
-                var actual2 = (await target.SelectEntitiesAsync(itemSelection2).ConfigureAwait(false)).OrderBy(x => x.Name).ToList();
+                var actual2 = new List<DomainAggregateRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(itemSelection2, cancellationToken).ConfigureAwait(false))
+                {
+                    actual2.Add(item);
+                }
+
+                actual2 = actual2.OrderBy(x => x.Name)
+                    .ToList();
+
                 Assert.AreEqual(expected2.First(), actual2.First(), string.Join(Environment.NewLine, expected1.First().GetDifferences(actual1.First())));
                 CollectionAssert.AreEqual(expected2, actual2);
             }
@@ -2214,6 +2245,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             List<DomainAggregateRow> expected;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -2222,7 +2254,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(topContainer2).ConfigureAwait(false);
+                await target.InsertAsync(topContainer2, cancellationToken).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -2231,7 +2263,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                await target.InsertAsync(subContainerA).ConfigureAwait(false);
+                await target.InsertAsync(subContainerA, cancellationToken).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -2240,7 +2272,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     IsSystem = false
                 };
 
-                await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
+                await target.InsertAsync(categoryAttribute20, cancellationToken).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -2249,7 +2281,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
+                await target.InsertAsync(timBobIdentity, cancellationToken).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -2258,7 +2290,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
+                await target.InsertAsync(fooBarIdentity, cancellationToken).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -2266,14 +2298,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
+                await target.InsertAsync(otherAggregate10, cancellationToken).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(template23).ConfigureAwait(false);
+                await target.InsertAsync(template23, cancellationToken).ConfigureAwait(false);
 
                 var aggregateOption1 = new AggregateOptionRow
                 {
@@ -2308,7 +2340,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate1).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate1, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate2 = new DomainAggregateRow
                 {
@@ -2330,7 +2362,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate2).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate2, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate3 = new DomainAggregateRow
                 {
@@ -2350,13 +2382,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate3).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate3, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                await target.InsertAsync(aggregateOption1).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption1, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                await target.InsertAsync(aggregateOption2).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption2, cancellationToken).ConfigureAwait(false);
 
                 var associationRow = new AssociationRow
                 {
@@ -2364,7 +2396,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     OtherAggregateId = otherAggregate10.OtherAggregateId
                 };
 
-                await target.InsertAsync(associationRow).ConfigureAwait(false);
+                await target.InsertAsync(associationRow, cancellationToken).ConfigureAwait(false);
 
                 expected = new List<DomainAggregateRow>
                                {
@@ -2395,7 +2427,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                 .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
                         .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId)));
 
-                var actual = (await target.DynamicSelectAsync(itemSelection).ConfigureAwait(false)).OrderBy(x => x.Name).ToList();
+                var actual = new List<dynamic>();
+
+                await foreach (var item in target.DynamicSelectAsync(itemSelection, cancellationToken).ConfigureAwait(false))
+                {
+                    actual.Add(item);
+                }
+
+                actual = actual.OrderBy(x => x.Name).ToList();
 
                 foreach (var result in actual)
                 {
@@ -2423,6 +2462,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             List<DomainAggregateRow> expectedPage2;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -2431,7 +2471,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(topContainer2).ConfigureAwait(false);
+                await target.InsertAsync(topContainer2, cancellationToken).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -2440,7 +2480,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                await target.InsertAsync(subContainerA).ConfigureAwait(false);
+                await target.InsertAsync(subContainerA, cancellationToken).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -2449,7 +2489,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     IsSystem = false
                 };
 
-                await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
+                await target.InsertAsync(categoryAttribute20, cancellationToken).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -2458,7 +2498,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
+                await target.InsertAsync(timBobIdentity, cancellationToken).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -2467,7 +2507,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
+                await target.InsertAsync(fooBarIdentity, cancellationToken).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -2475,14 +2515,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
+                await target.InsertAsync(otherAggregate10, cancellationToken).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(template23).ConfigureAwait(false);
+                await target.InsertAsync(template23, cancellationToken).ConfigureAwait(false);
 
                 var aggregateOption1 = new AggregateOptionRow
                 {
@@ -2517,7 +2557,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate1).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate1, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate2 = new DomainAggregateRow
                 {
@@ -2539,7 +2579,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate2).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate2, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate3 = new DomainAggregateRow
                 {
@@ -2559,7 +2599,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate3).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate3, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate4 = new DomainAggregateRow
                 {
@@ -2579,7 +2619,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate4).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate4, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate5 = new DomainAggregateRow
                 {
@@ -2599,13 +2639,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate5).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate5, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                await target.InsertAsync(aggregateOption1).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption1, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                await target.InsertAsync(aggregateOption2).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption2, cancellationToken).ConfigureAwait(false);
 
                 var associationRow = new AssociationRow
                 {
@@ -2613,7 +2653,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     OtherAggregateId = otherAggregate10.OtherAggregateId
                 };
 
-                await target.InsertAsync(associationRow).ConfigureAwait(false);
+                await target.InsertAsync(associationRow, cancellationToken).ConfigureAwait(false);
 
                 expectedPage1 = new List<DomainAggregateRow>
                                {
@@ -2636,7 +2676,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         .From(set => set.InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId))
                         .Where(set => set.AreEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId)));
 
-                var count = await target.GetScalarAsync<int>(countQuery).ConfigureAwait(false);
+                var count = await target.GetScalarAsync<int>(countQuery, cancellationToken).ConfigureAwait(false);
 
                 Assert.AreEqual(5, count);
 
@@ -2671,7 +2711,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     .Where(set => set.AreEqual(row => row.SubContainerId, expectedPage1.First().SubContainerId))
                     .Sort(set => set.OrderBy(row => row.Name));
 
-                var actualPage1 = (await target.SelectEntitiesAsync(selection).ConfigureAwait(false)).ToList();
+                var actualPage1 = new List<DomainAggregateRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(selection, cancellationToken).ConfigureAwait(false))
+                {
+                    actualPage1.Add(item);
+                }
+
                 Assert.AreEqual(
                     expectedPage1.First(),
                     actualPage1.First(),
@@ -2682,7 +2728,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Advance the number of rows
                 selection.ParentExpression.Expression.Page.SetPage(2);
 
-                var actualPage2 = (await target.SelectEntitiesAsync(selection).ConfigureAwait(false)).ToList();
+                var actualPage2 = new List<DomainAggregateRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(selection, cancellationToken).ConfigureAwait(false))
+                {
+                    actualPage2.Add(item);
+                }
+
                 Assert.AreEqual(
                     expectedPage2.First(),
                     actualPage2.First(),
@@ -2706,6 +2758,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             List<DomainAggregateRow> expectedDesc;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -2714,7 +2767,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(topContainer2).ConfigureAwait(false);
+                await target.InsertAsync(topContainer2, cancellationToken).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -2723,7 +2776,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                await target.InsertAsync(subContainerA).ConfigureAwait(false);
+                await target.InsertAsync(subContainerA, cancellationToken).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -2732,7 +2785,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     IsSystem = false
                 };
 
-                await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
+                await target.InsertAsync(categoryAttribute20, cancellationToken).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -2741,7 +2794,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
+                await target.InsertAsync(timBobIdentity, cancellationToken).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -2750,7 +2803,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
+                await target.InsertAsync(fooBarIdentity, cancellationToken).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -2758,14 +2811,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
+                await target.InsertAsync(otherAggregate10, cancellationToken).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(template23).ConfigureAwait(false);
+                await target.InsertAsync(template23, cancellationToken).ConfigureAwait(false);
 
                 var aggregateOption1 = new AggregateOptionRow
                 {
@@ -2800,7 +2853,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate1).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate1, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate2 = new DomainAggregateRow
                 {
@@ -2822,7 +2875,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate2).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate2, cancellationToken).ConfigureAwait(false);
 
                 var domainAggregate3 = new DomainAggregateRow
                 {
@@ -2842,13 +2895,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(domainAggregate3).ConfigureAwait(false);
+                await target.InsertAsync(domainAggregate3, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption1.AggregateOptionId = domainAggregate1.DomainAggregateId;
-                await target.InsertAsync(aggregateOption1).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption1, cancellationToken).ConfigureAwait(false);
 
                 aggregateOption2.AggregateOptionId = domainAggregate2.DomainAggregateId;
-                await target.InsertAsync(aggregateOption2).ConfigureAwait(false);
+                await target.InsertAsync(aggregateOption2, cancellationToken).ConfigureAwait(false);
 
                 var associationRow = new AssociationRow
                 {
@@ -2856,7 +2909,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     OtherAggregateId = otherAggregate10.OtherAggregateId
                 };
 
-                await target.InsertAsync(associationRow).ConfigureAwait(false);
+                await target.InsertAsync(associationRow, cancellationToken).ConfigureAwait(false);
 
                 expected = new List<DomainAggregateRow>
                                {
@@ -2889,7 +2942,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId))
                     .Sort(set => set.OrderBy(row => row.Name));
 
-                var actual = (await target.SelectEntitiesAsync(itemSelection).ConfigureAwait(false)).ToList();
+                var actual = new List<DomainAggregateRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(itemSelection, cancellationToken).ConfigureAwait(false))
+                {
+                    actual.Add(item);
+                }
+
                 Assert.AreEqual(expected.First(), actual.First(), string.Join(Environment.NewLine, expected.First().GetDifferences(actual.First())));
 
                 CollectionAssert.AreEqual(expected, actual);
@@ -2908,7 +2967,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     .Where(set => set.AreEqual(row => row.SubContainerId, expected.First().SubContainerId))
                     .Sort(set => set.OrderByDescending(row => row.Name));
 
-                var actualDesc = (await target.SelectEntitiesAsync(itemSelectionDesc).ConfigureAwait(false)).ToList();
+                var actualDesc = new List<DomainAggregateRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(itemSelectionDesc, cancellationToken).ConfigureAwait(false))
+                {
+                    actualDesc.Add(item);
+                }
+
                 Assert.AreEqual(
                     expectedDesc.First(),
                     actualDesc.First(),
@@ -2931,6 +2996,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             FieldRow expected;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -2940,14 +3006,15 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = "Mah Field Description"
                 };
 
-                await target.InsertAsync(expected).ConfigureAwait(false);
+                await target.InsertAsync(expected, cancellationToken).ConfigureAwait(false);
             }
 
             // New context again
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var actual = await target.FirstOrDefaultAsync(
-                                     Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)))
+                                     Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)),
+                                     cancellationToken)
                                  .ConfigureAwait(false);
 
                 Assert.IsNotNull(actual);
@@ -2967,6 +3034,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task FirstOrDefaultAsync_ExistingDomainAggregate_ExpectedPropertiesAreNull()
         {
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             DomainAggregateRow expected;
 
@@ -2977,7 +3045,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Name = $"UNIT_TEST:TopContainer2-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(topContainer2).ConfigureAwait(false);
+                await target.InsertAsync(topContainer2, cancellationToken).ConfigureAwait(false);
 
                 var subContainerA = new SubContainerRow
                 {
@@ -2986,7 +3054,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TopContainerId = topContainer2.TopContainerId
                 };
 
-                await target.InsertAsync(subContainerA).ConfigureAwait(false);
+                await target.InsertAsync(subContainerA, cancellationToken).ConfigureAwait(false);
 
                 var categoryAttribute20 = new CategoryAttributeRow
                 {
@@ -2995,7 +3063,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     IsSystem = false
                 };
 
-                await target.InsertAsync(categoryAttribute20).ConfigureAwait(false);
+                await target.InsertAsync(categoryAttribute20, cancellationToken).ConfigureAwait(false);
 
                 var timBobIdentity = new DomainIdentityRow
                 {
@@ -3004,7 +3072,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
+                await target.InsertAsync(timBobIdentity, cancellationToken).ConfigureAwait(false);
 
                 var fooBarIdentity = new DomainIdentityRow
                 {
@@ -3013,7 +3081,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:foobar@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(fooBarIdentity).ConfigureAwait(false);
+                await target.InsertAsync(fooBarIdentity, cancellationToken).ConfigureAwait(false);
 
                 var otherAggregate10 = new OtherAggregateRow
                 {
@@ -3021,14 +3089,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     AggregateOptionTypeId = 3
                 };
 
-                await target.InsertAsync(otherAggregate10).ConfigureAwait(false);
+                await target.InsertAsync(otherAggregate10, cancellationToken).ConfigureAwait(false);
 
                 var template23 = new TemplateRow
                 {
                     Name = $"UNIT_TEST:Template23-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(template23).ConfigureAwait(false);
+                await target.InsertAsync(template23, cancellationToken).ConfigureAwait(false);
 
                 expected = new DomainAggregateRow
                 {
@@ -3048,7 +3116,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     TemplateId = template23.TemplateId
                 };
 
-                await target.InsertAsync(expected).ConfigureAwait(false);
+                await target.InsertAsync(expected, cancellationToken).ConfigureAwait(false);
             }
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
@@ -3066,7 +3134,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                             .InnerJoin(row => row.TemplateId, row => row.Template.TemplateId))
                     .Where(set => set.AreEqual(row => row.DomainAggregateId, expected.DomainAggregateId));
 
-                var actual = await target.FirstOrDefaultAsync(itemSelection).ConfigureAwait(false);
+                var actual = await target.FirstOrDefaultAsync(itemSelection, cancellationToken).ConfigureAwait(false);
 
                 Assert.IsNotNull(actual);
                 Assert.IsNull(actual.AggregateOption);
@@ -3085,10 +3153,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task FirstOrDefaultAsync_NonExistentField_ReturnsNull()
         {
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var actual = await target.FirstOrDefaultAsync(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, -13)))
+                var actual = await target.FirstOrDefaultAsync(
+                                     Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, -13)),
+                                     cancellationToken)
                                  .ConfigureAwait(false);
 
                 Assert.IsNull(actual);
@@ -3106,6 +3177,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task DynamicFirstOrDefaultAsync_DynamicResults_MatchExpected()
         {
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -3116,13 +3188,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     UniqueIdentifier = $"UNIT_TEST:timbob@unittest.com-{Generator.Next(int.MaxValue)}"
                 };
 
-                await target.InsertAsync(timBobIdentity).ConfigureAwait(false);
+                await target.InsertAsync(timBobIdentity, cancellationToken).ConfigureAwait(false);
 
                 var entitySelection = Query.SelectEntities<DomainIdentityRow>(
                     select => select.Select(row => row.UniqueIdentifier)
                         .Where(set => set.AreEqual(row => row.DomainIdentityId, timBobIdentity.DomainIdentityId)));
 
-                var actual = await target.DynamicFirstOrDefaultAsync(entitySelection).ConfigureAwait(false);
+                var actual = await target.DynamicFirstOrDefaultAsync(entitySelection, cancellationToken).ConfigureAwait(false);
                 Assert.AreEqual(timBobIdentity.UniqueIdentifier, actual.UniqueIdentifier);
             }
         }
@@ -3140,6 +3212,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             FieldRow expected;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -3149,13 +3222,15 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = "Mah Field Description"
                 };
 
-                await target.InsertAsync(expected).ConfigureAwait(false);
+                await target.InsertAsync(expected, cancellationToken).ConfigureAwait(false);
             }
 
             // New context again
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var actual = await target.ContainsAsync(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)))
+                var actual = await target.ContainsAsync(
+                                     Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)),
+                                     cancellationToken)
                                  .ConfigureAwait(false);
 
                 Assert.IsTrue(actual);
@@ -3173,10 +3248,13 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task ContainsAsync_NonExistentField_ReturnsFalse()
         {
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var actual = await target.ContainsAsync(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, -13))).ConfigureAwait(false);
+                var actual = await target.ContainsAsync(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, -13)), cancellationToken)
+                                 .ConfigureAwait(false);
+
                 Assert.IsFalse(actual);
             }
         }
@@ -3194,6 +3272,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             FieldRow expected;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -3203,7 +3282,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = "Mah Field Description"
                 };
 
-                await target.InsertAsync(expected).ConfigureAwait(false);
+                await target.InsertAsync(expected, cancellationToken).ConfigureAwait(false);
             }
 
             Assert.AreNotEqual(0, expected.FieldId);
@@ -3211,11 +3290,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
             // New context again
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                await target.DeleteAsync(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)))
+                await target.DeleteAsync(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)), cancellationToken)
                     .ConfigureAwait(false);
 
-                var actual = await target.ContainsAsync(Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)))
+                var actual = await target.ContainsAsync(
+                                     Query.From<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, expected.FieldId)),
+                                     cancellationToken)
                                  .ConfigureAwait(false);
+
                 Assert.IsFalse(actual);
             }
         }
@@ -3233,6 +3315,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             var description = $"Mah Field Description {nameof(this.Delete_ExistingSetOfFields_ItemsDeleted)}";
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -3242,7 +3325,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = description
                 };
 
-                await target.InsertAsync(field1).ConfigureAwait(false);
+                await target.InsertAsync(field1, cancellationToken).ConfigureAwait(false);
 
                 var field2 = new FieldRow
                 {
@@ -3250,7 +3333,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = description
                 };
 
-                await target.InsertAsync(field2).ConfigureAwait(false);
+                await target.InsertAsync(field2, cancellationToken).ConfigureAwait(false);
 
                 var field3 = new FieldRow
                 {
@@ -3258,19 +3341,25 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = description
                 };
 
-                await target.InsertAsync(field3).ConfigureAwait(false);
+                await target.InsertAsync(field3, cancellationToken).ConfigureAwait(false);
             }
 
             // New context again
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var itemSelection = Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Description, description));
-                var affected = await target.DeleteAsync(itemSelection).ConfigureAwait(false);
+                var affected = await target.DeleteAsync(itemSelection, cancellationToken).ConfigureAwait(false);
 
                 Assert.AreEqual(3, affected);
 
-                var actual = await target.SelectEntitiesAsync(itemSelection).ConfigureAwait(false);
-                Assert.AreEqual(0, actual.Count());
+                var actual = new List<FieldRow>();
+
+                await foreach (var item in target.SelectEntitiesAsync(itemSelection, cancellationToken).ConfigureAwait(false))
+                {
+                    actual.Add(item);
+                }
+
+                Assert.AreEqual(0, actual.Count);
             }
         }
 
@@ -3285,10 +3374,11 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task InsertAsync_NewField_MatchesExpected()
         {
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var transaction = await target.BeginTransactionAsync().ConfigureAwait(false);
+                var transaction = await target.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
                 try
                 {
@@ -3303,7 +3393,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 }
                 finally
                 {
-                    await transaction.RollbackAsync().ConfigureAwait(false);
+                    await transaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -3321,6 +3411,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             FieldRow item;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -3330,7 +3421,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = "Mah Field Description"
                 };
 
-                await target.InsertAsync(item).ConfigureAwait(false);
+                await target.InsertAsync(item, cancellationToken).ConfigureAwait(false);
             }
 
             // Completely new context to test that caching is not involved.
@@ -3344,13 +3435,15 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     Description = "Mah Field Description The Second of That Name"
                 };
 
-                await target.UpdateSingleAsync(expected).ConfigureAwait(false);
+                await target.UpdateSingleAsync(expected, cancellationToken).ConfigureAwait(false);
             }
 
             // New context again
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
-                var actual = await target.FirstOrDefaultAsync(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, item.FieldId)))
+                var actual = await target.FirstOrDefaultAsync(
+                                     Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.FieldId, item.FieldId)),
+                                     cancellationToken)
                                  .ConfigureAwait(false);
 
                 Assert.IsNotNull(actual);
@@ -3372,6 +3465,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             DomainIdentityRow item;
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             var uniqueIdentifier = Guid.NewGuid().ToString();
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
@@ -3401,14 +3495,15 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     LastName = "New Last Name"
                 };
 
-                await target.UpdateSingleAsync(expected, row => row.FirstName, row => row.LastName).ConfigureAwait(false);
+                await target.UpdateSingleAsync(expected, cancellationToken, row => row.FirstName, row => row.LastName).ConfigureAwait(false);
             }
 
             // New context again
             await using (var target = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var actual = await target.FirstOrDefaultAsync(
-                                     Query.Select<DomainIdentityRow>().Where(set => set.AreEqual(row => row.DomainIdentityId, item.DomainIdentityId)))
+                                     Query.Select<DomainIdentityRow>().Where(set => set.AreEqual(row => row.DomainIdentityId, item.DomainIdentityId)),
+                                     cancellationToken)
                                  .ConfigureAwait(false);
 
                 Assert.IsNotNull(actual);

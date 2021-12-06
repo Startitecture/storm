@@ -6,6 +6,7 @@ namespace Startitecture.Orm.Common
 {
     using System;
     using System.Data;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -36,10 +37,13 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Commits the underlying transaction.
         /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The <see cref="Task"/> that is committing the transaction.
         /// </returns>
-        Task CommitAsync();
+        Task CommitAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Rolls back the underlying transaction.
@@ -49,9 +53,12 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Rolls back the underlying transaction.
         /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The <see cref="Task"/> that is rolling back the transaction.
         /// </returns>
-        Task RollbackAsync();
+        Task RollbackAsync(CancellationToken cancellationToken);
     }
 }

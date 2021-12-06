@@ -11,6 +11,8 @@ namespace Startitecture.Orm.PostgreSql
 {
     using System;
     using System.Collections.Generic;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Startitecture.Orm.Common;
@@ -43,23 +45,6 @@ namespace Startitecture.Orm.PostgreSql
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PostgreSqlRepository{TModel,TEntity}"/> class.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        /// <param name="selectionComparer">
-        /// The selection comparer.
-        /// </param>
-        public PostgreSqlRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper, IComparer<TEntity> selectionComparer)
-            : base(repositoryProvider, entityMapper, selectionComparer)
-        {
-        }
-
-        /// <summary>
         /// Inserts a list of items into the repository.
         /// </summary>
         /// <param name="items">
@@ -87,25 +72,8 @@ namespace Startitecture.Orm.PostgreSql
             jsonInsert.Execute(items);
         }
 
-        /// <summary>
-        /// Inserts a list of items into the repository.
-        /// </summary>
-        /// <param name="items">
-        /// The items to insert.
-        /// </param>
-        /// <param name="insertAction">
-        /// The insert action to take, or null to take the default insert action.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to insert..
-        /// </typeparam>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> is null.
-        /// </exception>
-        /// <returns>
-        /// The <see cref="Task"/> that is performing the insert.
-        /// </returns>
-        public async Task InsertAsync<TItem>(IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
+        /// <inheritdoc/>
+        public async Task InsertAsync<TItem>(IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction, CancellationToken cancellationToken)
         {
             if (items == null)
             {
@@ -115,7 +83,7 @@ namespace Startitecture.Orm.PostgreSql
             var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
             var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
-            await jsonInsert.ExecuteAsync(items).ConfigureAwait(false);
+            await jsonInsert.ExecuteAsync(items, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -152,27 +120,11 @@ namespace Startitecture.Orm.PostgreSql
             return this.EntityMapper.Map<List<TItem>>(insertedEntities);
         }
 
-        /// <summary>
-        /// Inserts a list of items into the repository.
-        /// </summary>
-        /// <param name="items">
-        /// The items to insert.
-        /// </param>
-        /// <param name="insertAction">
-        /// The insert action to take, or null to take the default insert action.
-        /// </param>
-        /// <typeparam name="TItem">
-        /// The type of item to insert..
-        /// </typeparam>
-        /// <exception cref="ArgumentNullException">
-        /// <paramref name="items"/> is null.
-        /// </exception>
-        /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
-        /// </returns>
-        public async Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
+        /// <inheritdoc/>
+        public async IAsyncEnumerable<TItem> InsertForResultsAsync<TItem>(
             IEnumerable<TItem> items,
-            Action<JsonInsert<TEntity>> insertAction)
+            Action<JsonInsert<TEntity>> insertAction,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             if (items == null)
             {
@@ -182,8 +134,11 @@ namespace Startitecture.Orm.PostgreSql
             var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
             var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
-            var insertedEntities = await jsonInsert.ExecuteForResultsAsync(items).ConfigureAwait(false);
-            return this.EntityMapper.Map<List<TItem>>(insertedEntities);
+
+            await foreach (var item in jsonInsert.ExecuteForResultsAsync(items, cancellationToken).ConfigureAwait(false))
+            {
+                yield return this.EntityMapper.Map<TItem>(item);
+            }
         }
     }
 }

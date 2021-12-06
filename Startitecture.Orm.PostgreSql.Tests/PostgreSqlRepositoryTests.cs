@@ -12,6 +12,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using global::AutoMapper;
@@ -688,13 +689,17 @@ namespace Startitecture.Orm.PostgreSql.Tests
                              };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
-                await fieldRepository.DeleteSelectionAsync(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%"))).ConfigureAwait(false);
+                await fieldRepository.DeleteSelectionAsync(
+                        Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%")),
+                        cancellationToken)
+                    .ConfigureAwait(false);
 
                 var fieldRows = fields.Select(
                     field => new FieldRow
@@ -703,10 +708,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         Description = field.Description
                     });
 
-                await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
+                await using (var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
                 {
-                    await fieldRepository.InsertAsync(fieldRows, null).ConfigureAwait(false); // Nothing special here
-                    await transaction.CommitAsync().ConfigureAwait(false);
+                    await fieldRepository.InsertAsync(fieldRows, null, cancellationToken).ConfigureAwait(false); // Nothing special here
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -775,13 +780,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
                              };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
                 var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
 
                 // Delete the existing rows.
-                await fieldRepository.DeleteSelectionAsync(Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%")))
+                await fieldRepository.DeleteSelectionAsync(
+                        Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%")),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 var fieldRows = fields.Select(
@@ -791,16 +799,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                  Description = field.Description
                              });
 
-                await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
+                await using (var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
                 {
-                    var actual = await fieldRepository.InsertForResultsAsync(fieldRows, null).ConfigureAwait(false);
-
-                    foreach (var fieldRow in actual)
+                    await foreach (var fieldRow in fieldRepository.InsertForResultsAsync(fieldRows, null, cancellationToken).ConfigureAwait(false))
                     {
                         Assert.AreNotEqual(0, fieldRow.FieldId);
                     }
 
-                    await transaction.CommitAsync().ConfigureAwait(false);
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -816,6 +822,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
         public async Task InsertForResultsAsync_GenericSubmission_MatchesExpected()
         {
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDbPg")))
             {
@@ -823,14 +830,17 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var domainIdentity = await identityRepository.FirstOrDefaultAsync(
                                              Query.From<DomainIdentity>()
-                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)))
-                                         .ConfigureAwait(false) ?? await identityRepository.SaveAsync(
+                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)),
+                                             cancellationToken)
+                                         .ConfigureAwait(false)
+                                     ?? await identityRepository.SaveAsync(
                                              new DomainIdentity(Environment.UserName)
                                              {
                                                  FirstName = "King",
                                                  MiddleName = "T.",
                                                  LastName = "Animal"
-                                             })
+                                             },
+                                             cancellationToken)
                                          .ConfigureAwait(false);
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
@@ -897,9 +907,15 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
-                var existingFields = await fieldRepository.SelectEntitiesAsync(
-                                             new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues)))
-                                         .ConfigureAwait(false);
+                var existingFields = new List<Field>();
+
+                await foreach (var item in fieldRepository.SelectEntitiesAsync(
+                                       new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues)),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    existingFields.Add(item);
+                }
 
                 foreach (var field in existingFields)
                 {
@@ -909,14 +925,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 foreach (var field in fields.Values.Where(field => field.FieldId.HasValue == false))
                 {
-                    await fieldRepository.SaveAsync(field).ConfigureAwait(false);
+                    await fieldRepository.SaveAsync(field, cancellationToken).ConfigureAwait(false);
                 }
 
                 var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
-                await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
+                await using (var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
                 {
-                    await submissionRepository.SaveAsync(expected).ConfigureAwait(false);
+                    await submissionRepository.SaveAsync(expected, cancellationToken).ConfigureAwait(false);
 
                     var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
                     Assert.AreNotEqual(0, submissionId);
@@ -982,35 +998,40 @@ namespace Startitecture.Orm.PostgreSql.Tests
                     await dateElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.DateElement.HasValue),
                             insert => insert.InsertInto(row => row.DateElementId, row => row.Value)
-                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement),
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                     var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
                     await floatElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.FloatElement.HasValue),
                             insert => insert.InsertInto(row => row.FloatElementId, row => row.Value)
-                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement),
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                     var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
                     await integerElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.IntegerElement.HasValue),
                             insert => insert.InsertInto(row => row.IntegerElementId, row => row.Value)
-                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement),
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                     var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
                     await moneyElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.MoneyElement.HasValue),
                             insert => insert.InsertInto(row => row.MoneyElementId, row => row.Value)
-                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement),
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                     var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
                     await textElementRepository.InsertAsync(
                             elementsList.Values.Where(row => row.TextElement != null),
                             insert => insert.InsertInto(row => row.TextElementId, row => row.Value)
-                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement))
+                                .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement),
+                            cancellationToken)
                         .ConfigureAwait(false);
 
                     // Attach the values to the submission
@@ -1022,8 +1043,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                                          };
 
                     var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                    await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
-                    await transaction.CommitAsync().ConfigureAwait(false);
+                    await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null, cancellationToken).ConfigureAwait(false);
+                    await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -1081,6 +1102,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
             };
 
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
@@ -1090,27 +1112,35 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // Set up the domain identity, not part of our validity testing.
                 var identityRepository = new PostgreSqlRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = await identityRepository.FirstOrDefaultAsync(
-                                         Query.From<DomainIdentity>()
-                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName))).ConfigureAwait(false)
+                                             Query.From<DomainIdentity>()
+                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)),
+                                             cancellationToken)
+                                         .ConfigureAwait(false)
                                      ?? await identityRepository.SaveAsync(
-                                         new DomainIdentity(Environment.UserName)
-                                         {
-                                             FirstName = "King",
-                                             MiddleName = "T.",
-                                             LastName = "Animal"
-                                         }).ConfigureAwait(false);
+                                             new DomainIdentity(Environment.UserName)
+                                             {
+                                                 FirstName = "King",
+                                                 MiddleName = "T.",
+                                                 LastName = "Animal"
+                                             },
+                                             cancellationToken)
+                                         .ConfigureAwait(false);
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = await identityRepository.FirstOrDefaultAsync(
-                                      Query.From<DomainIdentity>()
-                                          .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2))).ConfigureAwait(false)
+                                          Query.From<DomainIdentity>()
+                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)),
+                                          cancellationToken)
+                                      .ConfigureAwait(false)
                                   ?? await identityRepository.SaveAsync(
-                                      new DomainIdentity(domainIdentifier2)
-                                      {
-                                          FirstName = "Foo",
-                                          MiddleName = "J.",
-                                          LastName = "Bar"
-                                      }).ConfigureAwait(false);
+                                          new DomainIdentity(domainIdentifier2)
+                                          {
+                                              FirstName = "Foo",
+                                              MiddleName = "J.",
+                                              LastName = "Bar"
+                                          },
+                                          cancellationToken)
+                                      .ConfigureAwait(false);
 
                 // We will add to this submission later.
                 baselineSubmission = new GenericSubmission("My MERGE Submission", domainIdentity);
@@ -1120,7 +1150,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 baselineSubmission.SetValue(yearlyWage, 72150.35m); // gonna get updated so lets check that this value got scrapped
                 baselineSubmission.Submit();
 
-                await this.MergeSubmissionAsync(baselineSubmission, provider).ConfigureAwait(false);
+                await this.MergeSubmissionAsync(baselineSubmission, provider, cancellationToken).ConfigureAwait(false);
             }
 
             Assert.IsTrue(baselineSubmission.GenericSubmissionId.HasValue);
@@ -1154,28 +1184,37 @@ namespace Startitecture.Orm.PostgreSql.Tests
 
                 // Get rid of all the previous fields.
                 await fieldValueRepository.DeleteSelectionAsync(
-                    Query.Select<FieldValueRow>()
-                        .Where(
-                            set => set.Include(
-                                row => row.FieldValueId,
-                                baselineSubmission.SubmissionValues.Select(value => value.FieldValueId).ToArray()))).ConfigureAwait(false);
+                        Query.Select<FieldValueRow>()
+                            .Where(
+                                set => set.Include(
+                                    row => row.FieldValueId,
+                                    baselineSubmission.SubmissionValues.Select(value => value.FieldValueId).ToArray())),
+                        cancellationToken)
+                    .ConfigureAwait(false);
 
-                await this.MergeSubmissionAsync(expected, provider).ConfigureAwait(false);
+                await this.MergeSubmissionAsync(expected, provider, cancellationToken).ConfigureAwait(false);
 
                 var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-                actual = await submissionRepository.FirstOrDefaultAsync(expected.GenericSubmissionId).ConfigureAwait(false);
+                actual = await submissionRepository.FirstOrDefaultAsync(expected.GenericSubmissionId, cancellationToken).ConfigureAwait(false);
 
                 var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                var values = (await genericSubmissionValueRepository.SelectEntitiesAsync(
-                                  Query.Select<GenericSubmissionValueRow>()
-                                      .From(
-                                          set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
-                                              .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
-                                              .InnerJoin(
-                                                  row => row.FieldValue.LastModifiedByDomainIdentifierId,
-                                                  row => row.FieldValue.LastModifiedBy.DomainIdentityId))
-                                      .Where(set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault()))).ConfigureAwait(false))
-                    .ToDictionary(value => value.FieldValueId.GetValueOrDefault(), value => value);
+                var values = new Dictionary<long, FieldValue>();
+
+                await foreach (var item in genericSubmissionValueRepository.SelectEntitiesAsync(
+                                       Query.Select<GenericSubmissionValueRow>()
+                                           .From(
+                                               set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
+                                                   .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
+                                                   .InnerJoin(
+                                                       row => row.FieldValue.LastModifiedByDomainIdentifierId,
+                                                       row => row.FieldValue.LastModifiedBy.DomainIdentityId))
+                                           .Where(
+                                               set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    values.Add(item.FieldValueId.GetValueOrDefault(), item);
+                }
 
                 actual.Load(values.Values);
 
@@ -1392,7 +1431,10 @@ namespace Startitecture.Orm.PostgreSql.Tests
         /// <param name="provider">
         /// The provider.
         /// </param>
-        private async Task MergeSubmissionAsync(GenericSubmission submission, IRepositoryProvider provider)
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        private async Task MergeSubmissionAsync(GenericSubmission submission, IRepositoryProvider provider, CancellationToken cancellationToken)
         {
             // Merge our existing fields
             var fields = submission.SubmissionValues.Select(value => value.Field).Distinct().ToList();
@@ -1403,15 +1445,21 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                  Description = f.Description
                              };
 
-            await using (var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false))
+            await using (var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false))
             {
                 var fieldRepository = new PostgreSqlRepository<Field, FieldRow>(provider, this.mapper);
-                var mergedFields = (await fieldRepository.InsertForResultsAsync(
-                                            fieldItems,
-                                            insert => insert.OnConflict(row => row.Name)
-                                                .Upsert(row => row.Description)
-                                                .Returning(row => row.FieldId, row => row.Name, row => row.Description))
-                                        .ConfigureAwait(false)).ToDictionary(row => row.Name, row => row);
+                var mergedFields = new Dictionary<string, FieldRow>();
+
+                await foreach (var item in fieldRepository.InsertForResultsAsync(
+                                       fieldItems,
+                                       insert => insert.OnConflict(row => row.Name)
+                                           .Upsert(row => row.Description)
+                                           .Returning(row => row.FieldId, row => row.Name, row => row.Description),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    mergedFields.Add(item.Name, item);
+                }
 
                 foreach (var field in fields)
                 {
@@ -1428,7 +1476,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 }
 
                 var submissionRepository = new PostgreSqlRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-                await submissionRepository.SaveAsync(submission).ConfigureAwait(false);
+                await submissionRepository.SaveAsync(submission, cancellationToken).ConfigureAwait(false);
 
                 // Could be mapped as well.
                 var fieldValues = from v in submission.SubmissionValues
@@ -1442,16 +1490,22 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
                 // only inserted rows matched back to their original fields.
                 var fieldValueRepository = new PostgreSqlRepository<FieldValue, FieldValueRow>(provider, this.mapper);
-                var mergedFieldValues = (await fieldValueRepository.InsertForResultsAsync(
-                                                 fieldValues,
-                                                 insert => insert.OnConflict(row => row.FieldValueId)
-                                                     .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
-                                                     .Returning(
-                                                         row => row.FieldValueId,
-                                                         row => row.FieldId,
-                                                         row => row.LastModifiedByDomainIdentifierId,
-                                                         row => row.LastModifiedTime))
-                                             .ConfigureAwait(false)).ToDictionary(row => row.FieldId, row => row);
+                var mergedFieldValues = new Dictionary<int, FieldValueTableTypeRow>();
+
+                await foreach (var item in fieldValueRepository.InsertForResultsAsync(
+                                       fieldValues,
+                                       insert => insert.OnConflict(row => row.FieldValueId)
+                                           .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
+                                           .Returning(
+                                               row => row.FieldValueId,
+                                               row => row.FieldId,
+                                               row => row.LastModifiedByDomainIdentifierId,
+                                               row => row.LastModifiedTime),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    mergedFieldValues.Add(item.FieldId, item);
+                }
 
                 Assert.IsTrue(mergedFieldValues.Values.All(row => row.FieldValueId > 0));
 
@@ -1479,14 +1533,18 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                             }).ToList();
 
                 var fieldValueElementRepository = new PostgreSqlRepository<FieldValueElement, FieldValueElementRow>(provider, this.mapper);
-                var mergedValueElements = (await fieldValueElementRepository.InsertForResultsAsync(
-                                                   valueElements,
-                                                   insert => insert.OnConflict(row => row.FieldValueElementId)
-                                                       .Upsert(row => row.Order)
-                                                       .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order))
-                                               .ConfigureAwait(false)).ToDictionary(
-                    row => new Tuple<long, int>(row.FieldValueId, row.Order),
-                    row => row);
+                var mergedValueElements = new Dictionary<Tuple<long, int>, FieldValueElementPgFlatRow>();
+
+                await foreach (var item in fieldValueElementRepository.InsertForResultsAsync(
+                                       valueElements,
+                                       insert => insert.OnConflict(row => row.FieldValueElementId)
+                                           .Upsert(row => row.Order)
+                                           .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    mergedValueElements.Add(new Tuple<long, int>(item.FieldValueId, item.Order), item);
+                }
 
                 foreach (var element in valueElements)
                 {
@@ -1501,7 +1559,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         valueElements.Where(row => row.DateElement.HasValue),
                         insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement)
                             .OnConflict(row => row.DateElementId)
-                            .Upsert(row => row.Value))
+                            .Upsert(row => row.Value),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 var floatElementRepository = new PostgreSqlRepository<FieldValueElement, FloatElementRow>(provider, this.mapper);
@@ -1509,7 +1568,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         valueElements.Where(row => row.FloatElement.HasValue),
                         insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement)
                             .OnConflict(row => row.FloatElementId)
-                            .Upsert(row => row.Value))
+                            .Upsert(row => row.Value),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 var integerElementRepository = new PostgreSqlRepository<FieldValueElement, IntegerElementRow>(provider, this.mapper);
@@ -1517,7 +1577,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         valueElements.Where(row => row.IntegerElement.HasValue),
                         insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement)
                             .OnConflict(row => row.IntegerElementId)
-                            .Upsert(row => row.Value))
+                            .Upsert(row => row.Value),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 var moneyElementRepository = new PostgreSqlRepository<FieldValueElement, MoneyElementRow>(provider, this.mapper);
@@ -1525,7 +1586,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         valueElements.Where(row => row.MoneyElement.HasValue),
                         insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement)
                             .OnConflict(row => row.MoneyElementId)
-                            .Upsert(row => row.Value))
+                            .Upsert(row => row.Value),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 var textElementRepository = new PostgreSqlRepository<FieldValueElement, TextElementRow>(provider, this.mapper);
@@ -1533,7 +1595,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                         valueElements.Where(row => row.TextElement != null),
                         insert => insert.From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement)
                             .OnConflict(row => row.TextElementId)
-                            .Upsert(row => row.Value))
+                            .Upsert(row => row.Value),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
                 // Attach the values to the submission
@@ -1545,8 +1608,8 @@ namespace Startitecture.Orm.PostgreSql.Tests
                                                      };
 
                 var genericSubmissionValueRepository = new PostgreSqlRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null).ConfigureAwait(false);
-                await transaction.CommitAsync().ConfigureAwait(false);
+                await genericSubmissionValueRepository.InsertAsync(genericValueSubmissions, null, cancellationToken).ConfigureAwait(false);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
         }
     }

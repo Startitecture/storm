@@ -10,6 +10,7 @@ namespace Startitecture.Orm.Mapper.Tests
     using System.Data.Common;
     using System.Diagnostics;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Microsoft.Data.SqlClient;
@@ -128,27 +129,40 @@ namespace Startitecture.Orm.Mapper.Tests
         [TestCategory("Integration")]
         public async Task QueryAsync_SqlQuery_ExecutesQueryWithExpectedResults()
         {
-            var providerName = "System.Data.SqlClient";
+            const string ProviderName = "System.Data.SqlClient";
 
 #if !NET472
-            if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, providerName, StringComparison.Ordinal)) == false)
+            if (DbProviderFactories.GetProviderInvariantNames().Any(s => string.Equals(s, ProviderName, StringComparison.Ordinal)) == false)
             {
-                Trace.WriteLine($"Registering {providerName} factory");
-                DbProviderFactories.RegisterFactory(providerName, SqlClientFactory.Instance);
+                Trace.WriteLine($"Registering {ProviderName} factory");
+                DbProviderFactories.RegisterFactory(ProviderName, SqlClientFactory.Instance);
             }
 #endif
             var connectionString = ConfigurationRoot.GetConnectionString("MasterDatabase");
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             var repositoryAdapter = new TransactSqlAdapter(definitionProvider);
 
-            await using (var target = new DatabaseContext(connectionString, providerName, repositoryAdapter))
+            await using (var target = new DatabaseContext(connectionString, ProviderName, repositoryAdapter))
             {
-                var tables = (await target.QueryAsync<dynamic>("SELECT * FROM sys.tables WHERE [type] = @0", 'U').ConfigureAwait(false)).ToList();
-                Assert.IsTrue(tables.Any());
-                Assert.IsNotNull(tables.FirstOrDefault()?.name);
-                Assert.IsTrue(tables.FirstOrDefault()?.object_id > 0);
+                var tables = target.QueryAsync<dynamic>("SELECT * FROM sys.tables WHERE [type] = @0", CancellationToken.None, 'U')
+                    .ConfigureAwait(false);
+                var count = 0;
 
-                var tableCount = await target.ExecuteScalarAsync<int>("SELECT COUNT(1) FROM sys.tables WHERE [type] = @0", 'U').ConfigureAwait(false);
+                await foreach (var table in tables)
+                {
+                    Assert.IsNotNull(table.name);
+                    Assert.IsTrue(table.object_id > 0);
+                    count++;
+                }
+
+                Assert.AreNotEqual(0, count);
+
+                var tableCount = await target.ExecuteScalarAsync<int>(
+                                         "SELECT COUNT(1) FROM sys.tables WHERE [type] = @0",
+                                         CancellationToken.None,
+                                         'U')
+                                     .ConfigureAwait(false);
+
                 Assert.AreNotEqual(0, tableCount);
             }
         }
@@ -169,8 +183,9 @@ namespace Startitecture.Orm.Mapper.Tests
             await using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
             await using (var database = new DatabaseContext(connection, statementCompiler))
             {
-                await database.OpenSharedConnectionAsync().ConfigureAwait(false);
-                await database.ChangeDatabaseAsync("master").ConfigureAwait(false);
+                var cancellationToken = CancellationToken.None;
+                await database.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+                await database.ChangeDatabaseAsync("master", cancellationToken).ConfigureAwait(false);
                 Assert.AreEqual("master", database.Connection.Database);
             }
         }

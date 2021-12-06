@@ -16,6 +16,8 @@ namespace Startitecture.Orm.Common
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -37,11 +39,6 @@ namespace Startitecture.Orm.Common
         where TEntity : class, new()
     {
         /// <summary>
-        /// The selection comparer.
-        /// </summary>
-        private readonly IComparer<TEntity> selectionComparer;
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ReadOnlyRepository{TModel,TEntity}"/> class.
         /// </summary>
         /// <param name="repositoryProvider">
@@ -49,33 +46,14 @@ namespace Startitecture.Orm.Common
         /// </param>
         /// <param name="entityMapper">
         /// The entity mapper.
-        /// </param>
-        public ReadOnlyRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
-            : this(repositoryProvider, entityMapper, null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ReadOnlyRepository{TModel,TEntity}"/> class.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider for this repository.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        /// <param name="selectionComparer">
-        /// The selection comparer for ordering data items from the repository after being selected from the database.
         /// </param>
         public ReadOnlyRepository(
             [NotNull] IRepositoryProvider repositoryProvider,
-            [NotNull] IEntityMapper entityMapper,
-            IComparer<TEntity> selectionComparer)
+            [NotNull] IEntityMapper entityMapper)
         {
             // The entity mapper, and its resolution context, is intended to last only for the lifetime of the repository.
             this.EntityMapper = entityMapper ?? throw new ArgumentNullException(nameof(entityMapper));
             this.RepositoryProvider = repositoryProvider ?? throw new ArgumentNullException(nameof(repositoryProvider));
-            this.selectionComparer = selectionComparer;
         }
 
         /// <summary>
@@ -101,7 +79,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<bool> ContainsAsync<TItem>(TItem candidate)
+        public async Task<bool> ContainsAsync<TItem>(TItem candidate, CancellationToken cancellationToken)
         {
             if (Evaluate.IsNull(candidate))
             {
@@ -109,7 +87,7 @@ namespace Startitecture.Orm.Common
             }
 
             var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(candidate, set));
-            return await this.RepositoryProvider.ContainsAsync(entitySet).ConfigureAwait(false);
+            return await this.RepositoryProvider.ContainsAsync(entitySet, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -124,14 +102,15 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<bool> ContainsAsync<TItem>(EntitySet<TItem> selection)
+        public async Task<bool> ContainsAsync<TItem>(EntitySet<TItem> selection, CancellationToken cancellationToken)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return await this.RepositoryProvider.ContainsAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>()).ConfigureAwait(false);
+            return await this.RepositoryProvider.ContainsAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>(), cancellationToken)
+                       .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -152,12 +131,12 @@ namespace Startitecture.Orm.Common
                 return default;
             }
 
-            var entity = this.ConstructEntity(dataItem);
+            var entity = this.ConstructModel(dataItem);
             return entity;
         }
 
         /// <inheritdoc />
-        public async Task<TModel> FirstOrDefaultAsync<TItem>(TItem candidate)
+        public async Task<TModel> FirstOrDefaultAsync<TItem>(TItem candidate, CancellationToken cancellationToken)
         {
             if (Evaluate.IsNull(candidate))
             {
@@ -167,14 +146,14 @@ namespace Startitecture.Orm.Common
             var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(candidate, set));
             entitySet.SetDefaultRelations(this.RepositoryProvider.EntityDefinitionProvider);
 
-            var dataItem = await this.RepositoryProvider.FirstOrDefaultAsync(entitySet).ConfigureAwait(false);
+            var dataItem = await this.RepositoryProvider.FirstOrDefaultAsync(entitySet, cancellationToken).ConfigureAwait(false);
 
             if (Evaluate.IsNull(dataItem))
             {
                 return default;
             }
 
-            var entity = this.ConstructEntity(dataItem);
+            var entity = this.ConstructModel(dataItem);
             return entity;
         }
 
@@ -191,14 +170,15 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<TModel> FirstOrDefaultAsync<TItem>(EntitySet<TItem> selection)
+        public async Task<TModel> FirstOrDefaultAsync<TItem>(EntitySet<TItem> selection, CancellationToken cancellationToken)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var entity = await this.RepositoryProvider.FirstOrDefaultAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>())
+            var entity = await this.RepositoryProvider
+                             .FirstOrDefaultAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>(), cancellationToken)
                              .ConfigureAwait(false);
 
             return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
@@ -219,7 +199,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<TModel> FirstOrDefaultAsync(Action<EntitySet<TModel>> defineSet)
+        public async Task<TModel> FirstOrDefaultAsync(Action<EntitySet<TModel>> defineSet, CancellationToken cancellationToken)
         {
             if (defineSet == null)
             {
@@ -228,7 +208,7 @@ namespace Startitecture.Orm.Common
 
             var modelSet = new EntitySet<TModel>();
             defineSet.Invoke(modelSet);
-            var entity = await this.RepositoryProvider.FirstOrDefaultAsync(modelSet.MapSet<TEntity>()).ConfigureAwait(false);
+            var entity = await this.RepositoryProvider.FirstOrDefaultAsync(modelSet.MapSet<TEntity>(), cancellationToken).ConfigureAwait(false);
             return entity != null ? this.EntityMapper.Map<TModel>(entity) : default;
         }
 
@@ -244,15 +224,16 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection)
+        public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection, CancellationToken cancellationToken)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return await this.RepositoryProvider
-                       .DynamicFirstOrDefaultAsync(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>())
+            return await this.RepositoryProvider.DynamicFirstOrDefaultAsync(
+                           selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>(),
+                           cancellationToken)
                        .ConfigureAwait(false);
         }
 
@@ -268,30 +249,36 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<T> GetScalarAsync<T>([NotNull] ISelection selection)
+        public async Task<T> GetScalarAsync<T>([NotNull] ISelection selection, CancellationToken cancellationToken)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return await this.RepositoryProvider.GetScalarAsync<T>(selection).ConfigureAwait(false);
+            return await this.RepositoryProvider.GetScalarAsync<T>(selection, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         public IEnumerable<TModel> SelectAll()
         {
             var exampleSelection = new EntitySelection<TEntity>();
-            var entities = this.RepositoryProvider.SelectEntities(exampleSelection);
-            return this.SelectResults(entities);
+
+            foreach (var item in this.RepositoryProvider.SelectEntities(exampleSelection))
+            {
+                yield return this.ConstructModel(item);
+            }
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<TModel>> SelectAllAsync()
+        public async IAsyncEnumerable<TModel> SelectAllAsync([EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var exampleSelection = new EntitySelection<TEntity>();
-            var entities = await this.RepositoryProvider.SelectEntitiesAsync(exampleSelection).ConfigureAwait(false);
-            return this.SelectResults(entities);
+
+            await foreach (var item in this.RepositoryProvider.SelectEntitiesAsync(exampleSelection, cancellationToken).ConfigureAwait(false))
+            {
+                yield return this.ConstructModel(item);
+            }
         }
 
         /// <inheritdoc />
@@ -302,22 +289,28 @@ namespace Startitecture.Orm.Common
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var entities = this.RepositoryProvider.SelectEntities(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>());
-            return this.SelectResults(entities);
+            foreach (var item in this.RepositoryProvider.SelectEntities(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>()))
+            {
+                yield return this.ConstructModel(item);
+            }
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<TModel>> SelectEntitiesAsync<TItem>(EntitySet<TItem> selection)
+        public async IAsyncEnumerable<TModel> SelectEntitiesAsync<TItem>(
+            EntitySet<TItem> selection,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            var entities = await this.RepositoryProvider.SelectEntitiesAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>())
-                               .ConfigureAwait(false);
-
-            return this.SelectResults(entities);
+            await foreach (var item in this.RepositoryProvider
+                               .SelectEntitiesAsync(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>(), cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                yield return this.ConstructModel(item);
+            }
         }
 
         /// <inheritdoc />
@@ -332,15 +325,22 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<dynamic>> DynamicSelectAsync<TItem>(EntitySelection<TItem> selection)
+        public async IAsyncEnumerable<dynamic> DynamicSelectAsync<TItem>(
+            EntitySelection<TItem> selection,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
-            return await this.RepositoryProvider.DynamicSelectAsync(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>())
-                       .ConfigureAwait(false);
+            await foreach (var item in this.RepositoryProvider.DynamicSelectAsync(
+                                   selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>(),
+                                   cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                yield return item;
+            }
         }
 
         /// <summary>
@@ -352,7 +352,7 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A new instance of the entity.
         /// </returns>
-        protected virtual TModel ConstructEntity(TEntity entity)
+        protected virtual TModel ConstructModel(TEntity entity)
         {
             return this.EntityMapper.Map<TModel>(entity);
         }
@@ -517,7 +517,7 @@ namespace Startitecture.Orm.Common
                         {
                             try
                             {
-                                var value = key.GetType().GetProperty(attribute.PropertyName)?.GetMethod.Invoke(key, null);
+                                var value = key.GetType().GetProperty(attribute.PropertyName)?.GetMethod?.Invoke(key, null);
 
                                 if (value == null)
                                 {
@@ -639,31 +639,6 @@ namespace Startitecture.Orm.Common
                     valueFilterSet.Add(new ValueFilter(new AttributeLocation(expression), FilterType.Equality, valueSet.Value));
                 }
             }
-        }
-
-        /// <summary>
-        /// Selects results and adds them to the cache.
-        /// </summary>
-        /// <param name="entities">
-        /// The data items to select into the results collection.
-        /// </param>
-        /// <returns>
-        /// A collection of entities based on the specified data items.
-        /// </returns>
-        private IEnumerable<TModel> SelectResults(IEnumerable<TEntity> entities)
-        {
-            var results = new List<TModel>();
-
-            // Order the list of data items if desired.
-            var items = this.selectionComparer == null ? entities : entities.OrderBy(x => x, this.selectionComparer);
-
-            foreach (var dataItem in items)
-            {
-                var entity = this.ConstructEntity(dataItem);
-                results.Add(entity);
-            }
-
-            return results;
         }
     }
 }

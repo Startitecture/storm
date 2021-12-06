@@ -7,6 +7,7 @@ namespace Startitecture.Orm.Common
     using System;
     using System.Collections.Generic;
     using System.Data;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -44,10 +45,13 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Opens a connection that will be used for all subsequent queries.
         /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token for the task.
+        /// </param>
         /// <returns>
         /// The <see cref="Task" /> that is opening the connection.
         /// </returns>
-        Task OpenSharedConnectionAsync();
+        Task OpenSharedConnectionAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Starts a transaction in the repository.
@@ -60,10 +64,13 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Starts a transaction in the repository.
         /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The <see cref="IDbTransaction" /> started by the provider.
         /// </returns>
-        Task<ITransactionContext> BeginTransactionAsync();
+        Task<ITransactionContext> BeginTransactionAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Start a transaction in the repository.
@@ -82,10 +89,13 @@ namespace Startitecture.Orm.Common
         /// <param name="isolationLevel">
         /// The isolation level for the transaction.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The <see cref="IDbTransaction" /> started by the provider.
         /// </returns>
-        Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel);
+        Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken);
 
         /// <summary>
         /// Changes the database to the specified <paramref name="databaseName"/>.
@@ -101,8 +111,11 @@ namespace Startitecture.Orm.Common
         /// <param name="databaseName">
         /// The name of the database to change the connection to.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
-        Task ChangeDatabaseAsync(string databaseName);
+        Task ChangeDatabaseAsync(string databaseName, CancellationToken cancellationToken);
 
         /// <summary>
         /// Executes a non-query command.
@@ -124,13 +137,16 @@ namespace Startitecture.Orm.Common
         /// <param name="sql">
         /// The SQL statement to execute.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <param name="args">
         /// Arguments to any embedded parameters in the SQL.
         /// </param>
         /// <returns>
         /// The number of rows affected.
         /// </returns>
-        Task<int> ExecuteAsync(string sql, params object[] args);
+        Task<int> ExecuteAsync(string sql, CancellationToken cancellationToken, params object[] args);
 
         /// <summary>
         /// Executes a query and return the first column of the first row in the result set.
@@ -158,13 +174,16 @@ namespace Startitecture.Orm.Common
         /// <param name="sql">
         /// The SQL query to execute.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <param name="args">
         /// Arguments to any embedded parameters in the SQL.
         /// </param>
         /// <returns>
         /// The scalar value cast to <typeparamref name="T" />.
         /// </returns>
-        Task<T> ExecuteScalarAsync<T>(string sql, params object[] args);
+        Task<T> ExecuteScalarAsync<T>(string sql, CancellationToken cancellationToken, params object[] args);
 
         /// <summary>
         /// Runs an SQL query, returning the results as an IEnumerable collection.
@@ -196,6 +215,9 @@ namespace Startitecture.Orm.Common
         /// <param name="sql">
         /// The SQL query.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <param name="args">
         /// Arguments to any embedded parameters in the SQL statement.
         /// </param>
@@ -206,7 +228,7 @@ namespace Startitecture.Orm.Common
         /// For some DB providers, care should be taken to not start a new Query before finishing with and disposing the previous one.
         /// In cases where this is an issue, consider using Fetch which returns the results as a List rather than an IEnumerable.
         /// </remarks>
-        Task<IEnumerable<T>> QueryAsync<T>(string sql, params object[] args);
+        IAsyncEnumerable<T> QueryAsync<T>(string sql, CancellationToken cancellationToken, params object[] args);
 
         /// <summary>
         /// Gets a value mapper for the specified types.

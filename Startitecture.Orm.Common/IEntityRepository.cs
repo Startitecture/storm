@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Common
 {
     using System;
     using System.Linq.Expressions;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Startitecture.Orm.Model;
@@ -40,10 +41,13 @@ namespace Startitecture.Orm.Common
         /// <param name="model">
         /// The domain model to save.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The saved <typeparamref name="TModel"/> instance.
         /// </returns>
-        Task<TModel> SaveAsync(TModel model);
+        Task<TModel> SaveAsync(TModel model, CancellationToken cancellationToken);
 
         /// <summary>
         /// Updates a set of entities in the repository.
@@ -68,6 +72,9 @@ namespace Startitecture.Orm.Common
         /// <param name="updateSet">
         /// The update set that defines the entities and entity attributes to update.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of entity to update.
         /// </typeparam>
@@ -77,7 +84,7 @@ namespace Startitecture.Orm.Common
         /// <remarks>
         /// The number of affected entities can include rows affected by triggers on the target table.
         /// </remarks>
-        Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet);
+        Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet, CancellationToken cancellationToken);
 
         /// <summary>
         /// Updates a selection of entities in the repository.
@@ -114,13 +121,20 @@ namespace Startitecture.Orm.Common
         /// <param name="source">
         /// The item that contains the update.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <param name="setExpressions">
         /// A optional set of expressions that explicitly select the columns to update. If empty, all non-key columns are updated.
         /// </param>
         /// <returns>
         /// The <see cref="Task"/> that is performing the update.
         /// </returns>
-        Task UpdateSingleAsync<TKey, TItem>(TKey key, TItem source, params Expression<Func<TItem, object>>[] setExpressions);
+        Task UpdateSingleAsync<TKey, TItem>(
+            TKey key,
+            TItem source,
+            CancellationToken cancellationToken,
+            params Expression<Func<TItem, object>>[] setExpressions);
 
         /// <summary>
         /// Deletes a single item in the database.
@@ -145,10 +159,13 @@ namespace Startitecture.Orm.Common
         /// <param name="example">
         /// The example item.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The number of items affected as an <see cref="int"/>.
         /// </returns>
-        Task<int> DeleteAsync<TItem>(TItem example);
+        Task<int> DeleteAsync<TItem>(TItem example, CancellationToken cancellationToken);
 
         /// <summary>
         /// Delete entities matching the set of <typeparamref name="TModel"/> models in <paramref name="defineSet"/>.
@@ -167,10 +184,13 @@ namespace Startitecture.Orm.Common
         /// <param name="defineSet">
         /// Define the set of entities to delete.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The number of items affected as an <see cref="int"/>.
         /// </returns>
-        Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet);
+        Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet, CancellationToken cancellationToken);
 
         /// <summary>
         /// Deletes all entities matching the entity set.
@@ -189,9 +209,12 @@ namespace Startitecture.Orm.Common
         /// <param name="entitySet">
         /// The entity set to delete.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The number of items affected as an <see cref="int"/>.
         /// </returns>
-        Task<int> DeleteSelectionAsync(IEntitySet entitySet);
+        Task<int> DeleteSelectionAsync(IEntitySet entitySet, CancellationToken cancellationToken);
     }
 }

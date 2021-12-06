@@ -8,6 +8,7 @@ namespace Startitecture.Orm.SqlClient
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -53,6 +54,9 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of item to insert. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
         /// </typeparam>
@@ -62,7 +66,10 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The <see cref="Task"/> that is performing the insert.
         /// </returns>
-        Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction);
+        Task InsertAsync<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            Action<TransactSqlInsertBase<TEntity>> insertAction,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Inserts a set of items into the repository then maps the results back to the <typeparamref name="TItem"/> type.
@@ -95,6 +102,9 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of item to insert. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
         /// </typeparam>
@@ -104,9 +114,10 @@ namespace Startitecture.Orm.SqlClient
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
         /// </exception>
-        Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
+        IAsyncEnumerable<TItem> InsertForResultsAsync<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            Action<TransactSqlInsertBase<TEntity>> insertAction);
+            Action<TransactSqlInsertBase<TEntity>> insertAction,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Merges a set of items into the repository.
@@ -137,6 +148,9 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="mergeAction">
         /// The merge action to take, or null to take the default merge action.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of item to merge. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
         /// </typeparam>
@@ -149,7 +163,10 @@ namespace Startitecture.Orm.SqlClient
         /// <returns>
         /// The <see cref="Task"/> that is executing the merge operation.
         /// </returns>
-        Task MergeAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction);
+        Task MergeAsync<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            Action<TransactSqlMergeBase<TEntity>> mergeAction,
+            CancellationToken cancellationToken);
 
         /// <summary>
         /// Merges a set of items into the repository then maps the results back to the <typeparamref name="TItem"/> type.
@@ -185,6 +202,9 @@ namespace Startitecture.Orm.SqlClient
         /// <param name="mergeAction">
         /// The merge action to take, or null to take the default merge action.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of item to merge. This type should represent a User-Defined Table Type and be decorated with a <see cref="TableTypeAttribute"/>.
         /// </typeparam>
@@ -197,8 +217,9 @@ namespace Startitecture.Orm.SqlClient
         /// <remarks>
         /// In SQL Server, MERGE operations are not guaranteed to be atomic.
         /// </remarks>
-        Task<IEnumerable<TItem>> MergeForResultsAsync<TItem>(
+        IAsyncEnumerable<TItem> MergeForResultsAsync<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            Action<TransactSqlMergeBase<TEntity>> mergeAction);
+            Action<TransactSqlMergeBase<TEntity>> mergeAction,
+            CancellationToken cancellationToken);
     }
 }

@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Common.Tests
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using global::AutoMapper;
@@ -281,7 +282,8 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubSubRow>>())).Returns(Task.FromResult(1));
+            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubSubRow>>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.FromResult(1));
 
             int actual;
 
@@ -290,7 +292,8 @@ namespace Startitecture.Orm.Common.Tests
                 var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
                 actual = await repository.UpdateAsync(
                                  new UpdateSet<SubSubEntity>().Set(entity => entity.UniqueName, "newName")
-                                     .Where(filterSet => filterSet.AreEqual(entity => entity.UniqueName, "bar")))
+                                     .Where(filterSet => filterSet.AreEqual(entity => entity.UniqueName, "bar")),
+                                 CancellationToken.None)
                              .ConfigureAwait(false);
             }
 
@@ -334,7 +337,7 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubSubRow>>())).Verifiable();
+            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubSubRow>>(), It.IsAny<CancellationToken>())).Verifiable();
 
             await using (var provider = repositoryProvider.Object)
             {
@@ -344,7 +347,7 @@ namespace Startitecture.Orm.Common.Tests
                                        Description = "my description"
                                    };
 
-                await repository.UpdateSingleAsync(34, subSubEntity, entity => entity.Description).ConfigureAwait(false);
+                await repository.UpdateSingleAsync(34, subSubEntity, CancellationToken.None, entity => entity.Description).ConfigureAwait(false);
             }
 
             repositoryProvider.Verify();
@@ -391,7 +394,7 @@ namespace Startitecture.Orm.Common.Tests
             var repositoryProvider = new Mock<IRepositoryProvider>();
             var definitionProvider = new DataAnnotationsDefinitionProvider();
             repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
-            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubRow>>())).Verifiable();
+            repositoryProvider.Setup(provider => provider.UpdateAsync(It.IsAny<UpdateSet<SubRow>>(), It.IsAny<CancellationToken>())).Verifiable();
 
             await using (var provider = repositoryProvider.Object)
             {
@@ -404,6 +407,7 @@ namespace Startitecture.Orm.Common.Tests
                         UniqueOtherId = (short)65,
                         Description = "new desc"
                     },
+                    CancellationToken.None,
                     entity => entity.UniqueOtherId,
                     entity => entity.Description).ConfigureAwait(false);
             }

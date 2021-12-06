@@ -7,6 +7,7 @@ namespace Startitecture.Orm.Mapper
     using System;
     using System.Data;
     using System.Data.Common;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -81,8 +82,9 @@ namespace Startitecture.Orm.Mapper
             this.transaction?.Commit();
         }
 
+        /// <param name="cancellationToken"></param>
         /// <inheritdoc />
-        public async Task CommitAsync()
+        public async Task CommitAsync(CancellationToken cancellationToken)
         {
             if (this.transaction == null)
             {
@@ -94,7 +96,7 @@ namespace Startitecture.Orm.Mapper
 #if NET472
                 asyncTransaction.Commit();
 #else
-                await asyncTransaction.CommitAsync().ConfigureAwait(false);
+                await asyncTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
 #endif
             }
             else
@@ -114,8 +116,9 @@ namespace Startitecture.Orm.Mapper
             this.transaction.Rollback();
         }
 
+        /// <param name="cancellationToken"></param>
         /// <inheritdoc />
-        public async Task RollbackAsync()
+        public async Task RollbackAsync(CancellationToken cancellationToken)
         {
             if (this.transaction == null)
             {
@@ -127,7 +130,7 @@ namespace Startitecture.Orm.Mapper
 #if NET472
                 asyncTransaction.Rollback();
 #else
-                await asyncTransaction.RollbackAsync().ConfigureAwait(false);
+                await asyncTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
 #endif
             }
             else

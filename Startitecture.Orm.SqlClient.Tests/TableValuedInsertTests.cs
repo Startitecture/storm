@@ -13,6 +13,7 @@ namespace Startitecture.Orm.SqlClient.Tests
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using global::AutoMapper;
@@ -415,10 +416,11 @@ namespace Startitecture.Orm.SqlClient.Tests
                          };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
+                var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
                 // Set up the structured command provider.
                 var structuredCommandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
@@ -427,26 +429,33 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 // Delete the existing rows.
                 var fieldSelection = Query.Select<FieldRow>().Where(set => set.AreEqual(row => row.Name, "INS_%"));
-                var existingFields = await fieldRepository.SelectEntitiesAsync(fieldSelection).ConfigureAwait(false);
+                var existingFields = new List<Field>();
+
+                await foreach (var item in fieldRepository.SelectEntitiesAsync(fieldSelection, cancellationToken).ConfigureAwait(false))
+                {
+                    existingFields.Add(item);
+                }
 
                 await fieldValueRepository.DeleteSelectionAsync(
                         Query.Select<FieldValueRow>()
-                            .Where(set => set.Include(row => row.FieldId, existingFields.Select(field => field.FieldId).ToArray())))
+                            .Where(set => set.Include(row => row.FieldId, existingFields.Select(field => field.FieldId).ToArray())),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
-                await fieldRepository.DeleteSelectionAsync(fieldSelection).ConfigureAwait(false);
+                await fieldRepository.DeleteSelectionAsync(fieldSelection, cancellationToken).ConfigureAwait(false);
                 var fieldInsertCommand = new TableValuedInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
 
                 await fieldInsertCommand.ExecuteAsync(
                         fields.Select(
                             field => new FieldTableTypeRow
-                            {
-                                Name = field.Name,
-                                Description = field.Description
-                            }))
+                                     {
+                                         Name = field.Name,
+                                         Description = field.Description
+                                     }),
+                        cancellationToken)
                     .ConfigureAwait(false);
 
-                await transaction.CommitAsync().ConfigureAwait(false);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -461,64 +470,69 @@ namespace Startitecture.Orm.SqlClient.Tests
         public async Task ExecuteWithIdentityUpdateAsync_TableValuedInsertForGenericSubmission_DoesNotThrowException()
         {
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             await using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
 
                 var domainIdentity = await identityRepository.FirstOrDefaultAsync(
-                                         Query.Select<DomainIdentity>()
-                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName))).ConfigureAwait(false)
+                                             Query.Select<DomainIdentity>()
+                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)),
+                                             cancellationToken)
+                                         .ConfigureAwait(false)
                                      ?? await identityRepository.SaveAsync(
-                                         new DomainIdentity(Environment.UserName)
-                                         {
-                                             FirstName = "King",
-                                             MiddleName = "T.",
-                                             LastName = "Animal"
-                                         }).ConfigureAwait(false);
+                                             new DomainIdentity(Environment.UserName)
+                                             {
+                                                 FirstName = "King",
+                                                 MiddleName = "T.",
+                                                 LastName = "Animal"
+                                             },
+                                             cancellationToken)
+                                         .ConfigureAwait(false);
 
                 var expected = new GenericSubmission("My Submission", domainIdentity);
                 var internalId = new Field
-                {
-                    Name = "Internal ID",
-                    Description = "Unique ID used internally"
-                };
+                                 {
+                                     Name = "Internal ID",
+                                     Description = "Unique ID used internally"
+                                 };
 
                 var firstName = new Field
-                {
-                    Name = "First Name",
-                    Description = "The person's first name"
-                };
+                                {
+                                    Name = "First Name",
+                                    Description = "The person's first name"
+                                };
 
                 var lastName = new Field
-                {
-                    Name = "Last Name",
-                    Description = "The person's last name"
-                };
+                               {
+                                   Name = "Last Name",
+                                   Description = "The person's last name"
+                               };
 
                 var yearlyWage = new Field
-                {
-                    Name = "Yearly Wage",
-                    Description = "The base wage paid year over year."
-                };
+                                 {
+                                     Name = "Yearly Wage",
+                                     Description = "The base wage paid year over year."
+                                 };
 
                 var hireDate = new Field
-                {
-                    Name = "Hire Date",
-                    Description = "The date and time of hire for the person"
-                };
+                               {
+                                   Name = "Hire Date",
+                                   Description = "The date and time of hire for the person"
+                               };
 
                 var bonusTarget = new Field
-                {
-                    Name = "Bonus Target",
-                    Description = "The target bonus for the person"
-                };
+                                  {
+                                      Name = "Bonus Target",
+                                      Description = "The target bonus for the person"
+                                  };
 
                 var contactNumbers = new Field
-                {
-                    Name = "Contact Numbers",
-                    Description = "A list of contact numbers for the person in order of preference"
-                };
+                                     {
+                                         Name = "Contact Numbers",
+                                         Description = "A list of contact numbers for the person in order of preference"
+                                     };
 
                 expected.SetValue(internalId, 9234);
                 expected.SetValue(firstName, "Dan");
@@ -542,8 +556,15 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // TODO: Return names only from the repo as a dynamic
                 var fields = expected.SubmissionValues.Select(value => value.Field).Distinct().ToDictionary(field => field.Name, field => field);
                 var inclusionValues = fields.Keys.ToArray();
-                var existingFields = await fieldRepository.SelectEntitiesAsync(
-                                         new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues))).ConfigureAwait(false);
+                var existingFields = new List<Field>();
+
+                await foreach (var item in fieldRepository.SelectEntitiesAsync(
+                                       new EntitySelection<Field>().Where(set => set.Include(field => field.Name, inclusionValues)),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    existingFields.Add(item);
+                }
 
                 foreach (var field in existingFields)
                 {
@@ -553,13 +574,13 @@ namespace Startitecture.Orm.SqlClient.Tests
 
                 foreach (var field in fields.Values.Where(field => field.FieldId.HasValue == false))
                 {
-                    await fieldRepository.SaveAsync(field).ConfigureAwait(false);
+                    await fieldRepository.SaveAsync(field, cancellationToken).ConfigureAwait(false);
                 }
 
                 var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
 
-                var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
-                await submissionRepository.SaveAsync(expected).ConfigureAwait(false);
+                var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
+                await submissionRepository.SaveAsync(expected, cancellationToken).ConfigureAwait(false);
 
                 var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
                 Assert.AreNotEqual(0, submissionId);
@@ -570,14 +591,19 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
-                                 {
-                                     FieldId = v.Field.FieldId.GetValueOrDefault(),
-                                     LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
-                                     LastModifiedTime = expected.SubmittedTime
-                                 };
+                                        {
+                                            FieldId = v.Field.FieldId.GetValueOrDefault(),
+                                            LastModifiedByDomainIdentifierId = domainIdentity.DomainIdentityId.GetValueOrDefault(),
+                                            LastModifiedTime = expected.SubmittedTime
+                                        };
 
                 var valuesCommand = new TableValuedInsert<FieldValueRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
-                var insertedValues = (await valuesCommand.ExecuteForResultsAsync(valuesList).ConfigureAwait(false)).ToList();
+                var insertedValues = new List<FieldValueRow>();
+
+                await foreach (var item in valuesCommand.ExecuteForResultsAsync(valuesList, cancellationToken).ConfigureAwait(false))
+                {
+                    insertedValues.Add(item);
+                }
 
                 // Map back to the domain object.
                 foreach (var value in expected.SubmissionValues)
@@ -589,22 +615,27 @@ namespace Startitecture.Orm.SqlClient.Tests
                 // Do the field value elements
                 var elementsList = (from e in expected.SubmissionValues.SelectMany(value => value.Elements)
                                     select new FieldValueElementTableTypeRow
-                                    {
-                                        FieldValueElementId = e.FieldValueElementId,
-                                        FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
-                                        Order = e.Order,
-                                        DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
-                                        FloatElement = e.Element as double? ?? e.Element as float?,
-                                        IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
-                                        MoneyElement = e.Element as decimal?,
-                                        TextElement = e.Element as string // here we actually want it to be null if it is not a string
-                                    }).ToList();
+                                           {
+                                               FieldValueElementId = e.FieldValueElementId,
+                                               FieldValueId = e.FieldValue.FieldValueId.GetValueOrDefault(),
+                                               Order = e.Order,
+                                               DateElement = e.Element as DateTimeOffset? ?? e.Element as DateTime?,
+                                               FloatElement = e.Element as double? ?? e.Element as float?,
+                                               IntegerElement = e.Element as long? ?? e.Element as int? ?? e.Element as short? ?? e.Element as byte?,
+                                               MoneyElement = e.Element as decimal?,
+                                               TextElement = e.Element as string // here we actually want it to be null if it is not a string
+                                           }).ToList();
 
                 var elementsCommand = new TableValuedInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
 
                 // Reassign with our added identities
                 // TODO: create dictionary for seeks
-                var insertedElementRows = (await elementsCommand.ExecuteForResultsAsync(elementsList).ConfigureAwait(false)).ToList();
+                var insertedElementRows = new List<FieldValueElementRow>();
+
+                await foreach (var item in elementsCommand.ExecuteForResultsAsync(elementsList, cancellationToken).ConfigureAwait(false))
+                {
+                    insertedElementRows.Add(item);
+                }
 
                 foreach (var element in elementsList)
                 {
@@ -616,43 +647,46 @@ namespace Startitecture.Orm.SqlClient.Tests
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
-                await dateElementsCommand.ExecuteAsync(elementsList.Where(row => row.DateElement.HasValue)).ConfigureAwait(false);
+                await dateElementsCommand.ExecuteAsync(elementsList.Where(row => row.DateElement.HasValue), cancellationToken).ConfigureAwait(false);
 
                 var floatElementsCommand = new TableValuedInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.FloatElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement);
 
-                await floatElementsCommand.ExecuteAsync(elementsList.Where(row => row.FloatElement.HasValue)).ConfigureAwait(false);
+                await floatElementsCommand.ExecuteAsync(elementsList.Where(row => row.FloatElement.HasValue), cancellationToken)
+                    .ConfigureAwait(false);
 
                 var integerElementsCommand = new TableValuedInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.IntegerElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
-                await integerElementsCommand.ExecuteAsync(elementsList.Where(row => row.IntegerElement.HasValue)).ConfigureAwait(false);
+                await integerElementsCommand.ExecuteAsync(elementsList.Where(row => row.IntegerElement.HasValue), cancellationToken)
+                    .ConfigureAwait(false);
 
                 var moneyElementsCommand = new TableValuedInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.MoneyElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
-                await moneyElementsCommand.ExecuteAsync(elementsList.Where(row => row.MoneyElement.HasValue)).ConfigureAwait(false);
+                await moneyElementsCommand.ExecuteAsync(elementsList.Where(row => row.MoneyElement.HasValue), cancellationToken)
+                    .ConfigureAwait(false);
 
                 var textElementsCommand = new TableValuedInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
                     .InsertInto(row => row.TextElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
-                await textElementsCommand.ExecuteAsync(elementsList.Where(row => row.TextElement != null)).ConfigureAwait(false);
+                await textElementsCommand.ExecuteAsync(elementsList.Where(row => row.TextElement != null), cancellationToken).ConfigureAwait(false);
 
                 // Attach the values to the submission
                 var genericValueSubmissions = from v in insertedValues
                                               select new GenericSubmissionValueTableTypeRow
-                                              {
-                                                  GenericSubmissionId = submissionId,
-                                                  GenericSubmissionValueId = v.FieldValueId
-                                              };
+                                                     {
+                                                         GenericSubmissionId = submissionId,
+                                                         GenericSubmissionValueId = v.FieldValueId
+                                                     };
 
                 var submissionCommand = new TableValuedInsert<GenericSubmissionValueTableTypeRow>(commandProvider, provider.DatabaseContext);
-                await submissionCommand.ExecuteAsync(genericValueSubmissions).ConfigureAwait(false);
-                await transaction.CommitAsync().ConfigureAwait(false);
+                await submissionCommand.ExecuteAsync(genericValueSubmissions, cancellationToken).ConfigureAwait(false);
+                await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
