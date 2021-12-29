@@ -13,9 +13,9 @@ variables:
   - name: BuildConfiguration
     value: Debug
   - name: MajorVersion
-    value: '1'
-  - name: MinorVersion
     value: '2'
+  - name: MinorVersion
+    value: '0'
   - name: PatchVersion
     value: '0'
   - name: ReleaseVersion
