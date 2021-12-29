@@ -12,7 +12,7 @@ variables:
   - group: Git-Push
   - name: BuildConfiguration
     value: Debug
-  - name: MajorVesion
+  - name: MajorVersion
     value: '1'
   - name: MinorVersion
     value: '2'
