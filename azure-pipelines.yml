@@ -6,15 +6,22 @@
 
 trigger:
 - master
-
-name: $(MajorVersion).$(MinorVersion).$(PatchVersion)-ci$(Date:yyyyMMdd)$(Rev:rr)
+- releases/*
 
 variables:
   - group: Git-Push
   - name: BuildConfiguration
     value: Debug
+  - name: MajorVesion
+    value: '1'
+  - name: MinorVersion
+    value: '2'
+  - name: PatchVersion
+    value: '0'
   - name: ReleaseVersion
     value: $(MajorVersion).$(MinorVersion).$(PatchVersion)
+
+name: $(MajorVersion).$(MinorVersion).$(PatchVersion)-ci$(Date:yyyyMMdd)$(Rev:rr)
 
 stages:
 - stage: BuildTestMirrorPackages
