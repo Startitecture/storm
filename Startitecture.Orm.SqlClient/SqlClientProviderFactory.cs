@@ -63,7 +63,7 @@ namespace Startitecture.Orm.SqlClient
 #endif
             var statementCompiler = new TransactSqlAdapter(this.definitionProvider);
             var contextFactory = new DefaultDatabaseContextFactory(connectionString, ProviderInvariantName, statementCompiler);
-            return new DatabaseRepositoryProvider(contextFactory); // TODO: Support adding an ObjectCache
+            return new DatabaseRepositoryProvider(contextFactory); // TODO: Support IMemoryCache and IDistributedCache
         }
     }
 }

@@ -11,6 +11,8 @@ namespace Startitecture.Orm.Mapper
 {
     using System;
     using System.Data.Common;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     using JetBrains.Annotations;
 
@@ -80,6 +82,13 @@ namespace Startitecture.Orm.Mapper
         {
             var providerFactory = DbProviderFactories.GetFactory(this.providerName);
             return new DatabaseContext(this.connectionString, providerFactory, this.repositoryAdapter);
+        }
+
+        /// <inheritdoc />
+        public async Task<IDatabaseContext> CreateAsync(CancellationToken cancellationToken)
+        {
+            var providerFactory = DbProviderFactories.GetFactory(this.providerName);
+            return await Task.FromResult(new DatabaseContext(this.connectionString, providerFactory, this.repositoryAdapter));
         }
     }
 }

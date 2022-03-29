@@ -75,7 +75,7 @@ namespace Startitecture.Orm.SqlClient
                 throw new ArgumentNullException(nameof(items));
             }
 
-            if (!(this.databaseContext.Connection is SqlConnection sqlConnection))
+            if (this.databaseContext.Connection is not SqlConnection sqlConnection)
             {
                 throw new OperationException(this.databaseContext, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
             }
@@ -102,7 +102,7 @@ namespace Startitecture.Orm.SqlClient
                 throw;
             }
 
-            sqlCommand.Disposed += (sender, args) => dataTable.Dispose();
+            sqlCommand.Disposed += (_, _) => dataTable.Dispose();
             return sqlCommand;
         }
     }
