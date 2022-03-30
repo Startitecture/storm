@@ -1,4 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Startitecture.Orm.Model;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityRelationTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -74,6 +77,18 @@ namespace Startitecture.Orm.Model.Tests
 
             Assert.AreEqual(rightLocation, rightDefinition.Find(actual.RelationExpression).Entity);
             Assert.AreEqual(rightAttribute, rightDefinition.Find(actual.RelationExpression));
+        }
+
+        [TestMethod()]
+        public void JoinTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void JoinTest1()
+        {
+            Assert.Fail();
         }
     }
 }

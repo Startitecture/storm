@@ -1,4 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Startitecture.Orm.Common;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityRepositoryTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -315,9 +318,9 @@ namespace Startitecture.Orm.Common.Tests
             {
                 var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
                 var subSubEntity = new SubSubEntity("myUniqueName", 34)
-                                   {
-                                       Description = "my description"
-                                   };
+                {
+                    Description = "my description"
+                };
 
                 repository.UpdateSingle(34, subSubEntity, entity => entity.Description);
             }
@@ -343,9 +346,9 @@ namespace Startitecture.Orm.Common.Tests
             {
                 var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
                 var subSubEntity = new SubSubEntity("myUniqueName", 34)
-                                   {
-                                       Description = "my description"
-                                   };
+                {
+                    Description = "my description"
+                };
 
                 await repository.UpdateSingleAsync(34, subSubEntity, CancellationToken.None, entity => entity.Description).ConfigureAwait(false);
             }
@@ -413,6 +416,18 @@ namespace Startitecture.Orm.Common.Tests
             }
 
             repositoryProvider.Verify();
+        }
+
+        [TestMethod()]
+        public void DeleteAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void DeleteEntitiesAsyncTest()
+        {
+            Assert.Fail();
         }
     }
 }

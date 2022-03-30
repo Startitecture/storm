@@ -1,4 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Startitecture.Orm.Mapper;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseContextTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -188,6 +191,54 @@ namespace Startitecture.Orm.Mapper.Tests
                 await database.ChangeDatabaseAsync("master", cancellationToken).ConfigureAwait(false);
                 Assert.AreEqual("master", database.Connection.Database);
             }
+        }
+
+        [TestMethod()]
+        public void BeginTransactionTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BeginTransactionAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BeginTransactionTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BeginTransactionAsyncTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void AssociateTransactionTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void ExecuteTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void ExecuteAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void GetValueMapperTest()
+        {
+            Assert.Fail();
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Startitecture.Orm.Common;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ReadOnlyRepositoryTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -778,6 +781,72 @@ namespace Startitecture.Orm.Common.Tests
 
                 Assert.AreSame(expected, actual);
             }
+        }
+
+        [TestMethod()]
+        public void ContainsAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void ContainsAsyncTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void FirstOrDefaultAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void FirstOrDefaultAsyncTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void FirstOrDefaultAsyncTest2()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void DynamicFirstOrDefaultAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void GetScalarTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void GetScalarAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void SelectAllAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void SelectEntitiesAsyncTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void DynamicSelectAsyncTest()
+        {
+            Assert.Fail();
         }
     }
 }

@@ -18,8 +18,6 @@ namespace Startitecture.Orm.Common
     using System.Threading;
     using System.Threading.Tasks;
 
-    using JetBrains.Annotations;
-
     using Startitecture.Core;
     using Startitecture.Orm.Model;
     using Startitecture.Resources;
@@ -81,7 +79,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Update<TItem>([NotNull] UpdateSet<TItem> updateSet)
+        public int Update<TItem>(UpdateSet<TItem> updateSet)
         {
             if (updateSet == null)
             {
@@ -105,9 +103,9 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public void UpdateSingle<TKey, TItem>(
-            [NotNull] TKey key,
-            [NotNull] TItem source,
-            [NotNull] params Expression<Func<TItem, object>>[] setExpressions)
+            TKey key,
+            TItem source,
+            params Expression<Func<TItem, object>>[] setExpressions)
         {
             if (key == null)
             {
@@ -130,10 +128,10 @@ namespace Startitecture.Orm.Common
 
         /// <inheritdoc />
         public async Task UpdateSingleAsync<TKey, TItem>(
-            [NotNull] TKey key,
-            [NotNull] TItem source,
+            TKey key,
+            TItem source,
             CancellationToken cancellationToken,
-            [NotNull] params Expression<Func<TItem, object>>[] setExpressions)
+            params Expression<Func<TItem, object>>[] setExpressions)
         {
             if (key == null)
             {
@@ -155,7 +153,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Delete<TItem>([NotNull] TItem example)
+        public int Delete<TItem>(TItem example)
         {
             if (example == null)
             {
@@ -179,7 +177,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int DeleteEntities([NotNull] Action<EntitySet<TModel>> defineSet)
+        public int DeleteEntities(Action<EntitySet<TModel>> defineSet)
         {
             if (defineSet == null)
             {
@@ -205,7 +203,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int DeleteSelection([NotNull] IEntitySet entitySet)
+        public int DeleteSelection(IEntitySet entitySet)
         {
             if (entitySet == null)
             {

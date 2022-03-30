@@ -66,7 +66,7 @@ namespace Startitecture.Orm.Mapper
         private static readonly MethodInfo ListItemMethod = typeof(List<Func<object, object>>).GetProperty("Item")?.GetGetMethod();
 
         /// <summary>
-        /// Creates a delegate that returns a POCO from the provided data reader.
+        /// Creates a delegate that returns a POCO from the provided data reader. TODO: Make internal?
         /// </summary>
         /// <param name="dataRequest">
         /// The data request to create a POCO for.
@@ -381,7 +381,7 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
-        /// Creates a delegate that returns a POCO from the provided data reader.
+        /// Creates a delegate that returns a POCO from the provided data reader. TODO: Make private or coalesce into caller?
         /// </summary>
         /// <param name="dataRequest">
         /// The data request to create a POCO for.

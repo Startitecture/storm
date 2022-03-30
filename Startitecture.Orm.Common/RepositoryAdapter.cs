@@ -529,7 +529,7 @@ VALUES ({columnValues})";
         protected virtual string GetInclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
             var indexTokens = filterValues.Select(
-                (o, i) => this.NameQualifier.AddParameterPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
+                (_, i) => this.NameQualifier.AddParameterPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
 
             var inclusionToken = string.Format(
                 CultureInfo.InvariantCulture,
@@ -558,7 +558,7 @@ VALUES ({columnValues})";
         protected virtual string GetExclusionFilter(string qualifiedName, int filterIndex, IEnumerable<object> filterValues)
         {
             var indexTokens = filterValues.Select(
-                (o, i) => this.NameQualifier.AddParameterPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
+                (_, i) => this.NameQualifier.AddParameterPrefix((filterIndex + i).ToString(CultureInfo.InvariantCulture)));
 
             var inclusionToken = string.Format(
                 CultureInfo.InvariantCulture,

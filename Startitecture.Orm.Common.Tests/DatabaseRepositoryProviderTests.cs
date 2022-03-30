@@ -1,4 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Startitecture.Orm.Common;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseRepositoryProviderTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -155,6 +158,12 @@ namespace Startitecture.Orm.Common.Tests
                 var actual = target.Insert(expected);
                 Assert.AreSame(expected, actual);
             }
+        }
+
+        [TestMethod()]
+        public void BeginTransactionAsyncTest()
+        {
+            Assert.Fail();
         }
     }
 }

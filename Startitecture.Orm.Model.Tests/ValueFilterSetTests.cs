@@ -1,4 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Startitecture.Orm.Model;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="ValueFilterSetTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -147,15 +150,15 @@ namespace Startitecture.Orm.Model.Tests
         public void MatchKey_ImplicitKey_MatchesPrimaryKey()
         {
             var dataRow = new DataRow
-                          {
-                              FakeDataId = 43,
-                              AnotherColumn = "test",
-                              AnotherValueColumn = 33,
-                              NormalColumn = "foo",
-                              NullableColumn = null,
-                              NullableValueColumn = null,
-                              ValueColumn = 44
-                          };
+            {
+                FakeDataId = 43,
+                AnotherColumn = "test",
+                AnotherValueColumn = 33,
+                NormalColumn = "foo",
+                NullableColumn = null,
+                NullableValueColumn = null,
+                ValueColumn = 44
+            };
 
             var target = new ValueFilterSet<DataRow>().MatchKey(
                 dataRow,
@@ -175,15 +178,15 @@ namespace Startitecture.Orm.Model.Tests
         public void MatchKey_ExplicitKey_MatchesExplicitKey()
         {
             var dataRow = new DataRow
-                          {
-                              FakeDataId = 43,
-                              AnotherColumn = "test",
-                              AnotherValueColumn = 33,
-                              NormalColumn = "foo",
-                              NullableColumn = null,
-                              NullableValueColumn = null,
-                              ValueColumn = 44
-                          };
+            {
+                FakeDataId = 43,
+                AnotherColumn = "test",
+                AnotherValueColumn = 33,
+                NormalColumn = "foo",
+                NullableColumn = null,
+                NullableValueColumn = null,
+                ValueColumn = 44
+            };
 
             var target = new ValueFilterSet<DataRow>().MatchKey(
                 dataRow,
@@ -202,6 +205,72 @@ namespace Startitecture.Orm.Model.Tests
             var actual = target.ValueFilters.ToArray();
 
             CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestMethod()]
+        public void AddTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void MatchingTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void AreEqualTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void AreEqualTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void GreaterThanTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void GreaterThanOrEqualToTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void LessThanTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void LessThanOrEqualToTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void IncludeTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BetweenTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void BetweenTest1()
+        {
+            Assert.Fail();
         }
     }
 }

@@ -191,7 +191,7 @@ namespace Startitecture.Orm.Common
                 AliasedRelationStatementFormat,
                 joinType,
                 relationEntity,
-                this.nameQualifier.Escape(relationLocation.Alias),
+                this.nameQualifier.Escape(relationLocation.Alias), // TODO: could be null, need to verify
                 sourceName,
                 relationName);
         }

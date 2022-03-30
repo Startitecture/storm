@@ -65,15 +65,7 @@ namespace Startitecture.Orm.Model
             return this;
         }
 
-        /// <summary>
-        /// Maps the current selection to the target selection type.
-        /// </summary>
-        /// <typeparam name="TDestEntity">
-        /// The destination entity type.
-        /// </typeparam>
-        /// <returns>
-        /// An <see cref="EntitySet{T}" /> for the destination type.
-        /// </returns>
+        /// <inheritdoc />
         public override EntitySet<TDestEntity> MapSet<TDestEntity>()
         {
             return this.MapSelection<TDestEntity>();

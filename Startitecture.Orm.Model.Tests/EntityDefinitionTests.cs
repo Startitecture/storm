@@ -1,4 +1,7 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+
+using Startitecture.Orm.Model;
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityDefinitionTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -117,6 +120,24 @@ namespace Startitecture.Orm.Model.Tests
         private static LambdaExpression CreateExpression<TItem, TProperty>(Expression<Func<TItem, TProperty>> propertyExpression)
         {
             return propertyExpression;
+        }
+
+        [TestMethod()]
+        public void FindTest()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void FindTest1()
+        {
+            Assert.Fail();
+        }
+
+        [TestMethod()]
+        public void IsUpdateableTest()
+        {
+            Assert.Fail();
         }
     }
 }

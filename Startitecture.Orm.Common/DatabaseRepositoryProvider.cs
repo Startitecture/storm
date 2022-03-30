@@ -21,8 +21,6 @@ namespace Startitecture.Orm.Common
     using System.Threading;
     using System.Threading.Tasks;
 
-    using JetBrains.Annotations;
-
     using Startitecture.Core;
     using Startitecture.Orm.Model;
 
@@ -45,7 +43,7 @@ namespace Startitecture.Orm.Common
         private const string CacheKeyFormat = "{0}=[{1}]";
 
         /// <summary>
-        /// The entity cache.
+        /// The entity cache. TODO: replace with IMemory/IDistributedCache.
         /// </summary>
         private readonly ObjectCache entityCache;
 
@@ -56,7 +54,7 @@ namespace Startitecture.Orm.Common
         /// The database context factory.
         /// </param>
         public DatabaseRepositoryProvider(
-            [NotNull] IDatabaseContextFactory databaseContextFactory)
+            IDatabaseContextFactory databaseContextFactory)
             : this(databaseContextFactory, MemoryCache.Default)
         {
         }
@@ -71,8 +69,8 @@ namespace Startitecture.Orm.Common
         /// The entity cache.
         /// </param>
         public DatabaseRepositoryProvider(
-            [NotNull] IDatabaseContextFactory databaseContextFactory,
-            [NotNull] ObjectCache entityCache)
+            IDatabaseContextFactory databaseContextFactory,
+            ObjectCache entityCache)
         {
             if (databaseContextFactory == null)
             {
@@ -237,7 +235,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public T GetScalar<T>([NotNull] ISelection selection)
+        public T GetScalar<T>(ISelection selection)
         {
             if (selection == null)
             {
@@ -350,7 +348,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public dynamic DynamicFirstOrDefault([NotNull] ISelection selection)
+        public dynamic DynamicFirstOrDefault(ISelection selection)
         {
             if (selection == null)
             {
@@ -441,7 +439,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public IEnumerable<dynamic> DynamicSelect([NotNull] ISelection selection)
+        public IEnumerable<dynamic> DynamicSelect(ISelection selection)
         {
             if (selection == null)
             {
@@ -594,7 +592,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Update<T>([NotNull] UpdateSet<T> updateSet)
+        public int Update<T>(UpdateSet<T> updateSet)
         {
             if (updateSet == null)
             {
@@ -836,6 +834,7 @@ namespace Startitecture.Orm.Common
         /// </returns>
         private static string CreateCacheKey(IEntitySet selection)
         {
+            // TODO: Consider this behavior vs. storing by key columns
             return string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, selection.EntityType.ToRuntimeName(), selection);
         }
 
