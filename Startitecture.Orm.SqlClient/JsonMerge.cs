@@ -11,6 +11,7 @@ namespace Startitecture.Orm.SqlClient
     using System.Linq;
     using System.Text;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
 
@@ -25,19 +26,30 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonMerge{T}" /> class.
         /// </summary>
-        /// <param name="tableCommandFactory">
-        /// The table command factory for the merge.
+        /// <param name="databaseContext">
+        /// The database context for the merge.
+        /// </param>
+        public JsonMerge(IDatabaseContext databaseContext)
+            : base(Singleton<JsonParameterCommandFactory>.Instance, databaseContext)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="JsonMerge{T}"/> class.
+        /// </summary>
+        /// <param name="commandFactory">
+        /// The command factory to use to create the command.
         /// </param>
         /// <param name="databaseContext">
         /// The database context for the merge.
         /// </param>
-        public JsonMerge(IDbTableCommandFactory tableCommandFactory, IDatabaseContext databaseContext)
-            : base(tableCommandFactory, databaseContext)
+        public JsonMerge(IDbTableCommandFactory commandFactory, IDatabaseContext databaseContext)
+            : base(commandFactory, databaseContext)
         {
         }
 
         /// <inheritdoc />
-        protected override string DeclareSourceTable(IEnumerable<EntityAttributeDefinition> sourceAttributes)
+        protected override string DeclareSourceTable(string parameterName, IEnumerable<EntityAttributeDefinition> sourceAttributes)
         {
             if (sourceAttributes == null)
             {
@@ -50,13 +62,13 @@ namespace Startitecture.Orm.SqlClient
             var sourceColumnDeclarations = sourceAttributeList.Select(
                 definition => $"{this.NameQualifier.Escape(definition.PropertyName)} {definition.PropertyInfo.GetSqlType()}");
 
-            var parameterName = this.NameQualifier.AddParameterPrefix("sourceRows");
+            var sourceParameter = this.NameQualifier.AddParameterPrefix("sourceRows");
             commandBuilder.AppendLine(
-                $"DECLARE {parameterName} table({string.Join(", ", sourceColumnDeclarations)});");
+                $"DECLARE {sourceParameter} table({string.Join(", ", sourceColumnDeclarations)});");
 
-            commandBuilder.AppendLine($"INSERT INTO {parameterName} ({string.Join(", ", sourceColumns)})");
+            commandBuilder.AppendLine($"INSERT INTO {sourceParameter} ({string.Join(", ", sourceColumns)})");
             commandBuilder.AppendLine(
-                $"SELECT {string.Join(", ", sourceColumns)} FROM OPENJSON({this.NameQualifier.AddParameterPrefix(this.ParameterName)})");
+                $"SELECT {string.Join(", ", sourceColumns)} FROM OPENJSON({this.NameQualifier.AddParameterPrefix(parameterName)})");
 
             var jsonColumns = from definition in sourceAttributeList
                               select $"{this.NameQualifier.Escape(definition.PropertyName)} "
@@ -82,14 +94,16 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <inheritdoc />
-        protected override string SourceSelection(Dictionary<EntityAttributeDefinition, EntityAttributeDefinition> matchedAttributes)
+        protected override string SourceSelection(
+            string parameterName,
+            Dictionary<EntityAttributeDefinition, EntityAttributeDefinition> matchedAttributes)
         {
             if (matchedAttributes == null)
             {
                 throw new ArgumentNullException(nameof(matchedAttributes));
             }
 
-            var sourceColumns = matchedAttributes.Values.Select(x => this.NameQualifier.Escape(x.PropertyName));
+            ////var sourceColumns = matchedAttributes.Values.Select(x => this.NameQualifier.Escape(x.PropertyName));
             return $"{this.NameQualifier.AddParameterPrefix("sourceRows")}";
         }
     }

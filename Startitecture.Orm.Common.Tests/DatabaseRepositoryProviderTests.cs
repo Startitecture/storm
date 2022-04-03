@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Startitecture.Orm.Common;
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseRepositoryProviderTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -11,6 +8,8 @@ namespace Startitecture.Orm.Common.Tests
 {
     using System;
     using System.Data;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -56,7 +55,7 @@ namespace Startitecture.Orm.Common.Tests
         /// The start transaction test.
         /// </summary>
         [TestMethod]
-        public void StartTransaction_TransactionWithIsolationLevel_ReturnsTransactionWithExpectedIsolationLevel()
+        public void BeginTransaction_TransactionWithIsolationLevel_ReturnsTransactionWithExpectedIsolationLevel()
         {
             var mockDatabaseFactory = new Mock<IDatabaseContextFactory>();
             var mockDatabaseContext = new Mock<IDatabaseContext>();
@@ -81,6 +80,40 @@ namespace Startitecture.Orm.Common.Tests
             using (var target = new DatabaseRepositoryProvider(databaseFactory))
             {
                 var actual = target.BeginTransaction(IsolationLevel.Serializable);
+                Assert.AreEqual(IsolationLevel.Serializable, actual.IsolationLevel);
+            }
+        }
+
+        /// <summary>
+        /// Tests the BeginTransactionAsync method.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
+        [TestMethod]
+        public async Task BeginTransactionAsync_SerializableIsolationLevel_IsolationLevelMatchesExpected()
+        {
+            var mockDatabaseFactory = new Mock<IDatabaseContextFactory>();
+            var mockDatabaseContext = new Mock<IDatabaseContext>();
+            mockDatabaseFactory.Setup(factory => factory.Create()).Returns(mockDatabaseContext.Object);
+
+            var mockConnection = new Mock<IDbConnection>();
+            mockDatabaseContext.Setup(context => context.Connection).Returns(mockConnection.Object);
+            var repositoryAdapter = new Mock<IRepositoryAdapter>();
+            repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(new DataAnnotationsDefinitionProvider());
+            mockDatabaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
+            mockDatabaseContext.Setup(context => context.BeginTransactionAsync(It.IsAny<IsolationLevel>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(
+                    (IsolationLevel i, CancellationToken c) =>
+                    {
+                        var transaction = new Mock<ITransactionContext>();
+                        transaction.Setup(dbTransaction => dbTransaction.IsolationLevel).Returns(i);
+                        return transaction.Object;
+                    });
+
+            var databaseFactory = mockDatabaseFactory.Object;
+
+            using (var target = new DatabaseRepositoryProvider(databaseFactory))
+            {
+                var actual = await target.BeginTransactionAsync(IsolationLevel.Serializable, CancellationToken.None);
                 Assert.AreEqual(IsolationLevel.Serializable, actual.IsolationLevel);
             }
         }
@@ -158,12 +191,6 @@ namespace Startitecture.Orm.Common.Tests
                 var actual = target.Insert(expected);
                 Assert.AreSame(expected, actual);
             }
-        }
-
-        [TestMethod()]
-        public void BeginTransactionAsyncTest()
-        {
-            Assert.Fail();
         }
     }
 }

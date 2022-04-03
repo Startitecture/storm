@@ -50,7 +50,7 @@ namespace Startitecture.Orm.Testing.Moq
         /// <returns>
         /// The <see cref="Mock"/>.
         /// </returns>
-        public static Mock<IDbTableCommandFactory> MockCommandProvider<T>(
+        public static Mock<IDbTableCommandFactory> MockCommandFactory<T>(
             [NotNull] this IReadOnlyCollection<T> items,
             [NotNull] IEntityDefinitionProvider definitionProvider,
             [NotNull] INameQualifier nameQualifier)
@@ -90,7 +90,7 @@ namespace Startitecture.Orm.Testing.Moq
             ////    .Returns(command.Object);
 
             commandProvider
-                .Setup(provider => provider.Create(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<T>>()))
+                .Setup(provider => provider.Create(It.IsAny<IDatabaseContext>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<IEnumerable<T>>()))
                 .Returns(command.Object);
 
             return commandProvider;

@@ -12,8 +12,6 @@ namespace Startitecture.Orm.SqlClient
     using System.Linq;
     using System.Text.Json;
 
-    using JetBrains.Annotations;
-
     using Microsoft.Data.SqlClient;
 
     using Startitecture.Core;
@@ -25,52 +23,42 @@ namespace Startitecture.Orm.SqlClient
     /// </summary>
     public class JsonParameterCommandFactory : IDbTableCommandFactory
     {
-        /// <summary>
-        /// The database context.
-        /// </summary>
-        private readonly IDatabaseContext databaseContext;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="JsonParameterCommandFactory"/> class.
-        /// </summary>
-        /// <param name="databaseContext">
-        /// The context provider.
-        /// </param>
-        public JsonParameterCommandFactory([NotNull] IDatabaseContext databaseContext)
-        {
-            this.databaseContext = databaseContext ?? throw new ArgumentNullException(nameof(databaseContext));
-        }
-
         /// <inheritdoc />
-        public IDbCommand Create<T>(ITableCommand tableCommand, IEnumerable<T> items)
+        /// <exception cref="OperationException">
+        /// <paramref name="databaseContext"/> does not have a <see cref="IDatabaseContext.Connection"/> of type <see cref="SqlConnection"/>.
+        /// </exception>
+        public IDbCommand Create<T>(IDatabaseContext databaseContext, string commandText, string parameterName, IEnumerable<T> items)
         {
-            if (tableCommand == null)
-            {
-                throw new ArgumentNullException(nameof(tableCommand));
-            }
-
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            if (!(this.databaseContext.Connection is SqlConnection sqlConnection))
+            if (databaseContext.Connection is not SqlConnection sqlConnection)
             {
-                throw new OperationException(this.databaseContext, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
+                throw new OperationException(databaseContext.Connection, ErrorMessages.DatabaseContextConnectionIsNotSqlConnection);
             }
 
-#pragma warning disable CA2100 // Review SQL queries for security vulnerabilities
-            var sqlCommand = new SqlCommand(tableCommand.CommandText, sqlConnection);
-#pragma warning restore CA2100 // Review SQL queries for security vulnerabilities
-            this.databaseContext.AssociateTransaction(sqlCommand);
+            if (string.IsNullOrWhiteSpace(commandText))
+            {
+                throw new ArgumentException($"'{nameof(commandText)}' cannot be null or whitespace.", nameof(commandText));
+            }
+
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException($"'{nameof(parameterName)}' cannot be null or whitespace.", nameof(parameterName));
+            }
+
+            var sqlCommand = new SqlCommand(commandText, sqlConnection);
 
             try
             {
+                databaseContext.AssociateTransaction(sqlCommand);
                 var serializationOptions = new JsonSerializerOptions();
                 serializationOptions.Converters.Add(new MoneyConverter());
 
                 var tableParameter = sqlCommand.Parameters.AddWithValue(
-                    $"{this.databaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(tableCommand.ParameterName)}",
+                    $"{databaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(parameterName)}",
                     JsonSerializer.Serialize(items.ToList(), serializationOptions));
 
                 tableParameter.SqlDbType = SqlDbType.NVarChar;

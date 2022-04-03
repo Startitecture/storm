@@ -79,16 +79,66 @@ namespace Startitecture.Orm.Model.Tests
             Assert.AreEqual(rightAttribute, rightDefinition.Find(actual.RelationExpression));
         }
 
-        [TestMethod()]
-        public void JoinTest()
+        /// <summary>
+        /// Tests the Join method.
+        /// </summary>
+        [TestMethod]
+        public void Join_ExplicitSourceAndRelationTypes_EntityRelationMatchesExpected()
         {
-            Assert.Fail();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var actual = new EntityRelation(EntityRelationType.InnerJoin);
+            actual.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeDependencyEntityId);
+
+            var relatedDefinition = definitionProvider.Resolve<FakeRelatedRow>();
+            var leftDefinition = relatedDefinition;
+            var leftReference = new EntityReference { EntityType = typeof(FakeRelatedRow) };
+            var leftLocation = definitionProvider.GetEntityLocation(leftReference);
+            var leftAttributeLocation = new AttributeLocation(typeof(FakeRelatedRow).GetProperty(nameof(FakeRelatedRow.RelatedId)), leftReference);
+            var leftAttribute = leftDefinition.Find(leftAttributeLocation);
+
+            Assert.AreEqual(leftLocation, relatedDefinition.Find(actual.SourceExpression).Entity);
+            Assert.AreEqual(leftAttribute, relatedDefinition.Find(actual.SourceExpression));
+
+            var rightDefinition = definitionProvider.Resolve<DependencyRow>();
+            var rightReference = new EntityReference { EntityType = typeof(DependencyRow) };
+            var rightLocation = definitionProvider.GetEntityLocation(rightReference);
+            var rightAttributeLocation = new AttributeLocation(typeof(DependencyRow).GetProperty(nameof(DependencyRow.FakeDependencyEntityId)), rightReference);
+            var rightAttribute = rightDefinition.Find(rightAttributeLocation);
+
+            Assert.AreEqual(rightLocation, rightDefinition.Find(actual.RelationExpression).Entity);
+            Assert.AreEqual(rightAttribute, rightDefinition.Find(actual.RelationExpression));
         }
 
-        [TestMethod()]
-        public void JoinTest1()
+        /// <summary>
+        /// Tests the Join method.
+        /// </summary>
+        [TestMethod]
+        public void JoinTest_ExplicitSourceAndRelationTypesWithAliases_EntityRelationMatchesExpected()
         {
-            Assert.Fail();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var actual = new EntityRelation(EntityRelationType.InnerJoin);
+            actual.Join<FakeRelatedRow, DependencyRow>(row => row.RelatedId, row => row.FakeDependencyEntityId, "SourceAlias1", "RelationAlias1");
+
+            var relatedDefinition = definitionProvider.Resolve<FakeRelatedRow>();
+            var leftDefinition = relatedDefinition;
+            var leftReference = new EntityReference { EntityType = typeof(FakeRelatedRow) };
+            var leftLocation = definitionProvider.GetEntityLocation(leftReference);
+            var leftAttributeLocation = new AttributeLocation(typeof(FakeRelatedRow).GetProperty(nameof(FakeRelatedRow.RelatedId)), leftReference);
+            var leftAttribute = leftDefinition.Find(leftAttributeLocation);
+
+            Assert.AreEqual(leftLocation, relatedDefinition.Find(actual.SourceExpression).Entity);
+            Assert.AreEqual(leftAttribute, relatedDefinition.Find(actual.SourceExpression));
+            Assert.AreEqual("SourceAlias1", actual.SourceEntityAlias);
+
+            var rightDefinition = definitionProvider.Resolve<DependencyRow>();
+            var rightReference = new EntityReference { EntityType = typeof(DependencyRow) };
+            var rightLocation = definitionProvider.GetEntityLocation(rightReference);
+            var rightAttributeLocation = new AttributeLocation(typeof(DependencyRow).GetProperty(nameof(DependencyRow.FakeDependencyEntityId)), rightReference);
+            var rightAttribute = rightDefinition.Find(rightAttributeLocation);
+
+            Assert.AreEqual(rightLocation, rightDefinition.Find(actual.RelationExpression).Entity);
+            Assert.AreEqual(rightAttribute, rightDefinition.Find(actual.RelationExpression));
+            Assert.AreEqual("RelationAlias1", actual.RelationEntityAlias);
         }
     }
 }

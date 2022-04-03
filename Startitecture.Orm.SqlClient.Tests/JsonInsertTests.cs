@@ -27,7 +27,6 @@ namespace Startitecture.Orm.SqlClient.Tests
     using Startitecture.Orm.Testing.Entities;
     using Startitecture.Orm.Testing.Entities.TableTypes;
     using Startitecture.Orm.Testing.Model;
-    using Startitecture.Orm.Testing.Moq;
 
     /// <summary>
     /// A class for testing JSON inserts.
@@ -111,9 +110,6 @@ namespace Startitecture.Orm.SqlClient.Tests
             using (var provider = providerFactory.Create(ConfigurationRoot.GetConnectionString("OrmTestDb")))
             {
                 var transaction = provider.BeginTransaction();
-
-                // Set up the structured command provider.
-                var structuredCommandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -130,7 +126,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                     fieldRepository.DeleteSelection(fieldSelection);
                 }
 
-                var fieldInsertCommand = new JsonInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
+                var fieldInsertCommand = new JsonInsert<FieldRow>(provider.DatabaseContext);
                 fieldInsertCommand.Execute(
                     fields.Select(
                         field => new FieldTableTypeRow
@@ -254,9 +250,6 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
                 Assert.AreNotEqual(0, submissionId);
 
-                // Set up the structured command provider.
-                var commandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
-
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
@@ -266,7 +259,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                             LastModifiedTime = expected.SubmittedTime
                                         };
 
-                var valuesCommand = new JsonInsert<FieldValueRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var valuesCommand = new JsonInsert<FieldValueRow>(provider.DatabaseContext).SelectFromInserted();
                 var insertedValues = valuesCommand.ExecuteForResults(valuesList).ToList();
 
                 // Map back to the domain object.
@@ -290,7 +283,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                            }).ToList();
 
-                var elementsCommand = new JsonInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var elementsCommand = new JsonInsert<FieldValueElementRow>(provider.DatabaseContext).SelectFromInserted();
 
                 // Reassign with our added identities
                 // TODO: create dictionary for seeks
@@ -302,31 +295,31 @@ namespace Startitecture.Orm.SqlClient.Tests
                     this.mapper.MapTo(input, element);
                 }
 
-                var dateElementsCommand = new JsonInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
                 dateElementsCommand.Execute(elementsList.Where(row => row.DateElement.HasValue));
 
-                var floatElementsCommand = new JsonInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
+                var floatElementsCommand = new JsonInsert<FloatElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.FloatElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement);
 
                 floatElementsCommand.Execute(elementsList.Where(row => row.FloatElement.HasValue));
 
-                var integerElementsCommand = new JsonInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
+                var integerElementsCommand = new JsonInsert<IntegerElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.IntegerElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
                 integerElementsCommand.Execute(elementsList.Where(row => row.IntegerElement.HasValue));
 
-                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
+                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.MoneyElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
                 moneyElementsCommand.Execute(elementsList.Where(row => row.MoneyElement.HasValue));
 
-                var textElementsCommand = new JsonInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
+                var textElementsCommand = new JsonInsert<TextElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.TextElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
@@ -340,7 +333,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                          GenericSubmissionValueId = v.FieldValueId
                                                      };
 
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext);
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(provider.DatabaseContext);
                 submissionCommand.Execute(genericValueSubmissions);
                 transaction.Commit();
             }
@@ -416,8 +409,6 @@ namespace Startitecture.Orm.SqlClient.Tests
             {
                 var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
-                // Set up the structured command provider.
-                var structuredCommandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
                 var fieldRepository = new EntityRepository<Field, FieldRow>(provider, this.mapper);
                 var fieldValueRepository = new EntityRepository<FieldValue, FieldValueRow>(provider, this.mapper);
 
@@ -441,7 +432,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                     await fieldRepository.DeleteSelectionAsync(fieldSelection, cancellationToken).ConfigureAwait(false);
                 }
 
-                var fieldInsertCommand = new JsonInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
+                var fieldInsertCommand = new JsonInsert<FieldRow>(provider.DatabaseContext);
 
                 await fieldInsertCommand.ExecuteAsync(
                         fields.Select(
@@ -583,9 +574,6 @@ namespace Startitecture.Orm.SqlClient.Tests
                 var submissionId = expected.GenericSubmissionId.GetValueOrDefault();
                 Assert.AreNotEqual(0, submissionId);
 
-                // Set up the structured command provider.
-                var commandProvider = new JsonParameterCommandFactory(provider.DatabaseContext);
-
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
                                  select new FieldValueTableTypeRow
@@ -595,7 +583,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                             LastModifiedTime = expected.SubmittedTime
                                         };
 
-                var valuesCommand = new JsonInsert<FieldValueRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var valuesCommand = new JsonInsert<FieldValueRow>(provider.DatabaseContext).SelectFromInserted();
                 var insertedValues = new List<FieldValueRow>();
 
                 await foreach (var item in valuesCommand.ExecuteForResultsAsync(valuesList, cancellationToken).ConfigureAwait(false))
@@ -624,7 +612,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                            }).ToList();
 
-                var elementsCommand = new JsonInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext).SelectFromInserted();
+                var elementsCommand = new JsonInsert<FieldValueElementRow>(provider.DatabaseContext).SelectFromInserted();
 
                 // Reassign with our added identities
                 // TODO: create dictionary for seeks
@@ -641,34 +629,34 @@ namespace Startitecture.Orm.SqlClient.Tests
                     this.mapper.MapTo(input, element);
                 }
 
-                var dateElementsCommand = new JsonInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
                 await dateElementsCommand.ExecuteAsync(elementsList.Where(row => row.DateElement.HasValue), cancellationToken).ConfigureAwait(false);
 
-                var floatElementsCommand = new JsonInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
+                var floatElementsCommand = new JsonInsert<FloatElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.FloatElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement);
 
                 await floatElementsCommand.ExecuteAsync(elementsList.Where(row => row.FloatElement.HasValue), cancellationToken)
                     .ConfigureAwait(false);
 
-                var integerElementsCommand = new JsonInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
+                var integerElementsCommand = new JsonInsert<IntegerElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.IntegerElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
                 await integerElementsCommand.ExecuteAsync(elementsList.Where(row => row.IntegerElement.HasValue), cancellationToken)
                     .ConfigureAwait(false);
 
-                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
+                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.MoneyElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
                 await moneyElementsCommand.ExecuteAsync(elementsList.Where(row => row.MoneyElement.HasValue), cancellationToken)
                     .ConfigureAwait(false);
 
-                var textElementsCommand = new JsonInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
+                var textElementsCommand = new JsonInsert<TextElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.TextElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
@@ -682,7 +670,7 @@ namespace Startitecture.Orm.SqlClient.Tests
                                                          GenericSubmissionValueId = v.FieldValueId
                                                      };
 
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext);
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(provider.DatabaseContext);
                 await submissionCommand.ExecuteAsync(genericValueSubmissions, cancellationToken).ConfigureAwait(false);
                 await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -692,7 +680,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_JsonInsertWithIdentityColumnSelectResults_CommandTextMatchesExpected()
+        public void GetCommandText_JsonInsertWithIdentityColumnSelectResults_CommandTextMatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -707,17 +695,20 @@ namespace Startitecture.Orm.SqlClient.Tests
                 databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
                 ////structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
                 structuredCommandProvider
-                    .Setup(provider => provider.Create(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<FieldValueTableTypeRow>>()))
+                    .Setup(
+                        provider => provider.Create(
+                            It.IsAny<IDatabaseContext>(),
+                            It.IsAny<string>(),
+                            It.IsAny<string>(),
+                            It.IsAny<IEnumerable<FieldValueTableTypeRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var valuesCommand = new JsonInsert<FieldValueRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var valuesCommand = new JsonInsert<FieldValueRow>(databaseContext.Object)
                     .SelectFromInserted(row => row.FieldValueId, row => row.FieldId)
                     .SelectFromSource<FieldValueTableTypeRow>(
                         set => set.On(row => row.FieldId, row => row.FieldId),
                         row => row.LastModifiedByDomainIdentifierId,
                         row => row.LastModifiedTime);
-
-                valuesCommand.Execute(new List<FieldValueTableTypeRow>());
 
                 const string Expected = @"DECLARE @sourceRows table([FieldId] int, [LastModifiedByDomainIdentifierId] int, [LastModifiedTime] datetimeoffset);
 INSERT INTO @sourceRows ([FieldId], [LastModifiedByDomainIdentifierId], [LastModifiedTime])
@@ -734,7 +725,7 @@ FROM @inserted AS i
 INNER JOIN @sourceRows AS s
 ON i.[FieldId] = s.[FieldId];
 ";
-                var actual = valuesCommand.CommandText;
+                var actual = valuesCommand.GetCommandText<FieldValueTableTypeRow>("FieldValueRows");
                 Assert.AreEqual(Expected, actual);
             }
         }
@@ -743,7 +734,7 @@ ON i.[FieldId] = s.[FieldId];
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_JsonInsertForFlattenedType_MatchesExpected()
+        public void GetCommandText_JsonInsertForFlattenedType_MatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -758,14 +749,17 @@ ON i.[FieldId] = s.[FieldId];
                 databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
                 ////structuredCommandProvider.Setup(provider => provider.DatabaseContext).Returns(databaseContext.Object);
                 structuredCommandProvider
-                    .Setup(provider => provider.Create(It.IsAny<ITableCommand>(), It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
+                    .Setup(
+                        provider => provider.Create(
+                            It.IsAny<IDatabaseContext>(),
+                            It.IsAny<string>(),
+                            It.IsAny<string>(),
+                            It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(databaseContext.Object)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
-
-                dateElementsCommand.Execute(new List<FieldValueElementTableTypeRow>());
 
                 const string Expected = @"DECLARE @sourceRows table([FieldValueElementId] bigint, [DateElement] datetimeoffset);
 INSERT INTO @sourceRows ([FieldValueElementId], [DateElement])
@@ -775,7 +769,7 @@ INSERT INTO [dbo].[DateElement]
 ([DateElementId], [Value])
 SELECT [FieldValueElementId], [DateElement] FROM @sourceRows AS source;
 ";
-                var actual = dateElementsCommand.CommandText;
+                var actual = dateElementsCommand.GetCommandText<FieldValueElementTableTypeRow>("FieldValueElementRows");
                 Assert.AreEqual(Expected, actual);
             }
         }
@@ -784,7 +778,7 @@ SELECT [FieldValueElementId], [DateElement] FROM @sourceRows AS source;
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_JsonInsertForNonIdentityKey_CommandTextMatchesExpected()
+        public void GetCommandText_JsonInsertForNonIdentityKey_CommandTextMatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -797,20 +791,7 @@ SELECT [FieldValueElementId], [DateElement] FROM @sourceRows AS source;
                 repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(new TransactSqlQualifier());
                 databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
 
-                // Attach the values to the submission
-                var genericValueSubmissions = (from v in Enumerable.Range(1, 5)
-                                               select new GenericSubmissionValueTableTypeRow
-                                                      {
-                                                          GenericSubmissionId = 6,
-                                                          GenericSubmissionValueId = v
-                                                      }).ToList();
-
-                var structuredCommandProvider = genericValueSubmissions.MockCommandProvider(
-                    new DataAnnotationsDefinitionProvider(),
-                    new TransactSqlQualifier());
-
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider.Object, databaseContext.Object);
-                submissionCommand.Execute(genericValueSubmissions);
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(databaseContext.Object);
 
                 const string Expected = @"DECLARE @sourceRows table([GenericSubmissionValueId] bigint, [GenericSubmissionId] int);
 INSERT INTO @sourceRows ([GenericSubmissionValueId], [GenericSubmissionId])
@@ -820,7 +801,7 @@ INSERT INTO [dbo].[GenericSubmissionValue]
 ([GenericSubmissionValueId], [GenericSubmissionId])
 SELECT [GenericSubmissionValueId], [GenericSubmissionId] FROM @sourceRows AS source;
 ";
-                var actual = submissionCommand.CommandText;
+                var actual = submissionCommand.GetCommandText<GenericSubmissionValueTableTypeRow>("GenericSubmissionValueRows");
                 Assert.AreEqual(Expected, actual);
             }
         }

@@ -12,10 +12,10 @@ namespace Startitecture.Orm.SqlClient
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using System.Text;
 
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
 
@@ -30,19 +30,16 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Initializes a new instance of the <see cref="TableValuedInsert{T}"/> class.
         /// </summary>
-        /// <param name="tableCommandFactory">
-        /// The table command provider.
-        /// </param>
         /// <param name="databaseContext">
         /// The database context.
         /// </param>
-        public TableValuedInsert([NotNull] IDbTableCommandFactory tableCommandFactory, [NotNull] IDatabaseContext databaseContext)
-            : base(tableCommandFactory, databaseContext)
+        public TableValuedInsert([NotNull] IDatabaseContext databaseContext)
+            : base(Singleton<TableValuedParameterCommandFactory>.Instance, databaseContext)
         {
         }
 
         /// <inheritdoc />
-        protected override string DeclareSourceTable(IEnumerable<EntityAttributeDefinition> sourceAttributes)
+        protected override string DeclareSourceTable(string parameterName, IEnumerable<EntityAttributeDefinition> sourceAttributes)
         {
             return string.Empty; // Already declared in the parameter
         }
@@ -63,6 +60,7 @@ namespace Startitecture.Orm.SqlClient
 
         /// <inheritdoc />
         protected override string SourceSelection(
+            string parameterName,
             [NotNull] IReadOnlyDictionary<EntityAttributeDefinition, EntityAttributeDefinition> matchedAttributes)
         {
             if (matchedAttributes == null)
@@ -71,13 +69,13 @@ namespace Startitecture.Orm.SqlClient
             }
 
             var sourceColumns = matchedAttributes.Values.Select(x => this.NameQualifier.Escape(x.PropertyName));
-            return $"SELECT {string.Join(", ", sourceColumns)} FROM {this.NameQualifier.AddParameterPrefix(this.ParameterName)} AS source";
+            return $"SELECT {string.Join(", ", sourceColumns)} FROM {this.NameQualifier.AddParameterPrefix(parameterName)} AS source";
         }
 
         /// <inheritdoc />
-        protected override string SourceTableReference(IEnumerable<EntityAttributeDefinition> sourceAttributes)
+        protected override string SourceTableReference(string parameterName, IEnumerable<EntityAttributeDefinition> sourceAttributes)
         {
-            return this.NameQualifier.AddParameterPrefix(this.ParameterName);
+            return this.NameQualifier.AddParameterPrefix(parameterName);
         }
     }
 }

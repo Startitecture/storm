@@ -58,13 +58,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             insertAction?.Invoke(insertCommand);
@@ -91,13 +89,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             insertAction?.Invoke(insertCommand);
@@ -123,13 +119,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             insertAction?.Invoke(insertCommand);
@@ -157,13 +151,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new JsonInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                insertCommand = new TableValuedInsert<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                insertCommand = new TableValuedInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             insertAction?.Invoke(insertCommand);
@@ -189,13 +181,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             mergeAction?.Invoke(mergeCommand);
@@ -220,13 +210,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             mergeAction?.Invoke(mergeCommand);
@@ -250,13 +238,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             mergeAction?.Invoke(mergeCommand);
@@ -282,13 +268,11 @@ namespace Startitecture.Orm.SqlClient
 
             if (typeof(TItem).GetCustomAttribute<TableTypeAttribute>() == null)
             {
-                var commandProvider = new JsonParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new JsonMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new JsonMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
             else
             {
-                var commandProvider = new TableValuedParameterCommandFactory(this.RepositoryProvider.DatabaseContext);
-                mergeCommand = new TableValuedMerge<TEntity>(commandProvider, this.RepositoryProvider.DatabaseContext);
+                mergeCommand = new TableValuedMerge<TEntity>(this.RepositoryProvider.DatabaseContext);
             }
 
             mergeAction?.Invoke(mergeCommand);

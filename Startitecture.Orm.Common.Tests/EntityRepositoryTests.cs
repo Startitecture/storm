@@ -206,6 +206,31 @@ namespace Startitecture.Orm.Common.Tests
         }
 
         /// <summary>
+        /// Tests the DeletedAsync method.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task"/> representing the result of the asynchronous operation.
+        /// </returns>
+        [TestMethod]
+        public async Task DeleteAsync_ItemById_ReturnsSingleRowDeleted()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.DeleteAsync(It.IsAny<IEntitySet>(), It.IsAny<CancellationToken>())).ReturnsAsync(1);
+
+            int actual;
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<ComplexEntity, ComplexRaisedRow>(provider, this.mapper);
+                actual = await repository.DeleteAsync(14, CancellationToken.None);
+            }
+
+            Assert.AreEqual(1, actual);
+        }
+
+        /// <summary>
         /// The delete test.
         /// </summary>
         [TestMethod]
@@ -244,6 +269,33 @@ namespace Startitecture.Orm.Common.Tests
             {
                 var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
                 actual = repository.DeleteEntities(set => set.Where(filterSet => filterSet.AreEqual(entity => entity.UniqueName, "bar")));
+            }
+
+            Assert.AreEqual(5, actual);
+        }
+
+        /// <summary>
+        /// Tests the DeleteEntitiesAsync method.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task"/> representing the result of the asynchronous operation.
+        /// </returns>
+        [TestMethod]
+        public async Task DeleteEntitiesAsync_ItemsBySelection_ReturnsMultipleRowsDeleted()
+        {
+            var repositoryProvider = new Mock<IRepositoryProvider>();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            repositoryProvider.Setup(provider => provider.EntityDefinitionProvider).Returns(definitionProvider);
+            repositoryProvider.Setup(provider => provider.DeleteAsync(It.IsAny<IEntitySet>(), It.IsAny<CancellationToken>())).ReturnsAsync(5);
+
+            int actual;
+
+            using (var provider = repositoryProvider.Object)
+            {
+                var repository = new EntityRepository<SubSubEntity, SubSubRow>(provider, this.mapper);
+                actual = await repository.DeleteEntitiesAsync(
+                    set => set.Where(filterSet => filterSet.AreEqual(entity => entity.UniqueName, "bar")),
+                    CancellationToken.None);
             }
 
             Assert.AreEqual(5, actual);
@@ -416,18 +468,6 @@ namespace Startitecture.Orm.Common.Tests
             }
 
             repositoryProvider.Verify();
-        }
-
-        [TestMethod()]
-        public void DeleteAsyncTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void DeleteEntitiesAsyncTest()
-        {
-            Assert.Fail();
         }
     }
 }

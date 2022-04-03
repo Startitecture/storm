@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Startitecture.Orm.Model;
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntitySetTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -26,6 +23,34 @@ namespace Startitecture.Orm.Model.Tests
     [TestClass]
     public class EntitySetTests
     {
+        /// <summary>
+        /// Tests the From method.
+        /// </summary>
+        [TestMethod]
+        public void From_InnerJoin_MatchingRelationExpressionAdded()
+        {
+            var target = new EntitySet<DomainAggregateRow>().From(
+                set => set.InnerJoin(row => row.SubContainerId, row => row.SubContainer.SubContainerId));
+
+            Assert.AreEqual(EntityRelationType.InnerJoin, target.Relations.First().RelationType);
+            Assert.IsNull(target.Relations.First().SourceEntityAlias);
+            Assert.AreEqual(nameof(DomainAggregateRow.SubContainerId), target.Relations.First().SourceExpression.GetPropertyName());
+            Assert.IsNull(target.Relations.First().RelationEntityAlias);
+            Assert.AreEqual(nameof(SubContainerRow.SubContainerId), target.Relations.First().RelationExpression.GetPropertyName());
+        }
+
+        /// <summary>
+        /// Tests the Where method.
+        /// </summary>
+        [TestMethod]
+        public void Where_EqualityFilter_MatchingFilterAdded()
+        {
+            var target = new EntitySet<DomainAggregateRow>().Where(set => set.AreEqual(row => row.SubContainerId, 6));
+            Assert.AreEqual(nameof(DomainAggregateRow.SubContainerId), target.Filters.First().AttributeLocation.PropertyInfo.Name);
+            Assert.AreEqual(FilterType.Equality, target.Filters.First().FilterType);
+            Assert.AreEqual(6, target.Filters.First().FilterValues.First());
+        }
+
         /// <summary>
         /// The skip test.
         /// </summary>
@@ -54,7 +79,7 @@ namespace Startitecture.Orm.Model.Tests
         /// The order by test.
         /// </summary>
         [TestMethod]
-        public void OrderBy_MultipleExpressionsAdded_MatchesExpected()
+        public void OrderByExpressions_MultipleAscendingExpressionsAdded_MatchesExpected()
         {
             Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
             Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
@@ -98,7 +123,7 @@ namespace Startitecture.Orm.Model.Tests
         /// The order by descending test.
         /// </summary>
         [TestMethod]
-        public void OrderByDescending_MultipleExpressionsAdded_MatchesExpected()
+        public void OrderByExpressions_MultipleDescendingExpressionsAdded_MatchesExpected()
         {
             Expression<Func<ChildRaisedRow, object>> expr1 = row => row.FakeChildEntityId;
             Expression<Func<ChildRaisedRow, object>> expr2 = row => row.Name;
@@ -728,22 +753,15 @@ namespace Startitecture.Orm.Model.Tests
             AssertSetEquality(expected, actual);
         }
 
-        [TestMethod()]
-        public void SetDefaultRelationsTest()
+        /// <summary>
+        /// Tests the SetDefaultRelations method.
+        /// </summary>
+        [TestMethod]
+        public void SetDefaultRelations_EntityWithDefaultRelations_RelationsMatchEntityRelations()
         {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void FromTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void WhereTest()
-        {
-            Assert.Fail();
+            var target = new EntitySet<GenericSubmissionRow>();
+            target.SetDefaultRelations(new DataAnnotationsDefinitionProvider());
+            CollectionAssert.AreEqual(new GenericSubmissionRow().EntityRelations.ToList(), target.Relations.ToList());
         }
 
         /// <summary>

@@ -66,8 +66,7 @@ namespace Startitecture.Orm.PostgreSql
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
             jsonInsert.Execute(items);
         }
@@ -80,8 +79,7 @@ namespace Startitecture.Orm.PostgreSql
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
             await jsonInsert.ExecuteAsync(items, cancellationToken).ConfigureAwait(false);
         }
@@ -113,8 +111,7 @@ namespace Startitecture.Orm.PostgreSql
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
             var insertedEntities = jsonInsert.ExecuteForResults(items);
             return this.EntityMapper.Map<List<TItem>>(insertedEntities);
@@ -131,8 +128,7 @@ namespace Startitecture.Orm.PostgreSql
                 throw new ArgumentNullException(nameof(items));
             }
 
-            var tableCommandProvider = new JsonCommandFactory(this.RepositoryProvider.DatabaseContext);
-            var jsonInsert = new JsonInsert<TEntity>(tableCommandProvider, this.RepositoryProvider.DatabaseContext);
+            var jsonInsert = new JsonInsert<TEntity>(this.RepositoryProvider.DatabaseContext);
             insertAction?.Invoke(jsonInsert);
 
             await foreach (var item in jsonInsert.ExecuteForResultsAsync(items, cancellationToken).ConfigureAwait(false))

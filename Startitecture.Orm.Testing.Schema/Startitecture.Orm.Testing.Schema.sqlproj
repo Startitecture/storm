@@ -74,6 +74,7 @@
     <Folder Include="Scripts\PostDeployment" />
     <Folder Include="dbo\Table Types" />
     <Folder Include="Storage" />
+    <Folder Include="Scripts\PostgreSQL" />
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\MoneyElement.sql" />
@@ -107,11 +108,17 @@
     <Build Include="dbo\Table Types\FieldTableType.sql" />
     <Build Include="dbo\Tables\TextElement.sql" />
     <Build Include="dbo\Table Types\GenericSubmissionValueTableType.sql" />
+    <Build Include="Scripts\PostgreSQL\OrmTestModel-pgsql.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Build>
   </ItemGroup>
   <ItemGroup>
     <None Include="Startitecture.Orm.Testing.Schema.publish.xml" />
     <None Include="Scripts\PostDeployment\AggregateOptionTypeData.sql" />
     <None Include="Azure.publish.xml" />
+    <None Include="Scripts\PostgreSQL\GRANT dbo objects to storm_dev_user.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <PostDeploy Include="Scripts\PostDeployment\Script.PostDeployment.sql" />
