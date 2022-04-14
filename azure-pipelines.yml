@@ -137,7 +137,7 @@ stages:
       - task: gitsync@1
         displayName: 'Sync Azure DevOps repository with GitHub'
         inputs:
-          GitRepoUrl: 'https://%GitPat%@github.com/Startitecture/storm.git'
+          GitRepoUrl: 'https://$(GithubPAT-Mirror)@github.com/Startitecture/storm.git'
 
       - task: DocFxTask@0
         displayName: 'Create DocFx documentation'
