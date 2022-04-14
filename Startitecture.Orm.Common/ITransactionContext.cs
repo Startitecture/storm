@@ -37,6 +37,14 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Commits the underlying transaction.
         /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/> that is committing the transaction.
+        /// </returns>
+        Task CommitAsync();
+
+        /// <summary>
+        /// Commits the underlying transaction.
+        /// </summary>
         /// <param name="cancellationToken">
         /// The cancellation token for this task.
         /// </param>
@@ -49,6 +57,14 @@ namespace Startitecture.Orm.Common
         /// Rolls back the underlying transaction.
         /// </summary>
         void Rollback();
+
+        /// <summary>
+        /// Rolls back the underlying transaction.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/> that is rolling back the transaction.
+        /// </returns>
+        Task RollbackAsync();
 
         /// <summary>
         /// Rolls back the underlying transaction.

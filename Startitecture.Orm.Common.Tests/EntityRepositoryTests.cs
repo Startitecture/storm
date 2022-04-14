@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Startitecture.Orm.Common;
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityRepositoryTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>

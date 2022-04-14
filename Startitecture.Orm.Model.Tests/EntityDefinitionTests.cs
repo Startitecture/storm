@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Startitecture.Orm.Model;
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="EntityDefinitionTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -103,6 +100,80 @@ namespace Startitecture.Orm.Model.Tests
         }
 
         /// <summary>
+        /// Tests the Find method.
+        /// </summary>
+        [TestMethod]
+        public void Find_IndirectAttributeByLocation_MatchesLambdaResult()
+        {
+            var target = new EntityDefinition(
+                new DataAnnotationsDefinitionProvider(),
+                new EntityReference { EntityType = typeof(DomainAggregateRow) });
+
+            // Test that the behavior of Find with an AttributeLocation is the same of that with a LambdaExpression.
+            var expected = target.Find(CreateExpression<DomainAggregateRow, string>(item => item.SubContainer.Name));
+            var actual = target.Find(new AttributeLocation(CreateExpression<DomainAggregateRow, string>(row => row.SubContainer.Name)));
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// Tests the Find method.
+        /// </summary>
+        [TestMethod]
+        public void Find_IndirectAttributeByEntityAndPropertyName_MatchesLambdaResult()
+        {
+            var target = new EntityDefinition(
+                new DataAnnotationsDefinitionProvider(),
+                new EntityReference { EntityType = typeof(DomainAggregateRow) });
+
+            // Test that the behavior of Find with an AttributeLocation is the same of that with a LambdaExpression.
+            var expected = target.Find(CreateExpression<DomainAggregateRow, string>(item => item.SubContainer.Name));
+            var actual = target.Find("SubContainer", "Name");
+            Assert.AreEqual(expected, actual);
+        }
+
+        /// <summary>
+        /// Tests the IsUpdateable method.
+        /// </summary>
+        [TestMethod]
+        public void IsUpdateable_DirectUpdateableAttribute_ReturnsTrue()
+        {
+            var target = new EntityDefinition(
+                new DataAnnotationsDefinitionProvider(),
+                new EntityReference { EntityType = typeof(DomainAggregateRow) });
+
+            var actual = target.IsUpdateable(target.Find(CreateExpression<DomainAggregateRow, string>(row => row.Description)));
+            Assert.IsTrue(actual);
+        }
+
+        /// <summary>
+        /// Tests the IsUpdateable method.
+        /// </summary>
+        [TestMethod]
+        public void IsUpdateable_DirectIdentityAttribute_ReturnsFalse()
+        {
+            var target = new EntityDefinition(
+                new DataAnnotationsDefinitionProvider(),
+                new EntityReference { EntityType = typeof(DomainAggregateRow) });
+
+            var actual = target.IsUpdateable(target.Find(CreateExpression<DomainAggregateRow, int>(row => row.DomainAggregateId)));
+            Assert.IsFalse(actual);
+        }
+
+        /// <summary>
+        /// Tests the IsUpdateable method.
+        /// </summary>
+        [TestMethod]
+        public void IsUpdateable_IndirectUpdateableAttribute_ReturnsFalse()
+        {
+            var target = new EntityDefinition(
+                new DataAnnotationsDefinitionProvider(),
+                new EntityReference { EntityType = typeof(DomainAggregateRow) });
+
+            var actual = target.IsUpdateable(target.Find(CreateExpression<DomainAggregateRow, string>(row => row.SubContainer.Name)));
+            Assert.IsFalse(actual);
+        }
+
+        /// <summary>
         /// Creates and returns a lambda expression.
         /// </summary>
         /// <param name="propertyExpression">
@@ -120,24 +191,6 @@ namespace Startitecture.Orm.Model.Tests
         private static LambdaExpression CreateExpression<TItem, TProperty>(Expression<Func<TItem, TProperty>> propertyExpression)
         {
             return propertyExpression;
-        }
-
-        [TestMethod()]
-        public void FindTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void FindTest1()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void IsUpdateableTest()
-        {
-            Assert.Fail();
         }
     }
 }

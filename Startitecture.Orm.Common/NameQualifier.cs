@@ -6,26 +6,15 @@
 
 namespace Startitecture.Orm.Common
 {
-    using System;
-
     using Startitecture.Orm.Model;
-    using Startitecture.Resources;
 
     /// <summary>
     /// Qualifies names and identifiers for entity and attributes.
     /// </summary>
-    public class NameQualifier : INameQualifier
+    public abstract class NameQualifier : INameQualifier
     {
         /// <inheritdoc />
-        public virtual string Escape(string identifier)
-        {
-            if (string.IsNullOrWhiteSpace(identifier))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(identifier));
-            }
-
-            return $"[{identifier}]";
-        }
+        public abstract string Escape(string identifier);
 
         /// <inheritdoc />
         public string Qualify(EntityAttributeDefinition attribute)
@@ -58,15 +47,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public virtual string AddParameterPrefix(string parameterName)
-        {
-            if (string.IsNullOrWhiteSpace(parameterName))
-            {
-                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(parameterName));
-            }
-
-            return string.Concat('@', parameterName);
-        }
+        public abstract string AddParameterPrefix(string parameterName);
 
         /// <summary>
         /// Gets the entity qualified name.

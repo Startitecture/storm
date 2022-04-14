@@ -38,6 +38,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// A <see cref="Task"/> representing the result of the asynchronous operation.
         /// </returns>
         [TestMethod]
+        [TestCategory("Integration")]
         public async Task Create_JsonParameterCommand_CommandPropertiesMatchExpected()
         {
             var adapter = new TransactSqlAdapter(new DataAnnotationsDefinitionProvider());

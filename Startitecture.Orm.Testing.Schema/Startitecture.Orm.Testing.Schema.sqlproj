@@ -108,9 +108,9 @@
     <Build Include="dbo\Table Types\FieldTableType.sql" />
     <Build Include="dbo\Tables\TextElement.sql" />
     <Build Include="dbo\Table Types\GenericSubmissionValueTableType.sql" />
-    <Build Include="Scripts\PostgreSQL\OrmTestModel-pgsql.sql">
+    <None Include="Scripts\PostgreSQL\OrmTestModel-pgsql.sql">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Build>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="Startitecture.Orm.Testing.Schema.publish.xml" />

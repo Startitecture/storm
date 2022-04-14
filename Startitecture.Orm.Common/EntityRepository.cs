@@ -67,6 +67,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public Task<TModel> SaveAsync(TModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public async Task<TModel> SaveAsync(TModel model, CancellationToken cancellationToken)
         {
             if (Evaluate.IsNull(model))
@@ -87,6 +93,12 @@ namespace Startitecture.Orm.Common
             }
 
             return this.RepositoryProvider.Update(updateSet as UpdateSet<TEntity> ?? updateSet.MapSet<TEntity>());
+        }
+
+        /// <inheritdoc />
+        public Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet)
+        {
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
@@ -124,6 +136,12 @@ namespace Startitecture.Orm.Common
 
             var updateSet = this.GetUniqueUpdateSet(key, source, setExpressions);
             this.RepositoryProvider.Update(updateSet);
+        }
+
+        /// <inheritdoc />
+        public Task UpdateSingleAsync<TKey, TItem>(TKey key, TItem source, params Expression<Func<TItem, object>>[] setExpressions)
+        {
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />
@@ -165,6 +183,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public Task<int> DeleteAsync<TItem>(TItem example)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public async Task<int> DeleteAsync<TItem>(TItem example, CancellationToken cancellationToken)
         {
             if (example == null)
@@ -190,6 +214,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public async Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet, CancellationToken cancellationToken)
         {
             if (defineSet == null)
@@ -211,6 +241,12 @@ namespace Startitecture.Orm.Common
             }
 
             return this.RepositoryProvider.Delete(entitySet as EntitySet<TEntity> ?? entitySet.MapSet<TEntity>());
+        }
+
+        /// <inheritdoc />
+        public Task<int> DeleteSelectionAsync(IEntitySet entitySet)
+        {
+            throw new NotImplementedException();
         }
 
         /// <inheritdoc />

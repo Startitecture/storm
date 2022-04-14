@@ -1,7 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-
-using Startitecture.Orm.Mapper;
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="DatabaseContextTests.cs" company="Startitecture">
 //   Copyright (c) Startitecture. All rights reserved.
 // </copyright>
@@ -10,7 +7,9 @@ using Startitecture.Orm.Mapper;
 namespace Startitecture.Orm.Mapper.Tests
 {
     using System;
+    using System.Data;
     using System.Data.Common;
+    using System.Data.SqlTypes;
     using System.Diagnostics;
     using System.Linq;
     using System.Threading;
@@ -147,8 +146,7 @@ namespace Startitecture.Orm.Mapper.Tests
 
             await using (var target = new DatabaseContext(connectionString, ProviderName, repositoryAdapter))
             {
-                var tables = target.QueryAsync<dynamic>("SELECT * FROM sys.tables WHERE [type] = @0", CancellationToken.None, 'U')
-                    .ConfigureAwait(false);
+                var tables = target.QueryAsync<dynamic>("SELECT * FROM sys.tables WHERE [type] = @0", CancellationToken.None, 'U');
                 var count = 0;
 
                 await foreach (var table in tables)
@@ -163,8 +161,7 @@ namespace Startitecture.Orm.Mapper.Tests
                 var tableCount = await target.ExecuteScalarAsync<int>(
                                          "SELECT COUNT(1) FROM sys.tables WHERE [type] = @0",
                                          CancellationToken.None,
-                                         'U')
-                                     .ConfigureAwait(false);
+                                         'U');
 
                 Assert.AreNotEqual(0, tableCount);
             }
@@ -187,58 +184,149 @@ namespace Startitecture.Orm.Mapper.Tests
             await using (var database = new DatabaseContext(connection, statementCompiler))
             {
                 var cancellationToken = CancellationToken.None;
-                await database.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
-                await database.ChangeDatabaseAsync("master", cancellationToken).ConfigureAwait(false);
+                await database.OpenSharedConnectionAsync(cancellationToken);
+                await database.ChangeDatabaseAsync("master", cancellationToken);
                 Assert.AreEqual("master", database.Connection.Database);
             }
         }
 
-        [TestMethod()]
-        public void BeginTransactionTest()
+        /// <summary>
+        /// Tests the BeginTransaction method.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void BeginTransaction_DefaultIsolationLevel_TransactionIsReadCommitted()
         {
-            Assert.Fail();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
+
+            using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
+            using (var database = new DatabaseContext(connection, statementCompiler))
+            {
+                database.OpenSharedConnection();
+
+                using (var transaction = database.BeginTransaction())
+                {
+                    Assert.IsFalse(transaction.IsDisposed);
+                    Assert.AreEqual(IsolationLevel.ReadCommitted, transaction.IsolationLevel);
+                }
+            }
         }
 
-        [TestMethod()]
-        public void BeginTransactionAsyncTest()
+        /// <summary>
+        /// Tests the BeginTransactionAsync method.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task"/> representing the result of the asynchronous operation.
+        /// </returns>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public async Task BeginTransactionAsync_DefaultIsolationLevel_TransactionIsReadCommitted()
         {
-            Assert.Fail();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
+
+            await using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
+            await using (var database = new DatabaseContext(connection, statementCompiler))
+            {
+                var cancellationToken = CancellationToken.None;
+                await database.OpenSharedConnectionAsync(cancellationToken);
+                await using (var transaction = await database.BeginTransactionAsync(CancellationToken.None))
+                {
+                    Assert.IsFalse(transaction.IsDisposed);
+                    Assert.AreEqual(IsolationLevel.ReadCommitted, transaction.IsolationLevel);
+                }
+            }
         }
 
-        [TestMethod()]
-        public void BeginTransactionTest1()
+        /// <summary>
+        /// Tests the BeginTransaction method.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void BeginTransaction_ExplicitIsolationLevel_IsolationLevelMatchesExpected()
         {
-            Assert.Fail();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
+
+            using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
+            using (var database = new DatabaseContext(connection, statementCompiler))
+            {
+                database.OpenSharedConnection();
+
+                using (var transaction = database.BeginTransaction(IsolationLevel.RepeatableRead))
+                {
+                    Assert.IsFalse(transaction.IsDisposed);
+                    Assert.AreEqual(IsolationLevel.RepeatableRead, transaction.IsolationLevel);
+                }
+            }
         }
 
-        [TestMethod()]
-        public void BeginTransactionAsyncTest1()
+        /// <summary>
+        /// Tests the BeginTransactionAsync method.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task"/> representing the result of the asynchronous operation.
+        /// </returns>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public async Task BeginTransactionAsync_ExplicitIsolationLevel_IsolationLevelMatchesExpected()
         {
-            Assert.Fail();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
+
+            await using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
+            await using (var database = new DatabaseContext(connection, statementCompiler))
+            {
+                var cancellationToken = CancellationToken.None;
+                await database.OpenSharedConnectionAsync(cancellationToken);
+                await using (var transaction = await database.BeginTransactionAsync(IsolationLevel.RepeatableRead, CancellationToken.None))
+                {
+                    Assert.IsFalse(transaction.IsDisposed);
+                    Assert.AreEqual(IsolationLevel.RepeatableRead, transaction.IsolationLevel);
+                }
+            }
         }
 
-        [TestMethod()]
-        public void AssociateTransactionTest()
+        /// <summary>
+        /// Tests the AssociateTransaction test.
+        /// </summary>
+        [TestMethod]
+        [TestCategory("Integration")]
+        public void AssociateTransaction_SqlCommand_CommandTransactionIsSameAsExpected()
         {
-            Assert.Fail();
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
+
+            using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
+            using (var database = new DatabaseContext(connection, statementCompiler))
+            {
+                database.OpenSharedConnection();
+                var command = new SqlCommand("SELECT * FROM sys.tables WHERE [type] = @0");
+
+                using (var transaction = database.BeginTransaction(IsolationLevel.RepeatableRead))
+                {
+                    database.AssociateTransaction(command);
+                    Assert.IsNotNull(command.Transaction);
+                }
+            }
         }
 
-        [TestMethod()]
-        public void ExecuteTest()
+        /// <summary>
+        /// Tests the GetValueMapper method.
+        /// </summary>
+        [TestMethod]
+        public void GetValueMapper_TransactSqlAdapterForDecimalMoney_ReturnsIValueMapper()
         {
-            Assert.Fail();
-        }
+            var definitionProvider = new DataAnnotationsDefinitionProvider();
+            var statementCompiler = new TransactSqlAdapter(definitionProvider);
 
-        [TestMethod()]
-        public void ExecuteAsyncTest()
-        {
-            Assert.Fail();
-        }
-
-        [TestMethod()]
-        public void GetValueMapperTest()
-        {
-            Assert.Fail();
+            using (var connection = new SqlConnection(ConfigurationRoot.GetConnectionString("MasterDatabase")))
+            using (var database = new DatabaseContext(connection, statementCompiler))
+            {
+                var actual = database.GetValueMapper(typeof(decimal), typeof(SqlMoney));
+                Assert.IsNotNull(actual);
+            }
         }
     }
 }

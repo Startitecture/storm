@@ -6,7 +6,10 @@
 
 namespace Startitecture.Orm.PostgreSql
 {
+    using System;
+
     using Startitecture.Orm.Common;
+    using Startitecture.Resources;
 
     /// <summary>
     /// A name qualifier for PostgreSql.
@@ -16,7 +19,23 @@ namespace Startitecture.Orm.PostgreSql
         /// <inheritdoc />
         public override string Escape(string identifier)
         {
+            if (string.IsNullOrWhiteSpace(identifier))
+            {
+                throw new ArgumentException($"'{nameof(identifier)}' cannot be null or whitespace.", nameof(identifier));
+            }
+
             return string.Concat('"', identifier, '"');
+        }
+
+        /// <inheritdoc />
+        public override string AddParameterPrefix(string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(parameterName));
+            }
+
+            return string.Concat('@', parameterName);
         }
     }
 }

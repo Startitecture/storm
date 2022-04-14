@@ -286,6 +286,7 @@ SET
                 }
 
                 // Skip attributes that can't be updated, as defined by the entity definition.
+                // TODO: remove this safety? Only usage of the interface method.
                 if (entityDefinition.IsUpdateable(attributeDefinition) == false)
                 {
                     continue;

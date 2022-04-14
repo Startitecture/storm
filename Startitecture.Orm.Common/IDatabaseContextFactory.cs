@@ -28,6 +28,14 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Asynchronously creates a new database context instance.
         /// </summary>
+        /// <returns>
+        /// The <see cref="Task"/> that is creating a new <see cref="IDatabaseContext"/> instance.
+        /// </returns>
+        Task<IDatabaseContext> CreateAsync();
+
+        /// <summary>
+        /// Asynchronously creates a new database context instance.
+        /// </summary>
         /// <param name="cancellationToken">
         /// The cancellation token for the asynchronous operation.
         /// </param>

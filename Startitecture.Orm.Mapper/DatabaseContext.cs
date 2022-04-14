@@ -198,6 +198,12 @@ namespace Startitecture.Orm.Mapper
             }
         }
 
+        /// <inheritdoc />
+        public async Task OpenSharedConnectionAsync()
+        {
+            await this.OpenSharedConnectionAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
         /// <param name="cancellationToken"></param>
         /// <inheritdoc />
         public async Task OpenSharedConnectionAsync(CancellationToken cancellationToken)
@@ -243,6 +249,12 @@ namespace Startitecture.Orm.Mapper
             return this.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync()
+        {
+            return await this.BeginTransactionAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
         /// <param name="cancellationToken"></param>
         /// <inheritdoc />
         public async Task<ITransactionContext> BeginTransactionAsync(CancellationToken cancellationToken)
@@ -271,6 +283,12 @@ namespace Startitecture.Orm.Mapper
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel)
+        {
+            return await this.BeginTransactionAsync(isolationLevel, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -337,6 +355,12 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
+        public async Task ChangeDatabaseAsync(string databaseName)
+        {
+            await this.ChangeDatabaseAsync(databaseName, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task ChangeDatabaseAsync([NotNull] string databaseName, CancellationToken cancellationToken)
         {
             if (string.IsNullOrWhiteSpace(databaseName))
@@ -380,6 +404,12 @@ namespace Startitecture.Orm.Mapper
                 var returnValue = command.ExecuteNonQuery();
                 return returnValue;
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<int> ExecuteAsync(string sql, params object[] args)
+        {
+            return await this.ExecuteAsync(sql, CancellationToken.None, args).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -438,6 +468,12 @@ namespace Startitecture.Orm.Mapper
                 var result = command.ExecuteScalar();
                 return ConvertNullable<T>(result);
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<T> ExecuteScalarAsync<T>(string sql, params object[] args)
+        {
+            return await this.ExecuteScalarAsync<T>(sql, CancellationToken.None, args).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -504,6 +540,15 @@ namespace Startitecture.Orm.Mapper
                 {
                     yield return poco;
                 }
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<T> QueryAsync<T>(string sql, params object[] args)
+        {
+            await foreach (var item in this.QueryAsync<T>(sql, CancellationToken.None, args).ConfigureAwait(false))
+            {
+                yield return item;
             }
         }
 

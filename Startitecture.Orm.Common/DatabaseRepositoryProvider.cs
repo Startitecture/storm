@@ -124,6 +124,12 @@ namespace Startitecture.Orm.Common
             return this.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync()
+        {
+            return await this.BeginTransactionAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
         /// <param name="cancellationToken"></param>
         /// <inheritdoc />
         public async Task<ITransactionContext> BeginTransactionAsync(CancellationToken cancellationToken)
@@ -149,6 +155,12 @@ namespace Startitecture.Orm.Common
             {
                 throw new RepositoryException(this, ex.Message, ex);
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel)
+        {
+            return await this.BeginTransactionAsync(isolationLevel, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -200,6 +212,12 @@ namespace Startitecture.Orm.Common
             {
                 throw new RepositoryException(selection, ex.Message, ex);
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> ContainsAsync(IEntitySet selection)
+        {
+            return await this.ContainsAsync(selection, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -265,6 +283,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<T> GetScalarAsync<T>(ISelection selection)
+        {
+            return await this.GetScalarAsync<T>(selection, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<T> GetScalarAsync<T>(ISelection selection, CancellationToken cancellationToken)
         {
             if (selection == null)
@@ -321,6 +345,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<T> FirstOrDefaultAsync<T>(EntitySet<T> entitySet)
+        {
+            return await this.FirstOrDefaultAsync(entitySet, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<T> FirstOrDefaultAsync<T>(EntitySet<T> entitySet, CancellationToken cancellationToken)
         {
             if (entitySet == null)
@@ -358,6 +388,12 @@ namespace Startitecture.Orm.Common
             this.CheckDisposed();
             var item = this.FirstOrDefaultEntity<dynamic>(selection);
             return item;
+        }
+
+        /// <inheritdoc />
+        public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection)
+        {
+            return await this.DynamicFirstOrDefaultAsync(selection, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -400,6 +436,15 @@ namespace Startitecture.Orm.Common
             catch (DbException ex)
             {
                 throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<T> SelectEntitiesAsync<T>(EntitySet<T> selection)
+        {
+            await foreach (var item in this.SelectEntitiesAsync(selection, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
             }
         }
 
@@ -465,6 +510,15 @@ namespace Startitecture.Orm.Common
             catch (DbException ex)
             {
                 throw new RepositoryException(selection, ex.Message, ex);
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<dynamic> DynamicSelectAsync(ISelection selection)
+        {
+            await foreach (var item in this.DynamicSelectAsync(selection, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
             }
         }
 
@@ -547,6 +601,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<T> InsertAsync<T>(T entity)
+        {
+            return await this.InsertAsync(entity, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<T> InsertAsync<T>(T entity, CancellationToken cancellationToken)
         {
             if (Evaluate.IsNull(entity))
@@ -619,6 +679,12 @@ namespace Startitecture.Orm.Common
             {
                 throw new RepositoryException(updateSet, ex.Message, ex);
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<int> UpdateAsync<T>(UpdateSet<T> updateSet)
+        {
+            return await this.UpdateAsync(updateSet, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -695,6 +761,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task UpdateSingleAsync<T>(T entity, params Expression<Func<T, object>>[] setExpressions)
+        {
+            await this.UpdateSingleAsync(entity, CancellationToken.None, setExpressions).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task UpdateSingleAsync<T>(T entity, CancellationToken cancellationToken, params Expression<Func<T, object>>[] setExpressions)
         {
             if (entity == null)
@@ -764,6 +836,12 @@ namespace Startitecture.Orm.Common
             {
                 throw new RepositoryException(entitySet, ex.Message, ex);
             }
+        }
+
+        /// <inheritdoc />
+        public async Task<int> DeleteAsync(IEntitySet entitySet)
+        {
+            return await this.DeleteAsync(entitySet, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />

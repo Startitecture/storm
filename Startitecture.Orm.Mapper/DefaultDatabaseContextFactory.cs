@@ -85,6 +85,12 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <inheritdoc />
+        public async Task<IDatabaseContext> CreateAsync()
+        {
+            return await this.CreateAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<IDatabaseContext> CreateAsync(CancellationToken cancellationToken)
         {
             var providerFactory = DbProviderFactories.GetFactory(this.providerName);

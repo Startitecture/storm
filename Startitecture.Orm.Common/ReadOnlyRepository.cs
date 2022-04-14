@@ -79,6 +79,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<bool> ContainsAsync<TItem>(TItem candidate)
+        {
+            return await this.ContainsAsync(candidate, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<bool> ContainsAsync<TItem>(TItem candidate, CancellationToken cancellationToken)
         {
             if (Evaluate.IsNull(candidate))
@@ -99,6 +105,12 @@ namespace Startitecture.Orm.Common
             }
 
             return this.RepositoryProvider.Contains(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>());
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> ContainsAsync<TItem>(EntitySet<TItem> selection)
+        {
+            return await this.ContainsAsync(selection, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -136,6 +148,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<TModel> FirstOrDefaultAsync<TItem>(TItem candidate)
+        {
+            return await this.FirstOrDefaultAsync(candidate, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<TModel> FirstOrDefaultAsync<TItem>(TItem candidate, CancellationToken cancellationToken)
         {
             if (Evaluate.IsNull(candidate))
@@ -170,6 +188,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<TModel> FirstOrDefaultAsync<TItem>(EntitySet<TItem> selection)
+        {
+            return await this.FirstOrDefaultAsync(selection, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<TModel> FirstOrDefaultAsync<TItem>(EntitySet<TItem> selection, CancellationToken cancellationToken)
         {
             if (selection == null)
@@ -199,6 +223,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<TModel> FirstOrDefaultAsync(Action<EntitySet<TModel>> defineSet)
+        {
+            return await this.FirstOrDefaultAsync(defineSet, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<TModel> FirstOrDefaultAsync(Action<EntitySet<TModel>> defineSet, CancellationToken cancellationToken)
         {
             if (defineSet == null)
@@ -221,6 +251,12 @@ namespace Startitecture.Orm.Common
             }
 
             return this.RepositoryProvider.DynamicFirstOrDefault(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>());
+        }
+
+        /// <inheritdoc />
+        public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection)
+        {
+            return await this.DynamicFirstOrDefaultAsync(selection, CancellationToken.None).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -249,6 +285,12 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public async Task<T> GetScalarAsync<T>(ISelection selection)
+        {
+            return await this.GetScalarAsync<T>(selection, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task<T> GetScalarAsync<T>([NotNull] ISelection selection, CancellationToken cancellationToken)
         {
             if (selection == null)
@@ -267,6 +309,15 @@ namespace Startitecture.Orm.Common
             foreach (var item in this.RepositoryProvider.SelectEntities(exampleSelection))
             {
                 yield return this.ConstructModel(item);
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<TModel> SelectAllAsync()
+        {
+            await foreach (var item in this.SelectAllAsync(CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
             }
         }
 
@@ -292,6 +343,15 @@ namespace Startitecture.Orm.Common
             foreach (var item in this.RepositoryProvider.SelectEntities(selection as EntitySet<TEntity> ?? selection.MapSet<TEntity>()))
             {
                 yield return this.ConstructModel(item);
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<TModel> SelectEntitiesAsync<TItem>(EntitySet<TItem> selection)
+        {
+            await foreach (var item in this.SelectEntitiesAsync(selection, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
             }
         }
 
@@ -322,6 +382,15 @@ namespace Startitecture.Orm.Common
             }
 
             return this.RepositoryProvider.DynamicSelect(selection as EntitySelection<TEntity> ?? selection.MapSelection<TEntity>());
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<dynamic> DynamicSelectAsync<TItem>(EntitySelection<TItem> selection)
+        {
+            await foreach (var item in this.DynamicSelectAsync(selection, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
+            }
         }
 
         /// <inheritdoc />

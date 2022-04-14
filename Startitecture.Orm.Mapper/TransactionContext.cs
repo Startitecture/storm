@@ -82,6 +82,12 @@ namespace Startitecture.Orm.Mapper
             this.transaction?.Commit();
         }
 
+        /// <inheritdoc />
+        public async Task CommitAsync()
+        {
+            await this.CommitAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
         /// <param name="cancellationToken"></param>
         /// <inheritdoc />
         public async Task CommitAsync(CancellationToken cancellationToken)
@@ -114,6 +120,12 @@ namespace Startitecture.Orm.Mapper
             }
 
             this.transaction.Rollback();
+        }
+
+        /// <inheritdoc />
+        public Task RollbackAsync()
+        {
+            throw new NotImplementedException();
         }
 
         /// <param name="cancellationToken"></param>
