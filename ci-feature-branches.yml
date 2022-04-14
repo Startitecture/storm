@@ -1,0 +1,209 @@
+# Starter pipeline
+
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+variables:
+  - group: Git-Push
+  - name: BuildConfiguration
+    value: Debug
+  - name: MajorVersion
+    value: '2'
+  - name: MinorVersion
+    value: '0'
+  - name: PatchVersion
+    value: '0'
+  - name: ReleaseVersion
+    value: $(MajorVersion).$(MinorVersion).$(PatchVersion)
+
+name: $(MajorVersion).$(MinorVersion).$(PatchVersion)-ci$(Date:yyyyMMdd)$(Rev:rr)
+
+stages:
+- stage: BuildTestMirrorPackages
+  displayName: 'Build, Test and Mirror Packages'
+  jobs:
+    - job: BuildTestPackages
+      displayName: 'Build and Test Packages'
+
+      pool:
+        vmImage: 'windows-latest'
+
+      steps:
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Restore NuGet Packages'
+        inputs:
+          command: 'restore'
+          feedsToUse: 'select'
+          vstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+          verbosityRestore: 'Normal'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Build Projects'
+        inputs:
+          command: 'build'
+          projects: '**/*.csproj'
+          arguments: '-c $(BuildConfiguration) -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Run $(BuildConfiguration) Tests with Code Coverage'
+        inputs:
+          command: 'test'
+          projects: '**/*.Tests.csproj'
+          arguments: '-c $(BuildConfiguration) --collect "Code coverage" --filter TestCategory!=Integration'
+          testRunTitle: 'Core Tests - $(BuildConfiguration)'
+
+      - task: NuGetToolInstaller@1
+        inputs:
+          versionSpec: 
+          checkLatest: true
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Pack $(BuildConfiguration) configuration Pre-release Packages'
+        inputs:
+          command: 'pack'
+          packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
+          packDirectory: '$(Build.ArtifactStagingDirectory)/Packages'
+          nobuild: true
+          # includesymbols: true
+          includesource: true
+          versioningScheme: 'byEnvVar'
+          versionEnvVar: 'Build.BuildNumber'
+          verbosityPack: 'Normal'
+
+      - task: NuGetCommand@2
+        displayName: 'Push $(BuildConfiguration) NuGet Packages Internal'
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/Packages/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+          allowPackageConflicts: true
+          verbosityPush: 'Normal'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Build Projects'
+        inputs:
+          command: 'build'
+          projects: '**/*.csproj'
+          arguments: '-c Release -p:AssemblyVersion=$(MajorVersion).$(MinorVersion).0.0 -p:FileVersion=$(MajorVersion).$(MinorVersion).0.0'
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Run Release Tests with Code Coverage'
+        inputs:
+          command: 'test'
+          projects: '**/*.Tests.csproj'
+          arguments: '-c Release --collect "Code coverage" --filter TestCategory!=Integration'
+          testRunTitle: 'Core Tests - Release'
+
+      - task: NuGetToolInstaller@1
+        inputs:
+          versionSpec: 
+          checkLatest: true
+
+      - task: DotNetCoreCLI@2
+        displayName: 'Pack Release configuration Packages'
+        inputs:
+          command: 'pack'
+          packagesToPack: '**/*.csproj;!**/*.Tests.csproj;!**/*.Testing.*.csproj'
+          packDirectory: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
+          nobuild: true
+          # includesymbols: true
+          includesource: true
+          versioningScheme: 'byEnvVar'
+          versionEnvVar: 'ReleaseVersion'
+          verbosityPack: 'Normal'
+
+      - task: NuGetCommand@2
+        displayName: 'Push Release NuGet Packages Internal'
+        inputs:
+          command: 'push'
+          packagesToPush: '$(Build.ArtifactStagingDirectory)/ReleasePackages/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+          nuGetFeedType: 'internal'
+          publishVstsFeed: '644f502f-3851-40c7-b691-0456e0bed428'
+          allowPackageConflicts: true
+          verbosityPush: 'Normal'
+
+      - task: VSBuild@1
+        displayName: 'VS Build'
+        inputs:
+          solution: '**\*.sqlproj'
+          configuration: Release
+
+      - task: gitsync@1
+        displayName: 'Sync Azure DevOps repository with GitHub'
+        inputs:
+          GitRepoUrl: 'https://%GitPat%@github.com/Startitecture/storm.git'
+
+      - task: DocFxTask@0
+        displayName: 'Create DocFx documentation'
+        inputs:
+          solution: 'docs\docfx.json'
+
+      - task: CopyFiles@2
+        displayName: 'Copy $(BuildConfiguration) Test Assemblies'
+        inputs:
+          SourceFolder: '$(System.DefaultWorkingDirectory)'
+          Contents: '**/*.Tests/bin/$(buildConfiguration)/**'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/Tests'
+          CleanTargetFolder: true
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish $(BuildConfiguration) Test Assemblies'
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)/Tests'
+          artifact: 'Tests'
+          publishLocation: 'pipeline'
+
+      - task: CopyFiles@2
+        displayName: 'Copy Release Test Assemblies'
+        inputs:
+          SourceFolder: '$(System.DefaultWorkingDirectory)'
+          Contents: '**/*.Tests/bin/Release/**'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)/ReleaseTests'
+          CleanTargetFolder: true
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Release Test Assemblies'
+        inputs:
+          targetPath: '$(Build.ArtifactStagingDirectory)/ReleaseTests'
+          artifact: 'ReleaseTests'
+          publishLocation: 'pipeline'
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish NuGet $(BuildConfiguration) Package Build Artifacts'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/Packages'
+          ArtifactName: 'NuGet Pre-Release Packages'
+          publishLocation: 'Container'
+
+      - task: PublishBuildArtifacts@1
+        displayName: 'Publish NuGet Release Package Build Artifacts'
+        inputs:
+          PathtoPublish: '$(Build.ArtifactStagingDirectory)/ReleasePackages'
+          ArtifactName: 'NuGet Release Packages'
+          publishLocation: 'Container'
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Test DACPAC'
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/Startitecture.Orm.Testing.Schema/bin/Release/Startitecture.Orm.Testing.Schema.dacpac'
+          artifact: 'Storm Test DACPAC'
+          publishLocation: 'pipeline'
+
+      - task: PublishPipelineArtifact@1
+        displayName: 'Publish Database Publish Profile'
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/Startitecture.Orm.Testing.Schema/Azure.publish.xml'
+          artifact: 'Storm Test Publish Profile'
+          publishLocation: pipeline
+
+      - task: PublishPipelineArtifact@1
+        inputs:
+          targetPath: '$(System.DefaultWorkingDirectory)/docs/_site'
+          artifact: 'DocFx Site'
+          publishLocation: 'pipeline'
