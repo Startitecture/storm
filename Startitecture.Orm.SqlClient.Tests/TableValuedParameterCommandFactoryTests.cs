@@ -38,6 +38,7 @@ namespace Startitecture.Orm.SqlClient.Tests
         /// A <see cref="Task"/> representing the asynchronous unit test.
         /// </returns>
         [TestMethod]
+        [TestCategory("Integration")]
         public async Task Create_TableValuedParameterCommand_CommandPropertiesMatchExpected()
         {
             var adapter = new TransactSqlAdapter(new DataAnnotationsDefinitionProvider());

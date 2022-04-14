@@ -39,6 +39,7 @@ namespace Startitecture.Orm.PostgreSql.Tests
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the result of the asynchronous operation.</returns>
         [TestMethod]
+        [TestCategory("Integration")]
         public async Task Create_JsonCommand_CommandPropertiesMatchExpected()
         {
             var providerFactory = new PostgreSqlProviderFactory(new DataAnnotationsDefinitionProvider());
