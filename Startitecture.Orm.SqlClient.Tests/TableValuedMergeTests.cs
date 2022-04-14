@@ -10,6 +10,7 @@ namespace Startitecture.Orm.SqlClient.Tests
     using System.Collections.Generic;
     using System.Data;
     using System.Linq;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using global::AutoMapper;
@@ -115,12 +116,16 @@ namespace Startitecture.Orm.SqlClient.Tests
                               }).ToList();
 
             var definitionProvider = new DataAnnotationsDefinitionProvider();
-            var commandProvider = mergeItems.MockCommandProvider(definitionProvider, new TransactSqlQualifier());
             var databaseContext = new Mock<IDatabaseContext>();
             var repositoryAdapter = new Mock<IRepositoryAdapter>();
+
+            var nameQualifier = new TransactSqlQualifier();
+            var commandFactory = mergeItems.MockCommandFactory(definitionProvider, nameQualifier);
+
             repositoryAdapter.Setup(adapter => adapter.DefinitionProvider).Returns(definitionProvider);
+            repositoryAdapter.Setup(adapter => adapter.NameQualifier).Returns(nameQualifier);
             databaseContext.Setup(context => context.RepositoryAdapter).Returns(repositoryAdapter.Object);
-            var target = new TableValuedMerge<FieldRow>(commandProvider.Object, databaseContext.Object);
+            var target = new TableValuedMerge<FieldRow>(commandFactory.Object, databaseContext.Object);
             var typeRows = target.OnImplicit(row => row.Name).SelectFromInserted().ExecuteForResults(mergeItems);
 
             Assert.IsNotNull(typeRows);
@@ -158,11 +163,13 @@ namespace Startitecture.Orm.SqlClient.Tests
             commandProvider
                 .Setup(
                     provider => provider.Create(
-                        It.IsAny<ITableCommand>(),
+                        It.IsAny<IDatabaseContext>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<IEnumerable<FieldValueTableTypeRow>>()))
                 .Returns(new Mock<IDbCommand>().Object);
 
-            var fieldValueCommand = new TableValuedMerge<FieldValueRow>(commandProvider.Object, databaseContext.Object);
+            var fieldValueCommand = new TableValuedMerge<FieldValueRow>(databaseContext.Object);
 
             const string Expected = @"DECLARE @inserted table([FieldValueId] bigint, [FieldId] int, [LastModifiedByDomainIdentifierId] int, [LastModifiedTime] datetimeoffset);
 MERGE [dbo].[FieldValue] AS [Target]
@@ -180,9 +187,8 @@ FROM @inserted AS i;
 ";
 
             var target = fieldValueCommand.OnImplicit(row => row.FieldValueId).SelectFromInserted();
-            target.Execute(new List<FieldValueTableTypeRow>());
 
-            Assert.AreEqual(Expected, target.CommandText);
+            Assert.AreEqual(Expected, target.GetCommandText<FieldValueTableTypeRow>("FieldValueRows"));
         }
 
         /// <summary>
@@ -200,7 +206,9 @@ FROM @inserted AS i;
             commandProvider
                 .Setup(
                     provider => provider.Create(
-                        It.IsAny<ITableCommand>(),
+                        It.IsAny<IDatabaseContext>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
                 .Returns(new Mock<IDbCommand>().Object);
 
@@ -220,13 +228,12 @@ SELECT i.[FieldValueElementId], i.[FieldValueId], i.[Order]
 FROM @inserted AS i;
 ";
 
-            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider.Object, databaseContext.Object)
+            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(databaseContext.Object)
                 .OnImplicit(row => row.FieldValueId, row => row.Order)
                 .DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId)
                 .SelectFromInserted();
 
-            elementMergeCommand.Execute(new List<FieldValueElementTableTypeRow>());
-            var actual = elementMergeCommand.CommandText;
+            var actual = elementMergeCommand.GetCommandText<FieldValueElementTableTypeRow>("FieldValueElementRows");
             Assert.AreEqual(Expected, actual);
         }
 
@@ -246,7 +253,9 @@ FROM @inserted AS i;
             commandProvider
                 .Setup(
                     provider => provider.Create(
-                        It.IsAny<ITableCommand>(),
+                        It.IsAny<IDatabaseContext>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
                 .Returns(new Mock<IDbCommand>().Object);
 
@@ -268,15 +277,14 @@ INNER JOIN @FieldValueElementRows AS s
 ON i.[FieldValueId] = s.[FieldValueId] AND i.[Order] = s.[Order];
 ";
 
-            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider.Object, databaseContext.Object)
+            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(databaseContext.Object)
                 .OnImplicit(row => row.FieldValueId, row => row.Order)
                 .DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId)
                 .SelectFromInserted()
                 .SelectFromSource<FieldValueElementTableTypeRow>(
                     set => set.On(row => row.FieldValueId, row => row.FieldValueId).On(row => row.Order, row => row.Order));
 
-            elementMergeCommand.Execute(new List<FieldValueElementTableTypeRow>());
-            var actual = elementMergeCommand.CommandText;
+            var actual = elementMergeCommand.GetCommandText<FieldValueElementTableTypeRow>("FieldValueElementRows");
             Assert.AreEqual(Expected, actual);
         }
 
@@ -296,7 +304,9 @@ ON i.[FieldValueId] = s.[FieldValueId] AND i.[Order] = s.[Order];
             commandProvider
                 .Setup(
                     provider => provider.Create(
-                        It.IsAny<ITableCommand>(),
+                        It.IsAny<IDatabaseContext>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<IEnumerable<GenericSubmissionValueTableTypeRow>>()))
                 .Returns(new Mock<IDbCommand>().Object);
 
@@ -316,14 +326,12 @@ SELECT i.[GenericSubmissionValueId], i.[GenericSubmissionId]
 FROM @inserted AS i;
 ";
 
-            var target = new TableValuedMerge<GenericSubmissionValueRow>(commandProvider.Object, databaseContext.Object);
+            var target = new TableValuedMerge<GenericSubmissionValueRow>(databaseContext.Object);
             target.OnImplicit(row => row.GenericSubmissionValueId)
                 .SelectFromInserted()
                 .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId);
 
-            target.Execute(new List<GenericSubmissionValueTableTypeRow>());
-
-            Assert.AreEqual(Expected, target.CommandText);
+            Assert.AreEqual(Expected, target.GetCommandText<GenericSubmissionValueTableTypeRow>("GenericSubmissionValueRows"));
         }
 
         /// <summary>
@@ -342,7 +350,9 @@ FROM @inserted AS i;
             commandProvider
                 .Setup(
                     provider => provider.Create(
-                        It.IsAny<ITableCommand>(),
+                        It.IsAny<IDatabaseContext>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<IEnumerable<FieldValueElementTableTypeRow>>()))
                 .Returns(new Mock<IDbCommand>().Object);
 
@@ -357,13 +367,11 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
 ;
 ";
 
-            var target = new TableValuedMerge<DateElementRow>(commandProvider.Object, databaseContext.Object)
+            var target = new TableValuedMerge<DateElementRow>(databaseContext.Object)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement);
 
-            target.Execute(new List<FieldValueElementTableTypeRow>());
-
-            Assert.AreEqual(Expected, target.CommandText);
+            Assert.AreEqual(Expected, target.GetCommandText<FieldValueElementTableTypeRow>("FieldValueElementRows"));
         }
 
         /// <summary>
@@ -381,7 +389,9 @@ VALUES ([Source].[FieldValueElementId], [Source].[DateElement])
             commandFactory
                 .Setup(
                     provider => provider.Create(
-                        It.IsAny<ITableCommand>(),
+                        It.IsAny<IDatabaseContext>(),
+                        It.IsAny<string>(),
+                        It.IsAny<string>(),
                         It.IsAny<IEnumerable<FieldTableTypeRow>>()))
                 .Returns(new Mock<IDbCommand>().Object);
 
@@ -400,58 +410,11 @@ SELECT i.[FieldId], i.[Name], i.[Description]
 FROM @inserted AS i;
 ";
 
-            var fields = new List<Field>
-                         {
-                             new Field
-                             {
-                                 Name = "MERGE_Existing_Internal ID",
-                                 Description = "Unique ID used internally"
-                             },
-                             new Field
-                             {
-                                 Name = "MERGE_Existing_First Name",
-                                 Description = "The person's first name"
-                             },
-                             new Field
-                             {
-                                 Name = "MERGE_Existing_Last Name",
-                                 Description = "The person's last name"
-                             },
-                             new Field
-                             {
-                                 Name = "MERGE_Existing_Yearly Wage",
-                                 Description = "The base wage paid year over year."
-                             },
-                             new Field
-                             {
-                                 Name = "MERGE_NonExisting_Hire Date",
-                                 Description = "The date and time of hire for the person"
-                             },
-                             new Field
-                             {
-                                 Name = "MERGE_NonExisting_Bonus Target",
-                                 Description = "The target bonus for the person"
-                             },
-                             new Field
-                             {
-                                 Name = "MERGE_NonExisting_Contact Numbers",
-                                 Description = "A list of contact numbers for the person in order of preference"
-                             },
-                         };
-
-            var fieldItems = from f in fields
-                             select new FieldTableTypeRow
-                                    {
-                                        Name = f.Name,
-                                        Description = f.Description
-                                    };
-
             // Merge in the field values.
-            var target = new TableValuedMerge<FieldRow>(commandFactory.Object, databaseContext.Object).OnImplicit(row => row.Name)
+            var target = new TableValuedMerge<FieldRow>(databaseContext.Object).OnImplicit(row => row.Name)
                 .SelectFromInserted();
 
-            target.Execute(fieldItems);
-            Assert.AreEqual(Expected, target.CommandText);
+            Assert.AreEqual(Expected, target.GetCommandText<FieldTableTypeRow>("FieldRows"));
         }
 
         /// <summary>
@@ -679,6 +642,7 @@ FROM @inserted AS i;
             };
 
             var providerFactory = new SqlClientProviderFactory(new DataAnnotationsDefinitionProvider());
+            var cancellationToken = CancellationToken.None;
 
             GenericSubmission baselineSubmission;
             DomainIdentity domainIdentity2;
@@ -688,27 +652,35 @@ FROM @inserted AS i;
                 // Set up the domain identity, not part of our validity testing.
                 var identityRepository = new EntityRepository<DomainIdentity, DomainIdentityRow>(provider, this.mapper);
                 var domainIdentity = await identityRepository.FirstOrDefaultAsync(
-                                         Query.Select<DomainIdentity>()
-                                             .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName))).ConfigureAwait(false)
+                                             Query.Select<DomainIdentity>()
+                                                 .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, Environment.UserName)),
+                                             cancellationToken)
+                                         .ConfigureAwait(false)
                                      ?? await identityRepository.SaveAsync(
-                                         new DomainIdentity(Environment.UserName)
-                                         {
-                                             FirstName = "King",
-                                             MiddleName = "T.",
-                                             LastName = "Animal"
-                                         }).ConfigureAwait(false);
+                                             new DomainIdentity(Environment.UserName)
+                                             {
+                                                 FirstName = "King",
+                                                 MiddleName = "T.",
+                                                 LastName = "Animal"
+                                             },
+                                             cancellationToken)
+                                         .ConfigureAwait(false);
 
                 var domainIdentifier2 = $"{Environment.UserName}2";
                 domainIdentity2 = await identityRepository.FirstOrDefaultAsync(
-                                      Query.Select<DomainIdentity>()
-                                          .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2))).ConfigureAwait(false)
+                                          Query.Select<DomainIdentity>()
+                                              .Where(set => set.AreEqual(identity => identity.UniqueIdentifier, domainIdentifier2)),
+                                          cancellationToken)
+                                      .ConfigureAwait(false)
                                   ?? await identityRepository.SaveAsync(
-                                      new DomainIdentity(domainIdentifier2)
-                                      {
-                                          FirstName = "Foo",
-                                          MiddleName = "J.",
-                                          LastName = "Bar"
-                                      }).ConfigureAwait(false);
+                                          new DomainIdentity(domainIdentifier2)
+                                          {
+                                              FirstName = "Foo",
+                                              MiddleName = "J.",
+                                              LastName = "Bar"
+                                          },
+                                          cancellationToken)
+                                      .ConfigureAwait(false);
 
                 // We will add to this submission later.
                 baselineSubmission = new GenericSubmission("My MERGE Submission", domainIdentity);
@@ -751,20 +723,26 @@ FROM @inserted AS i;
                 await this.MergeSubmissionAsync(expected, provider).ConfigureAwait(false);
 
                 var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-                actual = await submissionRepository.FirstOrDefaultAsync(expected.GenericSubmissionId).ConfigureAwait(false);
+                actual = await submissionRepository.FirstOrDefaultAsync(expected.GenericSubmissionId, cancellationToken).ConfigureAwait(false);
 
                 var fieldValueRepository = new EntityRepository<FieldValue, GenericSubmissionValueRow>(provider, this.mapper);
-                var values = (await fieldValueRepository.SelectEntitiesAsync(
-                                      Query.Select<GenericSubmissionValueRow>()
-                                          .From(
-                                              set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
-                                                  .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
-                                                  .InnerJoin(
-                                                      row => row.FieldValue.LastModifiedByDomainIdentifierId,
-                                                      row => row.FieldValue.LastModifiedBy.DomainIdentityId))
-                                          .Where(
-                                              set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())))
-                                  .ConfigureAwait(false)).ToDictionary(value => value.FieldValueId.GetValueOrDefault(), value => value);
+                var values = new Dictionary<long, FieldValue>();
+
+                await foreach (var item in fieldValueRepository.SelectEntitiesAsync(
+                                       Query.Select<GenericSubmissionValueRow>()
+                                           .From(
+                                               set => set.InnerJoin(row => row.GenericSubmissionValueId, row => row.FieldValue.FieldValueId)
+                                                   .InnerJoin(row => row.FieldValue.FieldId, row => row.FieldValue.Field.FieldId)
+                                                   .InnerJoin(
+                                                       row => row.FieldValue.LastModifiedByDomainIdentifierId,
+                                                       row => row.FieldValue.LastModifiedBy.DomainIdentityId))
+                                           .Where(
+                                               set => set.AreEqual(row => row.GenericSubmissionId, expected.GenericSubmissionId.GetValueOrDefault())),
+                                       cancellationToken)
+                                   .ConfigureAwait(false))
+                {
+                    values.Add(item.FieldValueId.GetValueOrDefault(), item);
+                }
 
                 actual.Load(values.Values);
 
@@ -823,10 +801,9 @@ FROM @inserted AS i;
                              };
 
             // Merge in the field values.
-            var commandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
             var transaction = provider.BeginTransaction();
 
-            var fieldsCommand = new TableValuedMerge<FieldRow>(commandProvider, provider.DatabaseContext);
+            var fieldsCommand = new TableValuedMerge<FieldRow>(provider.DatabaseContext);
             var mergedFields = fieldsCommand.OnImplicit(row => row.Name)
                 .SelectFromInserted()
                 .ExecuteForResults(fieldItems)
@@ -860,7 +837,7 @@ FROM @inserted AS i;
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
-            var fieldValueCommand = new TableValuedMerge<FieldValueRow>(commandProvider, provider.DatabaseContext);
+            var fieldValueCommand = new TableValuedMerge<FieldValueRow>(provider.DatabaseContext);
             var mergedFieldValues = fieldValueCommand.OnImplicit(row => row.FieldValueId)
                 .SelectFromInserted()
                 .ExecuteForResults(fieldValues)
@@ -891,7 +868,7 @@ FROM @inserted AS i;
                                      TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                  }).ToList();
 
-            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider, provider.DatabaseContext);
+            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(provider.DatabaseContext);
             var mergedValueElements = elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
                 .DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
                 .SelectFromInserted()
@@ -905,31 +882,31 @@ FROM @inserted AS i;
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 
-            var dateElementsCommand = new TableValuedMerge<DateElementRow>(commandProvider, provider.DatabaseContext)
+            var dateElementsCommand = new TableValuedMerge<DateElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId);
 
             dateElementsCommand.Execute(valueElements.Where(row => row.DateElement.HasValue));
 
-            var floatElementsCommand = new TableValuedMerge<FloatElementRow>(commandProvider, provider.DatabaseContext)
+            var floatElementsCommand = new TableValuedMerge<FloatElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId);
 
             floatElementsCommand.Execute(valueElements.Where(row => row.FloatElement.HasValue));
 
-            var integerElementsCommand = new TableValuedMerge<IntegerElementRow>(commandProvider, provider.DatabaseContext)
+            var integerElementsCommand = new TableValuedMerge<IntegerElementRow>(provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
             integerElementsCommand.Execute(valueElements.Where(row => row.IntegerElement.HasValue));
 
-            var moneyElementsCommand = new TableValuedMerge<MoneyElementRow>(commandProvider, provider.DatabaseContext)
+            var moneyElementsCommand = new TableValuedMerge<MoneyElementRow>(provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
             moneyElementsCommand.Execute(valueElements.Where(row => row.MoneyElement.HasValue));
 
-            var textElementsCommand = new TableValuedMerge<TextElementRow>(commandProvider, provider.DatabaseContext)
+            var textElementsCommand = new TableValuedMerge<TextElementRow>(provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
@@ -943,7 +920,7 @@ FROM @inserted AS i;
                                               GenericSubmissionValueId = v.FieldValueId
                                           };
 
-            var submissionCommand = new TableValuedMerge<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext)
+            var submissionCommand = new TableValuedMerge<GenericSubmissionValueRow>(provider.DatabaseContext)
                 .OnImplicit(row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId);
 
@@ -972,14 +949,19 @@ FROM @inserted AS i;
                              };
 
             // Merge in the field values.
-            var commandProvider = new TableValuedParameterCommandFactory(provider.DatabaseContext);
-            var transaction = await provider.BeginTransactionAsync().ConfigureAwait(false);
+            var cancellationToken = CancellationToken.None;
+            var transaction = await provider.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
 
-            var fieldsCommand = new TableValuedMerge<FieldRow>(commandProvider, provider.DatabaseContext);
-            var mergedFields = (await fieldsCommand.OnImplicit(row => row.Name)
-                                    .SelectFromInserted()
-                                    .ExecuteForResultsAsync(fieldItems)
-                                    .ConfigureAwait(false)).ToList();
+            var fieldsCommand = new TableValuedMerge<FieldRow>(provider.DatabaseContext);
+            var mergedFields = new List<FieldRow>();
+
+            await foreach (var item in fieldsCommand.OnImplicit(row => row.Name)
+                               .SelectFromInserted()
+                               .ExecuteForResultsAsync(fieldItems, cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                mergedFields.Add(item);
+            }
 
             foreach (var field in fields)
             {
@@ -996,7 +978,7 @@ FROM @inserted AS i;
             }
 
             var submissionRepository = new EntityRepository<GenericSubmission, GenericSubmissionRow>(provider, this.mapper);
-            await submissionRepository.SaveAsync(submission).ConfigureAwait(false);
+            await submissionRepository.SaveAsync(submission, cancellationToken).ConfigureAwait(false);
 
             // Could be mapped as well.
             var fieldValues = from v in submission.SubmissionValues
@@ -1009,11 +991,16 @@ FROM @inserted AS i;
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
-            var fieldValueCommand = new TableValuedMerge<FieldValueRow>(commandProvider, provider.DatabaseContext);
-            var mergedFieldValues = (await fieldValueCommand.OnImplicit(row => row.FieldValueId)
-                                         .SelectFromInserted()
-                                         .ExecuteForResultsAsync(fieldValues)
-                                         .ConfigureAwait(false)).ToList();
+            var fieldValueCommand = new TableValuedMerge<FieldValueRow>(provider.DatabaseContext);
+            var mergedFieldValues = new List<FieldValueRow>();
+
+            await foreach (var item in fieldValueCommand.OnImplicit(row => row.FieldValueId)
+                               .SelectFromInserted()
+                               .ExecuteForResultsAsync(fieldValues, cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                mergedFieldValues.Add(item);
+            }
 
             Assert.IsTrue(mergedFieldValues.All(row => row.FieldValueId > 0));
 
@@ -1040,13 +1027,17 @@ FROM @inserted AS i;
                                      TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                  }).ToList();
 
-            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(commandProvider, provider.DatabaseContext);
-            var mergedValueElements = (await elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
-                                           .DeleteUnmatchedInSource<FieldValueElementTableTypeRow
-                                           >(row => row.FieldValueId) // Get rid of extraneous elements
-                                           .SelectFromInserted()
-                                           .ExecuteForResultsAsync(valueElements)
-                                           .ConfigureAwait(false)).ToList();
+            var elementMergeCommand = new TableValuedMerge<FieldValueElementRow>(provider.DatabaseContext);
+            var mergedValueElements = new List<FieldValueElementRow>();
+
+            await foreach (var item in elementMergeCommand.OnImplicit(row => row.FieldValueId, row => row.Order)
+                               .DeleteUnmatchedInSource<FieldValueElementTableTypeRow>(row => row.FieldValueId) // Get rid of extraneous elements
+                               .SelectFromInserted()
+                               .ExecuteForResultsAsync(valueElements, cancellationToken)
+                               .ConfigureAwait(false))
+            {
+                mergedValueElements.Add(item);
+            }
 
             foreach (var element in valueElements)
             {
@@ -1055,35 +1046,35 @@ FROM @inserted AS i;
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 
-            var dateElementsCommand = new TableValuedMerge<DateElementRow>(commandProvider, provider.DatabaseContext)
+            var dateElementsCommand = new TableValuedMerge<DateElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElement)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.DateElementId);
 
-            await dateElementsCommand.ExecuteAsync(valueElements.Where(row => row.DateElement.HasValue)).ConfigureAwait(false);
+            await dateElementsCommand.ExecuteAsync(valueElements.Where(row => row.DateElement.HasValue), cancellationToken).ConfigureAwait(false);
 
-            var floatElementsCommand = new TableValuedMerge<FloatElementRow>(commandProvider, provider.DatabaseContext)
+            var floatElementsCommand = new TableValuedMerge<FloatElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElement)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.FloatElementId);
 
-            await floatElementsCommand.ExecuteAsync(valueElements.Where(row => row.FloatElement.HasValue)).ConfigureAwait(false);
+            await floatElementsCommand.ExecuteAsync(valueElements.Where(row => row.FloatElement.HasValue), cancellationToken).ConfigureAwait(false);
 
-            var integerElementsCommand = new TableValuedMerge<IntegerElementRow>(commandProvider, provider.DatabaseContext)
+            var integerElementsCommand = new TableValuedMerge<IntegerElementRow>(provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
-            await integerElementsCommand.ExecuteAsync(valueElements.Where(row => row.IntegerElement.HasValue)).ConfigureAwait(false);
+            await integerElementsCommand.ExecuteAsync(valueElements.Where(row => row.IntegerElement.HasValue), cancellationToken).ConfigureAwait(false);
 
-            var moneyElementsCommand = new TableValuedMerge<MoneyElementRow>(commandProvider, provider.DatabaseContext)
+            var moneyElementsCommand = new TableValuedMerge<MoneyElementRow>(provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
-            await moneyElementsCommand.ExecuteAsync(valueElements.Where(row => row.MoneyElement.HasValue)).ConfigureAwait(false);
+            await moneyElementsCommand.ExecuteAsync(valueElements.Where(row => row.MoneyElement.HasValue), cancellationToken).ConfigureAwait(false);
 
-            var textElementsCommand = new TableValuedMerge<TextElementRow>(commandProvider, provider.DatabaseContext)
+            var textElementsCommand = new TableValuedMerge<TextElementRow>(provider.DatabaseContext)
                 .On<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElementId)
                 .From<FieldValueElementTableTypeRow>(row => row.FieldValueElementId, row => row.TextElement);
 
-            await textElementsCommand.ExecuteAsync(valueElements.Where(row => row.TextElement != null)).ConfigureAwait(false);
+            await textElementsCommand.ExecuteAsync(valueElements.Where(row => row.TextElement != null), cancellationToken).ConfigureAwait(false);
 
             // Attach the values to the submission
             var genericValueSubmissions = from v in mergedFieldValues
@@ -1093,12 +1084,12 @@ FROM @inserted AS i;
                                               GenericSubmissionValueId = v.FieldValueId
                                           };
 
-            var submissionCommand = new TableValuedMerge<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext)
+            var submissionCommand = new TableValuedMerge<GenericSubmissionValueRow>(provider.DatabaseContext)
                 .OnImplicit(row => row.GenericSubmissionValueId)
                 .DeleteUnmatchedInSource<GenericSubmissionValueTableTypeRow>(row => row.GenericSubmissionId);
 
-            await submissionCommand.ExecuteAsync(genericValueSubmissions).ConfigureAwait(false);
-            await transaction.CommitAsync().ConfigureAwait(false);
+            await submissionCommand.ExecuteAsync(genericValueSubmissions, cancellationToken).ConfigureAwait(false);
+            await transaction.CommitAsync(cancellationToken).ConfigureAwait(false);
         }
     }
 }

@@ -8,6 +8,7 @@ namespace Startitecture.Orm.PostgreSql
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -52,6 +53,9 @@ namespace Startitecture.Orm.PostgreSql
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of item to insert..
         /// </typeparam>
@@ -61,7 +65,7 @@ namespace Startitecture.Orm.PostgreSql
         /// <returns>
         /// The <see cref="Task"/> that is performing the insert.
         /// </returns>
-        Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction);
+        Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction, CancellationToken cancellationToken);
 
         /// <summary>
         /// Inserts a list of items into the repository.
@@ -94,6 +98,9 @@ namespace Startitecture.Orm.PostgreSql
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of item to insert..
         /// </typeparam>
@@ -103,8 +110,9 @@ namespace Startitecture.Orm.PostgreSql
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
         /// </returns>
-        Task<IEnumerable<TItem>> InsertForResultsAsync<TItem>(
+        IAsyncEnumerable<TItem> InsertForResultsAsync<TItem>(
             [NotNull] IEnumerable<TItem> items,
-            Action<JsonInsert<TEntity>> insertAction);
+            Action<JsonInsert<TEntity>> insertAction,
+            CancellationToken cancellationToken);
     }
 }

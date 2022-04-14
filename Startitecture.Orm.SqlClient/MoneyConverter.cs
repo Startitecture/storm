@@ -11,8 +11,6 @@ namespace Startitecture.Orm.SqlClient
     using System.Text.Json;
     using System.Text.Json.Serialization;
 
-    using JetBrains.Annotations;
-
     /// <summary>
     /// Converts the <see cref="SqlMoney"/> type for use in JSON data.
     /// </summary>
@@ -27,7 +25,7 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <inheritdoc />
-        public override void Write([NotNull] Utf8JsonWriter writer, SqlMoney? value, JsonSerializerOptions options)
+        public override void Write(Utf8JsonWriter writer, SqlMoney? value, JsonSerializerOptions options)
         {
             if (writer == null)
             {

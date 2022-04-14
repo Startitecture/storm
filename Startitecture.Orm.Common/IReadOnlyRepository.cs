@@ -11,6 +11,7 @@ namespace Startitecture.Orm.Common
 {
     using System;
     using System.Collections.Generic;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using Startitecture.Orm.Model;
@@ -60,6 +61,26 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Determines whether an item exists in the repository.
         /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item to search for.
+        /// </typeparam>
+        /// <param name="candidate">
+        /// The candidate item to search for.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <returns>
+        /// <c>true</c> if the item exists in the repository; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="candidate"/> is null.
+        /// </exception>
+        Task<bool> ContainsAsync<TItem>(TItem candidate, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Determines whether an item exists in the repository.
+        /// </summary>
         /// <param name="selection">
         /// The selection to use to query the repository.
         /// </param>
@@ -92,6 +113,26 @@ namespace Startitecture.Orm.Common
         Task<bool> ContainsAsync<TItem>(EntitySet<TItem> selection);
 
         /// <summary>
+        /// Determines whether an item exists in the repository.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to use to query the repository.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item with the properties to test.
+        /// </typeparam>
+        /// <returns>
+        /// <c>true</c> if a matching item exists in the repository; otherwise, <c>false</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
+        Task<bool> ContainsAsync<TItem>(EntitySet<TItem> selection, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Gets an item by its identifier or unique key.
         /// </summary>
         /// <typeparam name="TItem">
@@ -101,8 +142,8 @@ namespace Startitecture.Orm.Common
         /// The candidate item to search for.
         /// </param>
         /// <returns>
-        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a
-        /// default value of the <typeparamref name="TModel"/> type if no entity could be found using the candidate.
+        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or the
+        /// default value of <typeparamref name="TModel"/> if no entity could be found using the candidate.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="candidate"/> is null.
@@ -119,13 +160,34 @@ namespace Startitecture.Orm.Common
         /// The candidate item to search for.
         /// </param>
         /// <returns>
-        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a
-        /// default value of the <typeparamref name="TModel"/> type if no entity could be found using the candidate.
+        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or the
+        /// default value of <typeparamref name="TModel"/> if no entity could be found using the candidate.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="candidate"/> is null.
         /// </exception>
         Task<TModel> FirstOrDefaultAsync<TItem>(TItem candidate);
+
+        /// <summary>
+        /// Gets an item by its identifier or unique key.
+        /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item to search for.
+        /// </typeparam>
+        /// <param name="candidate">
+        /// The candidate item to search for.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <returns>
+        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or the
+        /// default value of <typeparamref name="TModel"/> if no entity could be found using the candidate.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="candidate"/> is null.
+        /// </exception>
+        Task<TModel> FirstOrDefaultAsync<TItem>(TItem candidate, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the first matching item of the selection. To ensure repeatable results, use unique column criteria.
@@ -137,8 +199,8 @@ namespace Startitecture.Orm.Common
         /// The selection to use to query the repository.
         /// </param>
         /// <returns>
-        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a
-        /// default value of the <typeparamref name="TModel"/> type if no entity could be found using the candidate.
+        /// The first <typeparamref name="TModel"/> in the repository matching the selection, or the default value of <typeparamref name="TModel"/>
+        /// if no entity could be found using the candidate.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
@@ -155,8 +217,8 @@ namespace Startitecture.Orm.Common
         /// The selection to use to query the repository.
         /// </param>
         /// <returns>
-        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a
-        /// default value of the <typeparamref name="TModel"/> type if no entity could be found using the candidate.
+        /// The first <typeparamref name="TModel"/> in the repository matching the selection, or the default value of <typeparamref name="TModel"/>
+        /// if no entity could be found using the candidate.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
@@ -166,12 +228,33 @@ namespace Startitecture.Orm.Common
         /// <summary>
         /// Gets the first matching item of the selection. To ensure repeatable results, use unique column criteria.
         /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item to search for.
+        /// </typeparam>
+        /// <param name="selection">
+        /// The selection to use to query the repository.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <returns>
+        /// The first <typeparamref name="TModel"/> in the repository matching the selection, or the default value of <typeparamref name="TModel"/>
+        /// if no entity could be found using the candidate.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
+        Task<TModel> FirstOrDefaultAsync<TItem>(EntitySet<TItem> selection, CancellationToken cancellationToken);
+
+        /// <summary>
+        /// Gets the first matching item of the selection. To ensure repeatable results, use unique column criteria.
+        /// </summary>
         /// <param name="defineSet">
         /// Define the set to use to query the repository.
         /// </param>
         /// <returns>
-        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a
-        /// default value of the <typeparamref name="TModel"/> type if no entity could be found using the candidate.
+        /// The first <typeparamref name="TModel"/> in the repository matching the model set, or the default value of <typeparamref name="TModel"/>
+        /// if no entity could be found using the candidate.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="defineSet"/> is null.
@@ -185,13 +268,31 @@ namespace Startitecture.Orm.Common
         /// Define the set to use to query the repository.
         /// </param>
         /// <returns>
-        /// The first <typeparamref name="TModel"/> in the repository matching the candidate item's identifier or unique key, or a
-        /// default value of the <typeparamref name="TModel"/> type if no entity could be found using the candidate.
+        /// The first <typeparamref name="TModel"/> in the repository matching the model set, or the default value of <typeparamref name="TModel"/>
+        /// if no entity could be found using the candidate.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="defineSet"/> is null.
         /// </exception>
         Task<TModel> FirstOrDefaultAsync(Action<EntitySet<TModel>> defineSet);
+
+        /// <summary>
+        /// Gets the first matching item of the selection. To ensure repeatable results, use unique column criteria.
+        /// </summary>
+        /// <param name="defineSet">
+        /// Define the set to use to query the repository.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <returns>
+        /// The first <typeparamref name="TModel"/> in the repository matching the model set, or the default value of <typeparamref name="TModel"/>
+        /// if no entity could be found using the candidate.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="defineSet"/> is null.
+        /// </exception>
+        Task<TModel> FirstOrDefaultAsync(Action<EntitySet<TModel>> defineSet, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets the first matching result of the <paramref name="selection"/> as a dynamic object.
@@ -214,6 +315,20 @@ namespace Startitecture.Orm.Common
         /// The first result of the <paramref name="selection"/> as a dynamic object, or null if no results were found.
         /// </returns>
         Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection);
+
+        /// <summary>
+        /// Gets the first matching result of the <paramref name="selection"/> as a dynamic object.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to use to query the repository.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <returns>
+        /// The first result of the <paramref name="selection"/> as a dynamic object, or null if no results were found.
+        /// </returns>
+        Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection, CancellationToken cancellationToken);
 
         /// <summary>
         /// Gets a scalar result from the specified query.
@@ -244,6 +359,23 @@ namespace Startitecture.Orm.Common
         Task<T> GetScalarAsync<T>(ISelection selection);
 
         /// <summary>
+        /// Gets a scalar result from the specified query.
+        /// </summary>
+        /// <param name="selection">
+        /// A selection for the specified scalar to return.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <typeparam name="T">
+        /// The type of scalar to return.
+        /// </typeparam>
+        /// <returns>
+        /// The scalar value as a <typeparamref name="T"/>.
+        /// </returns>
+        Task<T> GetScalarAsync<T>(ISelection selection, CancellationToken cancellationToken);
+
+        /// <summary>
         /// Selects all the domain models of the type <typeparamref name="TModel"/> in the repository.
         /// </summary>
         /// <returns>
@@ -257,7 +389,18 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// A collection of domain models that match the criteria.
         /// </returns>
-        Task<IEnumerable<TModel>> SelectAllAsync();
+        IAsyncEnumerable<TModel> SelectAllAsync();
+
+        /// <summary>
+        /// Selects all the domain models of the type <typeparamref name="TModel"/> in the repository.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <returns>
+        /// A collection of domain models that match the criteria.
+        /// </returns>
+        IAsyncEnumerable<TModel> SelectAllAsync(CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a collection of domain models matching the <paramref name="selection"/> for the specified data item type.
@@ -291,7 +434,27 @@ namespace Startitecture.Orm.Common
         /// <exception cref="ArgumentNullException">
         /// <paramref name="selection"/> is null.
         /// </exception>
-        Task<IEnumerable<TModel>> SelectEntitiesAsync<TItem>(EntitySet<TItem> selection);
+        IAsyncEnumerable<TModel> SelectEntitiesAsync<TItem>(EntitySet<TItem> selection);
+
+        /// <summary>
+        /// Returns a collection of domain models matching the <paramref name="selection"/> for the specified data item type.
+        /// </summary>
+        /// <param name="selection">
+        /// The selection to use to query the repository.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of data item that represents the <typeparamref name="TModel"/>.
+        /// </typeparam>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of the matching items.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="selection"/> is null.
+        /// </exception>
+        IAsyncEnumerable<TModel> SelectEntitiesAsync<TItem>(EntitySet<TItem> selection, CancellationToken cancellationToken);
 
         /// <summary>
         /// Returns a collection of dynamic objects matching the <paramref name="selection"/>.
@@ -319,6 +482,23 @@ namespace Startitecture.Orm.Common
         /// <returns>
         /// An <see cref="IEnumerable{T}"/> of dynamic objects matching the <paramref name="selection"/>.
         /// </returns>
-        Task<IEnumerable<dynamic>> DynamicSelectAsync<TItem>(EntitySelection<TItem> selection);
+        IAsyncEnumerable<dynamic> DynamicSelectAsync<TItem>(EntitySelection<TItem> selection);
+
+        /// <summary>
+        /// Returns a collection of dynamic objects matching the <paramref name="selection"/>.
+        /// </summary>
+        /// <typeparam name="TItem">
+        /// The type of item the selection is based on.
+        /// </typeparam>
+        /// <param name="selection">
+        /// The selection to use to query the repository.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <returns>
+        /// An <see cref="IEnumerable{T}"/> of dynamic objects matching the <paramref name="selection"/>.
+        /// </returns>
+        IAsyncEnumerable<dynamic> DynamicSelectAsync<TItem>(EntitySelection<TItem> selection, CancellationToken cancellationToken);
     }
 }

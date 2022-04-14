@@ -219,8 +219,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public EntityRelationSet<TEntity> InnerJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             string sourceAlias,
@@ -428,8 +426,6 @@ namespace Startitecture.Orm.Model
         /// <returns>
         /// The current <see cref="EntityRelationSet{TItem}"/>.
         /// </returns>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design", "CA1006:DoNotNestGenericTypesInMemberSignatures", Justification = "Allows fluent usage of the method.")]
         public EntityRelationSet<TEntity> LeftJoin<TSource, TRelation>(
             Expression<Func<TSource, object>> leftSelector,
             string sourceAlias,

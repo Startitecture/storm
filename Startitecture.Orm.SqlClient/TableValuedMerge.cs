@@ -10,8 +10,7 @@ namespace Startitecture.Orm.SqlClient
     using System.Collections.Generic;
     using System.Linq;
 
-    using JetBrains.Annotations;
-
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Model;
 
@@ -26,19 +25,30 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Initializes a new instance of the <see cref="TableValuedMerge{T}"/> class.
         /// </summary>
-        /// <param name="tableCommandFactory">
-        /// The table command provider.
+        /// <param name="databaseContext">
+        /// The database context.
+        /// </param>
+        public TableValuedMerge(IDatabaseContext databaseContext)
+            : base(Singleton<TableValuedParameterCommandFactory>.Instance, databaseContext)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TableValuedMerge{T}"/> class.
+        /// </summary>
+        /// <param name="commandFactory">
+        /// The command factory to use to create the command.
         /// </param>
         /// <param name="databaseContext">
         /// The database context.
         /// </param>
-        public TableValuedMerge([NotNull] IDbTableCommandFactory tableCommandFactory, IDatabaseContext databaseContext)
-            : base(tableCommandFactory, databaseContext)
+        public TableValuedMerge(IDbTableCommandFactory commandFactory, IDatabaseContext databaseContext)
+            : base(commandFactory, databaseContext)
         {
         }
 
         /// <inheritdoc />
-        protected override string DeclareSourceTable(IEnumerable<EntityAttributeDefinition> sourceAttributes)
+        protected override string DeclareSourceTable(string parameterName, IEnumerable<EntityAttributeDefinition> sourceAttributes)
         {
             return string.Empty; // Already declared in the parameter
         }
@@ -58,9 +68,11 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <inheritdoc />
-        protected override string SourceSelection(Dictionary<EntityAttributeDefinition, EntityAttributeDefinition> matchedAttributes)
+        protected override string SourceSelection(
+            string parameterName,
+            Dictionary<EntityAttributeDefinition, EntityAttributeDefinition> matchedAttributes)
         {
-            return this.DatabaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(this.ParameterName);
+            return this.DatabaseContext.RepositoryAdapter.NameQualifier.AddParameterPrefix(parameterName);
         }
     }
 }

@@ -321,7 +321,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Sets the row offset and size values for the entity set.
+        /// Sets the row offset and size values for the entity set. TODO: Examine for changing to private.
         /// </summary>
         /// <param name="subset">
         /// The subset of rows to return.
@@ -341,7 +341,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Adds relations to the selection.
+        /// Adds relations to the selection. TODO: Examine for changing to private.
         /// </summary>
         /// <param name="entityRelations">
         /// The relations.
@@ -360,7 +360,7 @@ namespace Startitecture.Orm.Model
         }
 
         /// <summary>
-        /// Sorts the results of the entity set.
+        /// Sorts the results of the entity set. TODO: Examine for changing to private.
         /// </summary>
         /// <param name="order">
         /// The set of order expressions that define the sort.

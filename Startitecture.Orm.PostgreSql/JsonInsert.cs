@@ -17,6 +17,7 @@ namespace Startitecture.Orm.PostgreSql
 
     using JetBrains.Annotations;
 
+    using Startitecture.Core;
     using Startitecture.Orm.Common;
     using Startitecture.Orm.Mapper;
     using Startitecture.Orm.Model;
@@ -29,11 +30,6 @@ namespace Startitecture.Orm.PostgreSql
     /// </typeparam>
     public class JsonInsert<T> : TableCommand<T>
     {
-        /// <summary>
-        /// The command text.
-        /// </summary>
-        private readonly Lazy<string> commandText;
-
         /// <summary>
         /// The match expressions.
         /// </summary>
@@ -72,28 +68,105 @@ namespace Startitecture.Orm.PostgreSql
         /// <summary>
         /// Initializes a new instance of the <see cref="JsonInsert{T}"/> class.
         /// </summary>
-        /// <param name="tableCommandFactory">
-        /// The table command provider.
-        /// </param>
         /// <param name="databaseContext">
         /// The database context.
         /// </param>
-        public JsonInsert(
-            [NotNull] IDbTableCommandFactory tableCommandFactory,
-            [NotNull] IDatabaseContext databaseContext)
-            : base(tableCommandFactory, databaseContext)
+        public JsonInsert([NotNull] IDatabaseContext databaseContext)
+            : base(Singleton<JsonCommandFactory>.Instance, databaseContext)
         {
             if (databaseContext == null)
             {
                 throw new ArgumentNullException(nameof(databaseContext));
             }
 
-            this.commandText = new Lazy<string>(this.CompileCommandText);
             this.nameQualifier = this.DatabaseContext.RepositoryAdapter.NameQualifier;
         }
 
         /// <inheritdoc />
-        public override string CommandText => this.commandText.Value;
+        public override string GetCommandText<TItem>(string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException($"'{nameof(parameterName)}' cannot be null or whitespace.", nameof(parameterName));
+            }
+
+            var insertAttributes = (this.insertColumnExpressions.Any()
+                                        ? this.insertColumnExpressions.Select(this.EntityDefinition.Find)
+                                        : this.EntityDefinition.InsertableAttributes).ToList();
+
+            var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PhysicalName)).ToList();
+
+            var itemDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>();
+
+            // Direct attributes if none are specified because this could be a raised POCO.
+            var sourceAttributes = (this.fromColumnExpressions.Any()
+                                        ? this.fromColumnExpressions.Select(itemDefinition.Find)
+                                        : from objectAttribute in itemDefinition.DirectAttributes
+                                          join insertAttribute in insertAttributes on objectAttribute.PhysicalName equals insertAttribute.PhysicalName
+                                          orderby objectAttribute.Ordinal
+                                          select objectAttribute).ToList();
+
+            var sourceColumns = sourceAttributes.Select(x => $"t.{this.nameQualifier.Escape(x.PropertyName)}").ToList();
+            var jsonProperties = sourceAttributes.Select(
+                x => $"{this.nameQualifier.Escape(x.PropertyName)} {PostgresTypeLookup.GetType(x.PropertyInfo.PropertyType)}");
+
+            var commandBuilder = new StringBuilder();
+
+            var selectResults = this.selectionAttributes.Any();
+            commandBuilder.AppendLine(
+                    $"INSERT INTO {this.nameQualifier.Escape(this.EntityDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.EntityDefinition.EntityName)}")
+                .AppendLine($"({string.Join(", ", targetColumns)})");
+
+            commandBuilder.Append(
+                $@"SELECT {string.Join(", ", sourceColumns)}
+FROM jsonb_to_recordset({this.nameQualifier.AddParameterPrefix(parameterName)}::jsonb) AS t ({string.Join(", ", jsonProperties)})");
+
+            if (this.insertConflictAction != InsertConflictAction.RaiseConstraintViolation)
+            {
+                switch (this.insertConflictAction)
+                {
+                    case InsertConflictAction.DoNothing:
+                        commandBuilder.AppendLine();
+                        commandBuilder.Append("ON CONFLICT DO NOTHING");
+                        break;
+                    case InsertConflictAction.Update:
+                        var conflictColumnHints = this.constraintHintExpressions.Select(this.EntityDefinition.Find)
+                            .Select(definition => this.nameQualifier.Escape(definition.PhysicalName))
+                            .ToList();
+
+                        var primaryKeyColumns =
+                            this.EntityDefinition.PrimaryKeyAttributes.Select(definition => this.nameQualifier.Escape(definition.PhysicalName));
+
+                        var excludedColumns = this.updateColumnExpressions.Select(this.EntityDefinition.Find)
+                            .Select(x => $"{this.nameQualifier.Escape(x.PhysicalName)} = EXCLUDED.{this.nameQualifier.Escape(x.PhysicalName)}")
+                            .ToList();
+
+                        ////var setColumnClauses =
+                        ////this.EntityDefinition.DirectAttributes.From(definition => definition.IsIdentityColumn)
+                        ////    .Select(id => $"{this.nameQualifier.Escape(id.PhysicalName)} = DEFAULT")
+                        ////    .Union(targetColumns.Select((t, i) => $"{t} = {excludedColumns[i]}")).ToList();
+
+                        commandBuilder.AppendLine()
+                            .AppendLine($"ON CONFLICT ({string.Join(", ", conflictColumnHints.Any() ? conflictColumnHints : primaryKeyColumns)})")
+                            .Append($"DO UPDATE SET {string.Join(", ", excludedColumns)}");
+
+                        break;
+                }
+            }
+
+            if (selectResults)
+            {
+                var selectionColumns = from c in this.selectionAttributes
+                                       select $"{this.nameQualifier.Escape(c.PhysicalName)}";
+
+                commandBuilder.AppendLine();
+                commandBuilder.Append($"RETURNING {string.Join(", ", selectionColumns)}");
+            }
+
+            commandBuilder.AppendLine(";");
+            var compileCommandText = commandBuilder.ToString();
+            return compileCommandText;
+        }
 
         /// <summary>
         /// Declares the table to insert into.
@@ -212,90 +285,6 @@ namespace Startitecture.Orm.PostgreSql
             this.selectionAttributes.Clear();
             this.selectionAttributes.AddRange(matchProperties.Select(this.EntityDefinition.Find));
             return this;
-        }
-
-        /// <summary>
-        /// The compile command text.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="string" />.
-        /// </returns>
-        private string CompileCommandText()
-        {
-            var insertAttributes = (this.insertColumnExpressions.Any()
-                                        ? this.insertColumnExpressions.Select(this.EntityDefinition.Find)
-                                        : this.EntityDefinition.InsertableAttributes).ToList();
-
-            var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.nameQualifier.Escape(x.PhysicalName)).ToList();
-
-            // Direct attributes if none are specified because this could be a raised POCO.
-            var sourceAttributes = (this.fromColumnExpressions.Any()
-                                        ? this.fromColumnExpressions.Select(this.ItemDefinition.Find)
-                                        : from objectAttribute in this.ItemDefinition.DirectAttributes
-                                          join insertAttribute in insertAttributes on objectAttribute.PhysicalName equals insertAttribute.PhysicalName
-                                          orderby objectAttribute.Ordinal
-                                          select objectAttribute).ToList();
-
-            var sourceColumns = sourceAttributes.Select(x => $"t.{this.nameQualifier.Escape(x.PropertyName)}").ToList();
-            var jsonProperties = sourceAttributes.Select(
-                x => $"{this.nameQualifier.Escape(x.PropertyName)} {PostgresTypeLookup.GetType(x.PropertyInfo.PropertyType)}");
-
-            var commandBuilder = new StringBuilder();
-
-            var selectResults = this.selectionAttributes.Any();
-            commandBuilder.AppendLine(
-                    $"INSERT INTO {this.nameQualifier.Escape(this.EntityDefinition.EntityContainer)}.{this.nameQualifier.Escape(this.EntityDefinition.EntityName)}")
-                .AppendLine($"({string.Join(", ", targetColumns)})");
-
-            commandBuilder.Append(
-                $@"SELECT {string.Join(", ", sourceColumns)}
-FROM jsonb_to_recordset({this.nameQualifier.AddParameterPrefix(this.ParameterName)}::jsonb) AS t ({string.Join(", ", jsonProperties)})");
-
-            if (this.insertConflictAction != InsertConflictAction.RaiseConstraintViolation)
-            {
-                switch (this.insertConflictAction)
-                {
-                    case InsertConflictAction.DoNothing:
-                        commandBuilder.AppendLine();
-                        commandBuilder.Append("ON CONFLICT DO NOTHING");
-                        break;
-                    case InsertConflictAction.Update:
-                        var conflictColumnHints = this.constraintHintExpressions.Select(this.EntityDefinition.Find)
-                            .Select(definition => this.nameQualifier.Escape(definition.PhysicalName))
-                            .ToList();
-
-                        var primaryKeyColumns =
-                            this.EntityDefinition.PrimaryKeyAttributes.Select(definition => this.nameQualifier.Escape(definition.PhysicalName));
-
-                        var excludedColumns = this.updateColumnExpressions.Select(this.EntityDefinition.Find)
-                            .Select(x => $"{this.nameQualifier.Escape(x.PhysicalName)} = EXCLUDED.{this.nameQualifier.Escape(x.PhysicalName)}")
-                            .ToList();
-
-                        ////var setColumnClauses =
-                        ////this.EntityDefinition.DirectAttributes.From(definition => definition.IsIdentityColumn)
-                        ////    .Select(id => $"{this.nameQualifier.Escape(id.PhysicalName)} = DEFAULT")
-                        ////    .Union(targetColumns.Select((t, i) => $"{t} = {excludedColumns[i]}")).ToList();
-
-                        commandBuilder.AppendLine()
-                            .AppendLine($"ON CONFLICT ({string.Join(", ", conflictColumnHints.Any() ? conflictColumnHints : primaryKeyColumns)})")
-                            .Append($"DO UPDATE SET {string.Join(", ", excludedColumns)}");
-
-                        break;
-                }
-            }
-
-            if (selectResults)
-            {
-                var selectionColumns = from c in this.selectionAttributes
-                                       select $"{this.nameQualifier.Escape(c.PhysicalName)}";
-
-                commandBuilder.AppendLine();
-                commandBuilder.Append($"RETURNING {string.Join(", ", selectionColumns)}");
-            }
-
-            commandBuilder.AppendLine(";");
-            var compileCommandText = commandBuilder.ToString();
-            return compileCommandText;
         }
     }
 }

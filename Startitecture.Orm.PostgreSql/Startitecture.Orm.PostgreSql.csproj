@@ -2,12 +2,13 @@
 
   <PropertyGroup>
     <TargetFrameworks>net5.0;netstandard2.1;net472</TargetFrameworks>
+    <LangVersion>latest</LangVersion>
     <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>Startitecture-Public.snk</AssemblyOriginatorKeyFile>
     <ApplicationIcon>storm_logo_q3R_icon.ico</ApplicationIcon>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <Version>1.0.0</Version>
+    <Version>2.0.0</Version>
     <Authors>Startitecture, LLC</Authors>
     <Description>PostgreSql connection library for the ST/ORM (Startitecture.Orm) package.</Description>
     <Copyright>© 2021, Startitecture, LLC</Copyright>
@@ -23,7 +24,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove=".editorconfig" />
     <None Remove="stylecop.json" />
     <None Include="..\Logos\Storm Logo.png">
       <Pack>True</Pack>
@@ -32,7 +32,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include=".editorconfig" />
     <AdditionalFiles Include="stylecop.json" />
   </ItemGroup>
 
@@ -51,6 +50,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="5.0.0" />
     <PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

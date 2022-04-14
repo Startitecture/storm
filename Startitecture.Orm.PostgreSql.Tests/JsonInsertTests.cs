@@ -47,13 +47,16 @@ namespace Startitecture.Orm.PostgreSql.Tests
         /// <summary>
         /// Gets the configuration root.
         /// </summary>
-        private static IConfigurationRoot ConfigurationRoot => new ConfigurationBuilder().AddJsonFile("appsettings.json", false).Build();
+        private static IConfigurationRoot ConfigurationRoot =>
+            new ConfigurationBuilder().AddJsonFile("appsettings.json", false)
+                .AddUserSecrets<JsonInsertTests>(false)
+                .Build();
 
         /// <summary>
         /// The command text test.
         /// </summary>
         [TestMethod]
-        public void CommandText_InsertJsonWithReturn_MatchesSelected()
+        public void GetCommandText_InsertJsonWithReturn_MatchesSelected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -70,14 +73,14 @@ namespace Startitecture.Orm.PostgreSql.Tests
                 structuredCommandProvider
                     .Setup(
                         provider => provider.Create(
-                            It.IsAny<ITableCommand>(),
+                            It.IsAny<IDatabaseContext>(),
+                            It.IsAny<string>(),
+                            It.IsAny<string>(),
                             It.IsAny<IEnumerable<FieldValueRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var valuesCommand = new JsonInsert<FieldValueRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var valuesCommand = new JsonInsert<FieldValueRow>(databaseContext.Object)
                     .Returning(row => row.FieldId);
-
-                valuesCommand.Execute(new List<FieldValueRow>());
 
                 const string Expected = @"INSERT INTO ""dbo"".""FieldValue""
 (""FieldId"", ""LastModifiedByDomainIdentifierId"", ""LastModifiedTime"")
@@ -86,7 +89,7 @@ FROM jsonb_to_recordset(@FieldValueRows::jsonb) AS t (""FieldId"" integer, ""Las
 RETURNING ""FieldId"";
 ";
 
-                var actual = valuesCommand.CommandText;
+                var actual = valuesCommand.GetCommandText<FieldValueRow>("FieldValueRows");
                 Assert.AreEqual(Expected, actual);
             }
         }
@@ -95,7 +98,7 @@ RETURNING ""FieldId"";
         /// The command text test.
         /// </summary>
         [TestMethod]
-        public void CommandText_InsertJsonOnConflictUpdateWithReturn_MatchesSelected()
+        public void GetCommandText_InsertJsonOnConflictUpdateWithReturn_MatchesSelected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -112,11 +115,13 @@ RETURNING ""FieldId"";
                 structuredCommandProvider
                     .Setup(
                         provider => provider.Create(
-                            It.IsAny<ITableCommand>(),
+                            It.IsAny<IDatabaseContext>(),
+                            It.IsAny<string>(),
+                            It.IsAny<string>(),
                             It.IsAny<IEnumerable<FieldValueRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var valuesCommand = new JsonInsert<FieldValueRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var valuesCommand = new JsonInsert<FieldValueRow>(databaseContext.Object)
                     .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
                     .Returning(row => row.FieldId);
 
@@ -129,8 +134,7 @@ DO UPDATE SET ""LastModifiedByDomainIdentifierId"" = EXCLUDED.""LastModifiedByDo
 RETURNING ""FieldId"";
 ";
 
-                valuesCommand.Execute(new List<FieldValueRow>());
-                var actual = valuesCommand.CommandText;
+                var actual = valuesCommand.GetCommandText<FieldValueRow>("FieldValueRows");
                 Assert.AreEqual(Expected, actual);
             }
         }
@@ -139,7 +143,7 @@ RETURNING ""FieldId"";
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_TableValueInsertForNonIdentityKey_CommandTextMatchesExpected()
+        public void GetCommandText_TableValueInsertForNonIdentityKey_CommandTextMatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -156,19 +160,20 @@ RETURNING ""FieldId"";
                 structuredCommandProvider
                     .Setup(
                         provider => provider.Create(
-                            It.IsAny<ITableCommand>(),
+                            It.IsAny<IDatabaseContext>(),
+                            It.IsAny<string>(),
+                            It.IsAny<string>(),
                             It.IsAny<IEnumerable<GenericSubmissionValueRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider.Object, databaseContext.Object);
-                submissionCommand.Execute(new List<GenericSubmissionValueRow>());
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(databaseContext.Object);
 
                 const string Expected = @"INSERT INTO ""dbo"".""GenericSubmissionValue""
 (""GenericSubmissionValueId"", ""GenericSubmissionId"")
 SELECT t.""GenericSubmissionValueId"", t.""GenericSubmissionId""
 FROM jsonb_to_recordset(@GenericSubmissionValueRows::jsonb) AS t (""GenericSubmissionValueId"" bigint, ""GenericSubmissionId"" integer);
 ";
-                var actual = submissionCommand.CommandText;
+                var actual = submissionCommand.GetCommandText<GenericSubmissionValueRow>("GenericSubmissionValueRows");
                 Assert.AreEqual(Expected, actual);
             }
         }
@@ -177,7 +182,7 @@ FROM jsonb_to_recordset(@GenericSubmissionValueRows::jsonb) AS t (""GenericSubmi
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_TableValueInsertForNonIdentityKeyOnConflictDoNothing_CommandTextMatchesExpected()
+        public void GetCommandText_TableValueInsertForNonIdentityKeyOnConflictDoNothing_CommandTextMatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -194,14 +199,14 @@ FROM jsonb_to_recordset(@GenericSubmissionValueRows::jsonb) AS t (""GenericSubmi
                 structuredCommandProvider
                     .Setup(
                         provider => provider.Create(
-                            It.IsAny<ITableCommand>(),
+                            It.IsAny<IDatabaseContext>(),
+                            It.IsAny<string>(),
+                            It.IsAny<string>(),
                             It.IsAny<IEnumerable<GenericSubmissionValueRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(databaseContext.Object)
                     .OnConflictDoNothing();
-
-                submissionCommand.Execute(new List<GenericSubmissionValueRow>());
 
                 const string Expected = @"INSERT INTO ""dbo"".""GenericSubmissionValue""
 (""GenericSubmissionValueId"", ""GenericSubmissionId"")
@@ -209,7 +214,7 @@ SELECT t.""GenericSubmissionValueId"", t.""GenericSubmissionId""
 FROM jsonb_to_recordset(@GenericSubmissionValueRows::jsonb) AS t (""GenericSubmissionValueId"" bigint, ""GenericSubmissionId"" integer)
 ON CONFLICT DO NOTHING;
 ";
-                var actual = submissionCommand.CommandText;
+                var actual = submissionCommand.GetCommandText<GenericSubmissionValueRow>("GenericSubmissionValueRows");
                 Assert.AreEqual(Expected, actual);
             }
         }
@@ -218,7 +223,7 @@ ON CONFLICT DO NOTHING;
         /// The execute test.
         /// </summary>
         [TestMethod]
-        public void CommandText_TableValuedInsertForFlattenedType_MatchesExpected()
+        public void GetCommandText_TableValuedInsertForFlattenedType_MatchesExpected()
         {
             var databaseContext = new Mock<IDatabaseContext>();
             var mockProvider = new Mock<IRepositoryProvider>();
@@ -235,22 +240,22 @@ ON CONFLICT DO NOTHING;
                 structuredCommandProvider
                     .Setup(
                         provider => provider.Create(
-                            It.IsAny<ITableCommand>(),
+                            It.IsAny<IDatabaseContext>(),
+                            It.IsAny<string>(),
+                            It.IsAny<string>(),
                             It.IsAny<IEnumerable<FieldValueElementPgFlatRow>>()))
                     .Returns(new Mock<IDbCommand>().Object);
 
-                var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider.Object, databaseContext.Object)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(databaseContext.Object)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement);
-
-                dateElementsCommand.Execute(new List<FieldValueElementPgFlatRow>());
 
                 const string Expected = @"INSERT INTO ""dbo"".""DateElement""
 (""DateElementId"", ""Value"")
 SELECT t.""FieldValueElementId"", t.""DateElement""
 FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElementId"" bigint, ""DateElement"" timestamp with time zone);
 ";
-                var actual = dateElementsCommand.CommandText;
+                var actual = dateElementsCommand.GetCommandText<FieldValueElementPgFlatRow>("FieldValueElementRows");
                 Assert.AreEqual(Expected, actual);
             }
         }
@@ -327,8 +332,8 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 using (var transaction = provider.BeginTransaction())
                 {
                     // Set up the structured command provider.
-                    var structuredCommandProvider = new JsonCommandFactory(provider.DatabaseContext);
-                    var fieldInsertCommand = new JsonInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext);
+                    var structuredCommandProvider = new JsonCommandFactory();
+                    var fieldInsertCommand = new JsonInsert<FieldRow>(provider.DatabaseContext);
 
                     fieldInsertCommand.Execute(
                         fields.Select(
@@ -415,9 +420,9 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 var transaction = provider.BeginTransaction();
 
                 // Set up the structured command provider.
-                var structuredCommandProvider = new JsonCommandFactory(provider.DatabaseContext);
+                var structuredCommandProvider = new JsonCommandFactory();
                 var fieldInsertCommand =
-                    new JsonInsert<FieldRow>(structuredCommandProvider, provider.DatabaseContext).Returning(
+                    new JsonInsert<FieldRow>(provider.DatabaseContext).Returning(
                         row => row.FieldId,
                         row => row.Description);
 
@@ -549,7 +554,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 Assert.AreNotEqual(0, submissionId);
 
                 // Set up the structured command provider.
-                var structuredCommandProvider = new JsonCommandFactory(provider.DatabaseContext);
+                var structuredCommandProvider = new JsonCommandFactory();
 
                 // Do the field values
                 var valuesList = from v in expected.SubmissionValues
@@ -561,7 +566,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                  };
 
                 var valuesCommand =
-                    new JsonInsert<FieldValueRow>(structuredCommandProvider, provider.DatabaseContext)
+                    new JsonInsert<FieldValueRow>(provider.DatabaseContext)
                         .Returning(row => row.FieldValueId, row => row.FieldId);
 
                 var insertedValues = valuesCommand.ExecuteForResults(valuesList).ToList();
@@ -587,7 +592,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                         TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                     }).ToList();
 
-                var elementsCommand = new JsonInsert<FieldValueElementPgFlatRow>(structuredCommandProvider, provider.DatabaseContext)
+                var elementsCommand = new JsonInsert<FieldValueElementPgFlatRow>(provider.DatabaseContext)
                     .Returning(row => row.FieldValueId, row => row.Order);
 
                 // Reassign with our added identities
@@ -599,31 +604,31 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                     this.mapper.MapTo(input, element);
                 }
 
-                var dateElementsCommand = new JsonInsert<DateElementRow>(structuredCommandProvider, provider.DatabaseContext)
+                var dateElementsCommand = new JsonInsert<DateElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.DateElementId, row => row.Value)
                     .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement);
 
                 dateElementsCommand.Execute(elementsList.Where(row => row.DateElement.HasValue));
 
-                var floatElementsCommand = new JsonInsert<FloatElementRow>(structuredCommandProvider, provider.DatabaseContext)
+                var floatElementsCommand = new JsonInsert<FloatElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.FloatElementId, row => row.Value)
                     .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement);
 
                 floatElementsCommand.Execute(elementsList.Where(row => row.FloatElement.HasValue));
 
-                var integerElementsCommand = new JsonInsert<IntegerElementRow>(structuredCommandProvider, provider.DatabaseContext)
+                var integerElementsCommand = new JsonInsert<IntegerElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.IntegerElementId, row => row.Value)
                     .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement);
 
                 integerElementsCommand.Execute(elementsList.Where(row => row.IntegerElement.HasValue));
 
-                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(structuredCommandProvider, provider.DatabaseContext)
+                var moneyElementsCommand = new JsonInsert<MoneyElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.MoneyElementId, row => row.Value)
                     .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement);
 
                 moneyElementsCommand.Execute(elementsList.Where(row => row.MoneyElement.HasValue));
 
-                var textElementsCommand = new JsonInsert<TextElementRow>(structuredCommandProvider, provider.DatabaseContext)
+                var textElementsCommand = new JsonInsert<TextElementRow>(provider.DatabaseContext)
                     .InsertInto(row => row.TextElementId, row => row.Value)
                     .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement);
 
@@ -637,7 +642,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                                   GenericSubmissionValueId = v.FieldValueId
                                               };
 
-                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(structuredCommandProvider, provider.DatabaseContext);
+                var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(provider.DatabaseContext);
                 submissionCommand.Execute(genericValueSubmissions);
                 transaction.Commit();
             }
@@ -856,10 +861,10 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                              };
 
             // Merge in the field values.
-            var commandProvider = new JsonCommandFactory(provider.DatabaseContext);
+            var commandProvider = new JsonCommandFactory();
             var transaction = provider.BeginTransaction();
 
-            var fieldsCommand = new JsonInsert<FieldRow>(commandProvider, provider.DatabaseContext).OnConflict(row => row.Name)
+            var fieldsCommand = new JsonInsert<FieldRow>(provider.DatabaseContext).OnConflict(row => row.Name)
                 .Upsert(row => row.Description)
                 .Returning(row => row.FieldId, row => row.Name, row => row.Description);
 
@@ -893,7 +898,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
 
             // We use FieldValueId to essentially ensure we're only affecting the scope of this submission. FieldId on the select brings back
             // only inserted rows matched back to their original fields.
-            var fieldValueCommand = new JsonInsert<FieldValueRow>(commandProvider, provider.DatabaseContext);
+            var fieldValueCommand = new JsonInsert<FieldValueRow>(provider.DatabaseContext);
             var mergedFieldValues = fieldValueCommand.OnConflict(row => row.FieldValueId)
                 .Upsert(row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
                 .Returning(row => row.FieldValueId, row => row.FieldId, row => row.LastModifiedByDomainIdentifierId, row => row.LastModifiedTime)
@@ -925,7 +930,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                      TextElement = e.Element as string // here we actually want it to be null if it is not a string
                                  }).ToList();
 
-            var elementMergeCommand = new JsonInsert<FieldValueElementRow>(commandProvider, provider.DatabaseContext);
+            var elementMergeCommand = new JsonInsert<FieldValueElementRow>(provider.DatabaseContext);
             var mergedValueElements = elementMergeCommand.OnConflict(row => row.FieldValueElementId)
                 .Upsert(row => row.Order)
                 .Returning(row => row.FieldValueElementId, row => row.FieldValueId, row => row.Order)
@@ -939,35 +944,35 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                 Assert.IsTrue(element.FieldValueElementId.HasValue);
             }
 
-            var dateElementsCommand = new JsonInsert<DateElementRow>(commandProvider, provider.DatabaseContext)
+            var dateElementsCommand = new JsonInsert<DateElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.DateElement)
                 .OnConflict(row => row.DateElementId)
                 .Upsert(row => row.Value);
 
             dateElementsCommand.Execute(valueElements.Where(row => row.DateElement.HasValue));
 
-            var floatElementsCommand = new JsonInsert<FloatElementRow>(commandProvider, provider.DatabaseContext)
+            var floatElementsCommand = new JsonInsert<FloatElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.FloatElement)
                 .OnConflict(row => row.FloatElementId)
                 .Upsert(row => row.Value);
 
             floatElementsCommand.Execute(valueElements.Where(row => row.FloatElement.HasValue));
 
-            var integerElementsCommand = new JsonInsert<IntegerElementRow>(commandProvider, provider.DatabaseContext)
+            var integerElementsCommand = new JsonInsert<IntegerElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.IntegerElement)
                 .OnConflict(row => row.IntegerElementId)
                 .Upsert(row => row.Value);
 
             integerElementsCommand.Execute(valueElements.Where(row => row.IntegerElement.HasValue));
 
-            var moneyElementsCommand = new JsonInsert<MoneyElementRow>(commandProvider, provider.DatabaseContext)
+            var moneyElementsCommand = new JsonInsert<MoneyElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.MoneyElement)
                 .OnConflict(row => row.MoneyElementId)
                 .Upsert(row => row.Value);
 
             moneyElementsCommand.Execute(valueElements.Where(row => row.MoneyElement.HasValue));
 
-            var textElementsCommand = new JsonInsert<TextElementRow>(commandProvider, provider.DatabaseContext)
+            var textElementsCommand = new JsonInsert<TextElementRow>(provider.DatabaseContext)
                 .From<FieldValueElementPgFlatRow>(row => row.FieldValueElementId, row => row.TextElement)
                 .OnConflict(row => row.TextElementId)
                 .Upsert(row => row.Value);
@@ -982,7 +987,7 @@ FROM jsonb_to_recordset(@FieldValueElementRows::jsonb) AS t (""FieldValueElement
                                               GenericSubmissionValueId = v.FieldValueId
                                           };
 
-            var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(commandProvider, provider.DatabaseContext).Upsert(
+            var submissionCommand = new JsonInsert<GenericSubmissionValueRow>(provider.DatabaseContext).Upsert(
                 row => row.GenericSubmissionValueId,
                 row => row.GenericSubmissionId);
             ////.DeleteUnmatchedInSource(row => row.GenericSubmissionId); Can't with PostgreSQL

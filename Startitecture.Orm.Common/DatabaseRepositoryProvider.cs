@@ -17,9 +17,9 @@ namespace Startitecture.Orm.Common
     using System.Linq;
     using System.Linq.Expressions;
     using System.Runtime.Caching;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
-
-    using JetBrains.Annotations;
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
@@ -43,7 +43,7 @@ namespace Startitecture.Orm.Common
         private const string CacheKeyFormat = "{0}=[{1}]";
 
         /// <summary>
-        /// The entity cache.
+        /// The entity cache. TODO: replace with IMemory/IDistributedCache.
         /// </summary>
         private readonly ObjectCache entityCache;
 
@@ -54,7 +54,7 @@ namespace Startitecture.Orm.Common
         /// The database context factory.
         /// </param>
         public DatabaseRepositoryProvider(
-            [NotNull] IDatabaseContextFactory databaseContextFactory)
+            IDatabaseContextFactory databaseContextFactory)
             : this(databaseContextFactory, MemoryCache.Default)
         {
         }
@@ -69,8 +69,8 @@ namespace Startitecture.Orm.Common
         /// The entity cache.
         /// </param>
         public DatabaseRepositoryProvider(
-            [NotNull] IDatabaseContextFactory databaseContextFactory,
-            [NotNull] ObjectCache entityCache)
+            IDatabaseContextFactory databaseContextFactory,
+            ObjectCache entityCache)
         {
             if (databaseContextFactory == null)
             {
@@ -127,7 +127,14 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<ITransactionContext> BeginTransactionAsync()
         {
-            return await this.BeginTransactionAsync(IsolationLevel.ReadCommitted).ConfigureAwait(false);
+            return await this.BeginTransactionAsync(CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <param name="cancellationToken"></param>
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync(CancellationToken cancellationToken)
+        {
+            return await this.BeginTransactionAsync(IsolationLevel.ReadCommitted, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
@@ -153,12 +160,18 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel)
         {
+            return await this.BeginTransactionAsync(isolationLevel, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<ITransactionContext> BeginTransactionAsync(IsolationLevel isolationLevel, CancellationToken cancellationToken)
+        {
             this.CheckDisposed();
 
             try
             {
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                return await this.DatabaseContext.BeginTransactionAsync(isolationLevel).ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+                return await this.DatabaseContext.BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -204,6 +217,12 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<bool> ContainsAsync(IEntitySet selection)
         {
+            return await this.ContainsAsync(selection, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<bool> ContainsAsync(IEntitySet selection, CancellationToken cancellationToken)
+        {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
@@ -215,7 +234,9 @@ namespace Startitecture.Orm.Common
             try
             {
                 // Always remember to supply this method with an array of values!
-                return await this.DatabaseContext.ExecuteScalarAsync<int>(sql, selection.PropertyValues.ToArray()).ConfigureAwait(false) > 0;
+                return await this.DatabaseContext.ExecuteScalarAsync<int>(sql, cancellationToken, selection.PropertyValues.ToArray())
+                           .ConfigureAwait(false)
+                       > 0;
             }
             catch (InvalidOperationException ex)
             {
@@ -232,7 +253,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public T GetScalar<T>([NotNull] ISelection selection)
+        public T GetScalar<T>(ISelection selection)
         {
             if (selection == null)
             {
@@ -264,6 +285,12 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<T> GetScalarAsync<T>(ISelection selection)
         {
+            return await this.GetScalarAsync<T>(selection, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<T> GetScalarAsync<T>(ISelection selection, CancellationToken cancellationToken)
+        {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
@@ -274,8 +301,9 @@ namespace Startitecture.Orm.Common
 
             try
             {
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                return await this.DatabaseContext.ExecuteScalarAsync<T>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+                return await this.DatabaseContext.ExecuteScalarAsync<T>(statement, cancellationToken, selection.PropertyValues.ToArray())
+                           .ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -319,6 +347,12 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<T> FirstOrDefaultAsync<T>(EntitySet<T> entitySet)
         {
+            return await this.FirstOrDefaultAsync(entitySet, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<T> FirstOrDefaultAsync<T>(EntitySet<T> entitySet, CancellationToken cancellationToken)
+        {
             if (entitySet == null)
             {
                 throw new ArgumentNullException(nameof(entitySet));
@@ -330,19 +364,21 @@ namespace Startitecture.Orm.Common
             if (this.CacheItemPolicy != null)
             {
                 var cacheKey = CreateCacheKey(entitySet);
-                var lazyGet = new Lazy<Task<T>>(async () => await this.FirstOrDefaultEntityAsync<T>(entitySet).ConfigureAwait(false));
+                var lazyGet = new Lazy<Task<T>>(
+                    async () => await this.FirstOrDefaultEntityAsync<T>(entitySet, cancellationToken).ConfigureAwait(false));
+
                 entity = ((Lazy<T>)this.entityCache.AddOrGetExisting(cacheKey, lazyGet, this.CacheItemPolicy)).Value;
             }
             else
             {
-                entity = await this.FirstOrDefaultEntityAsync<T>(entitySet).ConfigureAwait(false);
+                entity = await this.FirstOrDefaultEntityAsync<T>(entitySet, cancellationToken).ConfigureAwait(false);
             }
 
             return entity;
         }
 
         /// <inheritdoc />
-        public dynamic DynamicFirstOrDefault([NotNull] ISelection selection)
+        public dynamic DynamicFirstOrDefault(ISelection selection)
         {
             if (selection == null)
             {
@@ -357,13 +393,19 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection)
         {
+            return await this.DynamicFirstOrDefaultAsync(selection, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<dynamic> DynamicFirstOrDefaultAsync(ISelection selection, CancellationToken cancellationToken)
+        {
             if (selection == null)
             {
                 throw new ArgumentNullException(nameof(selection));
             }
 
             this.CheckDisposed();
-            var item = await this.FirstOrDefaultEntityAsync<dynamic>(selection).ConfigureAwait(false);
+            var item = await this.FirstOrDefaultEntityAsync<dynamic>(selection, cancellationToken).ConfigureAwait(false);
             return item;
         }
 
@@ -398,7 +440,16 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<T>> SelectEntitiesAsync<T>(EntitySet<T> selection)
+        public async IAsyncEnumerable<T> SelectEntitiesAsync<T>(EntitySet<T> selection)
+        {
+            await foreach (var item in this.SelectEntitiesAsync(selection, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<T> SelectEntitiesAsync<T>(EntitySet<T> selection, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             if (selection == null)
             {
@@ -410,8 +461,7 @@ namespace Startitecture.Orm.Common
 
             try
             {
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                return await this.DatabaseContext.QueryAsync<T>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -425,10 +475,16 @@ namespace Startitecture.Orm.Common
             {
                 throw new RepositoryException(selection, ex.Message, ex);
             }
+
+            await foreach (var item in this.DatabaseContext.QueryAsync<T>(statement, cancellationToken, selection.PropertyValues.ToArray())
+                               .ConfigureAwait(false))
+            {
+                yield return item;
+            }
         }
 
         /// <inheritdoc />
-        public IEnumerable<dynamic> DynamicSelect([NotNull] ISelection selection)
+        public IEnumerable<dynamic> DynamicSelect(ISelection selection)
         {
             if (selection == null)
             {
@@ -458,7 +514,16 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<IEnumerable<dynamic>> DynamicSelectAsync(ISelection selection)
+        public async IAsyncEnumerable<dynamic> DynamicSelectAsync(ISelection selection)
+        {
+            await foreach (var item in this.DynamicSelectAsync(selection, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
+            }
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<dynamic> DynamicSelectAsync(ISelection selection, [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             if (selection == null)
             {
@@ -470,8 +535,7 @@ namespace Startitecture.Orm.Common
 
             try
             {
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                return await this.DatabaseContext.QueryAsync<dynamic>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -484,6 +548,12 @@ namespace Startitecture.Orm.Common
             catch (DbException ex)
             {
                 throw new RepositoryException(selection, ex.Message, ex);
+            }
+
+            await foreach (var item in this.DatabaseContext.QueryAsync<dynamic>(statement, cancellationToken, selection.PropertyValues.ToArray())
+                               .ConfigureAwait(false))
+            {
+                yield return item;
             }
         }
 
@@ -533,6 +603,12 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<T> InsertAsync<T>(T entity)
         {
+            return await this.InsertAsync(entity, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<T> InsertAsync<T>(T entity, CancellationToken cancellationToken)
+        {
             if (Evaluate.IsNull(entity))
             {
                 throw new ArgumentNullException(nameof(entity));
@@ -545,16 +621,18 @@ namespace Startitecture.Orm.Common
 
             try
             {
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
 
                 if (entityDefinition.RowIdentity.HasValue)
                 {
-                    var autoNumber = await this.DatabaseContext.ExecuteScalarAsync<object>(statement, values).ConfigureAwait(false);
+                    var autoNumber = await this.DatabaseContext.ExecuteScalarAsync<object>(statement, cancellationToken, values)
+                                         .ConfigureAwait(false);
+
                     entityDefinition.RowIdentity.Value.SetValueDelegate.DynamicInvoke(entity, autoNumber);
                 }
                 else
                 {
-                    await this.DatabaseContext.ExecuteAsync(statement, values).ConfigureAwait(false);
+                    await this.DatabaseContext.ExecuteAsync(statement, cancellationToken, values).ConfigureAwait(false);
                 }
             }
             catch (InvalidOperationException ex)
@@ -574,7 +652,7 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public int Update<T>([NotNull] UpdateSet<T> updateSet)
+        public int Update<T>(UpdateSet<T> updateSet)
         {
             if (updateSet == null)
             {
@@ -606,6 +684,12 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<int> UpdateAsync<T>(UpdateSet<T> updateSet)
         {
+            return await this.UpdateAsync(updateSet, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<int> UpdateAsync<T>(UpdateSet<T> updateSet, CancellationToken cancellationToken)
+        {
             if (updateSet == null)
             {
                 throw new ArgumentNullException(nameof(updateSet));
@@ -616,8 +700,9 @@ namespace Startitecture.Orm.Common
             try
             {
                 // Always use ToArray()!
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                return await this.DatabaseContext.ExecuteAsync(updateStatement, updateSet.PropertyValues.ToArray()).ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+                return await this.DatabaseContext.ExecuteAsync(updateStatement, cancellationToken, updateSet.PropertyValues.ToArray())
+                           .ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -678,6 +763,12 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task UpdateSingleAsync<T>(T entity, params Expression<Func<T, object>>[] setExpressions)
         {
+            await this.UpdateSingleAsync(entity, CancellationToken.None, setExpressions).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task UpdateSingleAsync<T>(T entity, CancellationToken cancellationToken, params Expression<Func<T, object>>[] setExpressions)
+        {
             if (entity == null)
             {
                 throw new ArgumentNullException(nameof(entity));
@@ -700,8 +791,8 @@ namespace Startitecture.Orm.Common
             try
             {
                 // Always use ToArray()!
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                await this.DatabaseContext.ExecuteAsync(updateStatement, update.PropertyValues.ToArray()).ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+                await this.DatabaseContext.ExecuteAsync(updateStatement, cancellationToken, update.PropertyValues.ToArray()).ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -750,6 +841,12 @@ namespace Startitecture.Orm.Common
         /// <inheritdoc />
         public async Task<int> DeleteAsync(IEntitySet entitySet)
         {
+            return await this.DeleteAsync(entitySet, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
+        public async Task<int> DeleteAsync(IEntitySet entitySet, CancellationToken cancellationToken)
+        {
             if (entitySet == null)
             {
                 throw new ArgumentNullException(nameof(entitySet));
@@ -760,8 +857,9 @@ namespace Startitecture.Orm.Common
 
             try
             {
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                return await this.DatabaseContext.ExecuteAsync(statement, entitySet.PropertyValues.ToArray()).ConfigureAwait(false);
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+                return await this.DatabaseContext.ExecuteAsync(statement, cancellationToken, entitySet.PropertyValues.ToArray())
+                           .ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -814,6 +912,7 @@ namespace Startitecture.Orm.Common
         /// </returns>
         private static string CreateCacheKey(IEntitySet selection)
         {
+            // TODO: Consider this behavior vs. storing by key columns
             return string.Format(CultureInfo.InvariantCulture, CacheKeyFormat, selection.EntityType.ToRuntimeName(), selection);
         }
 
@@ -894,13 +993,16 @@ namespace Startitecture.Orm.Common
         /// <param name="selection">
         /// The selection that identifies the entity.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="T">
         /// The type of entity to retrieve.
         /// </typeparam>
         /// <returns>
         /// The first matching <typeparamref name="T"/>, or the default value if no entity is found.
         /// </returns>
-        private async Task<T> FirstOrDefaultEntityAsync<T>(IEntitySet selection)
+        private async Task<T> FirstOrDefaultEntityAsync<T>(IEntitySet selection, CancellationToken cancellationToken)
         {
             if (selection == null)
             {
@@ -909,11 +1011,14 @@ namespace Startitecture.Orm.Common
 
             var statement = this.DatabaseContext.RepositoryAdapter.CreateSelectionStatement(selection);
 
+            ConfiguredCancelableAsyncEnumerable<T> results;
+
             try
             {
-                await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-                var results = await this.DatabaseContext.QueryAsync<T>(statement, selection.PropertyValues.ToArray()).ConfigureAwait(false);
-                return results.FirstOrDefault();
+                await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+
+                results = this.DatabaseContext.QueryAsync<T>(statement, cancellationToken, selection.PropertyValues.ToArray())
+                    .ConfigureAwait(false);
             }
             catch (InvalidOperationException ex)
             {
@@ -927,6 +1032,16 @@ namespace Startitecture.Orm.Common
             {
                 throw new RepositoryException(selection, ex.Message, ex);
             }
+
+            T result = default;
+
+            await foreach (var item in results)
+            {
+                result = item;
+                break;
+            }
+
+            return result;
         }
 
         /// <summary>

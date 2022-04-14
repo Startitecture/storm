@@ -15,9 +15,8 @@ namespace Startitecture.Orm.Common
     using System.Linq;
     using System.Linq.Expressions;
     using System.Reflection;
+    using System.Threading;
     using System.Threading.Tasks;
-
-    using JetBrains.Annotations;
 
     using Startitecture.Core;
     using Startitecture.Orm.Model;
@@ -48,28 +47,10 @@ namespace Startitecture.Orm.Common
         /// <param name="entityMapper">
         /// The entity mapper.
         /// </param>
-        public EntityRepository(IRepositoryProvider repositoryProvider, IEntityMapper entityMapper)
-            : this(repositoryProvider, entityMapper, null)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EntityRepository{TModel,TEntity}"/> class.
-        /// </summary>
-        /// <param name="repositoryProvider">
-        /// The repository provider for this repository.
-        /// </param>
-        /// <param name="entityMapper">
-        /// The entity mapper.
-        /// </param>
-        /// <param name="selectionComparer">
-        /// The set comparer for ordering data entities from the repository after being selected from the database.
-        /// </param>
         public EntityRepository(
             IRepositoryProvider repositoryProvider,
-            IEntityMapper entityMapper,
-            IComparer<TEntity> selectionComparer)
-            : base(repositoryProvider, entityMapper, selectionComparer)
+            IEntityMapper entityMapper)
+            : base(repositoryProvider, entityMapper)
         {
         }
 
@@ -86,19 +67,25 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<TModel> SaveAsync(TModel model)
+        public Task<TModel> SaveAsync(TModel model)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public async Task<TModel> SaveAsync(TModel model, CancellationToken cancellationToken)
         {
             if (Evaluate.IsNull(model))
             {
                 throw new ArgumentNullException(nameof(model));
             }
 
-            var entity = await this.SaveEntityAsync(model).ConfigureAwait(false);
+            var entity = await this.SaveEntityAsync(model, cancellationToken).ConfigureAwait(false);
             return this.UpdateModelIdentity(model, entity);
         }
 
         /// <inheritdoc />
-        public int Update<TItem>([NotNull] UpdateSet<TItem> updateSet)
+        public int Update<TItem>(UpdateSet<TItem> updateSet)
         {
             if (updateSet == null)
             {
@@ -109,21 +96,28 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet)
+        public Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public async Task<int> UpdateAsync<TItem>(UpdateSet<TItem> updateSet, CancellationToken cancellationToken)
         {
             if (updateSet == null)
             {
                 throw new ArgumentNullException(nameof(updateSet));
             }
 
-            return await this.RepositoryProvider.UpdateAsync(updateSet as UpdateSet<TEntity> ?? updateSet.MapSet<TEntity>()).ConfigureAwait(false);
+            return await this.RepositoryProvider.UpdateAsync(updateSet as UpdateSet<TEntity> ?? updateSet.MapSet<TEntity>(), cancellationToken)
+                       .ConfigureAwait(false);
         }
 
         /// <inheritdoc />
         public void UpdateSingle<TKey, TItem>(
-            [NotNull] TKey key,
-            [NotNull] TItem source,
-            [NotNull] params Expression<Func<TItem, object>>[] setExpressions)
+            TKey key,
+            TItem source,
+            params Expression<Func<TItem, object>>[] setExpressions)
         {
             if (key == null)
             {
@@ -145,10 +139,17 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
+        public Task UpdateSingleAsync<TKey, TItem>(TKey key, TItem source, params Expression<Func<TItem, object>>[] setExpressions)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
         public async Task UpdateSingleAsync<TKey, TItem>(
-            [NotNull] TKey key,
-            [NotNull] TItem source,
-            [NotNull] params Expression<Func<TItem, object>>[] setExpressions)
+            TKey key,
+            TItem source,
+            CancellationToken cancellationToken,
+            params Expression<Func<TItem, object>>[] setExpressions)
         {
             if (key == null)
             {
@@ -166,11 +167,11 @@ namespace Startitecture.Orm.Common
             }
 
             var updateSet = this.GetUniqueUpdateSet(key, source, setExpressions);
-            await this.RepositoryProvider.UpdateAsync(updateSet).ConfigureAwait(false);
+            await this.RepositoryProvider.UpdateAsync(updateSet, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public int Delete<TItem>([NotNull] TItem example)
+        public int Delete<TItem>(TItem example)
         {
             if (example == null)
             {
@@ -182,7 +183,13 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<int> DeleteAsync<TItem>(TItem example)
+        public Task<int> DeleteAsync<TItem>(TItem example)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public async Task<int> DeleteAsync<TItem>(TItem example, CancellationToken cancellationToken)
         {
             if (example == null)
             {
@@ -190,11 +197,11 @@ namespace Startitecture.Orm.Common
             }
 
             var entitySet = new EntitySet<TEntity>().Where(set => this.GetUniqueSet(example, set));
-            return await this.RepositoryProvider.DeleteAsync(entitySet).ConfigureAwait(false);
+            return await this.RepositoryProvider.DeleteAsync(entitySet, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public int DeleteEntities([NotNull] Action<EntitySet<TModel>> defineSet)
+        public int DeleteEntities(Action<EntitySet<TModel>> defineSet)
         {
             if (defineSet == null)
             {
@@ -207,7 +214,13 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet)
+        public Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public async Task<int> DeleteEntitiesAsync(Action<EntitySet<TModel>> defineSet, CancellationToken cancellationToken)
         {
             if (defineSet == null)
             {
@@ -216,11 +229,11 @@ namespace Startitecture.Orm.Common
 
             var itemSet = new EntitySet<TModel>();
             defineSet.Invoke(itemSet);
-            return await this.DeleteSelectionAsync(itemSet).ConfigureAwait(false);
+            return await this.DeleteSelectionAsync(itemSet, cancellationToken).ConfigureAwait(false);
         }
 
         /// <inheritdoc />
-        public int DeleteSelection([NotNull] IEntitySet entitySet)
+        public int DeleteSelection(IEntitySet entitySet)
         {
             if (entitySet == null)
             {
@@ -231,14 +244,21 @@ namespace Startitecture.Orm.Common
         }
 
         /// <inheritdoc />
-        public async Task<int> DeleteSelectionAsync(IEntitySet entitySet)
+        public Task<int> DeleteSelectionAsync(IEntitySet entitySet)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc />
+        public async Task<int> DeleteSelectionAsync(IEntitySet entitySet, CancellationToken cancellationToken)
         {
             if (entitySet == null)
             {
                 throw new ArgumentNullException(nameof(entitySet));
             }
 
-            return await this.RepositoryProvider.DeleteAsync(entitySet as EntitySet<TEntity> ?? entitySet.MapSet<TEntity>()).ConfigureAwait(false);
+            return await this.RepositoryProvider.DeleteAsync(entitySet as EntitySet<TEntity> ?? entitySet.MapSet<TEntity>(), cancellationToken)
+                       .ConfigureAwait(false);
         }
 
         /// <summary>
@@ -394,25 +414,28 @@ namespace Startitecture.Orm.Common
         /// <param name="model">
         /// The model to save.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The saved data entity.
         /// </returns>
-        private async Task<TEntity> SaveEntityAsync(TModel model)
+        private async Task<TEntity> SaveEntityAsync(TModel model, CancellationToken cancellationToken)
         {
             var entity = new TEntity();
             this.EntityMapper.MapTo(model, entity);
 
-            if (await this.ContainsAsync(entity).ConfigureAwait(false))
+            if (await this.ContainsAsync(entity, cancellationToken).ConfigureAwait(false))
             {
                 var updateSet = new UpdateSet<TEntity>()
                     .Set(entity, this.RepositoryProvider.EntityDefinitionProvider)
                     .Where(set => set.MatchKey(entity, this.RepositoryProvider.EntityDefinitionProvider));
 
-                await this.RepositoryProvider.UpdateAsync(updateSet).ConfigureAwait(false);
+                await this.RepositoryProvider.UpdateAsync(updateSet, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                entity = await this.RepositoryProvider.InsertAsync(entity).ConfigureAwait(false);
+                entity = await this.RepositoryProvider.InsertAsync(entity, cancellationToken).ConfigureAwait(false);
             }
 
             if (entity == null)

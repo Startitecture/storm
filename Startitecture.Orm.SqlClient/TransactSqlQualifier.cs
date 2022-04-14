@@ -29,5 +29,16 @@ namespace Startitecture.Orm.SqlClient
 
             return $"[{identifier}]";
         }
+
+        /// <inheritdoc />
+        public override string AddParameterPrefix(string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException(ErrorMessages.ValueCannotBeNullOrWhiteSpace, nameof(parameterName));
+            }
+
+            return string.Concat('@', parameterName);
+        }
     }
 }

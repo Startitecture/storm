@@ -14,7 +14,7 @@ namespace Startitecture.Orm.Mapper
     using JetBrains.Annotations;
 
     /// <summary>
-    /// Contains metadata for a POCO delegate.
+    /// Contains metadata for a POCO delegate. TODO: Just use delegates directly?
     /// </summary>
     public class PocoDelegateInfo
     {

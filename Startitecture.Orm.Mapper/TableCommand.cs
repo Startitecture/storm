@@ -16,6 +16,8 @@ namespace Startitecture.Orm.Mapper
     using System.Globalization;
     using System.Linq;
     using System.Linq.Expressions;
+    using System.Runtime.CompilerServices;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -31,7 +33,7 @@ namespace Startitecture.Orm.Mapper
     /// <typeparam name="T">
     /// The type of the structure to use in the command.
     /// </typeparam>
-    public abstract class TableCommand<T> : ITableCommand
+    public abstract class TableCommand<T>
     {
         /// <summary>
         /// Gets the table command provider for the command.
@@ -59,16 +61,6 @@ namespace Startitecture.Orm.Mapper
         }
 
         /// <summary>
-        /// Gets the table value parameter.
-        /// </summary>
-        public string ParameterName { get; private set; }
-
-        /// <summary>
-        /// Gets the command text to execute.
-        /// </summary>
-        public abstract string CommandText { get; }
-
-        /// <summary>
         /// Gets the database context for the command.
         /// </summary>
         protected IDatabaseContext DatabaseContext { get; }
@@ -77,15 +69,6 @@ namespace Startitecture.Orm.Mapper
         /// Gets the entity definition.
         /// </summary>
         protected IEntityDefinition EntityDefinition { get; }
-
-        /// <summary>
-        /// Gets the item definition for the items passed to <see cref="Execute{TItem}"/> or <see cref="ExecuteForResults{TItem}"/>.
-        /// </summary>
-        /// <remarks>
-        /// For implementers: This property is not set until the <see cref="Execute{TItem}"/> or <see cref="ExecuteForResults{TItem}"/> methods are
-        /// called.
-        /// </remarks>
-        protected IEntityDefinition ItemDefinition { get; private set; }
 
         /// <summary>
         /// Gets the name qualifier for this command.
@@ -113,11 +96,11 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(items));
             }
 
-            this.SetCommandProperties<TItem>();
-
             this.DatabaseContext.OpenSharedConnection();
+            var parameterName = $"{this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>().EntityName}Rows";
+            var commandText = this.GetCommandText<TItem>(parameterName);
 
-            using (var command = this.tableCommandFactory.Create(this, items))
+            using (var command = this.tableCommandFactory.Create(this.DatabaseContext, commandText, parameterName, items))
             {
                 command.ExecuteNonQuery();
             }
@@ -132,25 +115,28 @@ namespace Startitecture.Orm.Mapper
         /// <param name="items">
         /// The items that are part of the table operation.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// The <see cref="Task"/> that is executing the command.
         /// </returns>
-        public async Task ExecuteAsync<TItem>([NotNull] IEnumerable<TItem> items)
+        public async Task ExecuteAsync<TItem>([NotNull] IEnumerable<TItem> items, CancellationToken cancellationToken)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            this.SetCommandProperties<TItem>();
+            await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
+            var parameterName = $"{this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>().EntityName}Rows";
+            var commandText = this.GetCommandText<TItem>(parameterName);
 
-            await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-
-            using (var command = this.tableCommandFactory.Create(this, items))
+            using (var command = this.tableCommandFactory.Create(this.DatabaseContext, commandText, parameterName, items))
             {
                 if (command is DbCommand asyncCommand)
                 {
-                    await asyncCommand.ExecuteNonQueryAsync().ConfigureAwait(false);
+                    await asyncCommand.ExecuteNonQueryAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
@@ -178,9 +164,6 @@ namespace Startitecture.Orm.Mapper
                 throw new ArgumentNullException(nameof(items));
             }
 
-            this.SetCommandProperties<TItem>();
-            var returnList = new List<T>();
-
             this.DatabaseContext.OpenSharedConnection();
 
             using (var reader = this.ExecuteReader(items))
@@ -189,11 +172,9 @@ namespace Startitecture.Orm.Mapper
 
                 while (reader.Read())
                 {
-                    this.FillReturnList(reader, entityDefinition, returnList);
+                    yield return this.FillReturnList(reader, entityDefinition);
                 }
             }
-
-            return returnList;
         }
 
         /// <summary>
@@ -205,43 +186,57 @@ namespace Startitecture.Orm.Mapper
         /// <param name="items">
         /// The items that are part of the table operation.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <returns>
         /// An <see cref="IEnumerable{TStructure}"/> of items returned by the command.
         /// </returns>
-        public async Task<IEnumerable<T>> ExecuteForResultsAsync<TItem>([NotNull] IEnumerable<TItem> items)
+        public async IAsyncEnumerable<T> ExecuteForResultsAsync<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             if (items == null)
             {
                 throw new ArgumentNullException(nameof(items));
             }
 
-            this.SetCommandProperties<TItem>();
-            var returnList = new List<T>();
+            await this.DatabaseContext.OpenSharedConnectionAsync(cancellationToken).ConfigureAwait(false);
 
-            await this.DatabaseContext.OpenSharedConnectionAsync().ConfigureAwait(false);
-
-            using (var reader = await this.ExecuteReaderAsync(items).ConfigureAwait(false))
+            using (var reader = await this.ExecuteReaderAsync(items, cancellationToken).ConfigureAwait(false))
             {
                 var entityDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<T>();
 
                 if (reader is DbDataReader asyncReader)
                 {
-                    while (await asyncReader.ReadAsync().ConfigureAwait(false))
+                    while (await asyncReader.ReadAsync(cancellationToken).ConfigureAwait(false))
                     {
-                        this.FillReturnList(reader, entityDefinition, returnList);
+                        yield return this.FillReturnList(reader, entityDefinition);
                     }
                 }
                 else
                 {
                     while (reader.Read())
                     {
-                        this.FillReturnList(reader, entityDefinition, returnList);
+                        yield return this.FillReturnList(reader, entityDefinition);
                     }
                 }
             }
-
-            return returnList;
         }
+
+        /// <summary>
+        /// Compiles the command text, using <paramref name="parameterName"/> as the name of the table parameter.
+        /// </summary>
+        /// <param name="parameterName">
+        /// The name to give the table parameter.
+        /// </param>
+        /// <returns>
+        /// The command text for the command.
+        /// </returns>
+        /// <typeparam name="TItem">
+        /// The type of item to generate the command text for.
+        /// </typeparam>
+        public abstract string GetCommandText<TItem>(string parameterName);
 
         /// <summary>
         /// Gets the matched attributes between the source and target definitions.
@@ -252,21 +247,25 @@ namespace Startitecture.Orm.Mapper
         /// <returns>
         /// A <see cref="Dictionary{TKey,TValue}"/> of source attributes indexed by target attributes.
         /// </returns>
+        /// <typeparam name="TItem">
+        /// The type of item to get matched attributes for.
+        /// </typeparam>
         /// <remarks>
         /// If there is no declaration of source attributes to insert from, then they are implicitly matched using
         /// <see cref="EntityAttributeDefinition.PhysicalName"/>.
         /// </remarks>
-        protected Dictionary<EntityAttributeDefinition, EntityAttributeDefinition> GetMatchedAttributes(
+        protected Dictionary<EntityAttributeDefinition, EntityAttributeDefinition> GetMatchedAttributes<TItem>(
             IEnumerable<EntityAttributeDefinition> insertAttributes)
         {
+            var itemDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>();
             return (this.FromColumnExpressions.Any()
                         ? insertAttributes.Select(
                             (ia, i) => new
                                        {
                                            InsertAttribute = ia,
-                                           SourceAttribute = this.ItemDefinition.Find(this.FromColumnExpressions.ElementAt(i))
+                                           SourceAttribute = itemDefinition.Find(this.FromColumnExpressions.ElementAt(i))
                                        })
-                        : from sourceAttribute in this.ItemDefinition.DirectAttributes
+                        : from sourceAttribute in itemDefinition.DirectAttributes
                           join insertAttribute in insertAttributes on sourceAttribute.PhysicalName equals insertAttribute.PhysicalName
                           orderby sourceAttribute.Ordinal
                           select new
@@ -311,13 +310,10 @@ namespace Startitecture.Orm.Mapper
         /// <param name="entityDefinition">
         /// The entity definition for the POCOs.
         /// </param>
-        /// <param name="returnList">
-        /// The return list to populate.
-        /// </param>
         /// <exception cref="OperationException">
         /// The <see cref="FlatPocoFactory"/> did not return a delegate of the expected type.
         /// </exception>
-        private void FillReturnList(IDataReader reader, IEntityDefinition entityDefinition, ICollection<T> returnList)
+        private T FillReturnList(IDataReader reader, IEntityDefinition entityDefinition)
         {
             var pocoDataRequest = new PocoDataRequest(reader, entityDefinition, this.DatabaseContext);
             var mappingDelegate = FlatPocoFactory.CreateDelegate<T>(pocoDataRequest).MappingDelegate;
@@ -325,7 +321,7 @@ namespace Startitecture.Orm.Mapper
             if (mappingDelegate is Func<IDataReader, T> pocoDelegate)
             {
                 var poco = pocoDelegate.Invoke(reader);
-                returnList.Add(poco);
+                return poco;
             }
             else
             {
@@ -333,18 +329,6 @@ namespace Startitecture.Orm.Mapper
                     pocoDataRequest,
                     string.Format(CultureInfo.CurrentCulture, ErrorMessages.DelegateCouldNotBeCreatedWithReader, pocoDataRequest));
             }
-        }
-
-        /// <summary>
-        /// Sets the command properties for the command.
-        /// </summary>
-        /// <typeparam name="TItem">
-        /// The type of item to return with the command.
-        /// </typeparam>
-        private void SetCommandProperties<TItem>()
-        {
-            this.ItemDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>();
-            this.ParameterName = $"{this.ItemDefinition.EntityName}Rows";
         }
 
         /// <summary>
@@ -361,7 +345,10 @@ namespace Startitecture.Orm.Mapper
         /// </returns>
         private IDataReader ExecuteReader<TItem>(IEnumerable<TItem> items)
         {
-            using (var command = this.tableCommandFactory.Create(this, items))
+            var parameterName = $"{this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>().EntityName}Rows";
+            var commandText = this.GetCommandText<TItem>(parameterName);
+
+            using (var command = this.tableCommandFactory.Create(this.DatabaseContext, commandText, parameterName, items))
             {
                 return command.ExecuteReader();
             }
@@ -373,19 +360,25 @@ namespace Startitecture.Orm.Mapper
         /// <param name="items">
         /// The items that are part of the table operation.
         /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
         /// <typeparam name="TItem">
         /// The type of items being inserted, updated, or merged.
         /// </typeparam>
         /// <returns>
         /// The <see cref="IDataReader"/> associated with the command.
         /// </returns>
-        private async Task<IDataReader> ExecuteReaderAsync<TItem>(IEnumerable<TItem> items)
+        private async Task<IDataReader> ExecuteReaderAsync<TItem>(IEnumerable<TItem> items, CancellationToken cancellationToken)
         {
-            using (var command = this.tableCommandFactory.Create(this, items))
+            var parameterName = $"{this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>().EntityName}Rows";
+            var commandText = this.GetCommandText<TItem>(parameterName);
+
+            using (var command = this.tableCommandFactory.Create(this.DatabaseContext, commandText, parameterName, items))
             {
                 if (command is DbCommand asyncCommand)
                 {
-                    return await asyncCommand.ExecuteReaderAsync().ConfigureAwait(false);
+                    return await asyncCommand.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {

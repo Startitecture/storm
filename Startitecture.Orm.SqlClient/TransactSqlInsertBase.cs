@@ -27,11 +27,6 @@ namespace Startitecture.Orm.SqlClient
     public abstract class TransactSqlInsertBase<T> : TableCommand<T>
     {
         /// <summary>
-        /// The command text.
-        /// </summary>
-        private readonly Lazy<string> commandText;
-
-        /// <summary>
         /// The values expression.
         /// </summary>
         private readonly List<LambdaExpression> insertColumnExpressions = new List<LambdaExpression>();
@@ -63,11 +58,70 @@ namespace Startitecture.Orm.SqlClient
         protected TransactSqlInsertBase([NotNull] IDbTableCommandFactory tableCommandFactory, IDatabaseContext databaseContext)
             : base(tableCommandFactory, databaseContext)
         {
-            this.commandText = new Lazy<string>(this.CompileCommandText);
         }
 
         /// <inheritdoc />
-        public override string CommandText => this.commandText.Value;
+        public override string GetCommandText<TItem>(string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(parameterName))
+            {
+                throw new ArgumentException($"'{nameof(parameterName)}' cannot be null or whitespace.", nameof(parameterName));
+            }
+
+            var insertAttributes = (this.insertColumnExpressions.Any()
+                                        ? this.insertColumnExpressions.Select(this.EntityDefinition.Find)
+                                        : this.EntityDefinition.InsertableAttributes).ToList();
+
+            // If FROM columns are specified, then assume that we are matching on ordinals, not physical names.
+            var matchedAttributes = this.GetMatchedAttributes<TItem>(insertAttributes);
+
+            var commandBuilder = new StringBuilder();
+            var itemDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>();
+
+            // No point including IDENTITY columns on an insert, unless specified by the from expressions.
+            var sourceTableAttributes = (this.FromColumnExpressions.Any()
+                                             ? this.FromColumnExpressions.Select(itemDefinition.Find)
+                                             : itemDefinition.ReturnableAttributes.Where(definition => definition.IsIdentityColumn == false))
+                .ToList();
+
+            var declareSourceTable = this.DeclareSourceTable(parameterName, sourceTableAttributes);
+
+            // TVPs don't declare source tables as the table type is the parameter.
+            if (string.IsNullOrWhiteSpace(declareSourceTable) == false)
+            {
+                commandBuilder.AppendLine(declareSourceTable);
+            }
+
+            var selectResults = this.insertedSelectionAttributes.Union(this.sourceSelectionAttributes).Any();
+
+            if (selectResults)
+            {
+                var insertedAttributes = this.GetInsertedAttributes(
+                    this.insertedSelectionAttributes.Any() ? this.insertedSelectionAttributes : this.EntityDefinition.DirectAttributes);
+
+                commandBuilder.AppendLine(this.DeclareInsertedTable(insertedAttributes));
+            }
+
+            var schema = this.NameQualifier.Escape(this.EntityDefinition.EntityContainer);
+            var entity = this.NameQualifier.Escape(this.EntityDefinition.EntityName);
+            var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.NameQualifier.Escape(x.PhysicalName));
+            commandBuilder.AppendLine($"INSERT INTO {schema}.{entity}").AppendLine($"({string.Join(", ", targetColumns)})");
+
+            if (selectResults)
+            {
+                this.CreateOutput(commandBuilder);
+            }
+
+            commandBuilder.Append(this.SourceSelection(parameterName, matchedAttributes)).AppendLine(";");
+
+            if (selectResults)
+            {
+                this.SelectOutput<TItem>(commandBuilder, parameterName, sourceTableAttributes);
+            }
+
+            var compileCommandText = commandBuilder.ToString();
+            return compileCommandText;
+        }
 
         /// <summary>
         /// Declares the table to insert into.
@@ -191,13 +245,16 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Builds the source table declaration statement.
         /// </summary>
+        /// <param name="parameterName">
+        /// The name of the table parameter.
+        /// </param>
         /// <param name="sourceAttributes">
         /// The attributes of the source table.
         /// </param>
         /// <returns>
         /// A statement for declaring the source table.
         /// </returns>
-        protected abstract string DeclareSourceTable(IEnumerable<EntityAttributeDefinition> sourceAttributes);
+        protected abstract string DeclareSourceTable(string parameterName, IEnumerable<EntityAttributeDefinition> sourceAttributes);
 
         /// <summary>
         /// Builds the table declaration statement. Called only if the caller indicates that inserted values should be selected.
@@ -213,24 +270,30 @@ namespace Startitecture.Orm.SqlClient
         /// <summary>
         /// Builds the source selection statement.
         /// </summary>
+        /// <param name="parameterName">
+        /// The name of the table parameter.
+        /// </param>
         /// <param name="matchedAttributes">
         /// A dictionary where the target attributes are the key and the source attributes are the value.
         /// </param>
         /// <returns>
         /// A statement for building the source selection.
         /// </returns>
-        protected abstract string SourceSelection(IReadOnlyDictionary<EntityAttributeDefinition, EntityAttributeDefinition> matchedAttributes);
+        protected abstract string SourceSelection(string parameterName, IReadOnlyDictionary<EntityAttributeDefinition, EntityAttributeDefinition> matchedAttributes);
 
         /// <summary>
         /// Gets a reference to the source table.
         /// </summary>
+        /// <param name="parameterName">
+        /// The name of the table parameter.
+        /// </param>
         /// <param name="sourceAttributes">
         /// The attributes of the source table.
         /// </param>
         /// <returns>
         /// A statement for referencing the source table.
         /// </returns>
-        protected abstract string SourceTableReference(IEnumerable<EntityAttributeDefinition> sourceAttributes);
+        protected abstract string SourceTableReference(string parameterName, IEnumerable<EntityAttributeDefinition> sourceAttributes);
 
         /// <summary>
         /// Creates the output for an output table.
@@ -252,77 +315,18 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <summary>
-        /// The compile command text.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="string" />.
-        /// </returns>
-        private string CompileCommandText()
-        {
-            var insertAttributes = (this.insertColumnExpressions.Any()
-                                        ? this.insertColumnExpressions.Select(this.EntityDefinition.Find)
-                                        : this.EntityDefinition.InsertableAttributes).ToList();
-
-            // If FROM columns are specified, then assume that we are matching on ordinals, not physical names.
-            var matchedAttributes = this.GetMatchedAttributes(insertAttributes);
-
-            var commandBuilder = new StringBuilder();
-
-            // No point including IDENTITY columns on an insert, unless specified by the from expressions.
-            var sourceTableAttributes = (this.FromColumnExpressions.Any()
-                                             ? this.FromColumnExpressions.Select(this.ItemDefinition.Find)
-                                             : this.ItemDefinition.ReturnableAttributes.Where(definition => definition.IsIdentityColumn == false))
-                .ToList();
-
-            var declareSourceTable = this.DeclareSourceTable(sourceTableAttributes);
-
-            // TVPs don't declare source tables as the table type is the parameter.
-            if (string.IsNullOrWhiteSpace(declareSourceTable) == false)
-            {
-                commandBuilder.AppendLine(declareSourceTable);
-            }
-
-            var selectResults = this.insertedSelectionAttributes.Union(this.sourceSelectionAttributes).Any();
-
-            if (selectResults)
-            {
-                var insertedAttributes = this.GetInsertedAttributes(
-                    this.insertedSelectionAttributes.Any() ? this.insertedSelectionAttributes : this.EntityDefinition.DirectAttributes);
-
-                commandBuilder.AppendLine(this.DeclareInsertedTable(insertedAttributes));
-            }
-
-            var schema = this.NameQualifier.Escape(this.EntityDefinition.EntityContainer);
-            var entity = this.NameQualifier.Escape(this.EntityDefinition.EntityName);
-            var targetColumns = insertAttributes.OrderBy(x => x.Ordinal).Select(x => this.NameQualifier.Escape(x.PhysicalName));
-            commandBuilder.AppendLine($"INSERT INTO {schema}.{entity}").AppendLine($"({string.Join(", ", targetColumns)})");
-
-            if (selectResults)
-            {
-                this.CreateOutput(commandBuilder);
-            }
-
-            commandBuilder.Append(this.SourceSelection(matchedAttributes)).AppendLine(";");
-
-            if (selectResults)
-            {
-                this.SelectOutput(commandBuilder, sourceTableAttributes);
-            }
-
-            var compileCommandText = commandBuilder.ToString();
-            return compileCommandText;
-        }
-
-        /// <summary>
         /// Selects the output from an inserted table variable.
         /// </summary>
         /// <param name="commandBuilder">
         /// The command builder to update.
         /// </param>
+        /// <param name="parameterName">
+        /// The name of the table parameter.
+        /// </param>
         /// <param name="sourceTableAttributes">
         /// The attributes defined in the source table.
         /// </param>
-        private void SelectOutput(StringBuilder commandBuilder, IEnumerable<EntityAttributeDefinition> sourceTableAttributes)
+        private void SelectOutput<TItem>(StringBuilder commandBuilder, string parameterName, IEnumerable<EntityAttributeDefinition> sourceTableAttributes)
         {
             // TODO: Detect if we've requested something that requires a JOIN
             // For our selection from the @inserted table, we need to get the key from the insert and everything else from the original
@@ -348,13 +352,15 @@ namespace Startitecture.Orm.SqlClient
             // Only need to match if we've got columns from both the inserted and source tables.
             if (this.insertedSelectionAttributes.Any() && this.sourceSelectionAttributes.Any())
             {
+                var itemDefinition = this.DatabaseContext.RepositoryAdapter.DefinitionProvider.Resolve<TItem>();
+
                 if (this.targetSourceRelations.Any())
                 {
                     matchedAttributes = (from match in this.targetSourceRelations
                                          select new
                                                 {
                                                     InsertedAttribute = this.EntityDefinition.Find(match.SourceExpression),
-                                                    SourceAttribute = this.ItemDefinition.Find(match.RelationExpression)
+                                                    SourceAttribute = itemDefinition.Find(match.RelationExpression)
                                                 }).ToDictionary(arg => arg.InsertedAttribute, arg => arg.SourceAttribute);
                 }
                 else
@@ -362,7 +368,7 @@ namespace Startitecture.Orm.SqlClient
                     // If a match isn't explicitly defined, look for a physical key match so that the item type can declare a matching physical name
                     // using ColumnAttribute.
                     matchedAttributes = (from ea in this.EntityDefinition.PrimaryKeyAttributes
-                                         join ia in this.ItemDefinition.DirectAttributes on ea.PhysicalName equals ia.PhysicalName
+                                         join ia in itemDefinition.DirectAttributes on ea.PhysicalName equals ia.PhysicalName
                                          select new
                                                 {
                                                     InsertedAttribute = ea,
@@ -380,7 +386,7 @@ namespace Startitecture.Orm.SqlClient
 
                 commandBuilder.AppendLine($"SELECT {string.Join(", ", selectedColumns)}")
                     .AppendLine($"FROM {this.NameQualifier.AddParameterPrefix("inserted")} AS i")
-                    .AppendLine($"INNER JOIN {this.SourceTableReference(this.sourceSelectionAttributes)} AS s")
+                    .AppendLine($"INNER JOIN {this.SourceTableReference(parameterName, this.sourceSelectionAttributes)} AS s")
                     .AppendLine($"ON {string.Join(" AND ", selectionJoinMatchColumns)};");
             }
             else if (this.insertedSelectionAttributes.Any())
@@ -391,7 +397,7 @@ namespace Startitecture.Orm.SqlClient
             else
             {
                 commandBuilder.AppendLine($"SELECT {string.Join(", ", selectedColumns)}")
-                    .AppendLine($"FROM {this.SourceTableReference(this.sourceSelectionAttributes)} AS s;");
+                    .AppendLine($"FROM {this.SourceTableReference(parameterName, this.sourceSelectionAttributes)} AS s;");
             }
         }
     }
