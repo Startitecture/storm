@@ -71,6 +71,12 @@ namespace Startitecture.Orm.PostgreSql
             jsonInsert.Execute(items);
         }
 
+        /// <inheritdoc />
+        public async Task InsertAsync<TItem>(IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
+        {
+            await this.InsertAsync(items, insertAction, CancellationToken.None).ConfigureAwait(false);
+        }
+
         /// <inheritdoc/>
         public async Task InsertAsync<TItem>(IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction, CancellationToken cancellationToken)
         {
@@ -115,6 +121,15 @@ namespace Startitecture.Orm.PostgreSql
             insertAction?.Invoke(jsonInsert);
             var insertedEntities = jsonInsert.ExecuteForResults(items);
             return this.EntityMapper.Map<List<TItem>>(insertedEntities);
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<TItem> InsertForResultsAsync<TItem>(IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction)
+        {
+            await foreach (var item in this.InsertForResultsAsync(items, insertAction, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
+            }
         }
 
         /// <inheritdoc/>

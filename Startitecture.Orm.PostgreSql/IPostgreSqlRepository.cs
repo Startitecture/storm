@@ -37,7 +37,7 @@ namespace Startitecture.Orm.PostgreSql
         /// The insert action to take, or null to take the default insert action.
         /// </param>
         /// <typeparam name="TItem">
-        /// The type of item to insert..
+        /// The type of item to insert.
         /// </typeparam>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
@@ -53,11 +53,31 @@ namespace Startitecture.Orm.PostgreSql
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
         /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to insert.
+        /// </typeparam>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="items"/> is null.
+        /// </exception>
+        /// <returns>
+        /// The <see cref="Task"/> that is performing the insert.
+        /// </returns>
+        Task InsertAsync<TItem>([NotNull] IEnumerable<TItem> items, Action<JsonInsert<TEntity>> insertAction);
+
+        /// <summary>
+        /// Inserts a list of items into the repository.
+        /// </summary>
+        /// <param name="items">
+        /// The items to insert.
+        /// </param>
+        /// <param name="insertAction">
+        /// The insert action to take, or null to take the default insert action.
+        /// </param>
         /// <param name="cancellationToken">
         /// The cancellation token for this task.
         /// </param>
         /// <typeparam name="TItem">
-        /// The type of item to insert..
+        /// The type of item to insert.
         /// </typeparam>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
@@ -77,7 +97,7 @@ namespace Startitecture.Orm.PostgreSql
         /// The insert action to take, or null to take the default insert action.
         /// </param>
         /// <typeparam name="TItem">
-        /// The type of item to insert..
+        /// The type of item to insert.
         /// </typeparam>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
@@ -98,17 +118,39 @@ namespace Startitecture.Orm.PostgreSql
         /// <param name="insertAction">
         /// The insert action to take, or null to take the default insert action.
         /// </param>
-        /// <param name="cancellationToken">
-        /// The cancellation token for this task.
-        /// </param>
         /// <typeparam name="TItem">
-        /// The type of item to insert..
+        /// The type of item to insert.
         /// </typeparam>
         /// <exception cref="ArgumentNullException">
         /// <paramref name="items"/> is null.
         /// </exception>
         /// <returns>
-        /// An <see cref="IEnumerable{T}"/> of <typeparamref name="TItem"/> items.
+        /// An <see cref="IAsyncEnumerable{T}"/> of <typeparamref name="TItem"/> items.
+        /// </returns>
+        IAsyncEnumerable<TItem> InsertForResultsAsync<TItem>(
+            [NotNull] IEnumerable<TItem> items,
+            Action<JsonInsert<TEntity>> insertAction);
+
+        /// <summary>
+        /// Inserts a list of items into the repository.
+        /// </summary>
+        /// <param name="items">
+        /// The items to insert.
+        /// </param>
+        /// <param name="insertAction">
+        /// The insert action to take, or null to take the default insert action.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// The cancellation token for this task.
+        /// </param>
+        /// <typeparam name="TItem">
+        /// The type of item to insert.
+        /// </typeparam>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="items"/> is null.
+        /// </exception>
+        /// <returns>
+        /// An <see cref="IAsyncEnumerable{T}"/> of <typeparamref name="TItem"/> items.
         /// </returns>
         IAsyncEnumerable<TItem> InsertForResultsAsync<TItem>(
             [NotNull] IEnumerable<TItem> items,
