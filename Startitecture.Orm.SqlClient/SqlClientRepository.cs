@@ -70,6 +70,12 @@ namespace Startitecture.Orm.SqlClient
         }
 
         /// <inheritdoc />
+        public async Task InsertAsync<TItem>(IEnumerable<TItem> items, Action<TransactSqlInsertBase<TEntity>> insertAction)
+        {
+            await this.InsertAsync(items, insertAction, CancellationToken.None).ConfigureAwait(false);
+        }
+
+        /// <inheritdoc />
         public async Task InsertAsync<TItem>(
             IEnumerable<TItem> items,
             Action<TransactSqlInsertBase<TEntity>> insertAction,
@@ -129,6 +135,17 @@ namespace Startitecture.Orm.SqlClient
             insertAction?.Invoke(insertCommand);
             var entities = insertCommand.ExecuteForResults(items);
             return this.EntityMapper.Map<List<TItem>>(entities);
+        }
+
+        /// <inheritdoc />
+        public async IAsyncEnumerable<TItem> InsertForResultsAsync<TItem>(
+            IEnumerable<TItem> items,
+            Action<TransactSqlInsertBase<TEntity>> insertAction)
+        {
+            await foreach (var item in this.InsertForResultsAsync(items, insertAction, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
+            }
         }
 
         /// <inheritdoc/>
@@ -248,6 +265,18 @@ namespace Startitecture.Orm.SqlClient
             mergeAction?.Invoke(mergeCommand);
             var entities = mergeCommand.ExecuteForResults(items);
             return this.EntityMapper.Map<List<TItem>>(entities);
+        }
+
+        /// <inheritdoc />
+        /// <remarks>
+        /// In SQL Server, MERGE operations are not guaranteed to be atomic.
+        /// </remarks>
+        public async IAsyncEnumerable<TItem> MergeForResultsAsync<TItem>(IEnumerable<TItem> items, Action<TransactSqlMergeBase<TEntity>> mergeAction)
+        {
+            await foreach (var item in this.MergeForResultsAsync(items, mergeAction, CancellationToken.None).ConfigureAwait(false))
+            {
+                yield return item;
+            }
         }
 
         /// <inheritdoc/>
